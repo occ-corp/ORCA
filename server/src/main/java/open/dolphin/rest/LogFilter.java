@@ -70,6 +70,7 @@ public class LogFilter implements Filter {
         sb.append(wrapper.getRemoteAddr()).append(" ");
         sb.append(wrapper.getShortUser()).append(" ");
         sb.append(wrapper.getMethod()).append(" ");
+        sb.append(wrapper.getRequestURI());
         String query = wrapper.getQueryString();
         if (query != null && !query.isEmpty()) {
             sb.append(" ").append(query);
