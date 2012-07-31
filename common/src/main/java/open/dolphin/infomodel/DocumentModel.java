@@ -27,13 +27,11 @@ public class DocumentModel extends KarteEntryBean {
     @Embedded
     private DocInfoModel docInfo;
     
-    //@JsonManagedReference
     @JsonDeserialize(contentAs=ModuleModel.class)
     @IndexedEmbedded        // hibernate search
     @OneToMany(mappedBy="document", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ModuleModel> modules;
     
-    //@JsonManagedReference
     @JsonDeserialize(contentAs=SchemaModel.class)
     @OneToMany(mappedBy="document", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<SchemaModel> schema;

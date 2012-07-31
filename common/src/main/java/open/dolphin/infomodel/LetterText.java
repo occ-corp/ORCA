@@ -27,7 +27,6 @@ public class LetterText extends InfoModel {
     private String textValue;
 
     @JsonIgnore
-    //@JsonBackReference
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LetterModule module;

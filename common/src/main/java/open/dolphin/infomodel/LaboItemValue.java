@@ -1,6 +1,5 @@
 package open.dolphin.infomodel;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 
@@ -19,7 +18,6 @@ public class LaboItemValue extends InfoModel {
     private long id;
     
     @JsonIgnore
-    //@JsonBackReference
     @ManyToOne
     @JoinColumn(name="specimen_id", nullable=false)
     private LaboSpecimenValue laboSpecimen;

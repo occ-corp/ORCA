@@ -58,7 +58,7 @@ public class UserModel extends InfoModel {
     @IndexedEmbedded
     private FacilityModel facility;
     
-    //@JsonManagedReference
+    @JsonManagedReference
     @JsonDeserialize(contentAs=RoleModel.class)
     @OneToMany(mappedBy="user", cascade=CascadeType.ALL, fetch=FetchType.EAGER)
     private List<RoleModel> roles;

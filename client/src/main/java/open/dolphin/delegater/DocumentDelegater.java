@@ -69,12 +69,17 @@ public class  DocumentDelegater extends BusinessDelegater {
         KarteBean karte = (KarteBean)
                 getConverter().fromJson(entityStr, KarteBean.class);
 
-        // reconnect
-        List<PatientMemoModel> memoList = karte.getMemoList();
-        if (memoList != null && !memoList.isEmpty()) {
-            for (PatientMemoModel pm : memoList) {
-                pm.setKarteBean(karte);
+        // PatientMemoTransferModel -> PatientMemoModel
+        List<PatientMemoTransferModel> transList = karte.getMemoTransList();
+        
+        if (transList != null && !transList.isEmpty()) {
+            List<PatientMemoModel> memoList = new ArrayList<PatientMemoModel>();
+            for (PatientMemoTransferModel pmtm : transList) {
+                PatientMemoModel pmm = pmtm.getPatientMemoModel();
+                pmm.setKarteBean(karte);
             }
+            karte.setMemoList(memoList);
+            karte.setMemoTransList(null);
         }
 
         return karte;
@@ -164,6 +169,7 @@ public class  DocumentDelegater extends BusinessDelegater {
             this.docModel = docModel;
         }
 
+        @Override
         public Void call() throws Exception {
             
             Collection<ModuleModel> mc = docModel.getModules();

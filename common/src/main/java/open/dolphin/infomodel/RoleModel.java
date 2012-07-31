@@ -1,6 +1,6 @@
 package open.dolphin.infomodel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.*;
 
 /**
@@ -21,8 +21,7 @@ public class RoleModel extends InfoModel {
     @Column(name="c_role", nullable=false)
     private String role;
     
-    //@JsonBackReference
-    @JsonIgnore
+    @JsonBackReference
     @ManyToOne
     @JoinColumn(name="c_user", nullable=false)
     private UserModel user;

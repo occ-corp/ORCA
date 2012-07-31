@@ -63,7 +63,6 @@ public class LaboModuleValue extends KarteEntryBean {
     
     //private String confirmDate;
     
-    //@JsonManagedReference
     @JsonDeserialize(contentAs=LaboSpecimenValue.class)
     @OneToMany(mappedBy="laboModule", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<LaboSpecimenValue> laboSpecimens;
@@ -259,6 +258,7 @@ public class LaboModuleValue extends KarteEntryBean {
      * サンプルタイムで比較する。
      * @return 比較値
      */
+    @Override
     public int compareTo(Object other) {
         if (other != null && getClass() == other.getClass()) {
             String sampleTime1 = getSampleTime();

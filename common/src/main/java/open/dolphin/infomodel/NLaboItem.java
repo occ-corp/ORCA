@@ -95,7 +95,6 @@ public class NLaboItem extends InfoModel {
     private String sortKey;
 
     @JsonIgnore
-    //@JsonBackReference
     @ManyToOne
     @JoinColumn(name="laboModule_id", nullable=false)
     private NLaboModule laboModule;

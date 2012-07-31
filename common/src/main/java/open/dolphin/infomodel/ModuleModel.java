@@ -32,7 +32,6 @@ public class ModuleModel extends KarteEntryBean {
     @Column(nullable=false)
     private byte[] beanBytes;
     
-    //@JsonBackReference
     @JsonIgnore
     @ManyToOne
     @JoinColumn(name="doc_id", nullable=false)

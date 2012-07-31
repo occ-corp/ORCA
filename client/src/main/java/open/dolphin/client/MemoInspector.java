@@ -122,7 +122,7 @@ public class MemoInspector {
     private void update() {
         //List list = context.getKarte().getEntryCollection("patientMemo");
         List<PatientMemoModel> list = context.getKarte().getMemoList();
-        if (list != null && list.size()>0) {
+        if (list != null && !list.isEmpty()) {
             patientMemoModel = list.get(0);
             memoArea.setText(patientMemoModel.getMemo());
         }

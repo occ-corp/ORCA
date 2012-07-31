@@ -27,7 +27,6 @@ public class LetterDate extends InfoModel {
     private Date value;
 
     @JsonIgnore
-    //@JsonBackReference
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LetterModule module;

@@ -21,8 +21,6 @@ public class LaboSpecimenValue extends InfoModel {
     private long id;
     
     @JsonIgnore
-    //@JsonManagedReference
-    //@JsonBackReference
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LaboModuleValue laboModule;
@@ -33,7 +31,6 @@ public class LaboSpecimenValue extends InfoModel {
     
     private String specimenCodeId;
     
-    //@JsonManagedReference
     @JsonDeserialize(contentAs=LaboItemValue.class)
     @OneToMany(mappedBy="laboSpecimen", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<LaboItemValue> laboItems;

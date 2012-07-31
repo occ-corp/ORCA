@@ -54,10 +54,22 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<DocInfoModel> docInfoList;
 
-    //@JsonManagedReference
-    @JsonDeserialize(contentAs=PatientMemoModel.class)
+    @JsonIgnore
     @Transient
     private List<PatientMemoModel> memoList;
+    
+    // infinite loopを避けるため
+    @JsonDeserialize(contentAs=PatientMemoTransferModel.class)
+    @Transient
+    private List<PatientMemoTransferModel> memoTransList;
+    
+    public void setMemoTransList(List<PatientMemoTransferModel> list) {
+        memoTransList = list;
+    }
+    
+    public List<PatientMemoTransferModel> getMemoTransList() {
+        return memoTransList;
+    }
 
     
     public KarteBean() {
