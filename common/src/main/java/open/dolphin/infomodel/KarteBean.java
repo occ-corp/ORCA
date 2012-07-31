@@ -1,7 +1,6 @@
 package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Date;
 import java.util.List;
@@ -55,7 +54,7 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<DocInfoModel> docInfoList;
 
-    @JsonManagedReference
+    //@JsonManagedReference
     @JsonDeserialize(contentAs=PatientMemoModel.class)
     @Transient
     private List<PatientMemoModel> memoList;

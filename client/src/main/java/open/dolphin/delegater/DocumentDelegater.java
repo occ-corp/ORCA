@@ -71,7 +71,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         // reconnect
         List<PatientMemoModel> memoList = karte.getMemoList();
-        if (memoList!=null && memoList.size()>0) {
+        if (memoList != null && !memoList.isEmpty()) {
             for (PatientMemoModel pm : memoList) {
                 pm.setKarteBean(karte);
             }

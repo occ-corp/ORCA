@@ -1,6 +1,5 @@
 package open.dolphin.infomodel;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.persistence.*;
@@ -45,7 +44,6 @@ public class KarteEntryBean extends InfoModel implements Comparable {
     @JoinColumn(name="creator_id", nullable=false)
     private UserModel creator;
     
-    @JsonBackReference  // KarteBean -> PatientMemoModelでnestする
     @ManyToOne
     @IndexedEmbedded
     @JoinColumn(name="karte_id", nullable=false)

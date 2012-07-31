@@ -36,7 +36,7 @@ public class KarteResource extends AbstractResource {
         Date fromDate = parseDate(fromDateStr);
 
         KarteBean result = karteServiceBean.getKarte(patientPK, fromDate);
-
+        
         String json = getConverter().toJson(result);
         debug(json);
         

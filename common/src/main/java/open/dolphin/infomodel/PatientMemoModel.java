@@ -14,7 +14,7 @@ import org.hibernate.annotations.Type;
 @Entity
 @Table(name = "d_patient_memo")
 public class PatientMemoModel extends KarteEntryBean {
-
+    
     @Lob
     @Type(type="org.hibernate.type.StringClobType")
     private String memo;
