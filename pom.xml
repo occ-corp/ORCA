@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <groupId>masudanaika</groupId>
+    <artifactId>OpenDolphin-2.3m</artifactId>
+    <version>2.3</version>
+    <packaging>pom</packaging>
+    <name>OpenDolphin-2.3m</name>
+  
+    <modules>
+        <module>common</module>
+        <module>server</module>
+        <module>client</module>
+    </modules>
+
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+    </properties>
+
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>masudanaika</groupId>
+                <artifactId>OpenDolphin-common</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>masudanaika</groupId>
+                <artifactId>OpenDolphin-client</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>masudanaika</groupId>
+                <artifactId>OpenDolphin-server</artifactId>
+                <version>${project.version}</version>
+                <type>war</type>
+            </dependency>
+
+        </dependencies>
+    </dependencyManagement>
+
+    <build>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <artifactId>maven-compiler-plugin</artifactId>
+                    <version>2.3.2</version>
+                    <configuration>
+                        <source>1.6</source>
+                        <target>1.6</target>
+                    </configuration>
+                </plugin>
+            </plugins>
+        </pluginManagement>
+        
+        <!-- distフォルダを作る -->
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>1.7</version>
+                <executions>
+                    <execution>
+                        <phase>compile</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <delete dir = "${basedir}/dist" />
+                                <copy todir="${basedir}/dist/lib">
+                                    <fileset dir="${basedir}/client/target/lib"/>
+                                </copy>
+                                <copy todir="${basedir}/dist/">
+                                    <fileset dir="${basedir}/client/target">
+                                        <include name="*.jar" />
+                                    </fileset>
+                                </copy>
+                                <copy todir="${basedir}/dist/">
+                                    <fileset dir="${basedir}/server/target">
+                                        <include name="*.war" />
+                                    </fileset>
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+        
+    </build>
+</project>

@@ -1,0 +1,9 @@
+open.dolphin.client.DocumentBridgeImpl #
+open.dolphin.client.DiagnosisDocument #
+open.dolphin.impl.img.ImageBrowserProxy
+open.dolphin.impl.lbtest.LaboTestBean
+open.dolphin.impl.care.CareMapDocument
+open.dolphin.impl.pinfo.PatientInfoDocument  #
+
+open.dolphin.impl.pacsviewer.PacsDicomDocImpl
+open.dolphin.impl.routinemed.RoutineMedImpl

@@ -1,0 +1,8 @@
+open.dolphin.setting.BaseURISettingPanel #
+open.dolphin.setting.ClaimSettingPanel #
+open.dolphin.setting.KarteSettingPanel #
+open.dolphin.setting.LetterSettingPanel #
+open.dolphin.setting.CodeHelperSettingPanel #
+open.dolphin.setting.AreaNetWorkSettingPanel #
+open.dolphin.setting.SendMmlSettingPanel 
+open.dolphin.setting.MiscSettingPanel ##

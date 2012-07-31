@@ -1,0 +1,2 @@
+open.dolphin.impl.claim.DiagnosisSender
+open.dolphin.impl.orcaapi.Orca21ApiDiagnosisSender

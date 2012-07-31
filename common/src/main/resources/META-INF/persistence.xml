@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<persistence version="2.0" xmlns="http://java.sun.com/xml/ns/persistence" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://java.sun.com/xml/ns/persistence http://java.sun.com/xml/ns/persistence/persistence_2_0.xsd">
+  <persistence-unit name="OpenDolphin" transaction-type="JTA">
+    <provider>org.hibernate.ejb.HibernatePersistence</provider>
+    <jta-data-source>java:jboss/datasources/DolphinDS</jta-data-source>
+    <exclude-unlisted-classes>false</exclude-unlisted-classes>
+    <properties>
+      <!-- 旧Hibernateとの互換性のため hibernate.id.new_generator_mappings = falseにしておく -->
+      <property name="hibernate.id.new_generator_mappings" value="false"/>
+      <!-- hibernate.search.default.indexBaseはlucene indexの位置を環境に合わせて指定する。-->
+      <property name="hibernate.search.default.indexBase" value="d:/lucene/indexes2"/>
+      <!-- linuxの場合 value="/var/lucene/indexes2" など                      ^^^^^^^^^^^^^^^^^^ -->
+      <property name="hibernate.search.default.directory_provider" value="filesystem"/>
+      <property name="hibernate.search.default.locking_strategy" value="single"/>
+      <property name="hibernate.search.lucene_version" value="LUCENE_34"/>
+      <property name="hibernate.search.default.optimizer.operation_limit.max" value="1000"/>
+      <property name="hibernate.search.default.optimizer.transaction_limit.max" value="100"/>
+      <!--
+            <property name="hibernate.search.default.indexwriter.transaction.max_buffered_docs" value="100"/>
+            <property name="hibernate.search.default.indexwriter.transaction.merge_factor" value="100"/>
+            -->
+      <property name="hibernate.hbm2ddl.auto" value="update"/>
+    </properties>
+  </persistence-unit>
+</persistence>

@@ -1,0 +1,44 @@
+##-------------------------------------
+##         RP Template
+##   Modified by masuda, Masuda Naika
+##-------------------------------------
+<HTML><BODY><TT><FONT SIZE="${hints.getFontSize()}" COLOR="${hints.getBackgroundAs16String()}">
+<TABLE BORDER="${hints.getBorder()}" CELLSPACING="${hints.getCellSpacing()}" CELLPADDING="${hints.getCellPadding()}">
+
+<TR BGCOLOR="${hints.getLabelColorAs16String()}">
+#if ($stampName == "新規スタンプ" || $stampName == "エディタから発行..." || $stampName == "チェックシート")
+     <TD NOWRAP COLSPAN="3">RP</TD>
+#else
+    ## 院内・院外処方は１行目の右端に表示する
+    <TD NOWRAP>RP) $stampName</TD>
+    <TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${model.getMemo().replace("処方", "")}/${model.getClassCode()}</TD>
+#end
+</TR>
+
+#foreach ($item in $model.getClaimItem())
+## コメントコードなら"・"と"x"は表示しない
+#if (!$item.getCode().matches($hints.getRegExpCommnentCode()))
+<TR>
+    <TD>・${item.getName()}</TD>
+    <TD NOWRAP ALIGN="RIGHT"> x ${item.getNumber()}</TD>
+    <TD NOWRAP> $!{item.getUnit().replace("カプセル", "Ｃ")}</TD>
+</TR>
+#else
+<TR>
+    <TD>${item.getName()}</TD>
+</TR>
+#end
+#end
+
+<TR>
+    <TD COLSPAN="3">${model.getAdminDisplayString()}</TD>
+</TR>
+
+#if ($model.getAdminMemo())
+<TR>
+    <TD>${model.getAdminMemo()}</TD>
+</TR>
+#end
+
+</TABLE>
+</BODY></HTML>

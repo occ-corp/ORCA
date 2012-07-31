@@ -1,0 +1,18 @@
+
+<project name="OpenDolphin-client" basedir=".">
+    
+    <property name="src.dir" value="${basedir}/src/main/java"/>
+    <!-- Buildを設定 -->
+    <target name="Set program Version and Build Date">
+        <tstamp>
+            <format property="today" pattern="yyyy/MM/dd" />
+        </tstamp>
+        <replaceregexp file="${src.dir}/open/dolphin/resources/Dolphin_ja.properties"
+                       match="version=(.*)"
+                       replace="version=2.2.1m" />
+        <replaceregexp file="${src.dir}/open/dolphin/resources/Dolphin_ja.properties"
+                       match="buildDate=(.*)"
+                       replace="buildDate=${today}" />
+    </target>
+    
+</project>
