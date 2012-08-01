@@ -1,7 +1,6 @@
 
 package open.dolphin.client;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.BorderLayout;
 import java.awt.Frame;
 import java.awt.Point;

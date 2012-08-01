@@ -1,6 +1,5 @@
 package open.dolphin.order;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -238,6 +237,7 @@ public final class BaseEditor extends AbstractStampEditor {
 
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
 
                 boolean setIsEmpty = tableModel.getObjectCount() == 0;
@@ -574,6 +574,7 @@ public final class BaseEditor extends AbstractStampEditor {
     
     private class UsoTmComparator implements Comparator {
 
+        @Override
         public int compare(Object o1, Object o2) {
             TensuMaster tm1 = (TensuMaster) o1;
             TensuMaster tm2 = (TensuMaster) o2;

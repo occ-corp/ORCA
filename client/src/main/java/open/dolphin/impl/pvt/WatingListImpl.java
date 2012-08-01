@@ -607,6 +607,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // サーバーからのプッシュを処理する
     private class PvtEventListener implements PropertyChangeListener {
 
+        @Override
         public void propertyChange(PropertyChangeEvent evt) {
             
             List<PvtMessageModel> list = pvtDelegater.getPvtMessageList(currentId);
@@ -915,6 +916,7 @@ public class WatingListImpl extends AbstractMainComponent {
                     }
                     cbm.addActionListener(new ActionListener(){
 
+                        @Override
                         public void actionPerformed(ActionEvent e) {
                             if (cbm.isSelected()) {
                                 cbm.getColumnSpec().setWidth(50);
@@ -1382,7 +1384,7 @@ public class WatingListImpl extends AbstractMainComponent {
         
         boolean assignedOnly = Project.getBoolean(ASSIGNED_ONLY, false);
         
-        List<PatientVisitModel> list = null;
+        List<PatientVisitModel> list;
         
         if (assignedOnly) {
             list = new ArrayList<PatientVisitModel>();

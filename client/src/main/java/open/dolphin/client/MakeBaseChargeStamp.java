@@ -1,7 +1,6 @@
 
 package open.dolphin.client;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

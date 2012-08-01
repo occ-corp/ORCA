@@ -355,6 +355,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         JButton btn_etensu = new JButton("電子点数表登録");
         btn_etensu.addActionListener(new ActionListener(){
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 RegistETensuData reg = new RegistETensuData();
                 reg.startRegist(MiscSettingPanel.this.getContext());
@@ -363,6 +364,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         JButton btn_santei = new JButton("算定歴初期化");
         btn_santei.addActionListener(new ActionListener(){
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 RegistETensuData reg = new RegistETensuData();
                 reg.startInitSantei(MiscSettingPanel.this.getContext());

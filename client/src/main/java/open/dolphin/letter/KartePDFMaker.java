@@ -160,7 +160,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
                 Collections.sort(pModules);
 
                 // テーブルを作成する
-                KarteTable table = null;
+                KarteTable table;
                 DocInfoModel docInfo = docModel.getDocInfoModel();
 
                 if (docInfo != null && docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE)) {

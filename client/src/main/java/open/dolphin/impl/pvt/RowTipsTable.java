@@ -35,7 +35,7 @@ public class RowTipsTable extends JTable {
                 if (now.after(pvtDate)) {
                     waitingTime = waitingTime + DurationFormatUtils.formatPeriod(pvtDate.getTime(), now.getTime(), "HH:mm");
                 } else {
-                    waitingTime = waitingTime = "00:00";
+                    waitingTime = "00:00";
                 }
             }
             return pvt.getPatientModel().getKanaName() + waitingTime;

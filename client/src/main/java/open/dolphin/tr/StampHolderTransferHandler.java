@@ -158,7 +158,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
         final StampHolder target = (StampHolder) support.getComponent();
         Transferable tr = support.getTransferable();
-        StampTreeNode droppedNode = null;
+        StampTreeNode droppedNode;
 
         try {
             droppedNode = (StampTreeNode) tr.getTransferData(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor);
@@ -420,7 +420,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         // まずは複数選択解除しておく
         exitClearSelectedStampHolder();
 
-        String groupMark = null;
+        String groupMark;
         String stampName = stampHolder.getStamp().getModuleInfoBean().getStampName();
         // StampNameが定期・臨時を含んでいたらそれをgroupMarkとする
         if (stampName.contains(MED_TEIKI)) {

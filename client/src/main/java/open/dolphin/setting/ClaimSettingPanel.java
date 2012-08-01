@@ -300,6 +300,7 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
         // orca api
         ActionListener al2 = new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 stateMgr.controlUseOrcaApi();
             }

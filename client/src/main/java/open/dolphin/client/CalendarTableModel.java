@@ -117,7 +117,7 @@ public class CalendarTableModel extends AbstractTableModel {
 
         // Cell 番号を得る
         int cellNumber = row*numCols + col;
-        Object ret = null;
+        Object ret;
 //masuda^
         ret = data[row][col];
         // SimpleDateが設定されてなかったら
@@ -159,13 +159,13 @@ public class CalendarTableModel extends AbstractTableModel {
         clear();
         if (markDates != null) {
             Iterator iter = markDates.iterator();
-            SimpleDate date = null;
+            SimpleDate date;
 
             while (iter.hasNext()) {
                 date = (SimpleDate)iter.next();
 //masuda^
                 int monthDiff = date.getYear() * 12 + date.getMonth() - (year * 12 + month);
-                int cellNumber = 0;
+                int cellNumber;
 
                 if (monthDiff == 0) {
                     cellNumber = firstCell + (date.getDay() - 1);

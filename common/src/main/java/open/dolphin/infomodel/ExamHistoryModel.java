@@ -70,7 +70,6 @@ public class ExamHistoryModel {
 
     public boolean putModuleModel(ModuleModel mm) {
         
-        boolean ret = false;
         String entity = mm.getModuleInfoBean().getEntity();
         if (examDate == null) {
             examDate = mm.getStarted();
@@ -133,7 +132,7 @@ public class ExamHistoryModel {
             xp = true;
         }
 
-        ret = ecg || us || ucg || labo || xp || holter || abpm || pwv || hyozai || psg || fiber;
+        boolean ret = ecg || us || ucg || labo || xp || holter || abpm || pwv || hyozai || psg || fiber;
         setTitle();
 
         return ret;

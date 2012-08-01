@@ -529,7 +529,7 @@ public class MasudaServiceBean {
             // テキスト抽出
             IInfoModel im = (IInfoModel) ModelUtils.xmlDecode(mm.getBeanBytes());
             mm.setModel(im);
-            String text = "";
+            String text;
             if (im instanceof ProgressCourse) {
                 String xml = ((ProgressCourse) im).getFreeText();
                 text = ModelUtils.extractText(xml);
@@ -900,7 +900,7 @@ public class MasudaServiceBean {
     @SuppressWarnings("unchecked")
     public List<SanteiHistoryModel> getSanteiHistory(long karteId, Date fromDate, Date toDate, List<String> srycds) {
         
-        List<SanteiHistoryModel> list = null;
+        List<SanteiHistoryModel> list;
         
         if (srycds == null) {
             final String sql = "from SanteiHistoryModel s where s.moduleModel.karte.id = :kId "
@@ -983,7 +983,7 @@ public class MasudaServiceBean {
         
         List<List<RpModel>> ret = new ArrayList<List<RpModel>>();
         
-        List<DocumentModel> docList = null;
+        List<DocumentModel> docList;
         
         if (lastOnly) {
             docList = em.createQuery(sql1)

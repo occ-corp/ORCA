@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.persistence.*;
@@ -11,7 +12,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "msd_usingdrug")
-public class UsingDrugModel implements Comparable {
+public class UsingDrugModel implements Serializable, Comparable {
 
     private static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
     @Id

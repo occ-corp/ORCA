@@ -18,8 +18,6 @@
  */
 package open.dolphin.infomodel;
 
-import open.dolphin.infomodel.InfoModel;
-
 /**
  * VersionModel
  * 

@@ -10,11 +10,11 @@ public class LapTimer {
 
     private long sTime;
 
-    private void start() {
+    public  void start() {
         sTime = System.currentTimeMillis();
     }
 
-    private void stop(String msg) {
+    public void stop(String msg) {
         long eTime = System.currentTimeMillis();
         System.out.println(msg + " in msec :" + String.valueOf(eTime - sTime));
     }

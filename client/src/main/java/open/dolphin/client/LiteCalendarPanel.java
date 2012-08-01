@@ -301,9 +301,8 @@ public class LiteCalendarPanel extends JPanel implements PropertyChangeListener 
      */
     private void setCellWidth(int cellWidth) {
         this.cellWidth = cellWidth;
-        TableColumn column = null;
         for (int i = 0; i < 7; i++) {
-            column = table.getColumnModel().getColumn(i);
+            TableColumn column = table.getColumnModel().getColumn(i);
             column.setPreferredWidth(cellWidth);
         }
     }

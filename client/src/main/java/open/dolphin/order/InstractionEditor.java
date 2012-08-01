@@ -293,6 +293,7 @@ public final class InstractionEditor extends AbstractStampEditor {
         
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 boolean setIsEmpty = (tableModel.getObjectCount() == 0);
 

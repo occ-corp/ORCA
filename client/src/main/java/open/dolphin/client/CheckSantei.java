@@ -1,7 +1,6 @@
 
 package open.dolphin.client;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.Toolkit;
 import java.util.*;
 import javax.swing.JOptionPane;

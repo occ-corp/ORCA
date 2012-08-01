@@ -73,7 +73,7 @@ public class BasicInfoInspector {
 
         String gender = context.getPatient().getGenderDesc();
 
-        Color color = null;
+        Color color;
         if (gender.equals(IInfoModel.MALE_DISP)) {
             color = maleColor;
         } else if (gender.equals(IInfoModel.FEMALE_DISP)) {

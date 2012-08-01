@@ -618,6 +618,7 @@ public class LaboTestBean extends AbstractChartDocument {
         JButton addBtn = new JButton("院内検査追加", addIcon);
         addBtn.addActionListener(new ActionListener(){
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 InFacilityLabo fLabo = new InFacilityLabo();
                 fLabo.setContext(LaboTestBean.this.getContext());

@@ -3,6 +3,7 @@ package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
@@ -15,9 +16,9 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "msd_routineMed")
-public class RoutineMedModel extends InfoModel implements Comparable, Cloneable{
+public class RoutineMedModel implements Serializable, Comparable, Cloneable{
     
-    private static final SimpleDateFormat sdf = new SimpleDateFormat(DATE_WITHOUT_TIME);
+    private static final SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
     
     @Id 
     @GeneratedValue(strategy=GenerationType.AUTO)

@@ -24,14 +24,17 @@ public class InFacilityLaboItemTransferable implements Transferable {
         this.items = items;
     }
     
+    @Override
     public DataFlavor[] getTransferDataFlavors() {
         return flavors;
     }
 
+    @Override
     public boolean isDataFlavorSupported(DataFlavor flavor) {
         return inFacilityLaboItemFlavor.equals(flavor);
     }
 
+    @Override
     public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
         
         if (flavor.equals(inFacilityLaboItemFlavor)) {

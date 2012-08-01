@@ -32,7 +32,7 @@ public class ShowEcgViewer {
 
 
         try {
-            String[] cmd = null;
+            String[] cmd;
             if (fev40Path.contains(WINE_KEY)) {
                 String home = System.getProperty("user.home");
                 fev40Path = fev40Path.replace(USER_HOME, home);

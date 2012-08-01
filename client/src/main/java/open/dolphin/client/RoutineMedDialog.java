@@ -63,6 +63,7 @@ public class RoutineMedDialog {
         JButton btnCancel = new JButton("取消");
         btnCancel.addActionListener(new ActionListener(){
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                dialog.setVisible(false);
             }
@@ -72,6 +73,7 @@ public class RoutineMedDialog {
         JButton btnOK = new JButton("保存");
         btnOK.addActionListener(new ActionListener(){
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 memo = ta.getText();
                 dialog.setVisible(false);

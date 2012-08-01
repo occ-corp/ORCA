@@ -9,7 +9,6 @@ import org.hibernate.annotations.Type;
  * MemoModel
  *
  * @author Minagawa, Kazushi
- *
  */
 @Entity
 @Table(name = "d_patient_memo")

@@ -487,6 +487,7 @@ public class StampHolderFunction {
     private void setMyTextLater(final StampHolder sh) {
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 setMyText(sh);
             }

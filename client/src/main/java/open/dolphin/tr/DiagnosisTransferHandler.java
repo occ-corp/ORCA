@@ -60,13 +60,17 @@ public class DiagnosisTransferHandler extends TransferHandler {
         if (canImport(c, t.getTransferDataFlavors())) {
 
             try {
+//masuda^   sorterもあるしてっぺん固定
+/*
                 // 病名の挿入位置を決めておく
                 JTable dropTable = (JTable) c;
                 int index = dropTable.getSelectedRow();
-                index = 0;
                 if (index < 0) {
                     index = 0;
                 }
+*/
+//masuda$
+                int index = 0;
 
                 // Dropされたノードを取得する
                 StampTreeNode droppedNode = (StampTreeNode) t.getTransferData(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor);

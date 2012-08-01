@@ -9,7 +9,6 @@ import org.hibernate.search.annotations.IndexedEmbedded;
  * KarteEntry
  *
  * @author Minagawa,Kazushi
- *
  */
 @MappedSuperclass
 public class KarteEntryBean extends InfoModel implements Comparable {

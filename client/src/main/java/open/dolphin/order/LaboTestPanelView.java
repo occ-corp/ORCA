@@ -305,7 +305,6 @@ public class LaboTestPanelView extends JPanel{
         // 内分泌機能関連検査、五列目上
         JPanel fifth = createBoxYPanel();
         JPanel endocrine = createBoxYPanel();
-        endocrine = createBoxYPanel();
         endocrine.setBorder(BorderFactory.createEtchedBorder());
         endocrine.add(new JLabel("内分泌機能関連検査"));
         endocrine.add(new LaboCheckBox(160031710, "TSH"));

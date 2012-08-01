@@ -221,7 +221,7 @@ public class SendClaimImpl implements ClaimMessageListener {
 
     private String getErrorInfo(int errorCode) {
         
-        String ret = null;
+        String ret;
         switch(errorCode) {
             case TT_NO_ERROR:
                 ret = "No Error";

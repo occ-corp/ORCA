@@ -310,9 +310,8 @@ public class DicomViewer {
         tbl.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
 
         // columnCountは１だけど。
-        TableColumn column = null;
         for (int i = 0; i < columnCount; i++) {
-            column = tbl.getColumnModel().getColumn(i);
+            TableColumn column = tbl.getColumnModel().getColumn(i);
             column.setPreferredWidth(cellWidth);
         }
         tbl.setRowHeight(cellHeight);

@@ -9,18 +9,8 @@ package open.dolphin.impl.scheam;
 import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.KeyEvent;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import javax.swing.AbstractAction;
-import javax.swing.ActionMap;
-import javax.swing.InputMap;
-import javax.swing.JComponent;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.KeyStroke;
+import java.awt.event.*;
+import javax.swing.*;
 import open.dolphin.impl.scheam.schemahelper.SchemaTitleBorder;
 
 /**
@@ -40,6 +30,7 @@ public class SchemaCanvasDialog extends javax.swing.JDialog {
         initTitlePanel();
 
         okBtn.addActionListener(new ActionListener(){
+            @Override
             public void actionPerformed(ActionEvent e) {
                 result = JOptionPane.OK_OPTION;
                 setVisible(false);
@@ -47,6 +38,7 @@ public class SchemaCanvasDialog extends javax.swing.JDialog {
             }
         });
         cancelBtn.addActionListener(new ActionListener(){
+            @Override
             public void actionPerformed(ActionEvent e) {
                 result = JOptionPane.CANCEL_OPTION;
                 setVisible(false);
@@ -59,6 +51,7 @@ public class SchemaCanvasDialog extends javax.swing.JDialog {
         // Enter で OK
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ENTER, 0), "ok");
         am.put("ok", new AbstractAction() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 okBtn.doClick();
             }
@@ -66,6 +59,7 @@ public class SchemaCanvasDialog extends javax.swing.JDialog {
         // ESC でキャンセル
         im.put(KeyStroke.getKeyStroke(KeyEvent.VK_ESCAPE, 0), "cancel");
         am.put("cancel", new AbstractAction() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 cancelBtn.doClick();
             }
@@ -144,6 +138,7 @@ public class SchemaCanvasDialog extends javax.swing.JDialog {
      * Dialog のタイトルを設定する
      * @param title
      */
+    @Override
     public void setTitle(String title) {
         titleLbl.setText(title);
     }
@@ -255,9 +250,11 @@ public class SchemaCanvasDialog extends javax.swing.JDialog {
     */
     public static void main(String args[]) {
         java.awt.EventQueue.invokeLater(new Runnable() {
+            @Override
             public void run() {
                 SchemaCanvasDialog dialog = new SchemaCanvasDialog(new SchemaCanvasView(), true);
                 dialog.addWindowListener(new java.awt.event.WindowAdapter() {
+                    @Override
                     public void windowClosing(java.awt.event.WindowEvent e) {
                         System.exit(0);
                     }

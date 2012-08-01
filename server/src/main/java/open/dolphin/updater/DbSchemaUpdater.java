@@ -49,6 +49,7 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
 
     private class UpdateWork implements org.hibernate.jdbc.Work {
 
+        @Override
         public void execute(Connection con) throws SQLException {
 
             DatabaseMetaData dmd = con.getMetaData();

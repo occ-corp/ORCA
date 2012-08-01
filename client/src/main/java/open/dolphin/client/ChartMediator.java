@@ -229,7 +229,7 @@ public final class ChartMediator extends MenuSupport implements UndoableEditList
         //
         // chainの先頭がDiagnosisDocumentの時のみ使用可能とする
         //
-        JMenu myMenu = null;
+        JMenu myMenu;
         DiagnosisDocument diagnosis = null;
         boolean enabled = false;
         Object obj = getChain();
@@ -260,7 +260,7 @@ public final class ChartMediator extends MenuSupport implements UndoableEditList
     private JMenu createTextMenu(StampTree stampTree) {
 
         // chain の先頭が KarteEditor でかつ SOAane が編集可の場合のみメニューが使える
-        JMenu myMenu = null;
+        JMenu myMenu;
         boolean enabled = false;
         KartePane kartePane = null;
         Object obj = getChain();
@@ -297,7 +297,7 @@ public final class ChartMediator extends MenuSupport implements UndoableEditList
     private JMenu createStampMenu(StampTree stampTree) {
 
         // chain の先頭が KarteEditor でかつ Pane が編集可の場合のみメニューが使える
-        JMenu myMenu = null;
+        JMenu myMenu;
         boolean enabled = false;
         KartePane kartePane = null;
         Object obj = getChain();

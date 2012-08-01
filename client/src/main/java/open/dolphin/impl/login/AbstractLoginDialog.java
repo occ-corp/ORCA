@@ -164,7 +164,8 @@ public abstract class AbstractLoginDialog implements ILoginDialog {
         dialog.setVisible(true);
 //masuda^
         SwingUtilities.invokeLater(new Runnable() {
-
+            
+            @Override
             public void run() {
                 dialog.toFront();
             }

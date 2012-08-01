@@ -284,7 +284,7 @@ public class KarteServiceBean {
     @SuppressWarnings("unchecked")
     public List<DocInfoModel> getDocumentList(long karteId, Date fromDate, boolean includeModifid) {
 
-        List<DocumentModel> documents = null;
+        List<DocumentModel> documents;
 
         if (includeModifid) {
 //masuda^
@@ -765,7 +765,7 @@ public class KarteServiceBean {
     @SuppressWarnings("unchecked")
     public List<RegisteredDiagnosisModel> getDiagnosis(long karteId, Date fromDate, boolean activeOnly) {
 
-        List<RegisteredDiagnosisModel> ret = null;
+        List<RegisteredDiagnosisModel> ret;
 
         // 疾患開始日を指定している
         if (fromDate != null) {
@@ -1060,7 +1060,7 @@ public class KarteServiceBean {
         final String sql2 = sql1 + " where e.yukostymd <= :date and :date <= e.yukoedymd";
         final String sql3 = sql2 + " and e.srycd in (:srycds)";
         
-        List<String> list = null;
+        List<String> list;
         if (date == null && srycds == null) {
             list = em.createQuery(sql1).getResultList();
         } else {

@@ -1,7 +1,6 @@
 
 package open.dolphin.order;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Insets;
@@ -113,6 +112,7 @@ public class TextStampEditor extends AbstractStampEditor {
     protected void checkValidation() {
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 String title = titleField.getText();
                 String text = textPane.getText();

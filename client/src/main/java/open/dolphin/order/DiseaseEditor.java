@@ -296,6 +296,7 @@ public final class DiseaseEditor extends AbstractStampEditor {
         
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 boolean setIsEmpty = (tableModel.getObjectCount() == 0);
 
@@ -356,7 +357,7 @@ public final class DiseaseEditor extends AbstractStampEditor {
                 SqlMasterDao dao = SqlMasterDao.getInstance();
                 String d = effectiveFormat.format(new Date());
                 boolean b = view.getPartialChk().isSelected();
-                List<DiseaseEntry> result = null;
+                List<DiseaseEntry> result;
 //masuda    修飾語ボタンの処理
                 if (text.startsWith(MODIFIER_CODE)) {
                     result = dao.getDiseaseByCode(text, d, true);

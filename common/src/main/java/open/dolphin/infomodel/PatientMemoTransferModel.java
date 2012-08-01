@@ -1,7 +1,6 @@
 
 package open.dolphin.infomodel;
 
-
 /**
  * 転送用のPatientMemoModel
  * 

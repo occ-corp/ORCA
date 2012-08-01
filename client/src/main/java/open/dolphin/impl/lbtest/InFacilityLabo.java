@@ -240,6 +240,7 @@ public class InFacilityLabo {
         
         editCheck.addItemListener(new ItemListener() {
 
+            @Override
             public void itemStateChanged(ItemEvent e) {
                 if (editCheck.isSelected()) {
                     deleteBtn.setEnabled(true);
@@ -254,6 +255,7 @@ public class InFacilityLabo {
 
         deleteBtn.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 delete();
             }
@@ -261,6 +263,7 @@ public class InFacilityLabo {
 
         closeBtn.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 dialog.setVisible(false);
             }
@@ -268,6 +271,7 @@ public class InFacilityLabo {
 
         saveBtn.addActionListener(new ActionListener() {
 
+            @Override
             public void actionPerformed(ActionEvent e) {
                 save();
                 toUpdate = true;

@@ -1,6 +1,5 @@
 package open.dolphin.order;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
@@ -1312,6 +1311,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
         
         SwingUtilities.invokeLater(new Runnable(){
 
+            @Override
             public void run() {
                 searchTextField.requestFocusInWindow();
             }

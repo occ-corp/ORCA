@@ -246,6 +246,7 @@ public class ExamHistory {
 
     private class ExamHistoryComparator implements Comparator {
 
+        @Override
         public int compare(Object o1, Object o2) {
             ExamHistoryModel e1 = (ExamHistoryModel) o1;
             ExamHistoryModel e2 = (ExamHistoryModel) o2;

@@ -1,6 +1,5 @@
 package open.dolphin.impl.psearch;
 
-import open.dolphin.infomodel.SimpleDate;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;

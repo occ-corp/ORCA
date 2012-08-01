@@ -277,7 +277,7 @@ public class TensuMaster {
             return null;
         }
 //masuda$
-        String ret = null;
+        String ret;
 
         if (srycd.startsWith(ClaimConst.SYUGI_CODE_START)) {
             ret = ClaimConst.SLOT_SYUGI;

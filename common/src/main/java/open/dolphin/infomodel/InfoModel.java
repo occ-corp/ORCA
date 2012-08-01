@@ -1,6 +1,5 @@
 package open.dolphin.infomodel;
 
-
 /**
  * InfoModel
  *

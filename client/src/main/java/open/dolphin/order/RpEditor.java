@@ -1,6 +1,5 @@
 package open.dolphin.order;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.Toolkit;
 import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
@@ -191,7 +190,7 @@ public final class RpEditor extends AbstractStampEditor {
                     bundle.setMemo(memo);
 
                     // 院内／院外など
-                    String rCode = null;
+                    String rCode;
 
                     if (ykzKbn.equals(ClaimConst.YKZ_KBN_NAIYO)) {
                         if (CheckTonyo.checkTonyo(adminCode)) {
@@ -422,6 +421,7 @@ public final class RpEditor extends AbstractStampEditor {
         
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 boolean setIsEmpty = (tableModel.getObjectCount() == 0);
 

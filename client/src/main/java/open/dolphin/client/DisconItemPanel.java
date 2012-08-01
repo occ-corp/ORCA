@@ -36,7 +36,7 @@ public class DisconItemPanel {
     private static final ImageIcon removeIcon = ClientContext.getImageIcon("del_16.gif");
     private static final ImageIcon saveIcon = ClientContext.getImageIcon("save_16.gif");
     
-    private ListTableModel tableModel;
+    private ListTableModel<DisconItemModel> tableModel;
     private List<DisconItemModel> addedList = new ArrayList<DisconItemModel>();
     private List<DisconItemModel> removedList = new ArrayList<DisconItemModel>();
     private List<DisconItemModel> updatedList = new ArrayList<DisconItemModel>();     // 編集したモデル
@@ -159,7 +159,6 @@ public class DisconItemPanel {
         close();
     }
 
-    @SuppressWarnings("unchecked")
     private void addNewModel() {
         DisconItemSubPanel panel = new DisconItemSubPanel(dialog);
         panel.enter();

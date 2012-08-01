@@ -1,6 +1,5 @@
 package open.dolphin.order;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -201,6 +200,7 @@ public final class RadEditor extends AbstractStampEditor {
         
         SwingUtilities.invokeLater(new Runnable() {
 
+            @Override
             public void run() {
                 
                 boolean setIsEmpty = (tableModel.getObjectCount() == 0);

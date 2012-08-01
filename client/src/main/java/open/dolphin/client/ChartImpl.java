@@ -1,6 +1,5 @@
 package open.dolphin.client;
 
-import open.dolphin.infomodel.VersionModel;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.EventHandler;
@@ -1660,6 +1659,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 final JTextPane soaTextPane = editor.getSOAPane().getTextPane();
                 SwingUtilities.invokeLater(new Runnable() {
 
+                    @Override
                     public void run() {
                         soaTextPane.requestFocusInWindow();
                     }

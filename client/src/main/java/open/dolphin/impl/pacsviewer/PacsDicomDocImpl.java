@@ -340,7 +340,6 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         public void run() {
             if (currentDicomObject != null) {
                 String currentStudyUID = currentDicomObject.getString(Tag.StudyInstanceUID);
