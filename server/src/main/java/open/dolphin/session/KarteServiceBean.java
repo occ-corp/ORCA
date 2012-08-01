@@ -311,7 +311,7 @@ public class KarteServiceBean {
             result.add(doc.getDocInfoModel());
         }
         return result;
-    }
+}
 
     /**
      * 文書(DocumentModel Object)を取得する。

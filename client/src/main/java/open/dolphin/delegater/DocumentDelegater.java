@@ -230,7 +230,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         String path = "karte/docinfo/" + String.valueOf(spec.getKarteId());
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("fromDate", REST_DATE_FRMT.format(spec.getFromDate()));
-        qmap.add("incudeModified", String.valueOf(spec.isIncludeModifid()));
+        qmap.add("includeModified", String.valueOf(spec.isIncludeModifid()));
 
         ClientResponse response = getQueryResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)

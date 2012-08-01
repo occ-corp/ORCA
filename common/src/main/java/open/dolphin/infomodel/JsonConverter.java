@@ -56,6 +56,8 @@ public class JsonConverter {
             processException(ex);
         } catch (IOException ex) {
             processException(ex);
+        } catch (Exception ex) {
+            processException(ex);
         }
         return null;
     }
@@ -70,7 +72,10 @@ public class JsonConverter {
             processException(ex);
         } catch (IOException ex) {
             processException(ex);
+        } catch (Exception ex) {
+            processException(ex);
         }
+        
         return null;
     }
     
@@ -83,6 +88,8 @@ public class JsonConverter {
         } catch (JsonMappingException ex) {
             processException(ex);
         } catch (IOException ex) {
+            processException(ex);
+        } catch (Exception ex) {
             processException(ex);
         }
         return null;

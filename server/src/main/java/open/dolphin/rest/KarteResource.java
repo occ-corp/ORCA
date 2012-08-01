@@ -72,7 +72,7 @@ public class KarteResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getDocumentList(@PathParam("id") Long karteId, 
             @QueryParam("fromDate") String fromDateStr, 
-            @QueryParam("inculdeModified") Boolean includeModified) {
+            @QueryParam("includeModified") Boolean includeModified) {
 
         Date fromDate = parseDate(fromDateStr);
 
@@ -80,7 +80,7 @@ public class KarteResource extends AbstractResource {
 
         String json = getConverter().toJson(result);
         debug(json);
-        
+
         return json;
     }
 

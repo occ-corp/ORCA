@@ -1418,7 +1418,7 @@ public class StampTree extends JTree implements TreeModelListener {
             @Override
             protected Void doInBackground() throws Exception {
                 logger.debug("deleteNode doInBackground");
-                sdl.removeStamp(deleteList);
+                sdl.removeStamps(deleteList);
                 return null;
             }
 

@@ -39,7 +39,7 @@ public class StampResource extends AbstractResource {
     @GET
     @Path("list")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getStamps(@QueryParam("param") String ids) {
+    public String getStamps(@QueryParam("ids") String ids) {
 
         List<String> list = toStrList(ids);
 
@@ -87,8 +87,8 @@ public class StampResource extends AbstractResource {
 
 
     @DELETE
-    @Path("id")
-    public void deleteStamp(@QueryParam("param") String param) {
+    @Path("id/{param}")
+    public void deleteStamp(@PathParam("param") String param) {
 
         int cnt = stampServiceBean.removeStamp(param);
 

@@ -478,7 +478,7 @@ public class StampDelegater extends BusinessDelegater {
      * @param stampId 削除する StampModel の id
      * @return 削除件数
      */
-    public int removeStamp(List<String> ids) {
+    public int removeStamps(List<String> ids) {
 
         String path = RES_STAMP + "list";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
