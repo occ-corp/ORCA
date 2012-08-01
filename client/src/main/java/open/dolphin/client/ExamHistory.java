@@ -28,7 +28,7 @@ import open.dolphin.table.StripeTableCellRenderer;
  */
 public class ExamHistory {
 
-    private ListTableModel tableModel;     // 文書履歴テーブル
+    private ListTableModel<ExamHistoryModel> tableModel;     // 文書履歴テーブル
     private JTable table;
     private InspectorTablePanel view;
     private DocumentHistory docHistory;     // 文書履歴
@@ -69,7 +69,7 @@ public class ExamHistory {
         Class[] columnClasses = {String.class, String.class};
 
         // 検査履歴テーブルを生成する
-        tableModel = new ListTableModel(columnNames, 1, methodNames, columnClasses) {
+        tableModel = new ListTableModel<ExamHistoryModel>(columnNames, 1, methodNames, columnClasses) {
             // テーブルは編集不可
             @Override
             public boolean isCellEditable(int row, int col) {
@@ -188,7 +188,7 @@ public class ExamHistory {
         final Date toDate = new Date();
 
         DocumentHistoryView dhView = (DocumentHistoryView) docHistory.getPanel();
-        docInfoList = ((ListTableModel) dhView.getTable().getModel()).getDataProvider();
+        docInfoList = ((ListTableModel<DocInfoModel>) dhView.getTable().getModel()).getDataProvider();
 
         final SimpleWorker worker = new SimpleWorker<List<ExamHistoryModel>, Void>() {
 

@@ -71,8 +71,8 @@ public class InFacilityLabo {
     private JPanel centerPanel;
     private JScrollPane rtScroll;
     
-    private ListTableModel setTableModel;
-    private ListTableModel templateTableModel;
+    private ListTableModel<InFacilityLaboItem> setTableModel;
+    private ListTableModel<InFacilityLaboItem> templateTableModel;
     
     private Chart chart;
     private boolean male;
@@ -98,7 +98,7 @@ public class InFacilityLabo {
     @SuppressWarnings("unchecked")
     private void setupTables() {
         
-        templateTableModel = new ListTableModel(TEMPLATE_COL_NAME, START_NUM_ROW, TEMPLATE_COL_METHOD, null) {
+        templateTableModel = new ListTableModel<InFacilityLaboItem>(TEMPLATE_COL_NAME, START_NUM_ROW, TEMPLATE_COL_METHOD, null) {
 
             @Override
             public boolean isCellEditable(int row, int column) {
@@ -106,7 +106,7 @@ public class InFacilityLabo {
             }
         };
 
-        setTableModel = new ListTableModel(SET_COL_NAME, START_NUM_ROW, SET_COL_METHOD, null) {
+        setTableModel = new ListTableModel<InFacilityLaboItem>(SET_COL_NAME, START_NUM_ROW, SET_COL_METHOD, null) {
             @Override
             public boolean isCellEditable(int row, int column) {
                 if (column == VALUE_COL || column == NORMAL_COL || column == UNIT_COL) {

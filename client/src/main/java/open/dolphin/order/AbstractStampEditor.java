@@ -906,8 +906,8 @@ public abstract class AbstractStampEditor extends StampEditorConst {
             public void valueChanged(ListSelectionEvent e) {
                 if (e.getValueIsAdjusting() == false) {
                     int row = view.getSearchResultTable().getSelectedRow();
-                    ListTableModel searchResultModel =  (ListTableModel) searchResultTable.getModel();
-                    TensuMaster o = (TensuMaster) searchResultModel.getObject(row);
+                    ListTableModel<TensuMaster> searchResultModel =(ListTableModel<TensuMaster>) searchResultTable.getModel();
+                    TensuMaster o = searchResultModel.getObject(row);
                     if (o != null) {
                         addSelectedTensu(o);
                         setFocusOnSearchTextFld();
@@ -1027,7 +1027,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
         view.getDeleteBtn().addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                ListTableModel tableModel = (ListTableModel) view.getSetTable().getModel();
+                ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) view.getSetTable().getModel();
                 int row = view.getSetTable().getSelectedRow();
                 if (tableModel.getObject(row) != null) {
                     tableModel.deleteAt(row);
@@ -1049,7 +1049,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
     protected void clear() {
         
         AbstractOrderView view = getOrderView();
-        ListTableModel tableModel = getSetTableModel();
+        ListTableModel<MasterItem> tableModel = getSetTableModel();
         tableModel.clear();
         view.getStampNameField().setText(DEFAULT_STAMP_NAME);
         checkValidation();
@@ -1123,7 +1123,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
                     result.addAll(saiyou);
                     result.addAll(hisaiyou);
                     
-                    ListTableModel srModel = (ListTableModel) view.getSearchResultTable().getModel();
+                    ListTableModel<TensuMaster> srModel = (ListTableModel<TensuMaster>) view.getSearchResultTable().getModel();
                     srModel.setDataProvider(result);
                     int cnt = srModel.getObjectCount();
                     view.getCountField().setText(String.valueOf(cnt));
@@ -1156,7 +1156,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
 
         // ListSelectionListenerからここに移動
         int row = view.getSetTable().getSelectedRow();
-        ListTableModel tableModel = (ListTableModel) view.getSetTable().getModel();
+        ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) view.getSetTable().getModel();
         if (tableModel.getObject(row) != null) {
             view.getDeleteBtn().setEnabled(true);
         } else {
@@ -1283,7 +1283,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
                 } catch (Exception ex) {
                 } finally {
                     checkValidation();
-                    ((ListTableModel) (view.getSetTable().getModel())).fireTableDataChanged();
+                    ((ListTableModel<MasterItem>) (view.getSetTable().getModel())).fireTableDataChanged();
                     blockGlass.unblock();
                 }
             }
@@ -1295,8 +1295,8 @@ public abstract class AbstractStampEditor extends StampEditorConst {
     private AbstractOrderView getOrderView() {
         return (AbstractOrderView) getView();
     }
-    private ListTableModel getSetTableModel() {
-        return (ListTableModel) getOrderView().getSetTable().getModel();
+    private ListTableModel<MasterItem> getSetTableModel() {
+        return (ListTableModel<MasterItem>) getOrderView().getSetTable().getModel();
     }
     
     protected final void showFirstResult(JTable table) {
@@ -1352,7 +1352,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
 
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
-            TensuMaster tm = (TensuMaster) ((ListTableModel) table.getModel()).getObject(row);
+            TensuMaster tm = ((ListTableModel<TensuMaster>) table.getModel()).getObject(row);
             if (tm != null && tm.isInUse() && !isSelected){
                 setForeground(java.awt.Color.BLUE);
             }

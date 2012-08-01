@@ -547,7 +547,6 @@ public final class BaseEditor extends AbstractStampEditor {
     }
     
     // ウソ診療行為区分設定
-    @SuppressWarnings("unchecked")
     private void searchClaimClassCode() {
         
         List<TensuMaster> list = new ArrayList<TensuMaster>();
@@ -565,7 +564,7 @@ public final class BaseEditor extends AbstractStampEditor {
         Collections.sort(list, new UsoTmComparator());
         
 
-        ListTableModel srModel = (ListTableModel) view.getSearchResultTable().getModel();
+        ListTableModel<TensuMaster> srModel = (ListTableModel<TensuMaster>) view.getSearchResultTable().getModel();
         srModel.setDataProvider(list);
         int cnt = srModel.getObjectCount();
         view.getCountField().setText(String.valueOf(cnt));

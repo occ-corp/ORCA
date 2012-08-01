@@ -53,10 +53,10 @@ public class DisconItemPanel {
         initComponents();
     }
 
-    @SuppressWarnings("unchecked")
+
     public void enter() {
 
-        tableModel = new ListTableModel(COLUMN_NAMES, START_NUM_ROWS, METHOD_NAMES, null) {
+        tableModel = new ListTableModel<DisconItemModel>(COLUMN_NAMES, START_NUM_ROWS, METHOD_NAMES, null) {
 
             @Override
             public boolean isCellEditable(int row, int col) {

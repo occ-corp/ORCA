@@ -145,7 +145,7 @@ public class DocumentHistory {
             searchResult.selectAll();
         } else {
             JTable table = view.getTable();
-            ListTableModel model = (ListTableModel) table.getModel();
+            ListTableModel<DocInfoModel> model = (ListTableModel<DocInfoModel>) table.getModel();
             int r = model.getObjectCount(); //rowCount だとだめ。データがないところも全部選択されてしまう
             ListSelectionModel lsm = table.getSelectionModel();
             lsm.setSelectionInterval(0, r - 1);

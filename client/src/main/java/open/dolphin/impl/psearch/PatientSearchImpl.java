@@ -66,7 +66,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private int ageColumn;
     private int pvtDateColumn;
     
-    private ListTableModel tableModel;
+    private ListTableModel<PatientModel> tableModel;
     private ListTableSorter sorter;
     private AbstractAction copyAction;
 

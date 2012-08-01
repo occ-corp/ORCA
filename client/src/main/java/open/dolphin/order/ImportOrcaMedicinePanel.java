@@ -217,7 +217,7 @@ public class ImportOrcaMedicinePanel {
         view.add(north, BorderLayout.NORTH);
         view.add(scroll, BorderLayout.CENTER);
 
-        tableModel = new ListTableModel(COLUMN_NAMES, ROWS, METHOD_NAMES, null) {
+        tableModel = new ListTableModel<MasterItem>(COLUMN_NAMES, ROWS, METHOD_NAMES, null) {
             // 編集は不可
 
             @Override

@@ -38,7 +38,7 @@ public class UsingDrugPanel {
     private static final ImageIcon removeIcon = ClientContext.getImageIcon("del_16.gif");
     private static final ImageIcon saveIcon = ClientContext.getImageIcon("save_16.gif");
     
-    private ListTableModel tableModel;
+    private ListTableModel<UsingDrugModel> tableModel;
     private JDialog dialog;
     private JPanel view;
 
@@ -62,7 +62,7 @@ public class UsingDrugPanel {
         removedList= new ArrayList<UsingDrugModel>();
         updatedList = new ArrayList<UsingDrugModel>();
 
-        tableModel = new ListTableModel(COLUMN_NAMES, START_NUM_ROWS, METHOD_NAMES, CLASSES) {
+        tableModel = new ListTableModel<UsingDrugModel>(COLUMN_NAMES, START_NUM_ROWS, METHOD_NAMES, CLASSES) {
             // 編集は不可
 
             @Override
