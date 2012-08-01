@@ -22,7 +22,7 @@ public class LogFilter implements Filter {
     private static final boolean WARN = false;
     private static final boolean INFO = true;
 
-    private static final Logger logger = Logger.getLogger(LogFilter.class.getName());
+    private static final Logger logger = Logger.getLogger(LogFilter.class.getSimpleName());
 
     private static final String USER_NAME = "userName";
     private static final String PASSWORD = "password";
@@ -68,15 +68,19 @@ public class LogFilter implements Filter {
         wrapper.setRemoteUser(userName);
 
         StringBuilder sb = new StringBuilder();
-        sb.append(wrapper.getRemoteAddr()).append(" ");
+        sb.append("\n");
+        //sb.append(wrapper.getRemoteAddr()).append(" ");
         sb.append(wrapper.getShortUser()).append(" ");
         sb.append(wrapper.getMethod()).append(" ");
         sb.append(wrapper.getRequestURI());
         String query = wrapper.getQueryString();
         if (query != null && !query.isEmpty()) {
-            sb.append(" ").append(query);
+            sb.append("?").append(query);
         }
-        String msg = sb.toString();
+        int len = sb.length();
+        String msg = len > 160
+                ? sb.delete(157, len).append("...").toString()
+                : sb.toString();
         info(msg);
 
         chain.doFilter(wrapper, response);
