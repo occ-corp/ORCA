@@ -8,7 +8,7 @@ import javax.swing.ImageIcon;
  * SchemaModel
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_image")
@@ -21,8 +21,7 @@ public class SchemaModel extends KarteEntryBean {
     @Column(nullable=false, length=16777215)    // MEDIUMBLOB
     private byte[] jpegByte;
     
-    //@JsonBackReference
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="doc_id", nullable=false)
     private DocumentModel document;

@@ -22,7 +22,6 @@ public class StampResource extends AbstractResource {
     @Inject
     private StampServiceBean stampServiceBean;
 
-    /** Creates a new instance of StampResource */
     public StampResource() {
     }
 

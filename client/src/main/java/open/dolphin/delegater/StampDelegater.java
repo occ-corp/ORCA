@@ -25,13 +25,16 @@ public class StampDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final StampDelegater instance;
+
     static {
         instance = new StampDelegater();
     }
+
     public static StampDelegater getInstance() {
         return instance;
     }
-    private StampDelegater(){
+
+    private StampDelegater() {
     }
     
     /**

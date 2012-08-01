@@ -8,6 +8,7 @@ import javax.persistence.*;
  * PublishedTreeModel
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name="d_published_tree")

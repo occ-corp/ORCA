@@ -12,6 +12,7 @@ import javax.persistence.*;
  * PatientVisitModel
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_patient_visit")

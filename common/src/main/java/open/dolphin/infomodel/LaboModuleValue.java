@@ -8,7 +8,7 @@ import javax.persistence.*;
 
 /**
  * LaboModuleValue
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_labo_module")

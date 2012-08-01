@@ -7,7 +7,7 @@ import javax.persistence.*;
  * LaboItemValue
  *
  * @author Minagawa,Kazushi
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_labo_item")
@@ -17,7 +17,7 @@ public class LaboItemValue extends InfoModel {
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
     
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="specimen_id", nullable=false)
     private LaboSpecimenValue laboSpecimen;

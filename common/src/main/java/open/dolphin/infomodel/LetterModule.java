@@ -11,6 +11,7 @@ import javax.persistence.Transient;
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table (name = "d_letter_module")

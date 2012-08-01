@@ -11,7 +11,8 @@ import javax.servlet.http.HttpServletResponse;
 import open.dolphin.session.UserServiceBean;
 
 /**
- *
+ * LogFilter
+ * 
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */

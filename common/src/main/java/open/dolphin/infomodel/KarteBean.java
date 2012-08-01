@@ -11,7 +11,7 @@ import javax.persistence.*;
  * KarteBean
  *
  * @author Minagawa,Kazushi
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_karte")
@@ -54,22 +54,20 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<DocInfoModel> docInfoList;
 
-    @JsonIgnore
-    //@JsonDeserialize(contentAs=PatientMemoModel.class)
+    @JsonIgnore // bi-directional references
     @Transient
     private List<PatientMemoModel> memoList;
     
-    // infinite loopを避けるため
+    // シリアライズ用
     @JsonDeserialize(contentAs=PatientMemoTransferModel.class)
     @Transient
     private List<PatientMemoTransferModel> memoTransList;
     
-    @JsonIgnore
-    //@JsonDeserialize(contentAs=AppointmentModel.class)
+    @JsonIgnore // bi-directional references
     @Transient
     private List<AppointmentModel> appoList;
     
-    // infinite loopを避けるため
+    // シリアライズ用
     @JsonDeserialize(contentAs=AppointmentTransferModel.class)
     @Transient
     private List<AppointmentTransferModel> appoTransList;

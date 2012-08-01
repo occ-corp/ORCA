@@ -76,6 +76,7 @@ public class JsonConverter {
     
     public Object fromJsonTypeRef(String json, TypeReference typeRef) {
         try {
+            debug(json);
             return objectMapper.readValue(json, typeRef);
         } catch (JsonParseException ex) {
             processException(ex);
@@ -93,7 +94,7 @@ public class JsonConverter {
     
     private void debug(String msg) {
         if (debug) {
-            System.out.println(msg);
+            System.out.print(msg);
         }
     }
 

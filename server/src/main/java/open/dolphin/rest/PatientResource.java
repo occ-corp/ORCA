@@ -26,7 +26,6 @@ public class PatientResource extends AbstractResource {
     @Context
     private HttpServletRequest servletReq;
     
-    /** Creates a new instance of PatientsResource */
     public PatientResource() {
     }
 

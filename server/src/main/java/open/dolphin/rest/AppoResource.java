@@ -25,7 +25,6 @@ public class AppoResource extends AbstractResource {
     @Inject
     private AppoServiceBean appoServiceBean;
 
-    /** Creates a new instance of AppoResource */
     public AppoResource() {
     }
 

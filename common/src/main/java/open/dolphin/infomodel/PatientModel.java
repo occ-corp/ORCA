@@ -11,7 +11,7 @@ import javax.persistence.*;
  * PatientModel
  *
  * @author Minagawa,kazushi
- * -
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_patient")

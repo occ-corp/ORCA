@@ -6,7 +6,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.util.HashUtil;
 
 /**
- *
+ * JerseyClient
  * @author Kazushi Minagawa. Digital Globe, Inc.
  */
 public class JerseyClient {
@@ -85,13 +85,6 @@ public class JerseyClient {
     // pvt同期用のクライアントを別に用意する
     public WebResource.Builder getAsyncResource(String path) {
         return webResource2.path(path).header(USER_NAME, userName).header(PASSWORD, password);
-    }
-    
-    public String getUserName() {
-        return userName;
-    }
-    public String getPassword() {
-        return password;
     }
 //masuda$
 }

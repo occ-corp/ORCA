@@ -9,6 +9,7 @@ import javax.persistence.Transient;
  * 外部参照要素クラス。
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Embeddable
 public class ExtRefModel extends InfoModel {

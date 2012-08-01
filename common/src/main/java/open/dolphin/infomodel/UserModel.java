@@ -12,7 +12,7 @@ import org.hibernate.search.annotations.IndexedEmbedded;
  * UserModel
  *
  * @author Minagawa,Kazushi
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name="d_users")
@@ -58,7 +58,7 @@ public class UserModel extends InfoModel {
     @IndexedEmbedded
     private FacilityModel facility;
     
-    @JsonManagedReference
+    @JsonManagedReference   // bi-directional references
     @JsonDeserialize(contentAs=RoleModel.class)
     @OneToMany(mappedBy="user", cascade=CascadeType.ALL, fetch=FetchType.EAGER)
     private List<RoleModel> roles;

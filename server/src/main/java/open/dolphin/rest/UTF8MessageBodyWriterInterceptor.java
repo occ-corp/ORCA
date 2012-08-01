@@ -12,7 +12,7 @@ import org.jboss.resteasy.spi.interception.MessageBodyWriterContext;
 import org.jboss.resteasy.spi.interception.MessageBodyWriterInterceptor;
 
 /**
- * MessageBodyWriterWrapper
+ * UTF8MessageBodyWriterInterceptor
  * RESTEasy on Windowsで文字化けしないように
  * MeidaTypeにcharset=UTF-8を設定する
  * 
@@ -20,7 +20,7 @@ import org.jboss.resteasy.spi.interception.MessageBodyWriterInterceptor;
  */
 @Provider
 @ServerInterceptor
-public class MessageBodyWriterWrapper implements MessageBodyWriterInterceptor {
+public class UTF8MessageBodyWriterInterceptor implements MessageBodyWriterInterceptor {
 
     @Override
     public void write(MessageBodyWriterContext context) throws IOException, WebApplicationException {

@@ -13,6 +13,7 @@ import org.hibernate.search.annotations.Index;
  * ModuleModel
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_module")
@@ -32,7 +33,7 @@ public class ModuleModel extends KarteEntryBean {
     @Column(nullable=false)
     private byte[] beanBytes;
     
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="doc_id", nullable=false)
     private DocumentModel document;

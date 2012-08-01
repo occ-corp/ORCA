@@ -21,7 +21,6 @@ public class PVTHealthInsuranceModel extends InfoModel  {
     private String payInRatio;
     private String payOutRatio;
     
-    //@JsonDeserialize(contentAs=PVTPublicInsuranceItemModel.class)
     private PVTPublicInsuranceItemModel[] pvtPublicInsuranceItem;
 
     

@@ -7,6 +7,7 @@ import javax.persistence.*;
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_letter_date")
@@ -26,7 +27,7 @@ public class LetterDate extends InfoModel {
     @Temporal(javax.persistence.TemporalType.DATE)
     private Date value;
 
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LetterModule module;

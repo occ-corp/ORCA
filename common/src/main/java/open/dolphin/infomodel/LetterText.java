@@ -7,6 +7,7 @@ import org.hibernate.annotations.Type;
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_letter_text")
@@ -26,7 +27,7 @@ public class LetterText extends InfoModel {
     @Type(type="org.hibernate.type.StringClobType")
     private String textValue;
 
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LetterModule module;

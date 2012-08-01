@@ -11,6 +11,9 @@ public class PatientMemoTransferModel extends AbstractKarteEntryTransferModel {
 
     private String memo;
     
+    public PatientMemoTransferModel() {
+    }
+    
     @Override
     public PatientMemoModel getKarteEntryBean() {
         PatientMemoModel model = new PatientMemoModel();
@@ -24,5 +27,13 @@ public class PatientMemoTransferModel extends AbstractKarteEntryTransferModel {
         store(karteEntryBean);
         PatientMemoModel model = (PatientMemoModel) karteEntryBean;
         memo = model.getMemo();
+    }
+    
+    public String getMemo() {
+        return memo;
+    }
+    
+    public void setMemo(String memo) {
+        this.memo = memo;
     }
 }

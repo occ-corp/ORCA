@@ -20,13 +20,16 @@ public class LaboDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final LaboDelegater instance;
+
     static {
         instance = new LaboDelegater();
     }
+
     public static LaboDelegater getInstance() {
         return instance;
     }
-    private LaboDelegater(){
+
+    private LaboDelegater() {
     }
 
     public List<PatientLiteModel> getConstrainedPatients(List<String> idList) {

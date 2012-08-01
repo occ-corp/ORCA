@@ -7,6 +7,7 @@ import javax.persistence.*;
  * 診断履歴クラス。
  *
  * @author Kazushi Minagawa, Digital Globe,Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_diagnosis")

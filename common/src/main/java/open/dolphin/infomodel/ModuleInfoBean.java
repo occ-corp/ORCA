@@ -9,6 +9,7 @@ import javax.persistence.Transient;
  * Stamp 及び Module の属性を保持するクラス。
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Embeddable
 public class ModuleInfoBean extends InfoModel implements Comparable {
@@ -19,7 +20,7 @@ public class ModuleInfoBean extends InfoModel implements Comparable {
     
     /** SOA または P の役割 */
     @Column(nullable=false)
-    private String role;
+    private String role;    // 名前変えたいｗ @Column(name="c_role", nullable=false)
     
     /** ドキュメントに出現する順番 */
     @Column(nullable=false)

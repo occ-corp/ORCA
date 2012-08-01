@@ -19,13 +19,16 @@ public class UserDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final UserDelegater instance;
+
     static {
         instance = new UserDelegater();
     }
+
     public static UserDelegater getInstance() {
         return instance;
     }
-    private UserDelegater(){
+
+    private UserDelegater() {
     }
     
     public UserModel login(String fid, String uid, String password) {

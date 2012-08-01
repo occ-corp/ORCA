@@ -17,13 +17,16 @@ public class LetterDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final LetterDelegater instance;
+
     static {
         instance = new LetterDelegater();
     }
+
     public static LetterDelegater getInstance() {
         return instance;
     }
-    private LetterDelegater(){
+
+    private LetterDelegater() {
     }
     
     public long saveOrUpdateLetter(LetterModule model) throws Exception {

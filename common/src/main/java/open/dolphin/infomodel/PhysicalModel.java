@@ -5,7 +5,8 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 /**
  * PhysicalModel
  *
- * @author  Kazushi Minagawa, Digital Globe, Inc.
+ * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 public class PhysicalModel extends InfoModel implements Comparable {
     

@@ -14,6 +14,9 @@ public class AppointmentTransferModel extends AbstractKarteEntryTransferModel {
     private String name;
     private String memo;
     private Date date;
+    
+    public AppointmentTransferModel() {
+    }
 
     @Override
     public AppointmentModel getKarteEntryBean() {
@@ -38,4 +41,43 @@ public class AppointmentTransferModel extends AbstractKarteEntryTransferModel {
         date = model.getDate();
     }
     
+    public String getPatientId() {
+        return patientId;
+    }
+    
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+
+    public int getState() {
+        return state;
+    }
+
+    public void setState(int val) {
+        state = val;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String val) {
+        name = val;
+    }
+
+    public String getMemo() {
+        return memo;
+    }
+
+    public void setMemo(String val) {
+        memo = val;
+    }
+
+    public Date getDate() {
+        return date;
+    }
+
+    public void setDate(Date val) {
+        date = val;
+    }
 }

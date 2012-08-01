@@ -13,7 +13,7 @@ import javax.persistence.Transient;
  * DocInfoModel
  *
  * @author Minagawa,Kazushi. Digital Globe, Inc.
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Embeddable
 public class DocInfoModel extends InfoModel implements Comparable {

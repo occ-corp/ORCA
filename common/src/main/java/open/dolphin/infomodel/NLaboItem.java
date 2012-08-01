@@ -6,6 +6,7 @@ import javax.persistence.*;
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name="d_nlabo_item")
@@ -94,7 +95,7 @@ public class NLaboItem extends InfoModel {
     // Sort Key
     private String sortKey;
 
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="laboModule_id", nullable=false)
     private NLaboModule laboModule;

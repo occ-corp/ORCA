@@ -14,15 +14,18 @@ public final class AppointmentDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final AppointmentDelegater instance;
+
     static {
         instance = new AppointmentDelegater();
     }
+
     public static AppointmentDelegater getInstance() {
         return instance;
     }
-    private AppointmentDelegater(){
+
+    private AppointmentDelegater() {
     }
-    
+
     public int putAppointments(List<AppointmentModel> list) {
 
         String path = "appo/";
@@ -35,7 +38,6 @@ public final class AppointmentDelegater extends BusinessDelegater {
         
         int status = response.getStatus();
         String entityStr = response.getEntity(String.class);
-        
         debug(status, entityStr);
 
         return Integer.parseInt(entityStr);

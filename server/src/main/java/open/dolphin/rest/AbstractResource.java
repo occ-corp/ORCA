@@ -11,7 +11,8 @@ import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.JsonConverter;
 
 /**
- *
+ * AbstractResource
+ * 
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
@@ -55,6 +56,8 @@ public class AbstractResource {
         sb.append(pid);
         return sb.toString();
     }
+    
+    
     
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();

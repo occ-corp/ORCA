@@ -6,6 +6,7 @@ import javax.persistence.*;
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_letter_item")
@@ -24,7 +25,7 @@ public class LetterItem extends InfoModel {
     @Column(name = "c_value")
     private String value;
 
-    @JsonIgnore
+    @JsonIgnore // bi-directional references
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LetterModule module;

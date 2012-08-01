@@ -7,7 +7,7 @@ import javax.persistence.*;
  * HealthInsuranceModel
  *
  * @author Minagawa,kazushi
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_health_insurance")

@@ -7,6 +7,7 @@ import javax.persistence.*;
  * RoleModel
  *
  * @author Minagawa,Kazushi
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name="d_roles")
@@ -21,8 +22,7 @@ public class RoleModel extends InfoModel {
     @Column(name="c_role", nullable=false)
     private String role;
     
-    @JsonBackReference
-    //@JsonIgnore
+    @JsonBackReference  // bi-directional references
     @ManyToOne
     @JoinColumn(name="c_user", nullable=false)
     private UserModel user;

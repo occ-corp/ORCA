@@ -8,6 +8,7 @@ import javax.persistence.*;
 /**
  *
  * @author kazushi Minagawa @digital-globe.co.jp
+ * @author modified by masuda, Masuda Naika
  */
 @Entity
 @Table(name = "d_nlabo_module")

@@ -27,13 +27,16 @@ public class  PatientDelegater extends BusinessDelegater {
 
     private static final boolean debug = false;
     private static final PatientDelegater instance;
+
     static {
         instance = new PatientDelegater();
     }
+
     public static PatientDelegater getInstance() {
         return instance;
     }
-    private PatientDelegater(){
+
+    private PatientDelegater() {
     }
     
     /**

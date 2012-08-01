@@ -14,7 +14,7 @@ import org.hibernate.search.annotations.IndexedEmbedded;
  * DocumentBean
  *
  * @author Minagawa,Kazushi
- *
+ * @author modified by masuda, Masuda Naika
  */
 @Indexed(index="document")      // hibernate search
 @FullTextFilterDefs({           // hibernate search

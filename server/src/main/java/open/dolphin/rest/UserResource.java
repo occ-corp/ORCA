@@ -27,7 +27,6 @@ public class UserResource extends AbstractResource {
     @Context
     private HttpServletRequest servletReq;
 
-    /** Creates a new instance of UserResource */
     public UserResource() {
     }
 

@@ -23,7 +23,6 @@ public class KarteResource extends AbstractResource {
     @Inject
     private KarteServiceBean karteServiceBean;
 
-    /** Creates a new instance of KarteResource */
     public KarteResource() {
     }
 

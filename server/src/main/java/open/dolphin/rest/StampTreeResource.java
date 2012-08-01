@@ -27,7 +27,6 @@ public class StampTreeResource extends AbstractResource {
     @Context
     private HttpServletRequest servletReq;
 
-    /** Creates a new instance of SampResource */
     public StampTreeResource() {
     }
 

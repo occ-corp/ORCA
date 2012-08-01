@@ -26,14 +26,13 @@ public class MasudaDelegater extends BusinessDelegater {
         instance = new MasudaDelegater();
     }
 
-    private MasudaDelegater() {
-    }
-
     public static MasudaDelegater getInstance() {
         return instance;
     }
 
-    
+    private MasudaDelegater() {
+    }
+
     // 定期処方
     public List<RoutineMedModel> getRoutineMedModels(long karteId, int firstResult, int maxResults) {
         

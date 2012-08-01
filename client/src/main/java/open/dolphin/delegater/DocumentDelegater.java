@@ -32,13 +32,16 @@ public class  DocumentDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final DocumentDelegater instance;
+
     static {
         instance = new DocumentDelegater();
     }
+
     public static DocumentDelegater getInstance() {
         return instance;
     }
-    private DocumentDelegater(){
+
+    private DocumentDelegater() {
     }
     
     /**
