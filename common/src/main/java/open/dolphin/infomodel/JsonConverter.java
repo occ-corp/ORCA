@@ -21,21 +21,22 @@ public class JsonConverter {
     
     private static final ObjectMapper objectMapper;
     private static final JsonConverter instance;
+    private static final boolean debug = false;
+    
     static {
         instance = new JsonConverter();
         objectMapper = new ObjectMapper();
         objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-        
         objectMapper.disable(SerializationFeature.WRITE_NULL_MAP_VALUES);
         objectMapper.disable(SerializationFeature.FAIL_ON_EMPTY_BEANS);
-        //objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
-        
         objectMapper.setSerializationInclusion(JsonInclude.Include.NON_NULL);
-        
         objectMapper.setVisibility(PropertyAccessor.FIELD, JsonAutoDetect.Visibility.ANY);
         objectMapper.setVisibility(PropertyAccessor.GETTER, JsonAutoDetect.Visibility.NONE);
         objectMapper.setVisibility(PropertyAccessor.IS_GETTER, JsonAutoDetect.Visibility.NONE);
-      }
+        if (debug) {
+            objectMapper.enable(SerializationFeature.INDENT_OUTPUT);
+        }
+    }
     
     private JsonConverter(){
     }
@@ -46,26 +47,29 @@ public class JsonConverter {
     
     public String toJson(Object obj) {
         try {
-            return objectMapper.writeValueAsString(obj);
+            String json =objectMapper.writeValueAsString(obj);
+            debug(json);
+            return json;
         } catch (JsonGenerationException ex) {
-            debug(ex);
+            processException(ex);
         } catch (JsonMappingException ex) {
-            debug(ex);
+            processException(ex);
         } catch (IOException ex) {
-            debug(ex);
+            processException(ex);
         }
         return null;
     }
     
     public Object fromJson(String json, Class clazz) {
         try {
+            debug(json);
             return objectMapper.readValue(json, clazz);
         } catch (JsonParseException ex) {
-            debug(ex);
+            processException(ex);
         } catch (JsonMappingException ex) {
-            debug(ex);
+            processException(ex);
         } catch (IOException ex) {
-            debug(ex);
+            processException(ex);
         }
         return null;
     }
@@ -74,17 +78,23 @@ public class JsonConverter {
         try {
             return objectMapper.readValue(json, typeRef);
         } catch (JsonParseException ex) {
-            debug(ex);
+            processException(ex);
         } catch (JsonMappingException ex) {
-            debug(ex);
+            processException(ex);
         } catch (IOException ex) {
-            debug(ex);
+            processException(ex);
         }
         return null;
     }
     
-    private void debug(Exception ex) {
+    private void processException(Exception ex) {
         ex.printStackTrace(System.err);
+    }
+    
+    private void debug(String msg) {
+        if (debug) {
+            System.out.println(msg);
+        }
     }
 
 }

@@ -36,19 +36,30 @@ public class KarteResource extends AbstractResource {
         Date fromDate = parseDate(fromDateStr);
 
         KarteBean karte = karteServiceBean.getKarte(patientPK, fromDate);
-        
+
         // PatientMemoModel -> PatientMemoTransferModel
         List<PatientMemoModel> memoList = karte.getMemoList();
         if (memoList != null && !memoList.isEmpty()) {
-            List<PatientMemoTransferModel> transList = new ArrayList<PatientMemoTransferModel>();
+            List<PatientMemoTransferModel> memoTransList = new ArrayList<PatientMemoTransferModel>();
             for (PatientMemoModel pmm : memoList) {
                 PatientMemoTransferModel pmtm = new PatientMemoTransferModel();
-                pmtm.setPatientMemoModel(pmm);
-                transList.add(pmtm);
+                pmtm.setKarteEntryBean(pmm);
+                memoTransList.add(pmtm);
             }
-            karte.setMemoTransList(transList);
+            karte.setMemoTransList(memoTransList);
         }
-        
+        // AppointmentModel -> AppointmentTransferModel
+        List<AppointmentModel> appoList = karte.getAppointmentList();
+        if (appoList != null && !appoList.isEmpty()) {
+            List<AppointmentTransferModel> appoTransList = new ArrayList<AppointmentTransferModel>();
+            for (AppointmentModel appo : appoList) {
+                AppointmentTransferModel atm = new AppointmentTransferModel();
+                atm.setKarteEntryBean(appo);
+                appoTransList.add(atm);
+            }
+            karte.setAppoTransList(appoTransList);
+        }
+
         String json = getConverter().toJson(karte);
         debug(json);
         

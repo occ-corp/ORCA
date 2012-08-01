@@ -55,6 +55,7 @@ public class KarteBean extends InfoModel {
     private List<DocInfoModel> docInfoList;
 
     @JsonIgnore
+    //@JsonDeserialize(contentAs=PatientMemoModel.class)
     @Transient
     private List<PatientMemoModel> memoList;
     
@@ -63,6 +64,26 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<PatientMemoTransferModel> memoTransList;
     
+    @JsonIgnore
+    //@JsonDeserialize(contentAs=AppointmentModel.class)
+    @Transient
+    private List<AppointmentModel> appoList;
+    
+    // infinite loopを避けるため
+    @JsonDeserialize(contentAs=AppointmentTransferModel.class)
+    @Transient
+    private List<AppointmentTransferModel> appoTransList;
+    
+    @Transient
+    private Date lastDocDate; 
+    
+    //==========================================================================
+    public void setLastDocDate(Date d) {
+        lastDocDate = d;
+    }
+    public Date getLastDocDate() {
+        return lastDocDate;
+    }
     public void setMemoTransList(List<PatientMemoTransferModel> list) {
         memoTransList = list;
     }
@@ -70,7 +91,22 @@ public class KarteBean extends InfoModel {
     public List<PatientMemoTransferModel> getMemoTransList() {
         return memoTransList;
     }
-
+    
+    public void setAppoTransList(List<AppointmentTransferModel> list) {
+        appoTransList = list;
+    }
+    
+    public List<AppointmentTransferModel> getAppoTransList() {
+        return appoTransList;
+    }
+    
+    public void setAppointmentList(List<AppointmentModel> list) {
+        appoList = list;
+    }
+    public List<AppointmentModel> getAppointmentList() {
+        return appoList;
+    }
+    //==========================================================================
     
     public KarteBean() {
     }
@@ -226,25 +262,4 @@ public class KarteBean extends InfoModel {
         setPatientModel(patient);
     }
     //-------------------------------------------------------------
-    
-//masuda^
-    @Transient
-    private Date lastDocDate;
-    
-    @JsonDeserialize(contentAs=AppointmentModel.class)
-    @Transient
-    private List<AppointmentModel> appoList;
-    public void setLastDocDate(Date d) {
-        lastDocDate = d;
-    }
-    public Date getLastDocDate() {
-        return lastDocDate;
-    }
-    public void setAppointmentList(List<AppointmentModel> list) {
-        appoList = list;
-    }
-    public List<AppointmentModel> getAppointmentList() {
-        return appoList;
-    }
-//masuda$
 }

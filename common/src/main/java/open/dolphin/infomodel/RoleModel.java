@@ -22,6 +22,7 @@ public class RoleModel extends InfoModel {
     private String role;
     
     @JsonBackReference
+    //@JsonIgnore
     @ManyToOne
     @JoinColumn(name="c_user", nullable=false)
     private UserModel user;

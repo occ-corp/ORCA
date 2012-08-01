@@ -70,16 +70,29 @@ public class  DocumentDelegater extends BusinessDelegater {
                 getConverter().fromJson(entityStr, KarteBean.class);
 
         // PatientMemoTransferModel -> PatientMemoModel
-        List<PatientMemoTransferModel> transList = karte.getMemoTransList();
-        
-        if (transList != null && !transList.isEmpty()) {
+        List<PatientMemoTransferModel> memoTransList = karte.getMemoTransList();
+        if (memoTransList != null && !memoTransList.isEmpty()) {
             List<PatientMemoModel> memoList = new ArrayList<PatientMemoModel>();
-            for (PatientMemoTransferModel pmtm : transList) {
-                PatientMemoModel pmm = pmtm.getPatientMemoModel();
+            for (PatientMemoTransferModel pmtm : memoTransList) {
+                PatientMemoModel pmm = pmtm.getKarteEntryBean();
                 pmm.setKarteBean(karte);
+                memoList.add(pmm);
             }
             karte.setMemoList(memoList);
             karte.setMemoTransList(null);
+        }
+        
+        // AppointmentTransferModel -> AppoimentntModel
+        List<AppointmentTransferModel> appoTransList = karte.getAppoTransList();
+        if (appoTransList != null && !appoTransList.isEmpty()) {
+            List<AppointmentModel> appoList = new ArrayList<AppointmentModel>();
+            for (AppointmentTransferModel atm : appoTransList) {
+                AppointmentModel am = atm.getKarteEntryBean();
+                am.setKarteBean(karte);
+                appoList.add(am);
+            }
+            karte.setAppointmentList(appoList);
+            karte.setAppoTransList(null);
         }
 
         return karte;
