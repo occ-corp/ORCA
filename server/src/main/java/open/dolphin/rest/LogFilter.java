@@ -69,7 +69,7 @@ public class LogFilter implements Filter {
 
         StringBuilder sb = new StringBuilder();
         sb.append("\n");
-        //sb.append(wrapper.getRemoteAddr()).append(" ");
+        sb.append(wrapper.getRemoteAddr()).append(" ");
         sb.append(wrapper.getShortUser()).append(" ");
         sb.append(wrapper.getMethod()).append(" ");
         sb.append(wrapper.getRequestURI());
