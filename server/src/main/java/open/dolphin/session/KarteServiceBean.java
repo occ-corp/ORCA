@@ -736,7 +736,7 @@ public class KarteServiceBean {
         SchemaModel image = em.find(SchemaModel.class, id);
         return image;
     }
-
+/*
     public List<SchemaModel> getS3Images(String fid, int firstResult, int maxResult) {
 
         @SuppressWarnings("unchecked")
@@ -756,7 +756,7 @@ public class KarteServiceBean {
         target.getExtRefModel().setSop(null);
         target.getExtRefModel().setUrl(null);
     }
-
+*/
     /**
      * 傷病名リストを取得する。
      * @param spec 検索仕様

@@ -176,7 +176,7 @@ public class KarteResource extends AbstractResource {
         return json;
     }
 
-/*
+
     @GET
     @Path("iamges/{id}")
     @Produces(MEDIATYPE_JSON_UTF8)
@@ -190,7 +190,7 @@ public class KarteResource extends AbstractResource {
         for (String str : froms) {
             fromList.add(parseDate(str));
         }
-        String[] tos = tos.split(CAMMA);
+        String[] tos = toStr.split(CAMMA);
         for (String str : tos) {
             toList.add(parseDate(str));
         }
@@ -202,7 +202,7 @@ public class KarteResource extends AbstractResource {
         
         return json;
     }
-*/
+
     
     @GET
     @Path("image/{id}")

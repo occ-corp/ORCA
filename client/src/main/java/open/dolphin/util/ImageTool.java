@@ -12,6 +12,8 @@ import javax.imageio.stream.ImageInputStream;
 import javax.swing.ImageIcon;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.ImageEntry;
+import open.dolphin.infomodel.ModelUtils;
+import open.dolphin.infomodel.SchemaModel;
 import open.dolphin.tr.ImageTransferable;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
@@ -82,7 +84,34 @@ public class ImageTool {
         ImageEntry entry = (ImageEntry) prepareImageEntry(buf);
         return entry;
     }
+    
+    /**
+     * シェーマモデルをエントリに変換する。
+     * @param schema シェーマモデル
+     * @param iconSize アイコンのサイズ
+     * @return ImageEntry
+     */
+    public static ImageEntry getImageEntryFromSchema(SchemaModel schema, Dimension iconSize) {
 
+        ImageEntry model = new ImageEntry();
+
+        model.setId(schema.getId());
+        model.setConfirmDate(ModelUtils.getDateTimeAsString(schema.getConfirmed()));  // First?
+        model.setContentType(schema.getExtRefModel().getContentType());
+        model.setTitle(schema.getExtRefModel().getTitle());
+        model.setMedicalRole(schema.getExtRefModel().getMedicalRole());
+
+        byte[] bytes = schema.getJpegByte();
+
+        // Create ImageIcon
+        ImageIcon icon = new ImageIcon(bytes);
+        if (icon != null) {
+            model.setImageIcon(adjustImageSize(icon, iconSize));
+        }
+
+        return model;
+    }
+    
     // DicomObjectからDicomImageEntryを作成
     public static DicomImageEntry getImageEntryFromDicom(DicomObject object) throws IOException {
 

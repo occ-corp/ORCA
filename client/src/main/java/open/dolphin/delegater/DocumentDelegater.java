@@ -432,7 +432,70 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @return Imageリストのリスト
      */
     public List<List<ImageEntry>> getImageList(ImageSearchSpec spec) {
+/*
+        String path = "karte/images/" + String.valueOf(spec.getKarteId());
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
 
+        Date[] froms = spec.getFromDate();
+        Date[] tos = spec.getToDate();
+        
+        int len = froms.length;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(CAMMA);
+            }
+            sb.append(REST_DATE_FRMT.format(froms[i]));
+        }
+        qmap.add("froms", sb.toString());
+        
+        len = tos.length;
+        sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(CAMMA);
+            }
+            sb.append(REST_DATE_FRMT.format(tos[i]));
+        }
+        qmap.add("tos", sb.toString());
+        
+        ClientResponse response = getQueryResource(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return null;
+        }
+
+        TypeReference typeRef = new TypeReference<List<List<SchemaModel>>>(){};
+
+        // 検索結果
+        List<List<SchemaModel>> result = (List<List<SchemaModel>>) 
+                getConverter().fromJsonTypeRef(entityStr, typeRef);
+
+        List<List<ImageEntry>> ret = new ArrayList<List<ImageEntry>>();
+        for (List<SchemaModel> periodList : result) {
+
+            // ImageEntry 用のリスト
+            List<ImageEntry> el = new ArrayList<ImageEntry>();
+            // 抽出期間をイテレートする
+            for (SchemaModel model : periodList) {
+                // シェーマモデルをエントリに変換しリストに加える
+                ImageEntry entry = ImageTool.getImageEntryFromSchema(model, spec.getIconSize());
+                el.add(entry);
+            }
+            // リターンリストへ追加する
+            ret.add(el);
+
+        }
+
+        return ret;
+*/
         return null;
     }
 
