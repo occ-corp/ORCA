@@ -54,6 +54,15 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<DocInfoModel> docInfoList;
 
+    /*
+     * PatientMemoModelやAppointmentModel等のKareteEntryBeanを継承したクラスは
+     * は内部にKarteBeanを含んでいるため、KarteBeanのシリアライズ(=JSON化)に含めると
+     * 無限ループになてしまう。そのため、KarteBeanをシリアライズする際には
+     * 転送用のKarteEntryBeanをシリアライズに含めない、AbstractKarteEntryTransferModel
+     * を継承したクラスを利用する。
+     * PatientMemoModelやAppointmentModelは@JsonIgnoreアノテーションをつけ、
+     * シリアライズから除外する。   masuda
+     */
     @JsonIgnore // bi-directional references
     @Transient
     private List<PatientMemoModel> memoList;
