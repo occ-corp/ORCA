@@ -230,7 +230,7 @@ public class MasudaResource extends AbstractResource {
     @GET
     @Path("moduleSearch/{karteId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getModulesEntitySearch(@PathParam("param") Long karteId,
+    public String getModulesEntitySearch(@PathParam("karteId") Long karteId,
                 @QueryParam("fromDate") String fromDateStr,
                 @QueryParam("toDate") String toDateStr,
                 @QueryParam("entities") String entitiesStr) {
