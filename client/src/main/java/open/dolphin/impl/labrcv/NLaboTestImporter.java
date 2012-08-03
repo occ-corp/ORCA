@@ -326,7 +326,12 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
                 for (NLaboImportSummary summary : modules) {
 
-//masuda^   MMLの場合の処理
+//masuda^           // OpenDolphinに登録されていない場合はスキップする　のつはる診療所　白坂先生のご提案
+                    if (summary.getKarteId() == null) {
+                        summary.setResult(ERROR);
+                        continue;
+                    }
+                    //MMLの場合の処理
                     //PatientModel pm = laboDelegater.putNLaboModule(summary.getModule());
                     PatientModel pm = null;
                     if ("MML".equals(summary.getReportFormat())) {
@@ -493,6 +498,10 @@ public class NLaboTestImporter extends AbstractMainComponent {
                 List<NLaboImportSummary> list = (List<NLaboImportSummary>) evt.getNewValue();
                 boolean enabled = (list != null && list.size() > 0);
                 boolean clearOk = enabled;
+//mauda^    
+                // OpenDolphnに登録されていない患者があってもとりあえずボタンはenableする
+                // のつはる診療所　白坂先生のご提案
+/*
                 if (enabled) {
                     for (NLaboImportSummary sm : list) {
                         if (sm.getKarteId()==null) {
@@ -501,6 +510,8 @@ public class NLaboTestImporter extends AbstractMainComponent {
                         }
                     }
                 }
+*/
+//masuda$
                 view.getAddBtn().setEnabled(enabled);
                 view.getClearBtn().setEnabled(clearOk);
                 updateCount();
