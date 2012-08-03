@@ -57,7 +57,7 @@ public class StampDelegater extends BusinessDelegater {
 
         // resource post
         String path = RES_STAMP_TREE;
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -74,7 +74,7 @@ public class StampDelegater extends BusinessDelegater {
     public List<IStampTreeModel> getTrees(long userPK) {
         
         String path = RES_STAMP_TREE + String.valueOf(userPK);
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -131,7 +131,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP_TREE + "published";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -180,7 +180,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP_TREE + "published";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -210,7 +210,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP_TREE + "published/cancel/";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -226,7 +226,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP_TREE + "published";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -273,7 +273,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP_TREE + "subscribed";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -311,7 +311,7 @@ public class StampDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", sb.toString());
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 
@@ -335,7 +335,7 @@ public class StampDelegater extends BusinessDelegater {
         String json = getConverter().toJson(list);
         String path = RES_STAMP + "list";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -361,7 +361,7 @@ public class StampDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
         String path = RES_STAMP + "id";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -394,7 +394,7 @@ public class StampDelegater extends BusinessDelegater {
         
         String path = RES_STAMP + "id/" +  stampId;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -434,7 +434,7 @@ public class StampDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", sb.toString());
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -463,7 +463,7 @@ public class StampDelegater extends BusinessDelegater {
         
         String path = RES_STAMP + "id/" + stampId;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 
@@ -484,7 +484,7 @@ public class StampDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", fromStrList(ids));
         
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 

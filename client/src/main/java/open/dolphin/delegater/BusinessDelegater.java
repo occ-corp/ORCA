@@ -41,12 +41,12 @@ public class BusinessDelegater {
         DEBUG = (logger.getLevel() == Level.DEBUG);
     }
 
-    protected WebResource.Builder getResource(String path) {
-        return JerseyClient.getInstance().getResource(path);
-    }
+    //protected WebResource.Builder getResource(String path) {
+    //    return JerseyClient.getInstance().getResource(path);
+    //}
     
-    protected WebResource.Builder getQueryResource(String path, MultivaluedMap<String, String> qmap) {
-        return JerseyClient.getInstance().getQueryResource(path, qmap);
+    protected WebResource.Builder getResource(String path, MultivaluedMap<String, String> qmap) {
+        return JerseyClient.getInstance().getResource(path, qmap);
     }
 
     protected void debug(int status, String entity) {

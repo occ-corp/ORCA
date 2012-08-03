@@ -39,7 +39,7 @@ public class LetterDelegater extends BusinessDelegater {
         
         String path = PATH_FOR_LETTER;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -56,7 +56,7 @@ public class LetterDelegater extends BusinessDelegater {
 
         String path = PATH_FOR_LETTER + String.valueOf(letterPk);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -79,7 +79,7 @@ public class LetterDelegater extends BusinessDelegater {
 
         String path = PATH_FOR_LETTER_LIST + String.valueOf(kartePk);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -103,7 +103,7 @@ public class LetterDelegater extends BusinessDelegater {
         
         String path = PATH_FOR_LETTER + String.valueOf(pk);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 

@@ -31,7 +31,7 @@ public final class AppointmentDelegater extends BusinessDelegater {
         String path = "appo/";
         String json = getConverter().toJson(list);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);

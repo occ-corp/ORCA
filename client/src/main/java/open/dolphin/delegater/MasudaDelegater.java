@@ -42,7 +42,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("firstResult", String.valueOf(firstResult));
         qmap.add("maxResults", String.valueOf(maxResults));
         
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -72,7 +72,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "routineMed/" + String.valueOf(id);
         
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -102,7 +102,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "routineMed";
         
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                     .accept(MEDIATYPE_TEXT_UTF8)
                     .delete(ClientResponse.class);
 
@@ -116,7 +116,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(model);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
 
@@ -131,7 +131,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(model);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
 
@@ -145,7 +145,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "discon";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -170,7 +170,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(model);
         
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
 
@@ -183,7 +183,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "discon/" + String.valueOf(model.getId());
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 
@@ -198,7 +198,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(model);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
 
@@ -212,7 +212,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String path = RES_BASE + "usingDrug";
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -237,7 +237,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(model);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                     .type(MEDIATYPE_JSON_UTF8)
                     .post(ClientResponse.class, json);
 
@@ -250,7 +250,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "usingDrug/" + String.valueOf(model.getId());
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                     .accept(MEDIATYPE_TEXT_UTF8)
                     .delete(ClientResponse.class);
 
@@ -264,7 +264,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(model);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                     .type(MEDIATYPE_JSON_UTF8)
                     .put(ClientResponse.class, json);
 
@@ -286,7 +286,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
         qmap.add("entities", fromStrList(entities));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -318,7 +318,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "lastPvt/" + ptId;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -347,7 +347,7 @@ public class MasudaDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", fromLongList(docPkList));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -374,7 +374,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("fromDocPk", String.valueOf(fromDocPk));
         qmap.add("maxResults", String.valueOf(maxResults));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .get(ClientResponse.class);
 
@@ -393,7 +393,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("karteId", String.valueOf(karteId));
         qmap.add("text", text);
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -422,7 +422,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("maxResult", String.valueOf(maxResult));
         qmap.add("pcOnly", String.valueOf(progressCourseOnly));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -448,7 +448,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
         
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
         
@@ -476,7 +476,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
         qmap.add("yoyuu", String.valueOf(yoyuu));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
         
@@ -499,7 +499,7 @@ public class MasudaDelegater extends BusinessDelegater {
     public List<InFacilityLaboItem> getInFacilityLaboItemList() {
         
         String path = RES_BASE + "inFacilityLabo/list";
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
         
@@ -524,7 +524,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(list);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
 
@@ -541,7 +541,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(list);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
         
@@ -564,7 +564,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("fromId", String.valueOf(fromId));
         qmap.add("maxResults", String.valueOf(maxResults));
         
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .get(ClientResponse.class);
         
@@ -589,7 +589,7 @@ public class MasudaDelegater extends BusinessDelegater {
             qmap.add("srycds", fromStrList(srycds));
         }
         
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
         
@@ -617,7 +617,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
         qmap.add("lastOnly", String.valueOf(lastOnly));
         
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
         

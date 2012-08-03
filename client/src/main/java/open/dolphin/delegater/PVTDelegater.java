@@ -56,7 +56,7 @@ public class PVTDelegater extends BusinessDelegater {
 
         // resource post
         String path = RES_PVT;
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
 
@@ -73,7 +73,7 @@ public class PVTDelegater extends BusinessDelegater {
 
         String path = RES_PVT + String.valueOf(id);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 
@@ -93,7 +93,7 @@ public class PVTDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(msg);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
 
@@ -112,7 +112,7 @@ public class PVTDelegater extends BusinessDelegater {
         sb.append("pvtListModel");
         String path = sb.toString();
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -147,7 +147,7 @@ public class PVTDelegater extends BusinessDelegater {
         sb.append(String.valueOf(nextId));
         String path = sb.toString();
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 

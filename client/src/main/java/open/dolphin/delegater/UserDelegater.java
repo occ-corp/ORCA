@@ -60,7 +60,7 @@ public class UserDelegater extends BusinessDelegater {
         sb.append(userPK);
         String path = sb.toString();
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                    .accept(MEDIATYPE_JSON_UTF8)
                    .get(ClientResponse.class);
 
@@ -83,7 +83,7 @@ public class UserDelegater extends BusinessDelegater {
 
         String path = RES_USER;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                    .accept(MEDIATYPE_JSON_UTF8)
                    .get(ClientResponse.class);
 
@@ -108,7 +108,7 @@ public class UserDelegater extends BusinessDelegater {
         String path = RES_USER;
         String json = getConverter().toJson(userModel);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -128,7 +128,7 @@ public class UserDelegater extends BusinessDelegater {
         String path = RES_USER;
         String json = getConverter().toJson(userModel);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)   
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -147,7 +147,7 @@ public class UserDelegater extends BusinessDelegater {
 
         String path = RES_USER + uid;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 
@@ -164,7 +164,7 @@ public class UserDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(userModel);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);

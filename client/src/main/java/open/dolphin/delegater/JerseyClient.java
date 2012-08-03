@@ -71,15 +71,17 @@ public class JerseyClient {
 //masuda$
     }
 
-    public WebResource.Builder getResource(String path) {
-        return webResource.path(path).header(USER_NAME, userName).header(PASSWORD, password);
-    }
+    //public WebResource.Builder getResource(String path) {
+    //    return webResource.path(path).header(USER_NAME, userName).header(PASSWORD, password);
+    //}
     
 //masuda^
     // QueryParam付のWebResource
-    public WebResource.Builder getQueryResource(String path, MultivaluedMap<String, String> qmap) {
-        webResource.path(path).queryParams(qmap).header(USER_NAME, userName).header(PASSWORD, password).toString();
-        return webResource.path(path).queryParams(qmap).header(USER_NAME, userName).header(PASSWORD, password);
+    public WebResource.Builder getResource(String path, MultivaluedMap<String, String> qmap) {
+        if (qmap != null) {
+            return webResource.path(path).queryParams(qmap).header(USER_NAME, userName).header(PASSWORD, password);
+        }
+        return webResource.path(path).header(USER_NAME, userName).header(PASSWORD, password);
     }
     
     // pvt同期用のクライアントを別に用意する

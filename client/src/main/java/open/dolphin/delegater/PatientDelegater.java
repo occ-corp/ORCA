@@ -50,7 +50,7 @@ public class  PatientDelegater extends BusinessDelegater {
 
         String path = BASE_RESOURCE;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -71,7 +71,7 @@ public class  PatientDelegater extends BusinessDelegater {
         
         String path = ID_RESOURCE;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -123,7 +123,7 @@ public class  PatientDelegater extends BusinessDelegater {
 
         String path = sb.toString();
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -158,7 +158,7 @@ public class  PatientDelegater extends BusinessDelegater {
 
         String path = BASE_RESOURCE;
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);

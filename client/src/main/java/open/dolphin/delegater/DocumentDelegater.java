@@ -56,7 +56,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap= new MultivaluedMapImpl();
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -115,7 +115,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         String json = getConverter().toJson(karteModel);
 
         String path = "karte/document";
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -139,7 +139,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", fromLongList(ids));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -232,7 +232,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         qmap.add("fromDate", REST_DATE_FRMT.format(spec.getFromDate()));
         qmap.add("includeModified", String.valueOf(spec.isIncludeModifid()));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -256,7 +256,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         String path = "odletter/list/" + String.valueOf(spec.getKarteId());
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -315,7 +315,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/document/" + String.valueOf(pk);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .delete(ClientResponse.class);
 
@@ -334,7 +334,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/document/" + String.valueOf(docInfo.getDocPk());
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_TEXT_UTF8)
                 .put(ClientResponse.class, docInfo.getTitle());
@@ -382,7 +382,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         qmap.add("tos", sb.toString());
         qmap.add("entity", spec.getEntity());
         
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -416,7 +416,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/image/" + String.valueOf(id);
  
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -523,7 +523,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(list);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -544,7 +544,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(list);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
 
@@ -561,7 +561,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", fromLongList(ids));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .delete(ClientResponse.class);
 
         int status = response.getStatus();
@@ -582,7 +582,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
         qmap.add("activeOnly", String.valueOf(activeOnly));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -608,7 +608,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(observations);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -628,7 +628,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", fromLongList(ids));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .delete(ClientResponse.class);
 
         int status = response.getStatus();
@@ -645,7 +645,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(pm);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
@@ -687,7 +687,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         }
         qmap.add("tos", sb.toString());
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -716,7 +716,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         sb.append(state);
         String path = sb.toString();
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                     .accept(MEDIATYPE_TEXT_UTF8)
                     .put(ClientResponse.class);
 

@@ -972,6 +972,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     
     private class KarteViewerComparator implements Comparator {
 
+        @Override
         public int compare(Object o1, Object o2) {
             KarteViewer k1 = (KarteViewer) o1;
             KarteViewer k2 = (KarteViewer) o2;

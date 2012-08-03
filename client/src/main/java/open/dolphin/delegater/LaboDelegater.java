@@ -38,7 +38,7 @@ public class LaboDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", fromStrList(idList));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -68,7 +68,7 @@ public class LaboDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(value);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
@@ -101,7 +101,7 @@ public class LaboDelegater extends BusinessDelegater {
         qmap.add("firstResult", String.valueOf(firstResult));
         qmap.add("maxResult", String.valueOf(maxResult));
 
-        ClientResponse response = getQueryResource(path, qmap)
+        ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
@@ -127,7 +127,7 @@ public class LaboDelegater extends BusinessDelegater {
 
         String json = getConverter().toJson(value);
 
-        ClientResponse response = getResource(path)
+        ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .type(MEDIATYPE_JSON_UTF8)
                 .post(ClientResponse.class, json);
