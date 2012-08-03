@@ -1,9 +1,17 @@
 package open.dolphin.impl.server;
 
 import java.io.*;
-import java.net.*;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.ByteBuffer;
+import java.nio.channels.SelectionKey;
+import java.nio.channels.Selector;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
 import java.text.DateFormat;
 import java.util.Date;
+import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -36,8 +44,6 @@ public final class PVTClientServer implements PVTServer {
     
     // バインドアドレス
     private String bindAddress;
-    // ServerSocket
-    private ServerSocket serverSocket;
     // ServerSocketのループスレッド
     private Thread serverThread;
     // PVT登録処理のSingle Thread Executor
@@ -153,11 +159,9 @@ public final class PVTClientServer implements PVTServer {
                 address = new InetSocketAddress(InetAddress.getLocalHost(), port);
             }
 
-            serverSocket = new ServerSocket();
-            serverSocket.bind(address);
             ClientContext.getPvtLogger().info("PVT Server is binded " + address + " with encoding: " + encoding);
 
-            serverThread = new Thread(new ServerThread(), "PVT server socket");
+            serverThread = new Thread(new ServerThread(address), "PVT server socket");
             serverThread.start();
 
         } catch (IOException e) {
@@ -170,17 +174,6 @@ public final class PVTClientServer implements PVTServer {
      * 受付受信サーバをストップする。
      */
     public void stopService() {
-
-        // SocketExceptionを起こしてserverThreadを中止させる
-        if (serverSocket != null) {
-            try {
-                serverSocket.close();
-                serverSocket = null;
-            } catch (IOException e) {
-                e.printStackTrace(System.err);
-                ClientContext.getPvtLogger().warn(e);
-            }
-        }
 
         // ServerSocketのThread破棄する
         try {
@@ -206,115 +199,133 @@ public final class PVTClientServer implements PVTServer {
         }
         exec = null;
     }
-
+    
     private final class ServerThread implements Runnable {
+        
+        private InetSocketAddress address;
+        private ServerSocketChannel ssc = null;
+        private Selector selector = null;
+        private boolean isRunning = false;
+        private ServerThread(InetSocketAddress address) {
+            this.address = address;
+            initialize();
+        }
+        
+        private void initialize() {
+            try {
+                ssc = ServerSocketChannel.open();
+                ssc.configureBlocking(false);
+                ssc.socket().bind(address);
+                selector = SelectorProvider.provider().openSelector();
+                ssc.register(selector, SelectionKey.OP_ACCEPT);
+            } catch (IOException ex) {
+            }
+        }
+        
+        private void setRunning(boolean b) {
+            isRunning = b;
+        }
+        
+        private boolean isRunning() {
+            return isRunning;
+        }
+        
+        private void dispose() throws IOException {
+            isRunning = false;
+            ssc.close();
+        }
 
         @Override
         public void run() {
 
-            try {
-                while (true) {
-                    Socket socket = serverSocket.accept();
-                    SocketReadTask task = new SocketReadTask(socket);
-                    exec.submit(task);
+            setRunning(true);
+
+            while (isRunning()) {
+                try {
+                    if (selector.select() > 0) {
+                        for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
+                            SelectionKey sk = itr.next();
+                            itr.remove();
+                            // The key contains the channel ready for accept
+                            ServerSocketChannel ready = (ServerSocketChannel) sk.channel();
+                            // accept the incoming socket
+                            SocketChannel channel = ready.accept();
+                            // serve the client in a separate thread
+                            exec.submit(new SocketReadTask(channel));
+                        }
+                    }
+                } catch (IOException ex) {
+                    break;
                 }
-            } catch (SocketException ex) {
-                // serverSocketが閉じられるとSocketExceptionが起こりループから脱出できる
-                ClientContext.getPvtLogger().info("PVTServer stopped");
-            } catch (InterruptedIOException ex) {
-                ex.printStackTrace(System.err);
-                ClientContext.getPvtLogger().info("PVTServer stopped");
-            } catch (IOException ex) {
-                ex.printStackTrace(System.err);
-                ClientContext.getPvtLogger().warn("Exception while listening for connections:" + ex);
             }
         }
     }
 
     private final class SocketReadTask implements Runnable {
 
-        private Socket socket;
+        private SocketChannel channel;
 
-        private SocketReadTask(Socket socket) {
-            this.socket = socket;
+        private SocketReadTask(SocketChannel channel) {
+            this.channel = channel;
         }
 
-        private void printInfo() {
-            String addr = socket.getInetAddress().getHostAddress();
+        private void printInfo() throws IOException {
+            String addr = channel.getRemoteAddress().toString();
             String time = DateFormat.getDateTimeInstance().format(new Date());
             ClientContext.getPvtLogger().info("Connected from " + addr + " at " + time);
         }
 
         @Override
         public void run() {
+            ByteBuffer buffer = ByteBuffer.allocate(16384);
+            ByteArrayOutputStream baos = new ByteArrayOutputStream();
+            BufferedOutputStream bos = new BufferedOutputStream(baos);
 
             try {
                 printInfo();
 
-                BufferedInputStream reader = new BufferedInputStream(new DataInputStream(socket.getInputStream()));
-                BufferedOutputStream writer = new BufferedOutputStream(new DataOutputStream(socket.getOutputStream()));
-
-                ByteArrayOutputStream bo = new ByteArrayOutputStream();
-                BufferedOutputStream buf = new BufferedOutputStream(bo);
-
-                byte[] buffer = new byte[16384];
-
                 while (true) {
-
-                    int readLen = reader.read(buffer);
-
+                    int readLen = channel.read(buffer);
                     if (readLen == -1) {
                         if (DEBUG) {
                             ClientContext.getPvtLogger().debug("EOF");
                         }
                         break;
                     }
+                    int pos = buffer.position();
+                    byte b = buffer.get(pos - 1);
 
-                    if (buffer[readLen - 1] == EOT) {
-                        buf.write(buffer, 0, readLen - 1);
-                        buf.flush();
-                        String recieved = bo.toString(encoding);
-                        int len = recieved.length();
-                        bo.close();
-                        buf.close();
+                    if (b == EOT) {
+                        buffer.position(pos - 1);
+                        buffer.flip();
+                        bos.write(buffer.array());
+                        bos.flush();
+                        String received = baos.toString(encoding);
                         if (DEBUG) {
-                            ClientContext.getPvtLogger().info("Recieved EOT length = " + len + " bytes");
-                            ClientContext.getPvtLogger().debug(recieved);
+                            ClientContext.getPvtLogger().info("Recieved EOT length = " + received.length() + " bytes");
+                            ClientContext.getPvtLogger().debug(received);
                         }
-
                         // add queue
-                        processPvt(recieved);
-
+                        processPvt(received);
                         // Reply ACK
                         if (DEBUG) {
                             ClientContext.getPvtLogger().debug("return ACK");
                         }
-                        writer.write(ACK);
-                        writer.flush();
-
+                        channel.write(ByteBuffer.wrap(new byte[]{ACK}));
                     } else {
-                        buf.write(buffer, 0, readLen);
+                        buffer.flip();
+                        bos.write(buffer.array());
                     }
                 }
-
-                reader.close();
-                writer.close();
-                socket.close();
-                socket = null;
-
-            } catch (IOException e) {
-                ClientContext.getPvtLogger().warn("IOException while reading streams");
-                ClientContext.getPvtLogger().warn("Exception details:" + e);
-
+            } catch (IOException ex) {
+                ex.printStackTrace(System.err);
             } finally {
-                if (socket != null) {
-                    try {
-                        socket.close();
-                        socket = null;
-                    } catch (IOException e2) {
-                        ClientContext.getPvtLogger().warn("Exception while closing socket conenction after reading streams");
-                        ClientContext.getPvtLogger().warn("Exception details:" + e2);
-                    }
+                try {
+                    baos.close();
+                    bos.close();
+                    channel.finishConnect();
+                } catch (IOException ex) {
+                    ex.printStackTrace(System.err);
                 }
             }
         }
