@@ -1,16 +1,14 @@
 package open.dolphin.impl.server;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.nio.ByteBuffer;
+import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.ServerSocketChannel;
-import java.nio.channels.SocketChannel;
-import java.nio.channels.spi.SelectorProvider;
-import java.text.DateFormat;
-import java.util.Date;
 import java.util.Iterator;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,7 +42,7 @@ public final class PVTClientServer implements PVTServer {
     
     // バインドアドレス
     private String bindAddress;
-    // ServerSocketのループスレッド
+    // ServerSocketのスレッド nio!
     private Thread serverThread;
     // PVT登録処理のSingle Thread Executor
     private ExecutorService exec;
@@ -199,13 +197,13 @@ public final class PVTClientServer implements PVTServer {
         }
         exec = null;
     }
-    
+
     private final class ServerThread implements Runnable {
         
         private InetSocketAddress address;
         private ServerSocketChannel ssc = null;
         private Selector selector = null;
-        private boolean isRunning = false;
+        
         private ServerThread(InetSocketAddress address) {
             this.address = address;
             initialize();
@@ -213,136 +211,77 @@ public final class PVTClientServer implements PVTServer {
         
         private void initialize() {
             try {
+                // ソケットチャネルを生成・設定
                 ssc = ServerSocketChannel.open();
-                ssc.configureBlocking(false);
+                ssc.socket().setReuseAddress(true);
                 ssc.socket().bind(address);
-                selector = SelectorProvider.provider().openSelector();
-                ssc.register(selector, SelectionKey.OP_ACCEPT);
+                // ノンブロッキングモードに設定
+                ssc.configureBlocking(false);
+                // セレクタの生成
+                selector = Selector.open();
+                // ソケットチャネルをセレクタに登録
+                ssc.register(selector, SelectionKey.OP_ACCEPT, new PvtClaimAcceptHandler(PVTClientServer.this));
             } catch (IOException ex) {
             }
         }
-        
-        private void setRunning(boolean b) {
-            isRunning = b;
-        }
-        
-        private boolean isRunning() {
-            return isRunning;
-        }
-        
-        private void dispose() throws IOException {
-            isRunning = false;
-            ssc.close();
-        }
 
         @Override
         public void run() {
-
-            setRunning(true);
-
-            while (isRunning()) {
-                try {
-                    if (selector.select() > 0) {
-                        for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
-                            SelectionKey sk = itr.next();
-                            itr.remove();
-                            // The key contains the channel ready for accept
-                            ServerSocketChannel ready = (ServerSocketChannel) sk.channel();
-                            // accept the incoming socket
-                            SocketChannel channel = ready.accept();
-                            // serve the client in a separate thread
-                            exec.submit(new SocketReadTask(channel));
-                        }
-                    }
-                } catch (IOException ex) {
-                    break;
-                }
-            }
-        }
-    }
-
-    private final class SocketReadTask implements Runnable {
-
-        private SocketChannel channel;
-
-        private SocketReadTask(SocketChannel channel) {
-            this.channel = channel;
-        }
-
-        private void printInfo() throws IOException {
-            String addr = channel.getRemoteAddress().toString();
-            String time = DateFormat.getDateTimeInstance().format(new Date());
-            ClientContext.getPvtLogger().info("Connected from " + addr + " at " + time);
-        }
-
-        @Override
-        public void run() {
-            ByteBuffer buffer = ByteBuffer.allocate(16384);
-            ByteArrayOutputStream baos = new ByteArrayOutputStream();
-            BufferedOutputStream bos = new BufferedOutputStream(baos);
 
             try {
-                printInfo();
-
-                while (true) {
-                    int readLen = channel.read(buffer);
-                    if (readLen == -1) {
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().debug("EOF");
-                        }
-                        break;
-                    }
-                    int pos = buffer.position();
-                    byte b = buffer.get(pos - 1);
-
-                    if (b == EOT) {
-                        buffer.position(pos - 1);
-                        buffer.flip();
-                        bos.write(buffer.array());
-                        bos.flush();
-                        String received = baos.toString(encoding);
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().info("Recieved EOT length = " + received.length() + " bytes");
-                            ClientContext.getPvtLogger().debug(received);
-                        }
-                        // add queue
-                        processPvt(received);
-                        // Reply ACK
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().debug("return ACK");
-                        }
-                        channel.write(ByteBuffer.wrap(new byte[]{ACK}));
-                    } else {
-                        buffer.flip();
-                        bos.write(buffer.array());
+                while (selector.select() > 0) {
+                    for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
+                        SelectionKey key = itr.next();
+                        itr.remove();
+                        // アタッチしたオブジェクトに処理を委譲
+                        Handler handler = (Handler) key.attachment();
+                        handler.handle(key);
                     }
                 }
+            } catch (ClosedChannelException ex) {
+                ClientContext.getPvtLogger().warn("ソケットがクローズしています:" + ex);
             } catch (IOException ex) {
-                ex.printStackTrace(System.err);
+                ClientContext.getPvtLogger().warn("通信エラーが発生しました" + ex);
             } finally {
                 try {
-                    baos.close();
-                    bos.close();
-                    channel.finishConnect();
+                    for (SelectionKey key : selector.keys()) {
+                        key.channel().close();
+                    }
                 } catch (IOException ex) {
                     ex.printStackTrace(System.err);
                 }
             }
         }
     }
+    
+    
+    public void putPvt(String pvtXml) {
+        PutPvtTask task = new PutPvtTask(pvtXml);
+        exec.submit(task);
+    }
+        
+    private final class PutPvtTask implements Runnable {
 
-    private void processPvt(final String pvtXml) {
+        private String pvtXml;
 
-        BufferedReader r = new BufferedReader(new StringReader(pvtXml));
-        PVTBuilder builder = new PVTBuilder();
-        builder.parse(r);
-        PatientVisitModel model = builder.getProduct();
+        private PutPvtTask(String xml) {
+            pvtXml = xml;
+        }
 
-        //FEV-70に患者情報を送る
-        SendPatientInfoToFEV.send(model);
-        // シングルトン化
-        PVTDelegater pdl = PVTDelegater.getInstance();
+        @Override
+        public void run() {
+            
+            BufferedReader r = new BufferedReader(new StringReader(pvtXml));
+            PVTBuilder builder = new PVTBuilder();
+            builder.parse(r);
+            PatientVisitModel model = builder.getProduct();
 
-        pdl.addPvt(model);
+            //FEV-70に患者情報を送る
+            SendPatientInfoToFEV.send(model);
+            // シングルトン化
+            PVTDelegater pdl = PVTDelegater.getInstance();
+            
+            pdl.addPvt(model);
+        }
     }
 }
