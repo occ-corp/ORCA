@@ -3,7 +3,7 @@ package open.dolphin.impl.claim;
 import open.dolphin.client.ClaimMessageEvent;
 
 /**
- *
+ * ClaimException
  * @author masuda, Masuda Naika
  */
 public class ClaimException extends Exception {
