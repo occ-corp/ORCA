@@ -277,7 +277,7 @@ public final class PVTClientServer implements PVTServer {
             PatientVisitModel model = builder.getProduct();
 
             //FEV-70に患者情報を送る
-            SendPatientInfoToFEV.send(model);
+            SendPatientInfoToFEV.getInstance().send(model);
             // シングルトン化
             PVTDelegater pdl = PVTDelegater.getInstance();
             

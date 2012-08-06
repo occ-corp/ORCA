@@ -14,16 +14,7 @@ public class ClaimMessageEvent extends java.util.EventObject {
     private String instance;
     private int number;
     private String confirmDate;
-    
-//masuda^
-    private int errorCode;
-    public void setErrorCode(int err){
-        errorCode = err;
-    }
-    public int getErrorCode() {
-        return errorCode;
-    }
-//masuda$
+
     
     /** Creates new ClaimEvent */
     public ClaimMessageEvent(Object source) {

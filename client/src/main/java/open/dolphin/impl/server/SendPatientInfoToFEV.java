@@ -1,10 +1,6 @@
 package open.dolphin.impl.server;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.OutputStreamWriter;
-import javax.swing.SwingWorker;
+import java.io.*;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
@@ -17,44 +13,52 @@ import open.dolphin.setting.MiscSettingPanel;
  * @author masuda, Masuda Naika
  */
 public class SendPatientInfoToFEV {
+    
+    private static SendPatientInfoToFEV instance;
+    
+    static {
+        instance = new SendPatientInfoToFEV();
+    }
+    
+    private SendPatientInfoToFEV() {
+    }
+    
+    public static SendPatientInfoToFEV getInstance() {
+        return instance;
+    }
 
-    public static void send(final PatientVisitModel model) {
+    public void send(final PatientVisitModel model) {
 
         final boolean sendToFEV = Project.getBoolean(MiscSettingPanel.SEND_PATIENT_INFO, MiscSettingPanel.DEFAULT_SENDPATIENTINFO);
         if (!sendToFEV) {
             return;
         }
 
-        SwingWorker worker = new SwingWorker() {
-
-            @Override
-            protected Object doInBackground() throws Exception {
-
-                MasudaDelegater del = MasudaDelegater.getInstance();
-                PatientVisitModel pvt = del.getLastPvtInThisMonth(model);
-                // 今月受診がないなら送信
-                if (pvt == null) {
-                    makeFile(model);
-                    return null;
-                }
-                // 名前・誕生日・性別が変わっていたら送信
-                PatientModel oldModel = pvt.getPatientModel();
-                String oldBD = oldModel.getBirthday();
-                String oldName = oldModel.getFullName();
-                String oldGender = oldModel.getGenderDesc();
-                String newBD = model.getPatientBirthday();
-                String newName = model.getPatientName();
-                String newGender = model.getPatientGenderDesc();
-                if (!oldBD.equals(newBD) || !oldName.equals(newName) || !oldGender.equals(newGender)) {
-                    makeFile(model);
-                }
-                return null;
+        try {
+            MasudaDelegater del = MasudaDelegater.getInstance();
+            PatientVisitModel pvt = del.getLastPvtInThisMonth(model);
+            // 今月受診がないなら送信
+            if (pvt == null) {
+                makeFile(model);
+                return;
             }
-        };
-        worker.execute();
+            // 名前・誕生日・性別が変わっていたら送信
+            PatientModel oldModel = pvt.getPatientModel();
+            String oldBD = oldModel.getBirthday();
+            String oldName = oldModel.getFullName();
+            String oldGender = oldModel.getGenderDesc();
+            String newBD = model.getPatientBirthday();
+            String newName = model.getPatientName();
+            String newGender = model.getPatientGenderDesc();
+            if (!oldBD.equals(newBD) || !oldName.equals(newName) || !oldGender.equals(newGender)) {
+                makeFile(model);
+            }
+        } catch (FileNotFoundException ex) {
+        } catch (IOException ex) {
+        }
     }
 
-    private static void makeFile(PatientVisitModel pvt) throws Exception {
+    private void makeFile(PatientVisitModel pvt) throws FileNotFoundException, IOException{
 
         String sharePath = Project.getString(MiscSettingPanel.FEV_SHAREPATH, MiscSettingPanel.DEFAULT_SHAREPATH);
         if (sharePath == null) {
