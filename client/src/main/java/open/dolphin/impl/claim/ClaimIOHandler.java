@@ -1,6 +1,7 @@
 package open.dolphin.impl.claim;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.nio.ByteBuffer;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
@@ -20,11 +21,21 @@ public class ClaimIOHandler {
     private SendClaimImpl context;
     private ClaimMessageEvent evt;
     private boolean noError;
-
+    private ByteBuffer writeBuffer;
     
     public ClaimIOHandler(SendClaimImpl context, ClaimMessageEvent evt) {
         this.context = context;
         this.evt = evt;
+
+        try {
+            byte[] bytes = evt.getClaimInsutance().getBytes(context.getEncoding());
+            writeBuffer = ByteBuffer.allocate(bytes.length + 1);
+            writeBuffer.put(bytes);
+            writeBuffer.put((byte) EOT);
+            writeBuffer.flip();
+        } catch (UnsupportedEncodingException ex) {
+            ex.printStackTrace(System.err);
+        }
     }
     
     public ClaimMessageEvent getClaimEvent() {
@@ -70,13 +81,10 @@ public class ClaimIOHandler {
         SocketChannel channel = (SocketChannel) key.channel();
 
         try {
-            byte[] bytes = evt.getClaimInsutance().getBytes(context.getEncoding());
-            ByteBuffer buffer = ByteBuffer.allocate(bytes.length + 1);
-            buffer.put(bytes);
-            buffer.put((byte) EOT);
-            buffer.flip();
-            channel.write(buffer);
-            key.interestOps(SelectionKey.OP_READ);
+            channel.write(writeBuffer);
+            if (writeBuffer.remaining() == 0) {
+                key.interestOps(SelectionKey.OP_READ);
+            }
         } catch (IOException ex) {
             throw new ClaimException(ClaimException.ERROR_CODE.IO_ERROR, evt);
         }

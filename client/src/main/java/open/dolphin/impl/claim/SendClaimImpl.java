@@ -8,9 +8,6 @@ import java.nio.channels.SocketChannel;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import javax.swing.JOptionPane;
 import open.dolphin.client.ClaimMessageEvent;
 import open.dolphin.client.ClaimMessageListener;
@@ -43,7 +40,8 @@ public class SendClaimImpl implements ClaimMessageListener {
     private Selector selector;
     private List<ClaimMessageEvent> queue;
     private Logger logger;
-    private ExecutorService exec;
+    private Thread thread;
+
 
     /**
      * Creates new ClaimQue
@@ -84,7 +82,6 @@ public class SendClaimImpl implements ClaimMessageListener {
 
         address = new InetSocketAddress(getHost(), getPort());
         queue = new LinkedList<ClaimMessageEvent>();
-        exec = Executors.newSingleThreadExecutor();
 
         try {
             // セレクタの生成
@@ -92,6 +89,9 @@ public class SendClaimImpl implements ClaimMessageListener {
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
         }
+        
+        thread = new Thread(new SendQueueTask(), "Claim send thread");
+        thread.start();
 
         logger.info("SendClaim started with = host = " + getHost() + " port = " + getPort());
     }
@@ -106,7 +106,7 @@ public class SendClaimImpl implements ClaimMessageListener {
         if (queue != null && !queue.isEmpty()) {
             int option = alertDialog(ClaimException.ERROR_CODE.QUEUE_NOT_EMPTY, null);
             if (option == 1) {
-                exec.submit(new QueueSendTask());
+                sendQueue();
             }
         }
 
@@ -117,8 +117,8 @@ public class SendClaimImpl implements ClaimMessageListener {
         } catch (IOException ex) {
             ex.printStackTrace(System.err);
         }
-        
-        shutdownExecutor();
+        thread.interrupt();
+
     }
 
     @Override
@@ -157,22 +157,9 @@ public class SendClaimImpl implements ClaimMessageListener {
     @Override
     public void claimMessageEvent(ClaimMessageEvent e) {
         queue.add(e);
-        exec.submit(new QueueSendTask());
+        sendQueue();
     }
-    
-    private void shutdownExecutor() {
 
-        try {
-            exec.shutdown();
-            if (!exec.awaitTermination(5, TimeUnit.SECONDS)) {
-                exec.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            exec.shutdownNow();
-        } catch (NullPointerException ex) {
-        }
-        exec = null;
-    }
     
     /**
      * Queue内の CLAIM message をログへ出力する。
@@ -288,22 +275,13 @@ public class SendClaimImpl implements ClaimMessageListener {
         }
         return option;
     }
-
-    private class QueueSendTask implements Runnable {
+    
+    private class SendQueueTask implements Runnable {
 
         @Override
         public void run() {
-
             try {
-                boolean isRunning = true;
-                for (ClaimMessageEvent evt : queue) {
-                    SocketChannel channel = SocketChannel.open();
-                    channel.configureBlocking(false);
-                    ClaimIOHandler handler = new ClaimIOHandler(SendClaimImpl.this, evt);
-                    channel.register(selector, SelectionKey.OP_CONNECT, handler);
-                    channel.connect(address);
-                }
-                while (isRunning && selector.select() > 0) {
+                while (selector.select() > 0) {
                     for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
                         SelectionKey key = itr.next();
                         itr.remove();
@@ -311,14 +289,12 @@ public class SendClaimImpl implements ClaimMessageListener {
                         try {
                             handler.handle(key);
                         } catch (ClaimException ex) {
-                            isRunning = false;
                             processError(ex);
                             break;
                         }
                         if (handler.isNoError()) {
                             ClaimMessageEvent evt = handler.getClaimEvent();
                             queue.remove(evt);
-                            isRunning = false;
                         }
                     }
                 }
@@ -326,6 +302,22 @@ public class SendClaimImpl implements ClaimMessageListener {
                 logger.warn("通信エラーが発生しました" + ex);
             } finally {
                 closeAllChannel();
+            }
+        }
+    }
+
+    private void sendQueue() {
+
+        for (ClaimMessageEvent evt : queue) {
+            try {
+                SocketChannel channel = SocketChannel.open();
+                channel.configureBlocking(false);
+                ClaimIOHandler handler = new ClaimIOHandler(SendClaimImpl.this, evt);
+                channel.register(selector, SelectionKey.OP_CONNECT, handler);
+                channel.connect(address);
+                selector.wakeup();
+            } catch (IOException ex) {
+                ex.printStackTrace(System.err);
             }
         }
     }
