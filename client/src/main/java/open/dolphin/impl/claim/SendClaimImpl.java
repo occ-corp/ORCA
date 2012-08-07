@@ -236,6 +236,8 @@ public class SendClaimImpl implements ClaimMessageListener {
                 }
             } catch (IOException ex) {
                 logger.warn("通信エラーが発生しました" + ex);
+            } catch (ClosedSelectorException ex) {
+                
             } finally {
                 closeAllChannel();
             }
