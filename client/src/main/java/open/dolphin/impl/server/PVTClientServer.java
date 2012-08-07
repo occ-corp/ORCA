@@ -40,7 +40,9 @@ public final class PVTClientServer implements PVTServer {
     // バインドアドレス
     private String bindAddress;
     // ServerSocketのスレッド nio!
-    private Thread serverThread;
+    private Thread thread;
+    private ServerThread serverThread;
+    
     // PVT登録処理のSingle Thread Executor
     private ExecutorService exec;
     
@@ -156,8 +158,9 @@ public final class PVTClientServer implements PVTServer {
 
             ClientContext.getPvtLogger().info("PVT Server is binded " + address + " with encoding: " + encoding);
 
-            serverThread = new Thread(new ServerThread(address), "PVT server socket");
-            serverThread.start();
+            serverThread = new ServerThread(address);
+            thread = new Thread(serverThread, "PVT server socket");
+            thread.start();
 
         } catch (IOException e) {
             e.printStackTrace(System.err);
@@ -170,10 +173,12 @@ public final class PVTClientServer implements PVTServer {
      */
     public void stopService() {
 
+        // ServerThreadを中止させる
+        serverThread.stop();
         // ServerSocketのThread破棄する
         try {
-            serverThread.interrupt();
-            serverThread = null;
+            thread.interrupt();
+            thread = null;
         } catch (Exception e) {
         }
 
@@ -200,13 +205,20 @@ public final class PVTClientServer implements PVTServer {
         private InetSocketAddress address;
         private ServerSocketChannel ssc = null;
         private Selector selector = null;
+        private boolean isRunning;
         
         private ServerThread(InetSocketAddress address) {
             this.address = address;
             initialize();
         }
+
+        private void stop() {
+            isRunning = false;
+            selector.wakeup();
+        }
         
         private void initialize() {
+            
             try {
                 // ソケットチャネルを生成・設定
                 ssc = ServerSocketChannel.open();
@@ -224,14 +236,16 @@ public final class PVTClientServer implements PVTServer {
 
         @Override
         public void run() {
-
+            
+            isRunning = true;
+            
             try {
-                while (selector.select() > 0) {
+                while (isRunning && selector.select() > 0) {
                     for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
                         SelectionKey key = itr.next();
                         itr.remove();
                         // アタッチしたオブジェクトに処理を委譲
-                        Handler handler = (Handler) key.attachment();
+                        IHandler handler = (IHandler) key.attachment();
                         handler.handle(key);
                     }
                 }
@@ -250,7 +264,6 @@ public final class PVTClientServer implements PVTServer {
             }
         }
     }
-    
     
     // PvtClaimIOHanlderから呼ばれる
     public void putPvt(String pvtXml) {

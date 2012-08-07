@@ -16,7 +16,7 @@ import open.dolphin.client.ClientContext;
  * @author masuda, Masuda Naika
  * http://itpro.nikkeibp.co.jp/article/COLUMN/20060515/237871/
  */
-public class PvtClaimAcceptHandler implements Handler {
+public class PvtClaimAcceptHandler implements IHandler {
 
     private PVTClientServer context;
 

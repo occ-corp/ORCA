@@ -15,7 +15,7 @@ import open.dolphin.client.ClientContext;
  * @author masuda, Masuda Naika
  * http://itpro.nikkeibp.co.jp/article/COLUMN/20060515/237871/
  */
-public class PvtClaimIOHandler implements Handler {
+public class PvtClaimIOHandler implements IHandler {
     
     private static final int EOT = 0x04;
     private static final int ACK = 0x06;
