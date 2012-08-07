@@ -255,8 +255,6 @@ public class SendClaimImpl implements ClaimMessageListener {
             } catch (ClosedSelectorException ex) {
             }
         }
-
-
     }
     
     private void processError(ClaimException ex) {
