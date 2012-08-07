@@ -237,7 +237,7 @@ public final class PVTClientServer implements PVTServer {
             isRunning = true;
             
             try {
-                while (selector.select() > 0 && isRunning) {
+                while (isRunning && selector.select() > 0) {
                     for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
                         SelectionKey key = itr.next();
                         itr.remove();

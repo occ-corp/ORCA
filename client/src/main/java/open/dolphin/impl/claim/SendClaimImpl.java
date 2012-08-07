@@ -206,7 +206,7 @@ public class SendClaimImpl implements ClaimMessageListener {
             int cnt;
             
             try {
-                while ((cnt = selector.select()) >= 0 && isRunning) {
+                while (isRunning && (cnt = selector.select()) >= 0) {
                     
                     // wakeupしたら登録されたClaimIOHandlerをselectorに登録する
                     if (cnt == 0) {
