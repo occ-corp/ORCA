@@ -8,6 +8,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 
@@ -35,6 +36,10 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private static final String PID = "pid";
     private static final String ID = "id";
     private static final String DATE = "date";
+    
+    private static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
+    private static final String QUERY_PROPERTY_BY_PROP_AND_VALUE 
+            = "from UserPropertyModel u where u.key = :key and u.value = :value";
 
     @PersistenceContext
     private EntityManager em;
@@ -54,6 +59,22 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // CLAIM 送信の場合 facilityID がデータベースに登録されているものと異なる場合がある
         // 施設IDを認証にパスしたユーザの施設IDに設定する。
         String fid = pvt.getFacilityId();
+        // fidがない場合はjmariCodeから設定する
+        if (fid == null) {
+            String jmariCode = pvt.getJmariNumber();
+            try {
+                UserPropertyModel model = (UserPropertyModel) 
+                        em.createQuery(QUERY_PROPERTY_BY_PROP_AND_VALUE)
+                        .setParameter("key", "jmariCode")
+                        .setParameter("value", jmariCode)
+                        .getSingleResult();
+                fid = model.getFacilityModel().getFacilityId();
+            } catch (NoResultException ex) {
+                fid = DEFAULT_FACILITY_OID;
+            } catch (NonUniqueResultException ex) {
+                fid = DEFAULT_FACILITY_OID;
+            }
+        }
         PatientModel patient = pvt.getPatientModel();
         pvt.setFacilityId(fid);
         patient.setFacilityId(fid);

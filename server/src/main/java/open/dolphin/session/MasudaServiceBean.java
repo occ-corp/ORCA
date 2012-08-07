@@ -7,6 +7,7 @@ import javax.ejb.Stateless;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import org.apache.lucene.analysis.Analyzer;
@@ -1032,5 +1033,43 @@ public class MasudaServiceBean {
         }
 
         return ret;
+    }
+    
+    // UserPropertyを保存する
+    public int postUserProperties(String fid, List<UserPropertyModel> list) {
+
+        final String deleteSql = "delete from UserPropertyModel u where u.facilityModel.facilityId = :fid";
+        final String facilitySql = "from FacilityModel f where f.facilityId = :fid";
+
+        em.createQuery(deleteSql).setParameter("fid", fid);
+
+        try {
+            FacilityModel facility = (FacilityModel) 
+                em.createQuery(facilitySql)
+                .setParameter("fid", fid)
+                .getSingleResult();
+            for (UserPropertyModel model : list) {
+                model.setFacilityModel(facility);
+                em.persist(model);
+            }
+            return list.size();
+        } catch (NoResultException ex) {
+            return 0;
+        } catch (NonUniqueResultException ex) {
+            return 0;
+        }
+    }
+    
+    // UserPropertyを取得する
+    public List<UserPropertyModel> getUserProperties(String fid) {
+        
+        final String sql = "from UserPropertyModel u where u.facilityModel.facilityId = :fid";
+        
+        List<UserPropertyModel> list = (List<UserPropertyModel>)
+                em.createQuery(sql)
+                .setParameter("fid", fid)
+                .getResultList();
+        
+        return list;
     }
 }

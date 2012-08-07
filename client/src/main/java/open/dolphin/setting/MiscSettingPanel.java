@@ -9,6 +9,7 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -16,7 +17,9 @@ import open.dolphin.client.AutoRomanListener;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.GUIFactory;
 import open.dolphin.client.RegexConstrainedDocument;
+import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.helper.GridBagBuilder;
+import open.dolphin.infomodel.UserPropertyModel;
 import open.dolphin.project.Project;
 
 /**
@@ -127,6 +130,11 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
     private JLabel lbl_fev70;
     private JLabel lbl_fevShareFolder;
+    
+    private JButton btn_discardSize;
+    private JButton btn_openBase;
+    private JButton btn_saveProp;
+    private JButton btn_loadProp;
     
 /*    
     private JLabel lbl_rsbURL;
@@ -316,7 +324,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 */        
         
         gbl = new GridBagBuilder("設定");
-        JButton btn_discardSize = new JButton("インスペクタサイズ初期化");
+        btn_discardSize = new JButton("インスペクタサイズ初期化");
         btn_discardSize.addActionListener(new ActionListener(){
 
             @Override
@@ -325,7 +333,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             }
         });
 
-        JButton btn_openBase = new JButton("ベースフォルダを開く");
+        btn_openBase = new JButton("ベースフォルダを開く");
         btn_openBase.addActionListener(new ActionListener(){
 
             @Override
@@ -337,8 +345,27 @@ public class MiscSettingPanel extends AbstractSettingPanel {
                 }
             }
         });
+        
+        btn_saveProp = new JButton("設定をサーバーに保存");
+        btn_saveProp.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                saveProperties();
+            }
+        });
+        btn_loadProp = new JButton("設定をサーバーから読込");
+        btn_loadProp.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                loadProperties();
+            }
+        });
         gbl.add(btn_openBase, 0, 0, GridBagConstraints.CENTER);
-        gbl.add(btn_discardSize, 0, 1, GridBagConstraints.CENTER);
+        gbl.add(btn_discardSize, 1, 0, GridBagConstraints.CENTER);
+        gbl.add(btn_saveProp, 0, 1, GridBagConstraints.CENTER);
+        gbl.add(btn_loadProp, 1, 1, GridBagConstraints.CENTER);
         JPanel inspector = gbl.getProduct();
         
         gbl = new GridBagBuilder("カルテスクロール");
@@ -626,7 +653,14 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         tf_lblPrtAddress.setDocument(ipDoc);
         tf_lblPrtAddress.getDocument().addDocumentListener(dl);
         tf_lblPrtAddress.addFocusListener(AutoRomanListener.getInstance());
-
+        
+        // ログインしていないと利用不可
+        if (!isLoginState()) {
+            btn_discardSize.setEnabled(false);
+            btn_openBase.setEnabled(false);
+            btn_loadProp.setEnabled(false);
+            btn_saveProp.setEnabled(false);
+        }
     }
 
     /**
@@ -956,5 +990,35 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         Project.getUserDefaults().remove("chartPanelLeftSize");
         Project.getUserDefaults().remove("chartInspectorsSize");
         Project.getUserDefaults().remove("chartPanelRightSize");
+    }
+    
+    private void loadProperties() {
+        
+        Properties prop = Project.getUserDefaults();
+        List<UserPropertyModel> list = MasudaDelegater.getInstance().getUserProperties();
+        if (list == null || list.isEmpty()) {
+            return;
+        }
+        for (UserPropertyModel propModel : list) {
+            prop.put(propModel.getKey(), propModel.getValue());
+        }
+    }
+    
+    private void saveProperties() {
+        
+        List<UserPropertyModel> list = new ArrayList<UserPropertyModel>();
+        Properties prop = Project.getUserDefaults();
+        
+        for (Iterator itr = prop.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry entry = (Map.Entry) itr.next();
+            String key = (String) entry.getKey();
+            String value = (String) entry.getValue();
+            UserPropertyModel propModel = new UserPropertyModel();
+            propModel.setKey(key);
+            propModel.setValue(value);
+            list.add(propModel);
+        }
+        
+        MasudaDelegater.getInstance().postUserProperties(list);
     }
 }

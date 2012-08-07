@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.*;
+import open.dolphin.project.Project;
 import open.dolphin.util.BeanUtils;
 
 /**
@@ -631,6 +632,46 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<List<RpModel>>>(){};
         List<List<RpModel>> list = (List<List<RpModel>>)
+                getConverter().fromJsonTypeRef(entityStr, typeRef);
+        
+        return list;
+    }
+    
+    public void postUserProperties(List<UserPropertyModel> list) {
+        
+        String fid = Project.getFacilityId();
+        String path = RES_BASE + "userProperty/" + fid;
+        
+        String json = getConverter().toJson(list);
+        
+        ClientResponse response = getResource(path, null)
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
+
+        int status = response.getStatus();
+        String enityStr = response.getEntity(String.class);
+        debug(status, enityStr);
+    }
+    
+    public List<UserPropertyModel> getUserProperties() {
+        
+        String fid = Project.getFacilityId();
+        String path = RES_BASE + "userProperty/" + fid;
+        
+        ClientResponse response = getResource(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+        
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return null;
+        }
+        
+        TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
+        List<UserPropertyModel> list = (List<UserPropertyModel>) 
                 getConverter().fromJsonTypeRef(entityStr, typeRef);
         
         return list;

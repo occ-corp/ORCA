@@ -472,7 +472,32 @@ public class MasudaResource extends AbstractResource {
         
         return json;
     }
-
+    
+    @POST
+    @Path("userProperty/{fid}")
+    @Consumes(MEDIATYPE_JSON_UTF8)
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String postUserProperties(@PathParam("fid") String fid, String json) {
+        
+        TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
+        List<UserPropertyModel> list = (List<UserPropertyModel>) 
+                getConverter().fromJsonTypeRef(json, typeRef);
+        
+        int cnt = masudaServiceBean.postUserProperties(fid, list);
+        return String.valueOf(cnt);
+    }
+    
+    @GET
+    @Path("userProperty/{fid}")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public String getUserProperties(@PathParam("fid") String fid) {
+        
+        List<UserPropertyModel> list = masudaServiceBean.getUserProperties(fid);
+        String json = getConverter().toJson(list);
+        
+        return json;
+    }
+    
     @Override
     protected void debug(String msg) {
         if (debug || DEBUG) {

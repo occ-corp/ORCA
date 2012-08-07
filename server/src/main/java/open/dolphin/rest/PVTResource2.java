@@ -43,7 +43,7 @@ public class PVTResource2 extends AbstractResource {
         // 関係構築
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         model.setFacilityId(fid);
-        model.getPatientModel().setFacilityId(fid);
+        //model.getPatientModel().setFacilityId(fid);
 
         Collection<HealthInsuranceModel> c = model.getPatientModel().getHealthInsurances();
         if (c!= null && c.size() > 0) {
