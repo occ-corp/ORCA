@@ -39,7 +39,8 @@ public class SendClaimImpl implements ClaimMessageListener {
 
     private InetSocketAddress address;
     private Thread thread;
-    private SendQueueTask task;
+
+    private SendQueueTask sendQueueTask;
 
     /**
      * Creates new ClaimQue
@@ -80,8 +81,8 @@ public class SendClaimImpl implements ClaimMessageListener {
 
         address = new InetSocketAddress(getHost(), getPort());
 
-        task = new SendQueueTask();
-        thread = new Thread(task, "Claim send thread");
+        sendQueueTask = new SendQueueTask();
+        thread = new Thread(sendQueueTask, "Claim send thread");
         thread.start();
 
         logger.info("SendClaim started with = host = " + getHost() + " port = " + getPort());
@@ -94,17 +95,18 @@ public class SendClaimImpl implements ClaimMessageListener {
     public void stop() {
 
         // 未送信キューがあるならば警告する
-        if (task.getQueueSize() > 0) {
+        if (sendQueueTask.getQueueSize() > 0) {
             int option = alertDialog(ClaimException.ERROR_CODE.QUEUE_NOT_EMPTY, null);
             if (option == 1) {
-                task.sendQueue();
+                sendQueueTask.sendQueue();
             }
         }
 
         logDump();
         
-        task.closeSelector();
+        sendQueueTask.stop();
         thread.interrupt();
+        thread = null;
     }
 
     @Override
@@ -142,8 +144,8 @@ public class SendClaimImpl implements ClaimMessageListener {
      */
     @Override
     public void claimMessageEvent(ClaimMessageEvent e) {
-        task.addQueue(e);
-        task.sendQueue();
+        sendQueueTask.addQueue(e);
+        sendQueueTask.sendQueue();
     }
 
     private class SendQueueTask implements Runnable {
@@ -151,6 +153,7 @@ public class SendClaimImpl implements ClaimMessageListener {
         private List<ClaimMessageEvent> queue;
         private List<ClaimIOHandler> newHandlerList;
         private Selector selector;
+        private boolean isRunning;
         
         private SendQueueTask() {
             queue = new CopyOnWriteArrayList<ClaimMessageEvent>();
@@ -199,10 +202,11 @@ public class SendClaimImpl implements ClaimMessageListener {
         @Override
         public void run() {
             
+            isRunning = true;
             int cnt;
             
             try {
-                while ((cnt = selector.select()) >= 0) {
+                while (isRunning && (cnt = selector.select()) >= 0) {
                     
                     // wakeupしたら登録されたClaimIOHandlerをselectorに登録する
                     if (cnt == 0) {
@@ -255,6 +259,11 @@ public class SendClaimImpl implements ClaimMessageListener {
             } catch (ClosedSelectorException ex) {
             }
         }
+        
+        private void stop() {
+            isRunning = false;
+            selector.wakeup();
+        }
     }
     
     private void processError(ClaimException ex) {
@@ -268,7 +277,7 @@ public class SendClaimImpl implements ClaimMessageListener {
      */
     private void logDump() {
 
-        List<ClaimMessageEvent> queue = task.getQueue();
+        List<ClaimMessageEvent> queue = sendQueueTask.getQueue();
         for (ClaimMessageEvent claimEvent : queue) {
             logger.warn(claimEvent.getClaimInsutance());
         }
@@ -342,7 +351,7 @@ public class SendClaimImpl implements ClaimMessageListener {
 
         switch (code) {
             case QUEUE_NOT_EMPTY:
-                sb.append("未送信のCLAIM(レセプト)データが").append(task.getQueueSize());
+                sb.append("未送信のCLAIM(レセプト)データが").append(sendQueueTask.getQueueSize());
                 sb.append(" 個あります。\n");
                 sb.append("CLAIM サーバとの接続を確認してください。\n");
                 break;
