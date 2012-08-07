@@ -38,7 +38,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private static final String DATE = "date";
     
     private static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
-    private static final String QUERY_PROPERTY_BY_PROP_AND_VALUE 
+    private static final String QUERY_PROPERTY_BY_KEY_AND_VALUE 
             = "from UserPropertyModel u where u.key = :key and u.value = :value";
 
     @PersistenceContext
@@ -60,11 +60,11 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // 施設IDを認証にパスしたユーザの施設IDに設定する。
         String fid = pvt.getFacilityId();
         // fidがない場合はjmariCodeから設定する
-        if (fid == null) {
+        if (fid == null || fid.isEmpty()) {
             String jmariCode = pvt.getJmariNumber();
             try {
                 UserPropertyModel model = (UserPropertyModel) 
-                        em.createQuery(QUERY_PROPERTY_BY_PROP_AND_VALUE)
+                        em.createQuery(QUERY_PROPERTY_BY_KEY_AND_VALUE)
                         .setParameter("key", "jmariCode")
                         .setParameter("value", jmariCode)
                         .getSingleResult();
