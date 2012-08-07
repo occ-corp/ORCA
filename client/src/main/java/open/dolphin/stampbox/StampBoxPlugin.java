@@ -38,7 +38,7 @@ public class StampBoxPlugin extends AbstractMainTool {
 
     private ComponentMemory cm;             // スタンプ箱のcomponent memory
     private ComponentMemory cmEditor;       // スタンプエディタのcomponent memory
-    private JFrame editorFrame;             // スタンプエディタのJFrame
+    private EditorFrame editorFrame;             // スタンプエディタのJFrame
     private JFrame frame;                   // StampBox の JFrame
     private JTabbedPane parentBox;          // StampBox
     private AbstractStampBox userBox;       //ユーザ個人用の StampBox
@@ -68,6 +68,12 @@ public class StampBoxPlugin extends AbstractMainTool {
         this.isLocked = isLocked;
     }
 //pns$
+    
+    private class EditorFrame extends JFrame {
+        private EditorFrame(String title) {
+            super(title);
+        } 
+    }
     
     /**
      * Creates new StampBoxPlugin
@@ -562,7 +568,7 @@ public class StampBoxPlugin extends AbstractMainTool {
 
         if (editorFrame == null) {
             String title = ClientContext.getFrameTitle(getName());
-            editorFrame = new JFrame(title);
+            editorFrame = new EditorFrame(title);
 //masuda^    アイコン設定
              ClientContext.setDolphinIcon(editorFrame);
 //masuda$

@@ -405,7 +405,7 @@ public class Dolphin implements MainWindow {
                 processExit();
             }
         });
-        ComponentMemory cm = new ComponentMemory(myFrame, loc, size, this);
+        ComponentMemory cm = new ComponentMemory(myFrame, loc, size, Dolphin.this);
         cm.setToPreferenceBounds();
 
         // BlockGlass を設定する

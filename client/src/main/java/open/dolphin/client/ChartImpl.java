@@ -9,12 +9,12 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -2276,8 +2276,10 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     // ChartDocumentの別ウィンドウを開く
     private HashMap<ChartDocument, JFrame> inactiveProvidersMap;  // 別ウィンドウで開いているChartDocumentとそのJFrame
     // 別ウィンドウを記録させるためだけの空クラス
-
-    private static final class ChartImplWindow {
+    private class ChartImplWindow extends ChartFrame {
+        private ChartImplWindow(String title) {
+            super(title);
+        }
     }
 
     // 現在選択されているカルテエディタを取得する
@@ -2398,12 +2400,12 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         sb.append(" - ");
         sb.append(doc.getTitle());
         sb.append(" - 別ウィンドウ");
-        ChartFrame frame = new ChartFrame(sb.toString());
+        ChartImplWindow frame = new ChartImplWindow(sb.toString());
         frame.setChartMediator(getChartMediator());
         frame.setContentPane(doc.getUI());
         frame.pack();
         // ウィンドウサイズを記録
-        ComponentMemory cm = new ComponentMemory(frame, new Point(0, 0), frame.getPreferredSize(), new ChartImplWindow());
+        ComponentMemory cm = new ComponentMemory(frame, new Point(0, 0), frame.getPreferredSize(), frame);
         cm.setToPreferenceBounds();
 
         // 別ウィンドウで開いたChartDocumentを記録する

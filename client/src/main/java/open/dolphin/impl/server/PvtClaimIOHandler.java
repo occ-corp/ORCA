@@ -16,15 +16,24 @@ import open.dolphin.client.ClientContext;
  * http://itpro.nikkeibp.co.jp/article/COLUMN/20060515/237871/
  */
 public class PvtClaimIOHandler implements Handler {
+    
+    private static final int EOT = 0x04;
+    private static final int ACK = 0x06;
+    //private static final int NAK = 0x15;
 
+    private static final int bufferSize = 8192;
+    private ByteBuffer byteBuffer;
+    
     private PVTClientServer context;
     private ByteArrayOutputStream baos;
     private BufferedOutputStream bos;
+   
 
     public PvtClaimIOHandler(PVTClientServer context) {
         this.context = context;
         baos = new ByteArrayOutputStream();
         bos = new BufferedOutputStream(baos);
+        byteBuffer = ByteBuffer.allocate(bufferSize);
     }
 
     @Override
@@ -43,22 +52,19 @@ public class PvtClaimIOHandler implements Handler {
     private void read(SelectionKey key) {
 
         SocketChannel channel = (SocketChannel) key.channel();
-        ByteBuffer byteBuffer = ByteBuffer.allocate(16384);
 
         try {
-            int lastBytePos = channel.read(byteBuffer) - 1;
-            int c = byteBuffer.get(lastBytePos);
-            if (c == PVTClientServer.EOT) {
+            byteBuffer.clear();
+            int readLen = channel.read(byteBuffer);
+            int c = byteBuffer.get(readLen - 1);
+            if (c == EOT) {
                 // EOTを除いて書き出す
-                byteBuffer.rewind();
-                byteBuffer.limit(lastBytePos);
-                bos.write(byteBuffer.array());
+                bos.write(byteBuffer.array(), 0, readLen - 1);
                 // writableにしてACKを返せるようにする
                 key.interestOps(SelectionKey.OP_WRITE);
             } else {
                 // byteBuffer全部書き出す
-                byteBuffer.flip();
-                bos.write(byteBuffer.array());
+                bos.write(byteBuffer.array(), 0, readLen);
             }
 
         } catch (IOException ex) {
@@ -73,11 +79,11 @@ public class PvtClaimIOHandler implements Handler {
 
         try {
             // 取得したxmlをPVT登録キューに送る
-            baos.flush();
+            bos.flush();
             String pvtXml = baos.toString(context.getEncoding());
             context.putPvt(pvtXml);
             // ACKを返す
-            channel.write(ByteBuffer.wrap(new byte[]{PVTClientServer.ACK}));
+            channel.write(ByteBuffer.wrap(new byte[]{ACK}));
 
         } catch (IOException ex) {
             ClientContext.getPvtLogger().warn("Exception while sending ACK:" + ex);

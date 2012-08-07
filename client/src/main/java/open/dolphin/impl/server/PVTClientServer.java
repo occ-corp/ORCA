@@ -29,10 +29,7 @@ import org.apache.log4j.Level;
  */
 public final class PVTClientServer implements PVTServer {
 
-    public static final int EOT = 0x04;
-    public static final int ACK = 0x06;
-    public static final int NAK = 0x15;
-    public static final String UTF8 = "UTF8";
+    public static final String UTF8 = "UTF-8";
     public static final String SJIS = "SHIFT_JIS";
     public static final String EUC = "EUC_JIS";
     private static final int DEFAULT_PORT = 5002;
@@ -255,6 +252,7 @@ public final class PVTClientServer implements PVTServer {
     }
     
     
+    // PvtClaimIOHanlderから呼ばれる
     public void putPvt(String pvtXml) {
         PutPvtTask task = new PutPvtTask(pvtXml);
         exec.submit(task);

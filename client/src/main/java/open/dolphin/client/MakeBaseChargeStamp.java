@@ -244,7 +244,7 @@ public class MakeBaseChargeStamp extends CheckSantei {
         // dialogのタイトルを設定
         dialog.setTitle("基本料スタンプ");
         dialog.pack();
-        ComponentMemory cm = new ComponentMemory(dialog, new Point(100, 100), dialog.getPreferredSize(), MakeBaseChargeStamp.this);
+        ComponentMemory cm = new ComponentMemory(dialog, new Point(100, 100), dialog.getPreferredSize(), MakeBaseChargeStamp.class);
         cm.setToPreferenceBounds();
         //dialog.setSize(dialog.getPreferredSize());
         //dialog.setResizable(false);
