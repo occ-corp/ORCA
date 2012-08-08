@@ -18,17 +18,16 @@ public class ClaimIOHandler {
     private static final int ACK = 0x06;
     private static final int NAK = 0x15;
     
-    private SendClaimImpl context;
     private ClaimMessageEvent evt;
-    private boolean noError;
     private ByteBuffer writeBuffer;
+    private ClaimException.ERROR_CODE errorCode;
     
-    public ClaimIOHandler(SendClaimImpl context, ClaimMessageEvent evt) {
-        this.context = context;
+    
+    public ClaimIOHandler(ClaimMessageEvent evt) {
         this.evt = evt;
 
         try {
-            byte[] bytes = evt.getClaimInsutance().getBytes(context.getEncoding());
+            byte[] bytes = evt.getClaimInsutance().getBytes(evt.getEncoding());
             writeBuffer = ByteBuffer.allocate(bytes.length + 1);
             writeBuffer.put(bytes);
             writeBuffer.put((byte) EOT);
@@ -43,7 +42,7 @@ public class ClaimIOHandler {
     }
 
     public boolean isNoError() {
-        return noError;
+        return ClaimException.ERROR_CODE.NO_ERROR == errorCode;
     }
     
     public void handle(SelectionKey key) throws ClaimException {
@@ -94,7 +93,6 @@ public class ClaimIOHandler {
     private void doRead(SelectionKey key) throws ClaimException {
 
         SocketChannel channel = (SocketChannel) key.channel();
-        ClaimException.ERROR_CODE errorCode = null;
 
         try {
             ByteBuffer byteBuffer = ByteBuffer.allocate(1);
@@ -105,7 +103,6 @@ public class ClaimIOHandler {
             switch (c) {
                 case ACK:
                     errorCode = ClaimException.ERROR_CODE.NO_ERROR;
-                    noError = true;
                     break;
                 case NAK:
                     errorCode = ClaimException.ERROR_CODE.NAK_SIGNAL;
@@ -119,7 +116,7 @@ public class ClaimIOHandler {
         } finally {
             try {
                 channel.close();
-                if (errorCode != ClaimException.ERROR_CODE.NO_ERROR) {
+                if (ClaimException.ERROR_CODE.NO_ERROR != errorCode) {
                     throw new ClaimException(errorCode, evt);
                 }
             } catch (IOException ex) {

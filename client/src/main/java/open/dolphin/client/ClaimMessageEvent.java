@@ -15,6 +15,15 @@ public class ClaimMessageEvent extends java.util.EventObject {
     private int number;
     private String confirmDate;
 
+//masuda$
+    private String encoding;
+    public String getEncoding() {
+        return encoding;
+    }
+    public void setEncoding(String encoding) {
+        this.encoding = encoding;
+    }
+//masuda$
     
     /** Creates new ClaimEvent */
     public ClaimMessageEvent(Object source) {

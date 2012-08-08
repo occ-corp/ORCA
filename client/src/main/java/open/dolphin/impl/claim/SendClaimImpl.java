@@ -192,7 +192,8 @@ public class SendClaimImpl implements ClaimMessageListener {
             // ClaimIOhanderをnewHandlerListに登録する
             newHandlerList.clear();
             for (ClaimMessageEvent evt : queue) {
-                ClaimIOHandler handler = new ClaimIOHandler(SendClaimImpl.this, evt);
+                evt.setEncoding(getEncoding());
+                ClaimIOHandler handler = new ClaimIOHandler(evt);
                 newHandlerList.add(handler);
             }
             // selectorを起こす
