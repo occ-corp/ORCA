@@ -215,6 +215,9 @@ public class PVTDelegater extends BusinessDelegater {
         
         @Override
         public void run() {
+            
+            isRunning = true;
+            
             while (isRunning) {
                 try {
                     String str = JerseyClient.getInstance()
