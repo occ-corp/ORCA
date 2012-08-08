@@ -19,15 +19,17 @@ public class ClaimIOHandler {
     private static final int NAK = 0x15;
     
     private ClaimMessageEvent evt;
+    private String encoding;
     private ByteBuffer writeBuffer;
     private ClaimException.ERROR_CODE errorCode;
     
     
-    public ClaimIOHandler(ClaimMessageEvent evt) {
+    public ClaimIOHandler(ClaimMessageEvent evt, String encoding) {
         this.evt = evt;
+        this.encoding = encoding;
 
         try {
-            byte[] bytes = evt.getClaimInsutance().getBytes(evt.getEncoding());
+            byte[] bytes = evt.getClaimInsutance().getBytes(encoding);
             writeBuffer = ByteBuffer.allocate(bytes.length + 1);
             writeBuffer.put(bytes);
             writeBuffer.put((byte) EOT);
