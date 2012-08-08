@@ -27,6 +27,11 @@ public class PvtAsyncServlet extends HttpServlet {
     protected void doGet(HttpServletRequest servletReq, HttpServletResponse servletRes) 
             throws ServletException, IOException {
         
+        // JBOSS終了時にぬるぽ
+        if (pvtServiceBean == null) {
+            return;
+        }
+        
         final AsyncContext ac = servletReq.startAsync();
         final String fid = getRemoteFacility(servletReq.getRemoteUser());
         pvtServiceBean.getPvtMediator().subscribePvtTopic(ac, fid);
