@@ -20,6 +20,7 @@ import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.server.PVTServer;
 import org.apache.log4j.Level;
+import org.apache.log4j.Logger;
 
 /**
  * PVT socket server
@@ -50,12 +51,14 @@ public final class PVTClientServer implements PVTServer {
     private String name;
     private UserModel user;
     private boolean DEBUG;
+    private Logger logger;
 
     /**
      * Creates new ClaimServer
      */
     public PVTClientServer() {
         DEBUG = (ClientContext.getPvtLogger().getLevel() == Level.DEBUG);
+        logger = ClientContext.getPvtLogger();
     }
 
     @Override
@@ -141,9 +144,7 @@ public final class PVTClientServer implements PVTServer {
             String test = getBindAddress();
 
             if (test != null && (!test.equals(""))) {
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("PVT ServerSocket bind address = " + getBindAddress());
-                }
+                debug("PVT ServerSocket bind address = " + getBindAddress());
                 try {
                     InetAddress addr = InetAddress.getByName(test);
                     address = new InetSocketAddress(addr, port);
@@ -156,7 +157,7 @@ public final class PVTClientServer implements PVTServer {
                 address = new InetSocketAddress(InetAddress.getLocalHost(), port);
             }
 
-            ClientContext.getPvtLogger().info("PVT Server is binded " + address + " with encoding: " + encoding);
+            logger.info("PVT Server is binded " + address + " with encoding: " + encoding);
 
             serverThread = new ServerThread(address);
             thread = new Thread(serverThread, "PVT server socket");
@@ -164,7 +165,7 @@ public final class PVTClientServer implements PVTServer {
 
         } catch (IOException e) {
             e.printStackTrace(System.err);
-            ClientContext.getPvtLogger().warn("IOException while creating the ServerSocket: " + e.toString());
+            logger.warn("IOException while creating the ServerSocket: " + e.toString());
         }
     }
 
@@ -175,6 +176,11 @@ public final class PVTClientServer implements PVTServer {
 
         // ServerThreadを中止させる
         serverThread.stop();
+        // thread終了を待つ
+        try {
+            thread.join();
+        } catch (InterruptedException ex) {
+        }
         // ServerSocketのThread破棄する
         thread.interrupt();
         thread = null;
@@ -237,7 +243,8 @@ public final class PVTClientServer implements PVTServer {
             isRunning = true;
             
             try {
-                while (isRunning && selector.select() > 0) {
+                while (selector.select() >= 0 && isRunning) {
+
                     for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
                         SelectionKey key = itr.next();
                         itr.remove();
@@ -247,9 +254,9 @@ public final class PVTClientServer implements PVTServer {
                     }
                 }
             } catch (ClosedChannelException ex) {
-                ClientContext.getPvtLogger().warn("ソケットがクローズしています:" + ex);
+                logger.warn("ソケットがクローズしています:" + ex);
             } catch (IOException ex) {
-                ClientContext.getPvtLogger().warn("通信エラーが発生しました" + ex);
+                logger.warn("通信エラーが発生しました" + ex);
             } finally {
                 try {
                     for (SelectionKey key : selector.keys()) {
@@ -290,6 +297,12 @@ public final class PVTClientServer implements PVTServer {
             PVTDelegater pdl = PVTDelegater.getInstance();
             
             pdl.addPvt(model);
+        }
+    }
+    
+    private void debug(String msg) {
+        if (DEBUG) {
+            logger.debug(msg);
         }
     }
 }

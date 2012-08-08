@@ -105,6 +105,11 @@ public class SendClaimImpl implements ClaimMessageListener {
         logDump();
         
         sendQueueTask.stop();
+        // thread終了を待つ
+        try {
+            thread.join();
+        } catch (InterruptedException ex) {
+        }
         thread.interrupt();
         thread = null;
     }
@@ -150,26 +155,21 @@ public class SendClaimImpl implements ClaimMessageListener {
 
     private class SendQueueTask implements Runnable {
         
+        private String encoding;
         private List<ClaimMessageEvent> queue;
-        private List<ClaimIOHandler> newHandlerList;
+        private List<ClaimMessageEvent> toSend;
         private Selector selector;
         private boolean isRunning;
         
         private SendQueueTask() {
+            
             queue = new CopyOnWriteArrayList<ClaimMessageEvent>();
-            newHandlerList = new CopyOnWriteArrayList<ClaimIOHandler>();
-
+            toSend = new CopyOnWriteArrayList<ClaimMessageEvent>();
+            
+            encoding = getEncoding();
             try {
                 // セレクタの生成
                 selector = Selector.open();
-            } catch (IOException ex) {
-                ex.printStackTrace(System.err);
-            }
-        }
-        
-        private void closeSelector() {
-            try {
-                selector.close();
             } catch (IOException ex) {
                 ex.printStackTrace(System.err);
             }
@@ -182,20 +182,15 @@ public class SendClaimImpl implements ClaimMessageListener {
         private int getQueueSize() {
             return queue.size();
         }
-        
+
         private void addQueue(ClaimMessageEvent evt) {
             queue.add(evt);
         }
-        
-        private void sendQueue() {
 
-            // ClaimIOhanderをnewHandlerListに登録する
-            newHandlerList.clear();
-            for (ClaimMessageEvent evt : queue) {
-                ClaimIOHandler handler = new ClaimIOHandler(evt, getEncoding());
-                newHandlerList.add(handler);
-            }
+        private void sendQueue() {
             // selectorを起こす
+            toSend.clear();
+            toSend.addAll(queue);
             selector.wakeup();
         }
 
@@ -210,14 +205,16 @@ public class SendClaimImpl implements ClaimMessageListener {
                     
                     // wakeupしたら登録されたClaimIOHandlerをselectorに登録する
                     if (cnt == 0) {
-                        for (ClaimIOHandler handler : newHandlerList) {
+                        for (ClaimMessageEvent evt : toSend) {
                             SocketChannel channel = SocketChannel.open();
+                            channel.socket().setReuseAddress(true);
                             channel.configureBlocking(false);
                             channel.connect(address);
                             // registerは同一スレッド内でないとダメ!!
+                            ClaimIOHandler handler = new ClaimIOHandler(evt, encoding);
                             channel.register(selector, SelectionKey.OP_CONNECT, handler);
                         }
-                        newHandlerList.clear();
+                        toSend.clear();
                         continue;
                     }
                     
@@ -232,6 +229,7 @@ public class SendClaimImpl implements ClaimMessageListener {
                             processError(ex);
                             break;
                         }
+                        // 成功したものはキューから除去する
                         if (handler.isNoError()) {
                             ClaimMessageEvent evt = handler.getClaimEvent();
                             queue.remove(evt);
