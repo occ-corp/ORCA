@@ -1023,7 +1023,7 @@ public final class RpEditor extends AbstractStampEditor {
                 }
             }
         };
-        java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
+        worker.execute();
     }
 
     private String intToZenkaku(int num){

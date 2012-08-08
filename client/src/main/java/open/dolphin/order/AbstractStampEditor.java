@@ -1289,7 +1289,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
             }
 
         };
-        java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
+        worker.execute();
     }
     
     private AbstractOrderView getOrderView() {

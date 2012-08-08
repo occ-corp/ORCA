@@ -351,7 +351,6 @@ public class LaboTestPanel {
         };
 
         // 別スレッドで処理
-        //java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
         worker.execute();
     }
 }

@@ -239,8 +239,6 @@ public class ExamHistory {
                 }
             }
         };
-        // ここは別スレッドで実行する
-        //java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
         worker.execute();
     }
 
