@@ -178,7 +178,7 @@ public final class PVTClientServer implements PVTServer {
         serverThread.stop();
         // thread終了を待つ
         try {
-            thread.join();
+            thread.join(100);
         } catch (InterruptedException ex) {
         }
         // ServerSocketのThread破棄する

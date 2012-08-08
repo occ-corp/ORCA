@@ -7,9 +7,6 @@ import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
 
@@ -24,7 +21,10 @@ public class PVTDelegater extends BusinessDelegater {
     private static final String RES_PVT = "pvt2/";
     public static final String PVT_MESSAGE_EVENT = "pvtMessageEvent";
     
-    private ExecutorService exec;
+    // スレッド
+    private PollingTask pollingTask;
+    private Thread thread;
+    
     // 束縛サポート
     private PropertyChangeSupport boundSupport;
     
@@ -183,37 +183,39 @@ public class PVTDelegater extends BusinessDelegater {
         sb.append("subscribe");
         final String path = sb.toString();
 
-        PollingTask task = new PollingTask();
-        task.setPath(path);
-
-        exec = Executors.newSingleThreadExecutor();
-        exec.execute(task);
+        pollingTask = new PollingTask();
+        pollingTask.setPath(path);
+        
+        thread = new Thread(pollingTask, "PVT polling task");
+        thread.start();
     }
 
     public void disposePollingTask() {
+        pollingTask.stop();
         try {
-            exec.shutdown();
-            if (!exec.awaitTermination(10, TimeUnit.MILLISECONDS)) {
-                exec.shutdownNow();
-            }
+            thread.join(100);
         } catch (InterruptedException ex) {
-            exec.shutdownNow();
-        } catch (NullPointerException ex) {
         }
-        exec = null;
+        thread.interrupt();
+        thread = null;
     }
 
     private class PollingTask implements Runnable {
 
         private String pollingPath;
+        private boolean isRunning;
 
         private void setPath(String path) {
             this.pollingPath = path;
         }
         
+        private void stop() {
+            isRunning = false;
+        }
+        
         @Override
         public void run() {
-            while (true) {
+            while (isRunning) {
                 try {
                     String str = JerseyClient.getInstance()
                             .getAsyncResource(pollingPath)
