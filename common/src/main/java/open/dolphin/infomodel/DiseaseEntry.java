@@ -1,5 +1,7 @@
 package open.dolphin.infomodel;
 
+import open.dolphin.infomodel.ModelUtils;
+
 /**
  * DiseaseEntry
  * 

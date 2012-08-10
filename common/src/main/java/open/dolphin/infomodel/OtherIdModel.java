@@ -1,5 +1,8 @@
 package open.dolphin.infomodel;
 
+import open.dolphin.infomodel.InfoModel;
+import open.dolphin.infomodel.PatientModel;
+
 /**
  * OtherIdModel
  *

@@ -1,9 +1,12 @@
 
-package open.dolphin.infomodel;
+package open.dolphin.impl.orcaapi;
 
 import java.util.Date;
 import java.util.List;
 import open.dolphin.client.Chart;
+import open.dolphin.infomodel.ClaimBundle;
+import open.dolphin.infomodel.PVTHealthInsuranceModel;
+import open.dolphin.infomodel.RegisteredDiagnosisModel;
 
 /**
  * ORCA APIで送信する途中終了データモデル

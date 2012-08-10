@@ -1,5 +1,7 @@
 package open.dolphin.session;
 
+import java.io.BufferedReader;
+import java.io.StringReader;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Logger;
@@ -11,6 +13,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
+import open.dolphin.pvtclaim.PVTBuilder;
 
 /**
  * PVTServiceBean
@@ -48,7 +51,17 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private PvtServiceMediator mediator;
     
     private static final Logger logger = Logger.getLogger(PVTServiceBean.class.getName());
+    
 
+    // CLAIM受診したpvtXmlをパースして登録する。ここではfidはないので後でJMARI番号から参照する
+    public void parseAndAddPvt(String pvtXml) {
+        BufferedReader br = new BufferedReader(new StringReader(pvtXml));
+        PVTBuilder builder = new PVTBuilder();
+        builder.parse(br);
+        PatientVisitModel pvt = builder.getProduct();
+        addPvt(pvt);
+    }
+    
     /**
      * 患者来院情報を登録する。
      * @param spec 来院情報を保持する DTO オブジェクト
@@ -59,6 +72,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // CLAIM 送信の場合 facilityID がデータベースに登録されているものと異なる場合がある
         // 施設IDを認証にパスしたユーザの施設IDに設定する。
         String fid = pvt.getFacilityId();
+        
         // fidがない場合はjmariCodeから設定する
         if (fid == null || fid.isEmpty()) {
             String jmariCode = pvt.getJmariNumber();
@@ -75,6 +89,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 fid = DEFAULT_FACILITY_OID;
             }
         }
+        
         PatientModel patient = pvt.getPatientModel();
         pvt.setFacilityId(fid);
         patient.setFacilityId(fid);

@@ -18,6 +18,9 @@
  */
 package open.dolphin.infomodel;
 
+import open.dolphin.infomodel.ClaimItem;
+import open.dolphin.infomodel.InfoModel;
+
 /**
  * ORCA の tbl_inputset エンティティクラス。
  *

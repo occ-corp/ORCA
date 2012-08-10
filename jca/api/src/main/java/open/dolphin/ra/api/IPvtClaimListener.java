@@ -1,8 +1,9 @@
 package open.dolphin.ra.api;
 
 /**
- *
- * @author masuda
+ * IPvtClaimListener
+ * jarを分けておかないとJBAS014521でハマるｗｗｗ
+ * @author masuda, Masuda Naika
  */
 public interface IPvtClaimListener {
     

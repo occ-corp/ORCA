@@ -5,7 +5,6 @@ import java.util.Date;
 import java.util.List;
 import open.dolphin.client.Chart;
 import open.dolphin.client.IDiagnosisSender;
-import open.dolphin.infomodel.MedicalModModel;
 import open.dolphin.infomodel.RegisteredDiagnosisModel;
 import open.dolphin.project.Project;
 

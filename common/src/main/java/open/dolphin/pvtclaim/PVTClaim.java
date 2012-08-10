@@ -6,10 +6,11 @@
  * Last updated on 2002/12/31
  *
  */
-package open.dolphin.infomodel;
+package open.dolphin.pvtclaim;
 
 import java.util.ArrayList;
 import java.util.List;
+import open.dolphin.infomodel.InfoModel;
 
 /**
  * Simple Claim　Class used for PVT.

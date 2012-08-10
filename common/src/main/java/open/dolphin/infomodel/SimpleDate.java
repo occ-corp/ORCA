@@ -7,6 +7,7 @@ package open.dolphin.infomodel;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import open.dolphin.infomodel.InfoModel;
 
 /**
  * SimpleDate

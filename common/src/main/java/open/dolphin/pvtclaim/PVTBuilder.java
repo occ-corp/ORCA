@@ -1,4 +1,4 @@
-package open.dolphin.impl.server;
+package open.dolphin.pvtclaim;
 
 import java.beans.XMLEncoder;
 import java.io.BufferedOutputStream;
@@ -8,9 +8,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
-import open.dolphin.client.ClientContext;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import open.dolphin.infomodel.*;
-import org.apache.log4j.Level;
 import org.jdom.Attribute;
 import org.jdom.Document;
 import org.jdom.Element;
@@ -21,6 +21,7 @@ import org.jdom.input.SAXBuilder;
  * PVTBuilder
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 public final class PVTBuilder {
 
@@ -124,8 +125,10 @@ public final class PVTBuilder {
 
     private boolean DEBUG;
     
+    private static final Logger logger = Logger.getLogger(PVTBuilder.class.getSimpleName());
+    
     public PVTBuilder() {
-        DEBUG = (ClientContext.getPvtLogger().getLevel() == Level.DEBUG);
+        DEBUG = false;
     }
     
     /**
@@ -143,8 +146,7 @@ public final class PVTBuilder {
             reader.close();
             
         } catch (Exception e) {
-            e.printStackTrace(System.err);
-            ClientContext.getPvtLogger().warn(e.getMessage());
+            logger.warning(e.getMessage());
         }
     }
     
@@ -286,7 +288,7 @@ public final class PVTBuilder {
                 // 患者モジュールをパースする
                 //-----------------------
                 if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("patientInfo　をパース中");
+                    debug("patientInfo　をパース中");
                 }
                 patientModel = new PatientModel();
                 parsePatientInfo(docInfoEle, contentEle);
@@ -296,10 +298,8 @@ public final class PVTBuilder {
                 // 健康保険モジュールをパースする
                 //------------------------------
                 String uuid = docInfoEle.getChild(docId).getChildTextTrim(uid);
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("healthInsurance　をパース中");
-                    ClientContext.getPvtLogger().debug("HealthInsurance UUID = " + uuid);
-                }
+                debug("healthInsurance　をパース中");
+                debug("HealthInsurance UUID = " + uuid);
 
                 if (pvtInsurnaces == null) {
                     pvtInsurnaces = new ArrayList<PVTHealthInsuranceModel>();
@@ -313,14 +313,12 @@ public final class PVTBuilder {
                 //------------------------------
                 // 受付情報をパースする
                 //------------------------------
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("claim　をパース中");
-                }
+                debug("claim　をパース中");
                 pvtClaim = new PVTClaim();
                 parseClaim(docInfoEle, contentEle);
                 
             } else {
-                ClientContext.getPvtLogger().warn("Unknown attribute value : " + attr);
+                logger.log(Level.WARNING, "Unknown attribute value : {0}", attr);
             }
         }
     }
@@ -345,9 +343,7 @@ public final class PVTBuilder {
             if (qname.equals(mmlCm_Id)) {
                 String pid = child.getTextTrim();
                 patientModel.setPatientId(pid);
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("patientId = " + pid);
-                }
+                debug("patientId = " + pid);
                 
             } else if (qname.equals(mmlNm_Name)) {
                 List attrs = child.getAttributes();
@@ -355,13 +351,9 @@ public final class PVTBuilder {
                     Attribute attr = (Attribute) iter.next();
                     if (attr.getName().equals(repCode)) {
                         curRepCode = attr.getValue();
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().debug("curRepCode = " + attr.getValue());
-                        }
+                        debug("curRepCode = " + attr.getValue());
                     } else if (attr.getName().equals(tableId)) {
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().debug("tableId = " + attr.getValue());
-                        }
+                        debug("tableId = " + attr.getValue());
                     }
                 }
                 
@@ -373,9 +365,7 @@ public final class PVTBuilder {
                 } else if (curRepCode.equals(A)) {
                     patientModel.setRomanFamilyName(child.getTextTrim());
                 }
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("family = " + child.getTextTrim());
-                }
+                debug("family = " + child.getTextTrim());
                 
             } else if (qname.equals(mmlNm_given)) {
                 if (curRepCode.equals(P)) {
@@ -385,10 +375,8 @@ public final class PVTBuilder {
                 } else if (curRepCode.equals(A)) {
                     patientModel.setRomanGivenName(child.getTextTrim());
                 }
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("given = " + child.getTextTrim());
-                }
-                
+                debug("given = " + child.getTextTrim());
+                 
             } else if (qname.equals(mmlNm_fullname)) {
                 if (curRepCode.equals(P)) {
                     patientModel.setKanaName(child.getTextTrim());
@@ -397,22 +385,16 @@ public final class PVTBuilder {
                 } else if (curRepCode.equals(A)) {
                     patientModel.setRomanName(child.getTextTrim());
                 }
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("fullName = " + child.getTextTrim());
-                }
-                
+                debug("fullName = " + child.getTextTrim());
+                 
             } else if (qname.equals(mmlPi_birthday)) {
                 patientModel.setBirthday(child.getTextTrim());
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("birthday = " + child.getTextTrim());
-                }
+                debug("birthday = " + child.getTextTrim());
                 
             } else if (qname.equals(mmlPi_sex)) {
                 patientModel.setGender(child.getTextTrim());
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("gender = " + child.getTextTrim());
-                }
-                
+                debug("gender = " + child.getTextTrim());
+                 
             } else if (qname.equals(mmlAd_Address)) {
                 curAddress = new AddressModel();
                 patientModel.addAddress(curAddress);
@@ -423,28 +405,20 @@ public final class PVTBuilder {
                     if (attr.getName().equals(addressClass)) {
                         curRepCode = attr.getValue();
                         curAddress.setAddressType(attr.getValue());
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().debug("addressClass = " + attr.getValue());
-                        }
+                        debug("addressClass = " + attr.getValue());
                     } else if (attr.getName().equals(tableId)) {
                         curAddress.setAddressTypeCodeSys(attr.getValue());
-                        if (DEBUG) {
-                            ClientContext.getPvtLogger().debug("tableId = " + attr.getValue());
-                        }
+                        debug("tableId = " + attr.getValue());
                     }
                 }
                 
             } else if (qname.equals(mmlAd_full)) {
                 curAddress.setAddress(child.getTextTrim());
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("address = " + child.getTextTrim());
-                }
+                debug("address = " + child.getTextTrim());
                 
             } else if (qname.equals(mmlAd_zip)) {
                 curAddress.setZipCode(child.getTextTrim());
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("zip = " + child.getTextTrim());
-                }
+                debug("zip = " + child.getTextTrim());
                 
             } else if (qname.equals(mmlPh_Phone)) {
                 curTelephone = new TelephoneModel();
@@ -454,32 +428,25 @@ public final class PVTBuilder {
                 String val = child.getTextTrim();
                 //val = ZenkakuUtils.utf8Replace(val);
                 curTelephone.setArea(val);
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("area = " + val);
-                }
+                debug("area = " + val);
                 
             } else if (qname.equals(mmlPh_city)) {
                 String val = child.getTextTrim();
                 //val = ZenkakuUtils.utf8Replace(val);
                 curTelephone.setCity(val);
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("city = " + val);
-                }
+                debug("city = " + val);
                 
             } else if (qname.equals(mmlPh_number)) {
                 String val = child.getTextTrim();
                 //val = ZenkakuUtils.utf8Replace(val);
                 curTelephone.setNumber(val);
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("number = " + val);
-                }
+                debug("number = " + val);
                 
             } else if (qname.equals(mmlPh_memo)) {
                 // ORCA
                 curTelephone.setMemo(child.getTextTrim());
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("memo = " + child.getTextTrim());
-                }
+                debug("memo = " + child.getTextTrim());
+
             }
             
             parsePatientInfo(docInfo, child);
@@ -496,7 +463,7 @@ public final class PVTBuilder {
         // HealthInsuranceModule を得る
         Element hModule = content.getChild(HealthInsuranceModule, mmlHi);
         if (hModule == null) {
-            ClientContext.getPvtLogger().debug("No HealthInsuranceModule");
+            debug("No HealthInsuranceModule");
             return;
         }
         
@@ -553,19 +520,18 @@ public final class PVTBuilder {
             curInsurance.setPayOutRatio(hModule.getChildTextTrim(paymentOutRatio, mmlHi));
         }
 
-        if (DEBUG) {
-            ClientContext.getPvtLogger().debug("insuranceClass = " + curInsurance.getInsuranceClass());
-            ClientContext.getPvtLogger().debug("insurance ClassCode = " + curInsurance.getInsuranceClassCode());
-            ClientContext.getPvtLogger().debug("insurance tableId = " + curInsurance.getInsuranceClassCodeSys());
-            ClientContext.getPvtLogger().debug("insuranceNumber = " + curInsurance.getInsuranceNumber());
-            ClientContext.getPvtLogger().debug("group = " + curInsurance.getClientGroup());
-            ClientContext.getPvtLogger().debug("number = " + curInsurance.getClientNumber());
-            ClientContext.getPvtLogger().debug("familyClass = " + curInsurance.getFamilyClass());
-            ClientContext.getPvtLogger().debug("startDate = " + curInsurance.getStartDate());
-            ClientContext.getPvtLogger().debug("expiredDate = " + curInsurance.getExpiredDate());
-            ClientContext.getPvtLogger().debug("paymentInRatio = " + curInsurance.getPayInRatio());
-            ClientContext.getPvtLogger().debug("paymentOutRatio = " + curInsurance.getPayOutRatio());
-        }
+        debug("insuranceClass = " + curInsurance.getInsuranceClass());
+        debug("insurance ClassCode = " + curInsurance.getInsuranceClassCode());
+        debug("insurance tableId = " + curInsurance.getInsuranceClassCodeSys());
+        debug("insuranceNumber = " + curInsurance.getInsuranceNumber());
+        debug("group = " + curInsurance.getClientGroup());
+        debug("number = " + curInsurance.getClientNumber());
+        debug("familyClass = " + curInsurance.getFamilyClass());
+        debug("startDate = " + curInsurance.getStartDate());
+        debug("expiredDate = " + curInsurance.getExpiredDate());
+        debug("paymentInRatio = " + curInsurance.getPayInRatio());
+        debug("paymentOutRatio = " + curInsurance.getPayOutRatio());
+
         
         //--------------------------------
         // publicInsurance をパースする
@@ -622,16 +588,14 @@ public final class PVTBuilder {
                     }
                 }
 
-                if (DEBUG) {
-                    ClientContext.getPvtLogger().debug("priority = " + curPublicItem.getPriority());
-                    ClientContext.getPvtLogger().debug("providerName = " + curPublicItem.getProviderName());
-                    ClientContext.getPvtLogger().debug("provider = " + curPublicItem.getProvider());
-                    ClientContext.getPvtLogger().debug("recipient = " + curPublicItem.getRecipient());
-                    ClientContext.getPvtLogger().debug("startDate = " + curPublicItem.getStartDate());
-                    ClientContext.getPvtLogger().debug("expiredDate = " + curPublicItem.getExpiredDate());
-                    ClientContext.getPvtLogger().debug("paymentRatio = " + curPublicItem.getPaymentRatio());
-                    ClientContext.getPvtLogger().debug("paymentRatioType = " + curPublicItem.getPaymentRatioType());
-                }
+                debug("priority = " + curPublicItem.getPriority());
+                debug("providerName = " + curPublicItem.getProviderName());
+                debug("provider = " + curPublicItem.getProvider());
+                debug("recipient = " + curPublicItem.getRecipient());
+                debug("startDate = " + curPublicItem.getStartDate());
+                debug("expiredDate = " + curPublicItem.getExpiredDate());
+                debug("paymentRatio = " + curPublicItem.getPaymentRatio());
+                debug("paymentRatioType = " + curPublicItem.getPaymentRatioType());
             }
         }
     }
@@ -688,17 +652,15 @@ public final class PVTBuilder {
         pvtClaim.setInsuranceUid(claimInfo.getAttributeValue(insuranceUid, claim));
         
         // DEBUG 出力
-        if (DEBUG) {
-            ClientContext.getPvtLogger().debug("担当医ID = " + pvtClaim.getAssignedDoctorId());
-            ClientContext.getPvtLogger().debug("担当医名 = " + pvtClaim.getAssignedDoctorName());
-            ClientContext.getPvtLogger().debug("JMARI コード = " + pvtClaim.getJmariCode());
-            ClientContext.getPvtLogger().debug("診療科名 = " + pvtClaim.getClaimDeptName());
-            ClientContext.getPvtLogger().debug("診療科コード = " + pvtClaim.getClaimDeptCode());
-            ClientContext.getPvtLogger().debug("status = " + pvtClaim.getClaimStatus());
-            ClientContext.getPvtLogger().debug("registTime = " + pvtClaim.getClaimRegistTime());
-            ClientContext.getPvtLogger().debug("admitFlag = " + pvtClaim.getClaimAdmitFlag());
-            ClientContext.getPvtLogger().debug("insuranceUid = " + pvtClaim.getInsuranceUid());
-        }
+        debug("担当医ID = " + pvtClaim.getAssignedDoctorId());
+        debug("担当医名 = " + pvtClaim.getAssignedDoctorName());
+        debug("JMARI コード = " + pvtClaim.getJmariCode());
+        debug("診療科名 = " + pvtClaim.getClaimDeptName());
+        debug("診療科コード = " + pvtClaim.getClaimDeptCode());
+        debug("status = " + pvtClaim.getClaimStatus());
+        debug("registTime = " + pvtClaim.getClaimRegistTime());
+        debug("admitFlag = " + pvtClaim.getClaimAdmitFlag());
+        debug("insuranceUid = " + pvtClaim.getInsuranceUid());
     }
     
     protected byte[] getXMLBytes(Object bean) {
@@ -707,5 +669,11 @@ public final class PVTBuilder {
         e.writeObject(bean);
         e.close();
         return bo.toByteArray();
+    }
+    
+    private void debug(String msg) {
+        if (DEBUG) {
+            logger.info(msg);
+        }
     }
 }

@@ -19,6 +19,9 @@
 package open.dolphin.infomodel;
 
 import java.util.ArrayList;
+import open.dolphin.infomodel.BundleMed;
+import open.dolphin.infomodel.InfoModel;
+import open.dolphin.infomodel.ModuleInfoBean;
 
 /**
  * ORCA の tbl_inputcd エンティティクラス。

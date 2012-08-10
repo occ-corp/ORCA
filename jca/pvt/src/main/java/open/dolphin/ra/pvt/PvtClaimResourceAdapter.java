@@ -15,7 +15,7 @@ import javax.transaction.xa.XAResource;
 import open.dolphin.ra.api.IPvtClaimListener;
 
 /**
- *
+ *　PvtClaimResourceAdapter
  * @author masuda, Masuda Naika
  */
 @Connector(

@@ -20,6 +20,7 @@ package open.dolphin.infomodel;
 
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
+import open.dolphin.infomodel.InfoModel;
 
 /**
  * MasterEntry

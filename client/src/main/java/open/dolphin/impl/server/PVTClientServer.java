@@ -18,6 +18,7 @@ import open.dolphin.client.MainWindow;
 import open.dolphin.delegater.PVTDelegater;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.UserModel;
+import open.dolphin.pvtclaim.PVTBuilder;
 import open.dolphin.server.PVTServer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;

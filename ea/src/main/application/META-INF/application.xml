@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<application xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             version="6" xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/application_6.xsd">
+
+    <module>
+        <connector>OpenDolphin-ra-2.3.rar</connector>
+    </module>    
+    <module>
+        <web>
+            <web-uri>OpenDolphin-server-2.3.war</web-uri>
+            <context-root>dolphin</context-root>
+        </web>
+    </module>
+    <library-directory>lib</library-directory>
+</application>

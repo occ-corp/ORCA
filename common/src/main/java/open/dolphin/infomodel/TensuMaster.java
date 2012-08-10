@@ -1,5 +1,7 @@
 package open.dolphin.infomodel;
 
+import open.dolphin.infomodel.ClaimConst;
+
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.

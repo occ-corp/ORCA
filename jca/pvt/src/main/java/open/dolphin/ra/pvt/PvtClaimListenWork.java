@@ -12,7 +12,7 @@ import java.util.logging.Logger;
 import javax.resource.spi.work.Work;
 
 /**
- *
+ *　PvtClaimListenWork
  * @author masuda, Masuda Naika
  */
 public class PvtClaimListenWork implements Work {
