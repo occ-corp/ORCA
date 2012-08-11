@@ -42,7 +42,8 @@ public class PvtClaimAcceptHandler implements IHandler {
         channel.register(key.selector(), SelectionKey.OP_READ, handler);
 
         // ログ出力
-        String addr = ((InetSocketAddress) channel.getRemoteAddress()).getAddress().getHostAddress();
+        //String addr = ((InetSocketAddress) channel.getRemoteAddress()).getAddress().getHostAddress(); // JDK7
+        String addr = ((InetSocketAddress) channel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
         String time = DateFormat.getDateTimeInstance().format(new Date());
         logger.log(Level.INFO, "PVT CLAIM Connected from {0} at {1}", new Object[]{addr, time});
     }

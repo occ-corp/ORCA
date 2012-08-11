@@ -7,3 +7,6 @@
 /target/
 /dist/
 /jca/api/target/
+/ea/target/
+/jca/ra/target/
+/jca/pvt/target/
