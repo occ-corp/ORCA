@@ -54,32 +54,13 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<DocInfoModel> docInfoList;
 
-    /*
-     * PatientMemoModelやAppointmentModel等のKareteEntryBeanを継承したクラスは
-     * は内部にKarteBeanを含んでいるため、KarteBeanのシリアライズ(=JSON化)に含めると
-     * 無限ループになてしまう。そのため、KarteBeanをシリアライズする際には
-     * 転送用のKarteEntryBeanをシリアライズに含めない、AbstractKarteEntryTransferModel
-     * を継承したクラスを利用する。
-     * PatientMemoModelやAppointmentModelは@JsonIgnoreアノテーションをつけ、
-     * シリアライズから除外する。   masuda
-     */
-    @JsonIgnore // bi-directional references
+    @JsonDeserialize(contentAs=PatientMemoModel.class)
     @Transient
     private List<PatientMemoModel> memoList;
-    
-    // シリアライズ用
-    @JsonDeserialize(contentAs=PatientMemoTransferModel.class)
-    @Transient
-    private List<PatientMemoTransferModel> memoTransList;
-    
-    @JsonIgnore // bi-directional references
+
+    @JsonDeserialize(contentAs=AppointmentModel.class)
     @Transient
     private List<AppointmentModel> appoList;
-    
-    // シリアライズ用
-    @JsonDeserialize(contentAs=AppointmentTransferModel.class)
-    @Transient
-    private List<AppointmentTransferModel> appoTransList;
     
     @Transient
     private Date lastDocDate; 
@@ -91,22 +72,7 @@ public class KarteBean extends InfoModel {
     public Date getLastDocDate() {
         return lastDocDate;
     }
-    public void setMemoTransList(List<PatientMemoTransferModel> list) {
-        memoTransList = list;
-    }
-    
-    public List<PatientMemoTransferModel> getMemoTransList() {
-        return memoTransList;
-    }
-    
-    public void setAppoTransList(List<AppointmentTransferModel> list) {
-        appoTransList = list;
-    }
-    
-    public List<AppointmentTransferModel> getAppoTransList() {
-        return appoTransList;
-    }
-    
+
     public void setAppointmentList(List<AppointmentModel> list) {
         appoList = list;
     }
