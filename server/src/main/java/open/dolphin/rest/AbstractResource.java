@@ -1,10 +1,7 @@
 package open.dolphin.rest;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Logger;
 import javax.ws.rs.core.MediaType;
 import open.dolphin.infomodel.IInfoModel;
@@ -77,32 +74,17 @@ public class AbstractResource {
         return Arrays.asList(strArray);
     }
     
-    protected String fromLongList(List<Long> list) {
+    protected String fromList(List list) {
         
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (Long l : list) {
+        for (Iterator itr = list.iterator(); itr.hasNext();) {
             if (!first) {
                 sb.append(CAMMA);
             } else {
                 first = false;
             }
-            sb.append(String.valueOf(l));
-        }
-        return sb.toString();
-    }
-    
-    protected String fromStrList(List<String> list) {
-        
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (String str : list) {
-            if (!first) {
-                sb.append(CAMMA);
-            } else {
-                first = false;
-            }
-            sb.append(str);
+            sb.append(String.valueOf(itr.next()));
         }
         return sb.toString();
     }

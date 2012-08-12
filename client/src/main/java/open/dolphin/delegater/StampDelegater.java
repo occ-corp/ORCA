@@ -482,7 +482,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP + "list";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromStrList(ids));
+        qmap.add("ids", fromList(ids));
         
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_TEXT_UTF8)

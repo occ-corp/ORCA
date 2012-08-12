@@ -78,7 +78,7 @@ public class StampResource extends AbstractResource {
 
         List<String> ret = stampServiceBean.putStamp(list);
         
-        String retText = fromStrList(ret);
+        String retText = fromList(ret);
         
         debug(retText);
 

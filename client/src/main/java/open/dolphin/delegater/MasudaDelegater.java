@@ -285,7 +285,7 @@ public class MasudaDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
-        qmap.add("entities", fromStrList(entities));
+        qmap.add("entities", fromList(entities));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -346,7 +346,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "docList";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromLongList(docPkList));
+        qmap.add("ids", fromList(docPkList));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -587,7 +587,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
         if (srycds != null) {
-            qmap.add("srycds", fromStrList(srycds));
+            qmap.add("srycds", fromList(srycds));
         }
         
         ClientResponse response = getResource(path, qmap)

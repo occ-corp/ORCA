@@ -119,7 +119,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/document";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromLongList(ids));
+        qmap.add("ids", fromList(ids));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -541,7 +541,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/diagnosis/";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromLongList(ids));
+        qmap.add("ids", fromList(ids));
 
         ClientResponse response = getResource(path, qmap)
                 .delete(ClientResponse.class);
@@ -608,7 +608,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "/karte/observations";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromLongList(ids));
+        qmap.add("ids", fromList(ids));
 
         ClientResponse response = getResource(path, qmap)
                 .delete(ClientResponse.class);

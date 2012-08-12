@@ -243,7 +243,7 @@ public class KarteResource extends AbstractResource {
                 getConverter().fromJsonTypeRef(json, typeRef);
         
         List<Long> result = karteServiceBean.addDiagnosis(list);
-        String text = fromLongList(result);
+        String text = fromList(result);
         debug(text);
 
         return text;
@@ -289,7 +289,7 @@ public class KarteResource extends AbstractResource {
 
         List<Long> result = karteServiceBean.addObservations(list);
 
-        String text = fromLongList(result);
+        String text = fromList(result);
         debug(text);
 
         return text;

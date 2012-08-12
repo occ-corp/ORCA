@@ -141,7 +141,7 @@ public class StampTreeResource extends AbstractResource {
 
         List<Long> result = stampServiceBean.subscribeTrees(list);
 
-        String pks = fromLongList(result);
+        String pks = fromList(result);
         
         debug(pks);
 

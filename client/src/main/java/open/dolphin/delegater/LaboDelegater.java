@@ -36,7 +36,7 @@ public class LaboDelegater extends BusinessDelegater {
 
         String path = "lab/patient";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromStrList(idList));
+        qmap.add("ids", fromList(idList));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
