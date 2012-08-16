@@ -35,7 +35,7 @@ public class AppoResource extends AbstractResource {
 
         TypeReference typeRef = new TypeReference<List<AppointmentModel>>(){};
         List<AppointmentModel> list = (List<AppointmentModel>) 
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
 
         int count = appoServiceBean.putAppointments(list);
         

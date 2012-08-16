@@ -36,7 +36,7 @@ public class LaboDelegater extends BusinessDelegater {
 
         String path = "lab/patient";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromList(idList));
+        qmap.add("ids", getConverter().fromList(idList));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -52,7 +52,7 @@ public class LaboDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<PatientLiteModel>>(){};
         List<PatientLiteModel> list = (List<PatientLiteModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -115,7 +115,7 @@ public class LaboDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<NLaboModule>>(){};
         List<NLaboModule> list = (List<NLaboModule>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }

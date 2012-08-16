@@ -11,6 +11,10 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 /**
  * Jackson関連
@@ -18,6 +22,7 @@ import java.io.IOException;
  */
 public class JsonConverter {
     
+    private static final String CAMMA = ",";
     private static final ObjectMapper objectMapper;
     private static final JsonConverter instance;
     private static final boolean debug = false;
@@ -78,7 +83,7 @@ public class JsonConverter {
         return null;
     }
     
-    public Object fromJsonTypeRef(String json, TypeReference typeRef) {
+    public Object fromJson(String json, TypeReference typeRef) {
         try {
             debug(json);
             return objectMapper.readValue(json, typeRef);
@@ -103,5 +108,33 @@ public class JsonConverter {
             System.out.print(msg);
         }
     }
-
+    
+    public List<Long> toLongList(String params) {
+        String[] strArray  = params.split(CAMMA);
+        List<Long> ret = new ArrayList<Long>();
+        for (String s : strArray) {
+            ret.add(Long.valueOf(s));
+        }
+        return ret;
+    }
+    
+    public List<String> toStrList(String params) {
+        String[] strArray  = params.split(CAMMA);
+        return Arrays.asList(strArray);
+    }
+    
+    public String fromList(List list) {
+        
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (Iterator itr = list.iterator(); itr.hasNext();) {
+            if (!first) {
+                sb.append(CAMMA);
+            } else {
+                first = false;
+            }
+            sb.append(String.valueOf(itr.next()));
+        }
+        return sb.toString();
+    }
 }

@@ -161,7 +161,7 @@ public class PVTDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<PvtMessageModel>>(){};
         List<PvtMessageModel> list = (List<PvtMessageModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         // pvtがのっかて来てるときは保険をデコード
         if (list != null) {

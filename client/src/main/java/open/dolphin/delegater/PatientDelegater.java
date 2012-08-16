@@ -137,7 +137,7 @@ public class  PatientDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         if (list != null && list.size() > 0) {
             for (PatientModel pm : list) {

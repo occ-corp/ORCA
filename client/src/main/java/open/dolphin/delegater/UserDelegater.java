@@ -98,7 +98,7 @@ public class UserDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<UserModel>>(){};
         List<UserModel> list  = (List<UserModel>) 
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }

@@ -53,39 +53,9 @@ public class AbstractResource {
         sb.append(pid);
         return sb.toString();
     }
-    
-    
-    
+
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
     }
 
-    protected List<Long> toLongList(String params) {
-        String[] strArray  = params.split(CAMMA);
-        List<Long> ret = new ArrayList<Long>();
-        for (String s : strArray) {
-            ret.add(Long.valueOf(s));
-        }
-        return ret;
-    }
-    
-    protected List<String> toStrList(String params) {
-        String[] strArray  = params.split(CAMMA);
-        return Arrays.asList(strArray);
-    }
-    
-    protected String fromList(List list) {
-        
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (Iterator itr = list.iterator(); itr.hasNext();) {
-            if (!first) {
-                sb.append(CAMMA);
-            } else {
-                first = false;
-            }
-            sb.append(String.valueOf(itr.next()));
-        }
-        return sb.toString();
-    }
 }

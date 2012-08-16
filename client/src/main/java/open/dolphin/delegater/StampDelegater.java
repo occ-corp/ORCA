@@ -241,7 +241,7 @@ public class StampDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<PublishedTreeModel>>(){};
         List<PublishedTreeModel> ret = (List<PublishedTreeModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         return ret;
     }
@@ -449,7 +449,7 @@ public class StampDelegater extends BusinessDelegater {
         
        TypeReference typeRef = new TypeReference<List<StampModel>>(){};
         List<StampModel> ret = (List<StampModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return ret;
     }
@@ -482,7 +482,7 @@ public class StampDelegater extends BusinessDelegater {
 
         String path = RES_STAMP + "list";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromList(ids));
+        qmap.add("ids", getConverter().fromList(ids));
         
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_TEXT_UTF8)

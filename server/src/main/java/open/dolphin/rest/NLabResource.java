@@ -52,7 +52,7 @@ public class NLabResource extends AbstractResource {
 
         String fid = getRemoteFacility(servletReq.getRemoteUser());
 
-        List<String> idList = toStrList(ids);
+        List<String> idList = getConverter().toStrList(ids);
 
         List<PatientLiteModel> list = nLabServiceBean.getConstrainedPatients(fid, idList);
 

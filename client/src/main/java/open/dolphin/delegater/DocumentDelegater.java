@@ -119,7 +119,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/document";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromList(ids));
+        qmap.add("ids", getConverter().fromList(ids));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -136,7 +136,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
         List<DocumentModel> list = (List<DocumentModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         // マルチスレッド化
         // タスクリストを準備する
@@ -229,7 +229,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
         List<DocInfoModel> list = (List<DocInfoModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -253,7 +253,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
         List<LetterModule> list = (List<LetterModule>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         List<DocInfoModel> ret = new ArrayList<DocInfoModel>();
         
@@ -379,7 +379,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         TypeReference typeRef = new TypeReference<List<List<ModuleModel>>>(){};
         List<List<ModuleModel>> ret = (List<List<ModuleModel>>) 
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         for (List<ModuleModel> list : ret) {
             for (ModuleModel module : list) {
@@ -515,7 +515,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         debug(status, entityStr);
         
-        List<Long> ret = toLongList(entityStr);
+        List<Long> ret = getConverter().toLongList(entityStr);
 
         return ret;
     }
@@ -541,7 +541,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/diagnosis/";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromList(ids));
+        qmap.add("ids", getConverter().fromList(ids));
 
         ClientResponse response = getResource(path, qmap)
                 .delete(ClientResponse.class);
@@ -578,7 +578,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
         List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -599,7 +599,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         String entityStr = response.getEntity(String.class);
         debug(status, entityStr);
 
-        List<Long> list = toLongList(entityStr);
+        List<Long> list = getConverter().toLongList(entityStr);
 
         return list;
     }
@@ -608,7 +608,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "/karte/observations";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromList(ids));
+        qmap.add("ids", getConverter().fromList(ids));
 
         ClientResponse response = getResource(path, qmap)
                 .delete(ClientResponse.class);
@@ -683,7 +683,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<List<AppointmentModel>>>(){};
         List<List<AppointmentModel>> ret = (List<List<AppointmentModel>>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return ret;
     }

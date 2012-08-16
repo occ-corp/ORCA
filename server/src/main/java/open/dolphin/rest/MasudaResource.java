@@ -240,7 +240,7 @@ public class MasudaResource extends AbstractResource {
         Date fromDate = parseDate(fromDateStr);
         Date toDate = parseDate(toDateStr);
         
-        List<String> entities = toStrList(entitiesStr);
+        List<String> entities = getConverter().toStrList(entitiesStr);
 
         List<ModuleModel> list = masudaServiceBean.getModulesEntitySearch(fid, karteId, fromDate, toDate, entities);
         String json = getConverter().toJson(list);
@@ -271,7 +271,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getDocumentList(@QueryParam("ids") String ids) {
 
-        List<Long> docPkList = toLongList(ids);
+        List<Long> docPkList = getConverter().toLongList(ids);
 
         List<DocInfoModel> list = masudaServiceBean.getDocumentList(docPkList);
         
@@ -395,7 +395,7 @@ public class MasudaResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<InFacilityLaboItem>>(){};
         List<InFacilityLaboItem> list = (List<InFacilityLaboItem>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
         
         long ret = masudaServiceBean.updateInFacilityLaboItem(fid, list);
         
@@ -410,7 +410,7 @@ public class MasudaResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<ETensuModel1>>(){};
         List<ETensuModel1> list = (List<ETensuModel1>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
         
         String ret = masudaServiceBean.updateETensu1Table(list);
         
@@ -443,7 +443,7 @@ public class MasudaResource extends AbstractResource {
         Date toDate = parseDate(toDateStr);
         List<String> srycdList = null;
         if (srycds != null && !srycds.isEmpty()) {
-            srycdList = toStrList(srycds);
+            srycdList = getConverter().toStrList(srycds);
         }
         
         List<SanteiHistoryModel> list = masudaServiceBean.getSanteiHistory(karteId, fromDate, toDate, srycdList);
@@ -481,7 +481,7 @@ public class MasudaResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
         List<UserPropertyModel> list = (List<UserPropertyModel>) 
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
         
         int cnt = masudaServiceBean.postUserProperties(fid, list);
         return String.valueOf(cnt);

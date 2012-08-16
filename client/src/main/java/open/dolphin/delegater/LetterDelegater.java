@@ -93,7 +93,7 @@ public class LetterDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
         List<LetterModule> ret = (List<LetterModule>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return ret;
     }

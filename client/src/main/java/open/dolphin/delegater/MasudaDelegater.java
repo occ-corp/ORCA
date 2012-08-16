@@ -57,7 +57,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<RoutineMedModel>>(){};
         List<RoutineMedModel> list = (List<RoutineMedModel>) 
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         // いつもデコード忘れるｗ
         for (RoutineMedModel model : list) {
@@ -160,7 +160,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<DisconItemModel>>(){};
         List<DisconItemModel> list = (List<DisconItemModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         return list;
     }
@@ -227,7 +227,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         TypeReference typeRef = new TypeReference<List<UsingDrugModel>>(){};
         List<UsingDrugModel> list = (List<UsingDrugModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         return list;
     }
@@ -285,7 +285,7 @@ public class MasudaDelegater extends BusinessDelegater {
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
-        qmap.add("entities", fromList(entities));
+        qmap.add("entities", getConverter().fromList(entities));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -301,7 +301,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<ModuleModel>>(){};
         List<ModuleModel> list = (List<ModuleModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         for (ModuleModel module : list) {
             module.setModel((InfoModel) BeanUtils.xmlDecode(module.getBeanBytes()));
@@ -346,7 +346,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         String path = RES_BASE + "docList";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", fromList(docPkList));
+        qmap.add("ids", getConverter().fromList(docPkList));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -362,7 +362,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
         List<DocInfoModel> list = (List<DocInfoModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
 
         return list;
     }
@@ -408,7 +408,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -463,7 +463,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<ExamHistoryModel>>(){};
         List<ExamHistoryModel> list = (List<ExamHistoryModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -491,7 +491,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -514,7 +514,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<InFacilityLaboItem>>(){};
         List<InFacilityLaboItem> list = (List<InFacilityLaboItem>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -587,7 +587,7 @@ public class MasudaDelegater extends BusinessDelegater {
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
         qmap.add("toDate", REST_DATE_FRMT.format(toDate));
         if (srycds != null) {
-            qmap.add("srycds", fromList(srycds));
+            qmap.add("srycds", getConverter().fromList(srycds));
         }
         
         ClientResponse response = getResource(path, qmap)
@@ -604,7 +604,7 @@ public class MasudaDelegater extends BusinessDelegater {
 
         TypeReference typeRef = new TypeReference<List<SanteiHistoryModel>>(){};
         List<SanteiHistoryModel> list = (List<SanteiHistoryModel>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -632,7 +632,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<List<RpModel>>>(){};
         List<List<RpModel>> list = (List<List<RpModel>>)
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }
@@ -672,7 +672,7 @@ public class MasudaDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
         List<UserPropertyModel> list = (List<UserPropertyModel>) 
-                getConverter().fromJsonTypeRef(entityStr, typeRef);
+                getConverter().fromJson(entityStr, typeRef);
         
         return list;
     }

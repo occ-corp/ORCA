@@ -41,7 +41,7 @@ public class StampResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getStamps(@QueryParam("ids") String ids) {
 
-        List<String> list = toStrList(ids);
+        List<String> list = getConverter().toStrList(ids);
 
         List<StampModel> result = stampServiceBean.getStamp(list);
 
@@ -74,11 +74,11 @@ public class StampResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<StampModel>>(){};
         List<StampModel> list = (List<StampModel>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
 
         List<String> ret = stampServiceBean.putStamp(list);
         
-        String retText = fromList(ret);
+        String retText = getConverter().fromList(ret);
         
         debug(retText);
 
@@ -100,7 +100,7 @@ public class StampResource extends AbstractResource {
     @Path("list")
     public void deleteStamps(@QueryParam("ids") String ids) {
 
-        List<String> list = toStrList(ids);
+        List<String> list = getConverter().toStrList(ids);
 
         int cnt = stampServiceBean.removeStamp(list);
 

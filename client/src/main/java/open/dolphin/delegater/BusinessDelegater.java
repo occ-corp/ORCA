@@ -2,10 +2,6 @@ package open.dolphin.delegater;
 
 import com.sun.jersey.api.client.WebResource;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ClientContext;
@@ -58,34 +54,5 @@ public class BusinessDelegater {
     
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
-    }
-    
-    protected List<Long> toLongList(String params) {
-        String[] strArray  = params.split(CAMMA);
-        List<Long> ret = new ArrayList<Long>();
-        for (String s : strArray) {
-            ret.add(Long.valueOf(s));
-        }
-        return ret;
-    }
-    
-    protected List<String> toStrList(String params) {
-        String[] strArray  = params.split(CAMMA);
-        return Arrays.asList(strArray);
-    }
-    
-    protected String fromList(List list) {
-        
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (Iterator itr = list.iterator(); itr.hasNext();) {
-            if (!first) {
-                sb.append(CAMMA);
-            } else {
-                first = false;
-            }
-            sb.append(String.valueOf(itr.next()));
-        }
-        return sb.toString();
     }
 }

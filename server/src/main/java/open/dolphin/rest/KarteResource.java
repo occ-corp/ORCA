@@ -76,7 +76,7 @@ public class KarteResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getDocuments(@QueryParam("ids") String ids) {
 
-        List<Long> list = toLongList(ids);
+        List<Long> list = getConverter().toLongList(ids);
 
         List<DocumentModel> result = karteServiceBean.getDocuments(list);
 
@@ -240,10 +240,10 @@ public class KarteResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
         List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
         
         List<Long> result = karteServiceBean.addDiagnosis(list);
-        String text = fromList(result);
+        String text = getConverter().fromList(result);
         debug(text);
 
         return text;
@@ -257,7 +257,7 @@ public class KarteResource extends AbstractResource {
 
         TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
         List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
 
         int result = karteServiceBean.updateDiagnosis(list);
         String text = String.valueOf(result);
@@ -270,7 +270,7 @@ public class KarteResource extends AbstractResource {
     @Path("diagnosis")
     public void deleteDiagnosis(@QueryParam("ids") String ids) {
 
-        List<Long> list = toLongList(ids);
+        List<Long> list = getConverter().toLongList(ids);
         int result = karteServiceBean.removeDiagnosis(list);
 
         debug(String.valueOf(result));
@@ -285,11 +285,11 @@ public class KarteResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<ObservationModel>>(){};
         List<ObservationModel> list = (List<ObservationModel>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
 
         List<Long> result = karteServiceBean.addObservations(list);
 
-        String text = fromList(result);
+        String text = getConverter().fromList(result);
         debug(text);
 
         return text;
@@ -299,7 +299,7 @@ public class KarteResource extends AbstractResource {
     @Path("observations")
     public void deleteObservations(@QueryParam("ids") String ids) {
 
-        List<Long> list = toLongList(ids);
+        List<Long> list = getConverter().toLongList(ids);
         int result = karteServiceBean.removeObservations(list);
 
         debug(String.valueOf(result));

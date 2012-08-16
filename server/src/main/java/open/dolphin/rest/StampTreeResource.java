@@ -137,11 +137,11 @@ public class StampTreeResource extends AbstractResource {
         
         TypeReference typeRef = new TypeReference<List<SubscribedTreeModel>>(){};
         List<SubscribedTreeModel> list = (List<SubscribedTreeModel>)
-                getConverter().fromJsonTypeRef(json, typeRef);
+                getConverter().fromJson(json, typeRef);
 
         List<Long> result = stampServiceBean.subscribeTrees(list);
 
-        String pks = fromList(result);
+        String pks = getConverter().fromList(result);
         
         debug(pks);
 
@@ -153,7 +153,7 @@ public class StampTreeResource extends AbstractResource {
     @Path("subscribed")
     public void unsubscribeTrees(@QueryParam("ids") String ids) {
 
-        List<Long> list = toLongList(ids);
+        List<Long> list = getConverter().toLongList(ids);
 
         int cnt = stampServiceBean.unsubscribeTrees(list);
         
