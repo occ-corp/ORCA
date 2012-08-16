@@ -73,11 +73,17 @@ public class  DocumentDelegater extends BusinessDelegater {
                 getConverter().fromJson(entityStr, KarteBean.class);
 
         // KarteEntryBean.karteをもとに戻す
-        List<KarteEntryBean> list = new ArrayList<KarteEntryBean>();
-        list.addAll(karte.getMemoList());
-        list.addAll(karte.getAppointmentList());
-        for (KarteEntryBean entry : list) {
-            entry.setKarteBean(karte);
+        List<PatientMemoModel> memoList = karte.getMemoList();
+        if (memoList != null && !memoList.isEmpty()) {
+            for (PatientMemoModel entry : memoList) {
+                entry.setKarteBean(karte);
+            }
+        }
+        List<AppointmentModel> appoList = karte.getAppointmentList();
+        if (appoList != null && !appoList.isEmpty()) {
+            for (AppointmentModel entry : appoList) {
+                entry.setKarteBean(karte);
+            }
         }
 
         return karte;

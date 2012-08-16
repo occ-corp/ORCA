@@ -38,11 +38,17 @@ public class KarteResource extends AbstractResource {
 
         // シリアライズ時のネスト防止のためKarteEntryBean.karteにnullを設定する
         // DocumentDelegaterで元に戻す
-        List<KarteEntryBean> list = new ArrayList<KarteEntryBean>();
-        list.addAll(karte.getMemoList());
-        list.addAll(karte.getAppointmentList());
-        for (KarteEntryBean entry : list) {
-            entry.setKarteBean(null);
+        List<PatientMemoModel> memoList = karte.getMemoList();
+        if (memoList != null && !memoList.isEmpty()) {
+            for (PatientMemoModel entry : memoList) {
+                entry.setKarteBean(null);
+            }
+        }
+        List<AppointmentModel> appoList = karte.getAppointmentList();
+        if (appoList != null && !appoList.isEmpty()) {
+            for (AppointmentModel entry : appoList) {
+                entry.setKarteBean(null);
+            }
         }
 
         String json = getConverter().toJson(karte);
