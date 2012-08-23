@@ -11,8 +11,6 @@
         <module>common</module>
         <module>server</module>
         <module>client</module>
-        <module>ea</module>
-        <module>jca</module>
     </modules>
 
     <properties>
@@ -23,21 +21,21 @@
         <dependencies>
             <dependency>
                 <groupId>masudanaika</groupId>
+                <artifactId>OpenDolphin-common</artifactId>
+                <version>${project.version}</version>
+                <type>jar</type>
+            </dependency>
+            <dependency>
+                <groupId>masudanaika</groupId>
                 <artifactId>OpenDolphin-client</artifactId>
                 <version>${project.version}</version>
                 <type>jar</type>
             </dependency>
             <dependency>
                 <groupId>masudanaika</groupId>
-                <artifactId>OpenDolphin-jca</artifactId>
+                <artifactId>OpenDolphin-server</artifactId>
                 <version>${project.version}</version>
-                <type>pom</type>
-            </dependency>
-            <dependency>
-                <groupId>masudanaika</groupId>
-                <artifactId>OpenDolphin-ea</artifactId>
-                <version>${project.version}</version>
-                <type>ear</type>
+                <type>war</type>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -80,8 +78,8 @@
                                     </fileset>
                                 </copy>
                                 <copy todir="${basedir}/dist/">
-                                    <fileset dir="${basedir}/ea/target">
-                                        <include name="*.ear" />
+                                    <fileset dir="${basedir}/server/target">
+                                        <include name="*.war" />
                                     </fileset>
                                 </copy>
                             </target>

@@ -13,7 +13,7 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
     
     // 無茶危なっかしいｗｗｗ
 
-    private static final String VERSION_DATE = "2012-03-10";
+    private static final String VERSION_DATE = "2012-08-23";
     private static final String UPDATE_MEMO = "Database schema updated.";
     private static final String NO_UPDATE_MEMO = "Database schema not updated.";
     
@@ -126,6 +126,15 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 treeBytesIsMediumBlob = MEDIUM_BLOB.equals(type);
             }
             
+            boolean pub_treeBytesIsMediumBlob = false;
+            columnName = "treeBytes";
+            tableName = "d_published_tree";
+            rs = dmd.getColumns(null, null, tableName, columnName);
+            if (rs.next()) {
+                String type = rs.getString(TYPE_NAME);
+                pub_treeBytesIsMediumBlob = MEDIUM_BLOB.equals(type);
+            }
+            
             boolean jpegByteIsMediumBlob = false;
             columnName = "jpegByte";
             tableName = "d_image";
@@ -152,6 +161,10 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 // StampTree.treeBytes LOB -> MEDIUMBLOB
                 if (!treeBytesIsMediumBlob) {
                     stmt.addBatch("alter table d_stamp_tree modify treeBytes mediumblob");
+                }
+                // PublishedTree.treeBytes LOB -> MEDIUMBLOB
+                if (!pub_treeBytesIsMediumBlob) {
+                    stmt.addBatch("alter table d_published_tree modify treeBytes mediumblob");
                 }
                 // SchemaModel.jpegBytes LOB -> MEDIUMBLOB
                 if (!jpegByteIsMediumBlob) {
