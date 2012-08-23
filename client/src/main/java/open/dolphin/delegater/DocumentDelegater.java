@@ -72,18 +72,30 @@ public class  DocumentDelegater extends BusinessDelegater {
         KarteBean karte = (KarteBean)
                 getConverter().fromJson(entityStr, KarteBean.class);
 
-        // KarteEntryBean.karteをもとに戻す
-        List<PatientMemoModel> memoList = karte.getMemoList();
-        if (memoList != null && !memoList.isEmpty()) {
-            for (PatientMemoModel entry : memoList) {
-                entry.setKarteBean(karte);
+        // PatientMemoTransferModel -> PatientMemoModel
+        List<PatientMemoTransferModel> memoTransList = karte.getMemoTransList();
+        if (memoTransList != null && !memoTransList.isEmpty()) {
+            List<PatientMemoModel> memoList = new ArrayList<PatientMemoModel>();
+            for (PatientMemoTransferModel pmtm : memoTransList) {
+                PatientMemoModel pmm = pmtm.getKarteEntryBean();
+                pmm.setKarteBean(karte);
+                memoList.add(pmm);
             }
+            karte.setMemoList(memoList);
+            karte.setMemoTransList(null);
         }
-        List<AppointmentModel> appoList = karte.getAppointmentList();
-        if (appoList != null && !appoList.isEmpty()) {
-            for (AppointmentModel entry : appoList) {
-                entry.setKarteBean(karte);
+        
+        // AppointmentTransferModel -> AppoimentntModel
+        List<AppointmentTransferModel> appoTransList = karte.getAppoTransList();
+        if (appoTransList != null && !appoTransList.isEmpty()) {
+            List<AppointmentModel> appoList = new ArrayList<AppointmentModel>();
+            for (AppointmentTransferModel atm : appoTransList) {
+                AppointmentModel am = atm.getKarteEntryBean();
+                am.setKarteBean(karte);
+                appoList.add(am);
             }
+            karte.setAppointmentList(appoList);
+            karte.setAppoTransList(null);
         }
 
         return karte;
@@ -99,7 +111,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         // 確定日、適合開始日、記録日、ステータスを
         // DocInfo から DocumentModel(KarteEntry) に移す
         karteModel.toPersist();
-
+        
         String json = getConverter().toJson(karteModel);
 
         String path = "karte/document";

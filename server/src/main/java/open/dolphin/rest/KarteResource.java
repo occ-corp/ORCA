@@ -36,19 +36,27 @@ public class KarteResource extends AbstractResource {
 
         KarteBean karte = karteServiceBean.getKarte(patientPK, fromDate);
 
-        // シリアライズ時のネスト防止のためKarteEntryBean.karteにnullを設定する
-        // DocumentDelegaterで元に戻す
+        // PatientMemoModel -> PatientMemoTransferModel
         List<PatientMemoModel> memoList = karte.getMemoList();
         if (memoList != null && !memoList.isEmpty()) {
-            for (PatientMemoModel entry : memoList) {
-                entry.setKarteBean(null);
+            List<PatientMemoTransferModel> memoTransList = new ArrayList<PatientMemoTransferModel>();
+            for (PatientMemoModel pmm : memoList) {
+                PatientMemoTransferModel pmtm = new PatientMemoTransferModel();
+                pmtm.setKarteEntryBean(pmm);
+                memoTransList.add(pmtm);
             }
+            karte.setMemoTransList(memoTransList);
         }
+        // AppointmentModel -> AppointmentTransferModel
         List<AppointmentModel> appoList = karte.getAppointmentList();
         if (appoList != null && !appoList.isEmpty()) {
-            for (AppointmentModel entry : appoList) {
-                entry.setKarteBean(null);
+            List<AppointmentTransferModel> appoTransList = new ArrayList<AppointmentTransferModel>();
+            for (AppointmentModel appo : appoList) {
+                AppointmentTransferModel atm = new AppointmentTransferModel();
+                atm.setKarteEntryBean(appo);
+                appoTransList.add(atm);
             }
+            karte.setAppoTransList(appoTransList);
         }
 
         String json = getConverter().toJson(karte);
