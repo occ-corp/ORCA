@@ -202,7 +202,6 @@ public final class PVTClientServer implements PVTServer {
             Future<PatientVisitModel> future = exec.submit(new PvtPostTask(pvtXml));
             // FEV-70にexportする
             PatientVisitModel pvt = future.get();
-            // FEV-70にexportする
             if (pvt != null) {
                 exec.submit(new FevPostTask(pvt));
             }

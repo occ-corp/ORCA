@@ -94,13 +94,11 @@ public class PvtServletServer implements ServletContextListener {
     public void postPvt(String pvtXml) {
         try {
             // Pvtをサーバーに登録する
-            Callable task1 = new PvtPostTask(pvtXml);
-            Future<PatientVisitModel>future = exec.submit(task1);
-            PatientVisitModel pvt = future.get();
+            Future<PatientVisitModel>future = exec.submit(new PvtPostTask(pvtXml));
             // FEV-70にexportする
+            PatientVisitModel pvt = future.get();
             if (pvt != null) {
-                Runnable task2 = new FevPostTask(pvt);
-                exec.submit(task2);
+                exec.submit(new FevPostTask(pvt));
             }
         } catch (NamingException ex) {
         } catch (InterruptedException ex) {
