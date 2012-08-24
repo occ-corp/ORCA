@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.UnknownHostException;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
@@ -143,14 +144,14 @@ public final class PVTClientServer implements PVTServer {
         try {
             InetSocketAddress address = null;
             String test = getBindAddress();
-
-            if (test != null && (!test.equals(""))) {
+            
+            if (test != null && !test.isEmpty()) {
                 debug("PVT ServerSocket bind address = " + getBindAddress());
                 try {
                     InetAddress addr = InetAddress.getByName(test);
                     address = new InetSocketAddress(addr, port);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
+                } catch (UnknownHostException e) {
+                    debug("Invalid bind address. Use localhost.");
                 }
             }
 
@@ -164,9 +165,9 @@ public final class PVTClientServer implements PVTServer {
             thread = new Thread(serverThread, "PVT server socket");
             thread.start();
 
-        } catch (IOException e) {
-            e.printStackTrace(System.err);
-            logger.warn("IOException while creating the ServerSocket: " + e.toString());
+        } catch (IOException ex) {
+            ex.printStackTrace(System.err);
+            logger.warn("IOException while creating the ServerSocket: " + ex.toString());
         }
     }
 
@@ -211,7 +212,7 @@ public final class PVTClientServer implements PVTServer {
         private Selector selector = null;
         private boolean isRunning;
         
-        private ServerThread(InetSocketAddress address) {
+        private ServerThread(InetSocketAddress address) throws IOException {
             this.address = address;
             initialize();
         }
@@ -221,21 +222,18 @@ public final class PVTClientServer implements PVTServer {
             selector.wakeup();
         }
         
-        private void initialize() {
-            
-            try {
-                // ソケットチャネルを生成・設定
-                ssc = ServerSocketChannel.open();
-                ssc.socket().setReuseAddress(true);
-                ssc.socket().bind(address);
-                // ノンブロッキングモードに設定
-                ssc.configureBlocking(false);
-                // セレクタの生成
-                selector = Selector.open();
-                // ソケットチャネルをセレクタに登録
-                ssc.register(selector, SelectionKey.OP_ACCEPT, new PvtClaimAcceptHandler(PVTClientServer.this));
-            } catch (IOException ex) {
-            }
+        private void initialize() throws IOException {
+
+            // ソケットチャネルを生成・設定
+            ssc = ServerSocketChannel.open();
+            ssc.socket().setReuseAddress(true);
+            ssc.socket().bind(address);
+            // ノンブロッキングモードに設定
+            ssc.configureBlocking(false);
+            // セレクタの生成
+            selector = Selector.open();
+            // ソケットチャネルをセレクタに登録
+            ssc.register(selector, SelectionKey.OP_ACCEPT, new PvtClaimAcceptHandler(PVTClientServer.this));
         }
 
         @Override
