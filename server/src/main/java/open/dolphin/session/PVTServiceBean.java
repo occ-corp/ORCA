@@ -2,13 +2,11 @@ package open.dolphin.session;
 
 import java.util.Date;
 import java.util.List;
-import java.util.logging.Logger;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.NonUniqueResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 
@@ -36,9 +34,6 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private static final String PID = "pid";
     private static final String ID = "id";
     private static final String DATE = "date";
-    
-    private static final String QUERY_PROPERTY_BY_KEY_AND_VALUE 
-            = "from UserPropertyModel u where u.key = :key and u.value = :value";
 
     @PersistenceContext
     private EntityManager em;
@@ -46,8 +41,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     @Inject
     private PvtServiceMediator mediator;
     
-    private static final Logger logger = Logger.getLogger(PVTServiceBean.class.getName());
-    
+    //private static final Logger logger = Logger.getLogger(PVTServiceBean.class.getName());
 
     /**
      * 患者来院情報を登録する。
@@ -59,24 +53,6 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // CLAIM 送信の場合 facilityID がデータベースに登録されているものと異なる場合がある
         // 施設IDを認証にパスしたユーザの施設IDに設定する。
         String fid = pvt.getFacilityId();
-        
-        // fidがない場合はjmariCodeから設定する
-        if (fid == null || fid.isEmpty()) {
-            String jmariCode = pvt.getJmariNumber();
-            try {
-                UserPropertyModel model = (UserPropertyModel) 
-                        em.createQuery(QUERY_PROPERTY_BY_KEY_AND_VALUE)
-                        .setParameter("key", "jmariCode")
-                        .setParameter("value", jmariCode)
-                        .getSingleResult();
-                fid = model.getFacilityModel().getFacilityId();
-            } catch (NoResultException ex) {
-                fid = IInfoModel.DEFAULT_FACILITY_OID;
-            } catch (NonUniqueResultException ex) {
-                fid = IInfoModel.DEFAULT_FACILITY_OID;
-            }
-        }
-        
         PatientModel patient = pvt.getPatientModel();
         pvt.setFacilityId(fid);
         patient.setFacilityId(fid);

@@ -469,4 +469,16 @@ public final class ProjectSettingDialog implements PropertyChangeListener {
         dialog.dispose();
         notifyResult();
     }
+
+//masuda^
+    public void saveOnly() {
+        Iterator<AbstractSettingPanel> iter = settingMap.values().iterator();
+        while (iter.hasNext()) {
+            AbstractSettingPanel p = iter.next();
+            logger.debug(p.getTitle());
+            p.save();
+        }
+        Project.saveUserDefaults();
+    }
+//masuda$
 }

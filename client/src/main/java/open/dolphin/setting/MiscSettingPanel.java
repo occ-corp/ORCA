@@ -1041,6 +1041,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     
     private void saveProperties() {
         
+        // サーバーに保存する前にPropertiesを更新する
+        getContext().saveOnly();
+        
         List<UserPropertyModel> list = new ArrayList<UserPropertyModel>();
         Properties prop = Project.getUserDefaults();
         

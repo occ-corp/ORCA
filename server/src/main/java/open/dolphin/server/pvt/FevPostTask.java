@@ -34,7 +34,7 @@ public class FevPostTask implements Runnable {
             return;
         }
         this.model = pvt;
-        Map<String, String>propMap = masudaServiceBean.getUserPropertyMap(pvt.getFacilityId());
+        Map<String, String> propMap = masudaServiceBean.getUserPropertyMap(pvt.getFacilityId());
         sharePath = propMap.get("fevSharePath");
         String value = propMap.get("fevOnServer");
         sendToFEV = sharePath != null && !sharePath.isEmpty() && "true".equals(value); 

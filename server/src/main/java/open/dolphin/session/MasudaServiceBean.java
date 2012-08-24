@@ -29,19 +29,7 @@ public class MasudaServiceBean {
     @PersistenceContext
     private EntityManager em;
 
-    // ユーザープロパティー
-    public Map<String, String> getUserPropertyMap(String fid) {
-        Map<String, String> propMap = new HashMap<String, String>();
-        List<UserPropertyModel> list = (List<UserPropertyModel>) 
-                em.createQuery("from UserPropertyModel u where u.facilityModel.facilityId = :fid")
-                .setParameter("fid", fid)
-                .getResultList();
-        for (UserPropertyModel model : list) {
-            propMap.put(model.getKey(), model.getValue());
-        }
-        return propMap;
-    }
-    
+
     // 定期処方
     @SuppressWarnings("unchecked")
     public List<RoutineMedModel> getRoutineMedModels(long karteId, int firstResult, int maxResults) {
@@ -1083,4 +1071,32 @@ public class MasudaServiceBean {
         
         return list;
     }
+    
+    // ユーザープロパティー
+    public Map<String, String> getUserPropertyMap(String fid) {
+        
+        Map<String, String> propMap = new HashMap<String, String>();
+        List<UserPropertyModel> list = getUserProperties(fid);
+        for (UserPropertyModel model : list) {
+            propMap.put(model.getKey(), model.getValue());
+        }
+        return propMap;
+    }
+    
+    // JMARI番号からfidを探す
+    public String getFidFromJmari(String jmariCode) {
+
+        String fid = IInfoModel.DEFAULT_FACILITY_OID;
+        try {
+            UserPropertyModel model = (UserPropertyModel) 
+                    em.createQuery("from UserPropertyModel u where u.key = :key and u.value = :value")
+                    .setParameter("key", "jmariCode")
+                    .setParameter("value", jmariCode).getSingleResult();
+            fid = model.getFacilityModel().getFacilityId();
+        } catch (NoResultException ex) {
+        } catch (NonUniqueResultException ex) {
+        }
+        return fid;
+    }
+    
 }
