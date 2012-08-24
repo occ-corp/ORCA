@@ -1,7 +1,6 @@
 package open.dolphin.impl.server;
 
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.ServerSocketChannel;
@@ -39,8 +38,7 @@ public class PvtClaimAcceptHandler implements IHandler {
         channel.register(key.selector(), SelectionKey.OP_READ, handler);
 
         // ログ出力
-        //String addr = ((InetSocketAddress) channel.getRemoteAddress()).getAddress().getHostAddress(); // JDK7
-        String addr = ((InetSocketAddress) channel.socket().getRemoteSocketAddress()).getAddress().getHostAddress();
+        String addr = channel.socket().getInetAddress().getHostAddress();
         String time = DateFormat.getDateTimeInstance().format(new Date());
         ClientContext.getPvtLogger().info("Connected from " + addr + " at " + time);
     }
