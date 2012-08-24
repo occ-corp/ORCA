@@ -1,25 +1,14 @@
 package open.dolphin.impl.server;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.StringReader;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.nio.channels.ClosedChannelException;
-import java.nio.channels.SelectionKey;
-import java.nio.channels.Selector;
-import java.nio.channels.ServerSocketChannel;
-import java.util.Iterator;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.MainWindow;
-import open.dolphin.delegater.PVTDelegater;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.UserModel;
-import open.dolphin.pvtclaim.PVTBuilder;
 import open.dolphin.server.PVTServer;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
@@ -44,7 +33,7 @@ public final class PVTClientServer implements PVTServer {
     private String bindAddress;
     // ServerSocketのスレッド nio!
     private Thread thread;
-    private ServerThread serverThread;
+    private PvtServerThread serverThread;
     
     // PVT登録処理のSingle Thread Executor
     private ExecutorService exec;
@@ -161,7 +150,7 @@ public final class PVTClientServer implements PVTServer {
 
             logger.info("PVT Server is binded " + address + " with encoding: " + encoding);
 
-            serverThread = new ServerThread(address);
+            serverThread = new PvtServerThread(PVTClientServer.this, address);
             thread = new Thread(serverThread, "PVT server socket");
             thread.start();
 
@@ -181,11 +170,12 @@ public final class PVTClientServer implements PVTServer {
         // thread終了を待つ
         try {
             thread.join(100);
-        } catch (InterruptedException ex) {
-        }
-        // ServerSocketのThread破棄する
+            // ServerSocketのThread破棄する
         thread.interrupt();
         thread = null;
+        } catch (InterruptedException ex) {
+        } catch (NullPointerException ex) {
+        }
 
         // SocketReadTaskをシャットダウンする
         shutdownExecutor();
@@ -204,98 +194,20 @@ public final class PVTClientServer implements PVTServer {
         }
         exec = null;
     }
-
-    private final class ServerThread implements Runnable {
-        
-        private InetSocketAddress address;
-        private ServerSocketChannel ssc = null;
-        private Selector selector = null;
-        private boolean isRunning;
-        
-        private ServerThread(InetSocketAddress address) throws IOException {
-            this.address = address;
-            initialize();
-        }
-
-        private void stop() {
-            isRunning = false;
-            selector.wakeup();
-        }
-        
-        private void initialize() throws IOException {
-
-            // ソケットチャネルを生成・設定
-            ssc = ServerSocketChannel.open();
-            ssc.socket().setReuseAddress(true);
-            ssc.socket().bind(address);
-            // ノンブロッキングモードに設定
-            ssc.configureBlocking(false);
-            // セレクタの生成
-            selector = Selector.open();
-            // ソケットチャネルをセレクタに登録
-            ssc.register(selector, SelectionKey.OP_ACCEPT, new PvtClaimAcceptHandler(PVTClientServer.this));
-        }
-
-        @Override
-        public void run() {
-            
-            isRunning = true;
-            
-            try {
-                while (selector.select() >= 0 && isRunning) {
-
-                    for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
-                        SelectionKey key = itr.next();
-                        itr.remove();
-                        // アタッチしたオブジェクトに処理を委譲
-                        IHandler handler = (IHandler) key.attachment();
-                        handler.handle(key);
-                    }
-                }
-            } catch (ClosedChannelException ex) {
-                logger.warn("ソケットがクローズしています:" + ex);
-            } catch (IOException ex) {
-                logger.warn("通信エラーが発生しました" + ex);
-            } finally {
-                try {
-                    for (SelectionKey key : selector.keys()) {
-                        key.channel().close();
-                    }
-                } catch (IOException ex) {
-                    ex.printStackTrace(System.err);
-                }
-            }
-        }
-    }
     
     // PvtClaimIOHanlderから呼ばれる
     public void putPvt(String pvtXml) {
-        PutPvtTask task = new PutPvtTask(pvtXml);
-        exec.submit(task);
-    }
-        
-    private final class PutPvtTask implements Runnable {
-
-        private String pvtXml;
-
-        private PutPvtTask(String xml) {
-            pvtXml = xml;
-        }
-
-        @Override
-        public void run() {
-            
-            BufferedReader r = new BufferedReader(new StringReader(pvtXml));
-            PVTBuilder builder = new PVTBuilder();
-            builder.parse(r);
-            PatientVisitModel model = builder.getProduct();
-
-            //FEV-70に患者情報を送る
-            SendPatientInfoToFEV.getInstance().send(model);
-            // シングルトン化
-            PVTDelegater pdl = PVTDelegater.getInstance();
-            
-            pdl.addPvt(model);
+        try {
+            // Pvtをサーバーに登録する
+            Future<PatientVisitModel> future = exec.submit(new PvtPostTask(pvtXml));
+            // FEV-70にexportする
+            PatientVisitModel pvt = future.get();
+            // FEV-70にexportする
+            if (pvt != null) {
+                exec.submit(new FevPostTask(pvt));
+            }
+        } catch (InterruptedException ex) {
+        } catch (ExecutionException ex) {
         }
     }
     

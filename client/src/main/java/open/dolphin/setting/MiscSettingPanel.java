@@ -41,6 +41,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final String USE_FEV = "useFev";
     public static final String FEV40_PATH = "fev40Path";
     public static final String SEND_PATIENT_INFO = "sendPatientInfo";
+    public static final String PVT_ON_SERVER = "pvtOnServer";
+    public static final String FEV_ON_SERVER = "fevOnServer";
 
     public static final String FOLLOW_MEDICOM = "followMedicom";
     public static final String SANTEI_CHECK = "santeiCheck";
@@ -81,6 +83,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final boolean DEFAULT_FOLLOW_MEDICOM = true;
     public static final boolean DEFAULT_SANTEI_CHECK = true;
     public static final boolean DEFAULT_EX_MED = false;
+    
+    public static final boolean DEFAULT_PVT_ON_SERVER = false;
+    public static final boolean DEFAULT_FEV_ON_SERVER = false;
 
    // public static final int DEFAULT_STAMP_HOLDER_CELLPADDING = 3;
 
@@ -130,6 +135,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
     private JLabel lbl_fev70;
     private JLabel lbl_fevShareFolder;
+    
+    private JCheckBox cb_PvtOnServer;
+    private JCheckBox cb_FevOnServer;
     
     private JButton btn_discardSize;
     private JButton btn_openBase;
@@ -368,6 +376,14 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(btn_loadProp, 1, 1, GridBagConstraints.CENTER);
         JPanel inspector = gbl.getProduct();
         
+        gbl = new GridBagBuilder("サーバー設定");
+        cb_PvtOnServer = new JCheckBox("PVT受信登録処理をサーバーで行う");
+        cb_FevOnServer = new JCheckBox("FEV患者登録処理をサーバーで行う");
+        cb_FevOnServer.setToolTipText("出力先フォルダは設定１で入力してください");
+        gbl.add(cb_PvtOnServer, 0, 0, GridBagConstraints.CENTER);
+        gbl.add(cb_FevOnServer, 0, 1, GridBagConstraints.CENTER);
+        JPanel pvt = gbl.getProduct();
+        
         gbl = new GridBagBuilder("カルテスクロール");
         //cb_skipScroll = new JCheckBox("スキップスクロール有効");
         //gbl.add(cb_skipScroll, 0, 0, GridBagConstraints.CENTER);
@@ -411,6 +427,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(medPanel, 0, 0, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         //gbl.add(stamp, 0, 1, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         gbl.add(inspector, 0, 2, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        gbl.add(pvt, 0, 3, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         //gbl.add(chartSyncPanel, 0, 3, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         gbl.add(karteScroll, 0, 4, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         gbl.add(etensu, 0, 5, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
@@ -730,6 +747,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         val = val != null ? val : "";
         tf_rsbBrowserPath.setText(val);
 */
+        // PVT
+        cb_PvtOnServer.setSelected(model.pvtOnServer);
+        cb_FevOnServer.setSelected(model.fevOnServer);
         // Pacs
         cb_UsePacs.setSelected(model.usePacs);
         cb_SuffixSearch.setSelected(model.useSuffixSearch);
@@ -799,6 +819,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         model.rsbRsnPath = tf_rsbRsnPath.getText().trim();
         model.rsbBrowserPath = tf_rsbBrowserPath.getText().trim();
 */
+        // PVT
+        model.pvtOnServer = cb_PvtOnServer.isSelected();
+        model.fevOnServer = cb_FevOnServer.isSelected();
+        
         // Pacs
         model.usePacs = cb_UsePacs.isSelected();
         model.useSuffixSearch = cb_SuffixSearch.isSelected();
@@ -839,6 +863,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         private String rsbBrowserPath;
         private boolean useJms;
 */
+        private boolean pvtOnServer;
+        private boolean fevOnServer;
+        
         private boolean usePacs;
         private boolean useSuffixSearch;
         private String remoteHost;
@@ -880,6 +907,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             rsbRsnPath = Project.getString(RSB_RSN_PATH, DEFAULT_RSB_RSN_PATH);
             rsbBrowserPath = Project.getString(RSB_BROWSER_PATH, DEFAULT_RSB_BROWSER_PATH);
 */
+            // PVT
+            pvtOnServer = Project.getBoolean(PVT_ON_SERVER, DEFAULT_PVT_ON_SERVER);
+            fevOnServer = Project.getBoolean(FEV_ON_SERVER, DEFAULT_FEV_ON_SERVER);
+            
             // Pacs
             usePacs = Project.getBoolean(USE_PACS, DEFAULT_USE_PACS);
             useSuffixSearch = Project.getBoolean(PACS_USE_SUFFIXSEARCH, DEFAULT_PACS_SUFFIX_SEARCH);
@@ -920,6 +951,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             Project.setString(RSB_RSN_PATH, rsbRsnPath);
             Project.setString(RSB_BROWSER_PATH, rsbBrowserPath);
 */
+            // PVT
+            Project.setBoolean(PVT_ON_SERVER, pvtOnServer);
+            Project.setBoolean(FEV_ON_SERVER, fevOnServer);
+            
             // Pacs
             Project.setString(PACS_REMOTE_HOST, remoteHost);
             Project.setInt(PACS_REMOTE_PORT, remotePort);

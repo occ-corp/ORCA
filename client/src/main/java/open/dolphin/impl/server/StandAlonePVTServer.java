@@ -12,6 +12,7 @@ import javax.swing.JTextArea;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.ClientContextStub;
 import open.dolphin.delegater.UserDelegater;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.plugin.PluginLoader;
 import open.dolphin.project.Project;
@@ -27,7 +28,6 @@ import org.apache.log4j.Logger;
  */
 public class StandAlonePVTServer {
 
-    private static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
     private PVTServer pvtServer;
     private Logger pvtLogger;
     private ScheduledFuture timerHandler;
@@ -56,7 +56,7 @@ public class StandAlonePVTServer {
 
         String fid = Project.isValid()
                 ? Project.getFacilityId()
-                : DEFAULT_FACILITY_OID;
+                : IInfoModel.DEFAULT_FACILITY_OID;
 
         // 10秒ごとにログインをトライする
         Login l = new Login(fid, userId, password);

@@ -8,6 +8,9 @@ package open.dolphin.infomodel;
  */
 public interface IInfoModel extends java.io.Serializable, java.lang.Cloneable {
     
+    // Default facility oid
+    public static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
+    
     /** ISO 8601 style date format */
     public static final String ISO_8601_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss";
     

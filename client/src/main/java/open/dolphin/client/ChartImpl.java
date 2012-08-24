@@ -107,7 +107,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     public PatientInspector getPatientInspector() {
         return inspector;
     }
-    private static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
     private ChartImplExtensions ext;
 //masuda$
     // task
@@ -535,6 +534,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         // 患者ID Status パネルの左に配置する
         //statusPanel.setLeftInfo(patienIdPrefix + getKarte().getPatientModel().getPatientId()); // 患者ID:xxxxxx
         // 最終受診日を取得する
+        final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         Date lastDocDate = getKarte().getLastDocDate();
         sb = new StringBuilder();
         sb.append(patienIdPrefix);

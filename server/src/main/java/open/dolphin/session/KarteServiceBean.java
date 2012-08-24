@@ -965,8 +965,6 @@ public class KarteServiceBean {
 
     
 //masuda^   算定情報登録
-    private static final SimpleDateFormat frmt2 = new SimpleDateFormat("yyyyMMdd");
-    
     //@Asynchronous
     private void registSanteiHistory(DocumentModel document) {
         
@@ -1059,6 +1057,7 @@ public class KarteServiceBean {
         final String sql1 = "select distinct e.srycd from ETensuModel1 e";
         final String sql2 = sql1 + " where e.yukostymd <= :date and :date <= e.yukoedymd";
         final String sql3 = sql2 + " and e.srycd in (:srycds)";
+        final SimpleDateFormat frmt2 = new SimpleDateFormat("yyyyMMdd");
         
         List<String> list;
         if (date == null && srycds == null) {

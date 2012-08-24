@@ -31,7 +31,6 @@ public class CheckInteractionPanel {
     private HashMap<String, String> kensakuItems;        // 検索にマッチした薬剤
 
     private static final String yakuzaiClassCode = "2";    // 薬剤のclaim class code
-    private static final SimpleDateFormat frmt = new SimpleDateFormat("yyyy-MM-dd");
     private static final int searchPeriod = 3;
     private BlockGlass blockGlass;
 
@@ -117,6 +116,7 @@ public class CheckInteractionPanel {
             ClaimBundle cb = (ClaimBundle) mm.getModel();
             for (ClaimItem ci : cb.getClaimItem()) {
                 if (yakuzaiClassCode.equals(ci.getClassCode())) {     // 用法などじゃなくて薬剤なら、薬剤リストに追加
+                    final SimpleDateFormat frmt = new SimpleDateFormat("yyyy-MM-dd");
                     String code = ci.getCode();     // コード
                     String name = ci.getName();     // 薬剤名
                     String date = frmt.format(mm.getStarted());     // 処方日

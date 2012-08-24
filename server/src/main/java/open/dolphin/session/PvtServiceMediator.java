@@ -43,8 +43,7 @@ public class PvtServiceMediator {
     private GregorianCalendar today;
     private GregorianCalendar tomorrow;
 
-    private static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-    private static final Logger logger = Logger.getLogger(PvtServiceMediator.class.getName());
+    private static final Logger logger = Logger.getLogger(PvtServiceMediator.class.getSimpleName());
     
     @PersistenceContext
     private EntityManager em;
@@ -217,6 +216,7 @@ public class PvtServiceMediator {
         setToday();
         
         // サーバーの「今日」で管理する
+        final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         String fromDate = frmt.format(today.getTime());
         String toDate = frmt.format(tomorrow.getTime());
 

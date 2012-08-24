@@ -1,4 +1,3 @@
-
 package open.dolphin.session;
 
 import java.text.SimpleDateFormat;
@@ -25,13 +24,24 @@ import org.hibernate.search.jpa.Search;
 @Stateless
 public class MasudaServiceBean {
 
-    private static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME); //"yyyy-MM-dd"
-    private static final SimpleDateFormat frmt2 = new SimpleDateFormat("yyyyMMdd");
     private static final String FINISHED = "finished";
-    
+
     @PersistenceContext
     private EntityManager em;
 
+    // ユーザープロパティー
+    public Map<String, String> getUserPropertyMap(String fid) {
+        Map<String, String> propMap = new HashMap<String, String>();
+        List<UserPropertyModel> list = (List<UserPropertyModel>) 
+                em.createQuery("from UserPropertyModel u where u.facilityModel.facilityId = :fid")
+                .setParameter("fid", fid)
+                .getResultList();
+        for (UserPropertyModel model : list) {
+            propMap.put(model.getKey(), model.getValue());
+        }
+        return propMap;
+    }
+    
     // 定期処方
     @SuppressWarnings("unchecked")
     public List<RoutineMedModel> getRoutineMedModels(long karteId, int firstResult, int maxResults) {
@@ -227,6 +237,7 @@ public class MasudaServiceBean {
     // FEV-70関連
     public PatientVisitModel getLastPvtInThisMonth(String fid, String ptId) {
 
+        final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         GregorianCalendar gc = new GregorianCalendar();
         int year = gc.get(GregorianCalendar.YEAR);
         int month = gc.get(GregorianCalendar.MONTH);
@@ -248,8 +259,8 @@ public class MasudaServiceBean {
                     .setMaxResults(1)
                     .getSingleResult();
             // 保険がnullだとconverterでexceptionが出てしまうので取り敢えず空のリストを設定する
-            List<HealthInsuranceModel> insurances = Collections.emptyList();
-            result.getPatientModel().setHealthInsurances(insurances);
+            //List<HealthInsuranceModel> insurances = Collections.emptyList();
+            //result.getPatientModel().setHealthInsurances(insurances);
         } catch (NoResultException e) {
         }
         return result;

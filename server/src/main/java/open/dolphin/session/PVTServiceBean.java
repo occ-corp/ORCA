@@ -37,7 +37,6 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private static final String ID = "id";
     private static final String DATE = "date";
     
-    private static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
     private static final String QUERY_PROPERTY_BY_KEY_AND_VALUE 
             = "from UserPropertyModel u where u.key = :key and u.value = :value";
 
@@ -49,16 +48,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     
     private static final Logger logger = Logger.getLogger(PVTServiceBean.class.getName());
     
-/*
-    // CLAIM受診したpvtXmlをパースして登録する。ここではfidはないので後でJMARI番号から参照する
-    public void parseAndAddPvt(String pvtXml) {
-        BufferedReader br = new BufferedReader(new StringReader(pvtXml));
-        PVTBuilder builder = new PVTBuilder();
-        builder.parse(br);
-        PatientVisitModel pvt = builder.getProduct();
-        addPvt(pvt);
-    }
-*/
+
     /**
      * 患者来院情報を登録する。
      * @param spec 来院情報を保持する DTO オブジェクト
@@ -81,9 +71,9 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                         .getSingleResult();
                 fid = model.getFacilityModel().getFacilityId();
             } catch (NoResultException ex) {
-                fid = DEFAULT_FACILITY_OID;
+                fid = IInfoModel.DEFAULT_FACILITY_OID;
             } catch (NonUniqueResultException ex) {
-                fid = DEFAULT_FACILITY_OID;
+                fid = IInfoModel.DEFAULT_FACILITY_OID;
             }
         }
         

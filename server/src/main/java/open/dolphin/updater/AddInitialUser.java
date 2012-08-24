@@ -12,7 +12,6 @@ import open.dolphin.infomodel.*;
 public class AddInitialUser extends AbstractUpdaterModule {
     
     private static final String MEMBER_TYPE = "FACILITY_USER";
-    private static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
     private static final String DEFAULT_FACILITY_NAME = "シルククリニック";
     private static final String ADMIN_USER = "OpenDolphin";
     private static final String ADMIN_PASS_MD5 = "6129b1bc2af957614808c217db83a175";    // DigitalGlobe
@@ -64,7 +63,7 @@ public class AddInitialUser extends AbstractUpdaterModule {
         
         // 施設情報
         FacilityModel facility = new FacilityModel();
-        facility.setFacilityId(DEFAULT_FACILITY_OID);
+        facility.setFacilityId(IInfoModel.DEFAULT_FACILITY_OID);
         facility.setFacilityName(DEFAULT_FACILITY_NAME);
         facility.setMemberType(MEMBER_TYPE);
         facility.setZipCode("");
@@ -79,7 +78,7 @@ public class AddInitialUser extends AbstractUpdaterModule {
         // ユーザー情報
         UserModel admin = new UserModel();
         admin.setFacilityModel(facility);
-        admin.setUserId(DEFAULT_FACILITY_OID + IInfoModel.COMPOSITE_KEY_MAKER + ADMIN_USER);
+        admin.setUserId(IInfoModel.DEFAULT_FACILITY_OID + IInfoModel.COMPOSITE_KEY_MAKER + ADMIN_USER);
         admin.setPassword(ADMIN_PASS_MD5);
         admin.setSirName(ADMIN_SIR_NAME);
         admin.setGivenName(ADMIN_GIVEN_NAME);
@@ -117,7 +116,7 @@ public class AddInitialUser extends AbstractUpdaterModule {
     private void addDemoPatient() {
         
         PatientModel pm = new PatientModel();
-        pm.setFacilityId(DEFAULT_FACILITY_OID);
+        pm.setFacilityId(IInfoModel.DEFAULT_FACILITY_OID);
         pm.setPatientId("000001");
         pm.setKanaFamilyName("トクガワ");
         pm.setKanaGivenName("ヨシムネ");

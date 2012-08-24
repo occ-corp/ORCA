@@ -87,7 +87,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         "クリックするとコンボボックスが立ち上がります。", "クリックするとコンボボックスが立ち上がります。",
         "右クリックでカレンダがポップアップします。", "右クリックでカレンダがポップアップします。", null};
     
-    private static final SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
+    //private static final SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
 
     private ListTableModel<RegisteredDiagnosisModel> tableModel; // TableModel
     private ListTableSorter sorter;
@@ -138,7 +138,6 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 
 //masuda    最終受診日＝今日受診している場合は今日，していないばあいは最後の受診日
     private String lastVisit;
-    private static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
 
 //pns   Stamp から drop を受け取る場合のアクション
     private int action; // 通常は MOVE で，ALT が押されていたら COPY になる
@@ -184,6 +183,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         if (visit != null) {
             lastVisit = visit;
         } else {
+            final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
             Date lastDocDate = getContext().getKarte().getLastDocDate();
             lastVisit = (lastDocDate == null) ? MMLDate.getDate() : frmt.format(lastDocDate);
         }

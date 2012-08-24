@@ -14,7 +14,6 @@ import javax.persistence.*;
 @Table(name = "msd_usingdrug")
 public class UsingDrugModel implements Serializable, Comparable {
 
-    private static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
@@ -88,6 +87,7 @@ public class UsingDrugModel implements Serializable, Comparable {
     }
 
     public String getCreatedStr() {
+        final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         return frmt.format(created);
     }
     

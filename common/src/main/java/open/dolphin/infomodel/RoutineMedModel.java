@@ -18,8 +18,6 @@ import javax.persistence.*;
 @Table(name = "msd_routineMed")
 public class RoutineMedModel implements Serializable, Comparable, Cloneable{
     
-    private static final SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-    
     @Id 
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
@@ -98,6 +96,7 @@ public class RoutineMedModel implements Serializable, Comparable, Cloneable{
     
     // for display
     public String getRegistDateStr() {
+        final SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         return sdf.format(registDate);
     }
     

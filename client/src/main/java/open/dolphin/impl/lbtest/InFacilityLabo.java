@@ -57,7 +57,6 @@ public class InFacilityLabo {
     private static final ImageIcon saveIcon = ClientContext.getImageIcon("save_16.gif");
     
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm";
-    private static final SimpleDateFormat dateFrmt = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
     
     private JDialog dialog;
     private JPanel panel;
@@ -183,6 +182,7 @@ public class InFacilityLabo {
     
     private void initComponents() {
         
+        final SimpleDateFormat dateFrmt = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
         JPanel north = new JPanel();
@@ -406,6 +406,7 @@ public class InFacilityLabo {
     }
     
     private String getFormattedDate(SimpleDate sd) {
+        final SimpleDateFormat dateFrmt = new SimpleDateFormat(DEFAULT_DATE_FORMAT);
         GregorianCalendar gc = new GregorianCalendar();
         gc.clear();
         gc.set(sd.getYear(), sd.getMonth(), sd.getDay());

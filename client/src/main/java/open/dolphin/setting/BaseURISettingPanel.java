@@ -13,6 +13,7 @@ import open.dolphin.client.AutoRomanListener;
 import open.dolphin.client.GUIFactory;
 import open.dolphin.client.RegexConstrainedDocument;
 import open.dolphin.helper.GridBagBuilder;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.project.ProjectStub;
 
 /**
@@ -26,9 +27,6 @@ public class BaseURISettingPanel extends AbstractSettingPanel {
     private static final String ID = "hostSetting";
     private static final String TITLE = "サーバ";
     private static final String ICON = "ntwrk_16.gif";
-//masuda^
-    private final String DEFAULT_FACILITY_ID = "1.3.6.1.4.1.9414.10.1";
-//masuda$
     
     // 設定用の GUI components
     private JTextField facilityIdField;
@@ -79,7 +77,7 @@ public class BaseURISettingPanel extends AbstractSettingPanel {
         baseURIField = GUIFactory.createTextField(15, null, null, null);
         
 //masuda^   DEFAULT_FACILITY_ID固定にする
-        facilityIdField.setText(DEFAULT_FACILITY_ID);
+        facilityIdField.setText(IInfoModel.DEFAULT_FACILITY_OID);
         facilityIdField.setEnabled(false);
 //masuda$
         

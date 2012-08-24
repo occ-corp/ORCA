@@ -9,6 +9,7 @@ import java.util.Enumeration;
 import java.util.Properties;
 import open.dolphin.client.ClientContext;
 import open.dolphin.exception.DolphinException;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.UserModel;
 
 /**
@@ -22,7 +23,6 @@ public final class ProjectStub implements java.io.Serializable {
     // デフォルトのプロジェクト名
     //-------------------------------------------
     private final String DEFAULT_PROJECT_NAME = "OpenDolphin";
-    private final String DEFAULT_FACILITY_ID = "1.3.6.1.4.1.9414.10.1";
     private final String REST_BASE_RESOURCE = "/dolphin/openSource";
 
     private boolean valid;
@@ -164,7 +164,7 @@ public final class ProjectStub implements java.io.Serializable {
      * @return ログイン画面に表示するFacilityID
      */
     public String getFacilityId() {
-        return getString(Project.FACILITY_ID, DEFAULT_FACILITY_ID);
+        return getString(Project.FACILITY_ID, IInfoModel.DEFAULT_FACILITY_OID);
     }
 
     /**

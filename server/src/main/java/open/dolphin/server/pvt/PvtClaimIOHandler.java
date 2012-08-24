@@ -1,4 +1,4 @@
-package open.dolphin.impl.server;
+package open.dolphin.server.pvt;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
@@ -7,29 +7,32 @@ import java.nio.ByteBuffer;
 import java.nio.channels.ClosedChannelException;
 import java.nio.channels.SelectionKey;
 import java.nio.channels.SocketChannel;
-import open.dolphin.client.ClientContext;
+import java.util.logging.Logger;
 
 /**
- * PvtClaimIOHandler, client
- *
+ * PvtClaimIOHandler
  * @author masuda, Masuda Naika
- * http://itpro.nikkeibp.co.jp/article/COLUMN/20060515/237871/
  */
 public class PvtClaimIOHandler implements IHandler {
     
     private static final int EOT = 0x04;
     private static final int ACK = 0x06;
     //private static final int NAK = 0x15;
+    private static final String encoding = "UTF-8";
 
     private static final int bufferSize = 8192;
     private ByteBuffer byteBuffer;
     
-    private PVTClientServer server;
     private ByteArrayOutputStream baos;
     private BufferedOutputStream bos;
+    
+    private PvtServletServer server;
    
+    private static final Logger logger = Logger.getLogger(PvtClaimIOHandler.class.getSimpleName());
+    private static final boolean DEBUG = false;
 
-    public PvtClaimIOHandler(PVTClientServer server) {
+    public PvtClaimIOHandler(PvtServletServer server) {
+        
         this.server = server;
         baos = new ByteArrayOutputStream();
         bos = new BufferedOutputStream(baos);
@@ -68,8 +71,7 @@ public class PvtClaimIOHandler implements IHandler {
             }
 
         } catch (IOException ex) {
-            ClientContext.getPvtLogger().warn("IOException while reading streams");
-            ClientContext.getPvtLogger().warn("Exception details:" + ex);
+            debug("IOException while reading streams:" + ex);
         }
     }
 
@@ -80,13 +82,15 @@ public class PvtClaimIOHandler implements IHandler {
         try {
             // 取得したxmlをPVT登録キューに送る
             bos.flush();
-            String pvtXml = baos.toString(server.getEncoding());
-            server.putPvt(pvtXml);
+            String pvtXml = baos.toString(encoding);
+            // PvtClaimListenWorkに登録処理をさせる
+            server.postPvt(pvtXml);
+            
             // ACKを返す
             channel.write(ByteBuffer.wrap(new byte[]{ACK}));
 
         } catch (IOException ex) {
-            ClientContext.getPvtLogger().warn("Exception while sending ACK:" + ex);
+            debug("Exception while sending ACK:" + ex);
         } finally {
             try {
                 // close channel
@@ -95,8 +99,14 @@ public class PvtClaimIOHandler implements IHandler {
                 bos.close();
                 baos.close();
             } catch (IOException ex) {
-                ClientContext.getPvtLogger().warn("Exception while closing channel:" + ex);
+                debug("Exception while closing channel:" + ex);
             }
+        }
+    }
+    
+    private void debug(String msg) {
+        if (DEBUG) {
+            logger.info(msg);
         }
     }
 }
