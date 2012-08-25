@@ -4,10 +4,11 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.MainWindow;
-import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.server.PVTServer;
 import org.apache.log4j.Level;
@@ -197,17 +198,9 @@ public final class PVTClientServer implements PVTServer {
     
     // PvtClaimIOHanlderから呼ばれる
     public void putPvt(String pvtXml) {
-        try {
-            // Pvtをサーバーに登録する
-            Future<PatientVisitModel> future = exec.submit(new PvtPostTask(pvtXml));
-            // FEV-70にexportする
-            PatientVisitModel pvt = future.get();
-            if (pvt != null) {
-                exec.submit(new FevPostTask(pvt));
-            }
-        } catch (InterruptedException ex) {
-        } catch (ExecutionException ex) {
-        }
+        
+        PvtPostTask task = new PvtPostTask(pvtXml);
+        exec.submit(task);
     }
     
     private void debug(String msg) {

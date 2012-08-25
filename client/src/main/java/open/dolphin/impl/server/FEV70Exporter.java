@@ -1,72 +1,52 @@
-package open.dolphin.server.pvt;
+package open.dolphin.impl.server;
 
 import java.io.*;
-import java.util.Map;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.session.MasudaServiceBean;
 
 /**
  * フクダ電子心電図ファイリングFEV-70に患者情報を送る
- * 
+ *
  * @author masuda, Masuda Naika
  */
-public class FevPostTask implements Runnable {
+public class FEV70Exporter {
 
-    private PatientVisitModel model;
-    private boolean sendToFEV;
+    private PatientVisitModel pvt;
+    private PatientVisitModel oldPvt;
     private String sharePath;
-    private MasudaServiceBean masudaServiceBean;
-    
-    public FevPostTask(PvtServletServer server, PatientVisitModel pvt) {
 
-        masudaServiceBean = server.getMasudaServiceBean();
-        if (pvt == null) {
-            sendToFEV = false;
-            return;
-        }
-        this.model = pvt;
-        Map<String, String> propMap = masudaServiceBean.getUserPropertyMap(pvt.getFacilityId());
-        sharePath = propMap.get("fevSharePath");
-        String value = propMap.get("fevOnServer");
-        sendToFEV = sharePath != null && !sharePath.isEmpty() && "true".equals(value); 
+    public FEV70Exporter(PatientVisitModel pvt, PatientVisitModel oldPvt, String sharePath) {
+        this.pvt = pvt;
+        this.oldPvt = oldPvt;
+        this.sharePath = sharePath;
     }
-    
-    @Override
-    public void run() {
 
-        if (!sendToFEV) {
-            return;
-        }
+    public void export() {
 
         try {
-            String fid = model.getFacilityId();
-            String ptId = model.getPatientId();
-            PatientVisitModel pvt = masudaServiceBean.getLastPvtInThisMonth(fid, ptId);
-
             // 今月受診がないなら送信
-            if (pvt == null) {
-                makeFile(model);
+            if (oldPvt == null) {
+                makeFile(pvt);
                 return;
             }
 
             // 名前・誕生日・性別が変わっていたら送信
-            PatientModel oldModel = pvt.getPatientModel();
+            PatientModel oldModel = oldPvt.getPatientModel();
             String oldBD = oldModel.getBirthday();
             String oldName = oldModel.getFullName();
             String oldGender = oldModel.getGenderDesc();
-            String newBD = model.getPatientBirthday();
-            String newName = model.getPatientName();
-            String newGender = model.getPatientGenderDesc();
+            String newBD = pvt.getPatientBirthday();
+            String newName = pvt.getPatientName();
+            String newGender = pvt.getPatientGenderDesc();
             if (!oldBD.equals(newBD) || !oldName.equals(newName) || !oldGender.equals(newGender)) {
-                makeFile(model);
+                makeFile(pvt);
             }
         } catch (FileNotFoundException ex) {
         } catch (IOException ex) {
         }
     }
-    
-    private void makeFile(PatientVisitModel pvt) throws FileNotFoundException, IOException{
+
+    private void makeFile(PatientVisitModel model) throws FileNotFoundException, IOException {
 
         if (!sharePath.endsWith(File.separator)) {
             sharePath = sharePath + File.separator;
@@ -77,13 +57,13 @@ public class FevPostTask implements Runnable {
             folder.mkdir();
         }
 
-        String patientId = pvt.getPatientId();
-        String patientName = pvt.getPatientName();
+        String patientId = model.getPatientId();
+        String patientName = model.getPatientName();
         String patientSex = "1";
-        if ("女".equals(pvt.getPatientGenderDesc())) {
+        if ("女".equals(model.getPatientGenderDesc())) {
             patientSex = "2";
         }
-        String patientBD = pvt.getPatientBirthday().replace("-", "/");
+        String patientBD = model.getPatientBirthday().replace("-", "/");
 
         StringBuilder sb = new StringBuilder();
         sb.append(patientId);

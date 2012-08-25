@@ -3,61 +3,72 @@ package open.dolphin.server.pvt;
 import java.io.BufferedReader;
 import java.io.StringReader;
 import java.util.Map;
-import java.util.concurrent.Callable;
 import java.util.logging.Logger;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.pvtclaim.PVTBuilder;
-import open.dolphin.session.MasudaServiceBean;
-import open.dolphin.session.PVTServiceBean;
 
 /**
  * PvtPostTask
+ *
  * @author masuda, Masuda Naika
  */
-public class PvtPostTask implements Callable {
-    
+public class PvtPostTask implements Runnable {
+
     private static final Logger logger = Logger.getLogger(PvtPostTask.class.getSimpleName());
-    
     private String pvtXml;
-    private PVTServiceBean pvtServiceBean;
-    private MasudaServiceBean masudaServiceBean;
-    
-    
+    private PvtServletServer server;
+
     public PvtPostTask(PvtServletServer server, String pvtXml) {
-        pvtServiceBean = server.getPvtServiceBean();
-        masudaServiceBean = server.getMasudaServiceBean();
+        this.server = server;
         this.pvtXml = pvtXml;
     }
 
     @Override
-    public PatientVisitModel call() throws Exception {
-        
+    public void run() {
+
         // pvtXmlからPatientVisitModelを作成する
         BufferedReader br = new BufferedReader(new StringReader(pvtXml));
         PVTBuilder builder = new PVTBuilder();
         builder.parse(br);
         PatientVisitModel pvt = builder.getProduct();
-        
-        // jmari番号に対応するfacilityIdを取得する
-        String fid = masudaServiceBean.getFidFromJmari(pvt.getJmariNumber());
+
+        // pvtがnullなら何もせずリターン
+        if (pvt == null) {
+            return;
+        }
+
+        // CLAIM送信されたJMARI番号からfacilityIdを取得する
+        String jmariNum = pvt.getJmariNumber();
+        String fid = server.getMasudaServiceBean().getFidFromJmari(jmariNum);
         pvt.setFacilityId(fid);
-        
-        // PVT登録するか否か
-        Map<String, String> propMap = masudaServiceBean.getUserPropertyMap(fid);
-        String value = propMap.get("pvtOnServer");
-        boolean pvtOnServer = "true".equals(value);
-        
+
+        // 施設プロパティーを取得する
+        Map<String, String> propMap = server.getMasudaServiceBean().getUserPropertyMap(fid);
+        boolean pvtOnServer = "true".equals(propMap.get("pvtOnServer"));
+        boolean fevOnServer = "ture".equals(propMap.get("fevOnServer"));
+        String sharePath = propMap.get("fevSharePath");
+        boolean sendToFEV = 
+                sharePath != null 
+                && !sharePath.isEmpty() 
+                && fevOnServer;
+
+        // PVT登録処理
         if (pvtOnServer) {
-            pvtServiceBean.addPvt(pvt);
+            server.getPvtServiceBean().addPvt(pvt);
             StringBuilder sb = new StringBuilder();
             sb.append("PVT post: ").append(pvt.getPvtDate());
             sb.append(", Fid=").append(pvt.getFacilityId());
             sb.append(", PtID=").append(pvt.getPatientId());
             sb.append(", Name=").append(pvt.getPatientName());
             logger.info(sb.toString());
-            return pvt;
         }
-        return null;
+        
+        // FEV-70 export処理
+        if (sendToFEV) {
+            String ptId = pvt.getPatientId();
+            PatientVisitModel history = server.getMasudaServiceBean().getLastPvtInThisMonth(fid, ptId);
+            FEV70Exporter fev = new FEV70Exporter(pvt, history, sharePath);
+            fev.export();
+        }
     }
-    
- }
+}

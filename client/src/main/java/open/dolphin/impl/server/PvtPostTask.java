@@ -2,16 +2,18 @@ package open.dolphin.impl.server;
 
 import java.io.BufferedReader;
 import java.io.StringReader;
-import java.util.concurrent.Callable;
+import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.delegater.PVTDelegater;
 import open.dolphin.infomodel.PatientVisitModel;
+import open.dolphin.project.Project;
 import open.dolphin.pvtclaim.PVTBuilder;
+import open.dolphin.setting.MiscSettingPanel;
 
 /**
  * PvtPostTask
  * @author masuda, Masuda Naika
  */
-public class PvtPostTask implements Callable {
+public class PvtPostTask implements Runnable {
     
     private String pvtXml;
     
@@ -20,15 +22,33 @@ public class PvtPostTask implements Callable {
     }
 
     @Override
-    public PatientVisitModel call() throws Exception {
-        BufferedReader r = new BufferedReader(new StringReader(pvtXml));
+    public void run() {
+        
+        // pvtXmlからPatientVisitModelを作成する
+        BufferedReader br = new BufferedReader(new StringReader(pvtXml));
         PVTBuilder builder = new PVTBuilder();
-        builder.parse(r);
+        builder.parse(br);
         PatientVisitModel pvt = builder.getProduct();
 
+        // pvtがnullなら何もせずリターン
+        if (pvt == null) {
+            return;
+        }
+        
+        // PVT登録処理
         PVTDelegater pdl = PVTDelegater.getInstance();
         pdl.addPvt(pvt);
         
-        return pvt;
+        // FEV70 export処理
+        String sharePath = Project.getString(MiscSettingPanel.FEV_SHAREPATH, MiscSettingPanel.DEFAULT_SHAREPATH);
+        boolean sendToFEV = sharePath != null 
+                && !sharePath.isEmpty() 
+                && Project.getBoolean(MiscSettingPanel.SEND_PATIENT_INFO, MiscSettingPanel.DEFAULT_SENDPATIENTINFO);
+        PatientVisitModel oldPvt = MasudaDelegater.getInstance().getLastPvtInThisMonth(pvt);
+        
+        if (sendToFEV) {
+            FEV70Exporter fev = new FEV70Exporter(pvt, oldPvt, sharePath);
+            fev.export();
+        }
     }
 }

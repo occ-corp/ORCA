@@ -3,13 +3,14 @@ package open.dolphin.server.pvt;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.concurrent.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
-import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.session.MasudaServiceBean;
 import open.dolphin.session.PVTServiceBean;
 
@@ -105,26 +106,14 @@ public class PvtServletServer implements ServletContextListener {
     public PVTServiceBean getPvtServiceBean() {
         return pvtServiceBean;
     }
-
+    
     public MasudaServiceBean getMasudaServiceBean() {
         return masudaServiceBean;
     }
 
     // PvtClaimIOHanlderから呼ばれる
     public void postPvt(String pvtXml) {
-        try {
-            // Pvtをサーバーに登録する
-            Callable task1 = new PvtPostTask(this, pvtXml);
-            Future<PatientVisitModel>future = exec.submit(task1);
-            // FEV-70にexportする
-            PatientVisitModel pvt = future.get();
-            if (pvt != null) {
-                Runnable task2 = new FevPostTask(this, pvt);
-                exec.submit(task2);
-            }
-        } catch (InterruptedException ex) {
-        } catch (ExecutionException ex) {
-        }
+        PvtPostTask task = new PvtPostTask(this, pvtXml);
+        exec.submit(task);
     }
-
 }
