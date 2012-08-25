@@ -23,7 +23,7 @@ public class PvtPostTask implements Callable {
     private MasudaServiceBean masudaServiceBean;
     
     
-    public PvtPostTask(PvtServerMBean server, String pvtXml) {
+    public PvtPostTask(PvtServletServer server, String pvtXml) {
         pvtServiceBean = server.getPvtServiceBean();
         masudaServiceBean = server.getMasudaServiceBean();
         this.pvtXml = pvtXml;

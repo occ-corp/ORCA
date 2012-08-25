@@ -21,7 +21,7 @@ import open.dolphin.session.PVTServiceBean;
  * @author masuda, Masuda Naika
  */
 @WebListener
-public class PvtServletServer implements ServletContextListener, PvtServerMBean {
+public class PvtServletServer implements ServletContextListener {
 
     private static final Logger logger = Logger.getLogger(PvtServletServer.class.getSimpleName());
     private static final String UTF8 = "UTF-8";
@@ -102,12 +102,10 @@ public class PvtServletServer implements ServletContextListener, PvtServerMBean 
         return encoding;
     }
     
-    @Override
     public PVTServiceBean getPvtServiceBean() {
         return pvtServiceBean;
     }
-    
-    @Override
+
     public MasudaServiceBean getMasudaServiceBean() {
         return masudaServiceBean;
     }

@@ -18,7 +18,7 @@ public class FevPostTask implements Runnable {
     private String sharePath;
     private MasudaServiceBean masudaServiceBean;
     
-    public FevPostTask(PvtServerMBean server, PatientVisitModel pvt) {
+    public FevPostTask(PvtServletServer server, PatientVisitModel pvt) {
 
         masudaServiceBean = server.getMasudaServiceBean();
         if (pvt == null) {
