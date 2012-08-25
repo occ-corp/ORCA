@@ -2,8 +2,6 @@ package open.dolphin.server.pvt;
 
 import java.io.*;
 import java.util.Map;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.session.MasudaServiceBean;
@@ -14,21 +12,15 @@ import open.dolphin.session.MasudaServiceBean;
  * @author masuda, Masuda Naika
  */
 public class FevPostTask implements Runnable {
-    
-    private static final String jndiDolphin = "java:global/OpenDolphin-server-2.3/";
-    private static final String jndiNameMsd = jndiDolphin + MasudaServiceBean.class.getSimpleName();
 
     private PatientVisitModel model;
     private boolean sendToFEV;
     private String sharePath;
-    
-    // ここはInjectionダメみたい
     private MasudaServiceBean masudaServiceBean;
     
-    public FevPostTask( PatientVisitModel pvt) throws NamingException {
+    public FevPostTask(PvtServerMBean server, PatientVisitModel pvt) {
 
-        InitialContext ic = new InitialContext();
-        masudaServiceBean = (MasudaServiceBean) ic.lookup(jndiNameMsd);
+        masudaServiceBean = server.getMasudaServiceBean();
         if (pvt == null) {
             sendToFEV = false;
             return;

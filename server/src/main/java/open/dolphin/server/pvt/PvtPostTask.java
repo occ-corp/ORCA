@@ -5,8 +5,6 @@ import java.io.StringReader;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.pvtclaim.PVTBuilder;
 import open.dolphin.session.MasudaServiceBean;
@@ -18,24 +16,16 @@ import open.dolphin.session.PVTServiceBean;
  */
 public class PvtPostTask implements Callable {
     
-    private static final String jndiDolphin = "java:global/OpenDolphin-server-2.3/";
-    private static final String jndiNamePvt = jndiDolphin + PVTServiceBean.class.getSimpleName();
-    private static final String jndiNameMsd = jndiDolphin + MasudaServiceBean.class.getSimpleName();
-
     private static final Logger logger = Logger.getLogger(PvtPostTask.class.getSimpleName());
     
     private String pvtXml;
-
-    // ここはInjectionダメみたい
     private PVTServiceBean pvtServiceBean;
-    
     private MasudaServiceBean masudaServiceBean;
     
     
-    public PvtPostTask(String pvtXml) throws NamingException {
-        InitialContext ic = new InitialContext();
-        pvtServiceBean = (PVTServiceBean) ic.lookup(jndiNamePvt);
-        masudaServiceBean = (MasudaServiceBean) ic.lookup(jndiNameMsd);
+    public PvtPostTask(PvtServerMBean server, String pvtXml) {
+        pvtServiceBean = server.getPvtServiceBean();
+        masudaServiceBean = server.getMasudaServiceBean();
         this.pvtXml = pvtXml;
     }
 

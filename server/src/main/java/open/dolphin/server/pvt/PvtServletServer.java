@@ -5,11 +5,13 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.concurrent.*;
 import java.util.logging.Logger;
-import javax.naming.NamingException;
+import javax.inject.Inject;
 import javax.servlet.ServletContextEvent;
 import javax.servlet.ServletContextListener;
 import javax.servlet.annotation.WebListener;
 import open.dolphin.infomodel.PatientVisitModel;
+import open.dolphin.session.MasudaServiceBean;
+import open.dolphin.session.PVTServiceBean;
 
 /**
  * PvtServletServer
@@ -19,7 +21,7 @@ import open.dolphin.infomodel.PatientVisitModel;
  * @author masuda, Masuda Naika
  */
 @WebListener
-public class PvtServletServer implements ServletContextListener {
+public class PvtServletServer implements ServletContextListener, PvtServerMBean {
 
     private static final Logger logger = Logger.getLogger(PvtServletServer.class.getSimpleName());
     private static final String UTF8 = "UTF-8";
@@ -33,8 +35,14 @@ public class PvtServletServer implements ServletContextListener {
     private PvtServerThread serverThread;
     // PVT登録処理のSingle Thread Executor
     private ExecutorService exec;
+    
+    @Inject
+    private PVTServiceBean pvtServiceBean;
+    
+    @Inject
+    private MasudaServiceBean masudaServiceBean;
 
-
+    
     @Override
     public void contextInitialized(ServletContextEvent sce) {
 
@@ -93,18 +101,29 @@ public class PvtServletServer implements ServletContextListener {
     public String getEncoding() {
         return encoding;
     }
+    
+    @Override
+    public PVTServiceBean getPvtServiceBean() {
+        return pvtServiceBean;
+    }
+    
+    @Override
+    public MasudaServiceBean getMasudaServiceBean() {
+        return masudaServiceBean;
+    }
 
     // PvtClaimIOHanlderから呼ばれる
     public void postPvt(String pvtXml) {
         try {
             // Pvtをサーバーに登録する
-            Future<PatientVisitModel>future = exec.submit(new PvtPostTask(pvtXml));
+            Callable task1 = new PvtPostTask(this, pvtXml);
+            Future<PatientVisitModel>future = exec.submit(task1);
             // FEV-70にexportする
             PatientVisitModel pvt = future.get();
             if (pvt != null) {
-                exec.submit(new FevPostTask(pvt));
+                Runnable task2 = new FevPostTask(this, pvt);
+                exec.submit(task2);
             }
-        } catch (NamingException ex) {
         } catch (InterruptedException ex) {
         } catch (ExecutionException ex) {
         }
