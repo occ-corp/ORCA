@@ -18,7 +18,6 @@ public class PvtClaimIOHandler implements IHandler {
     private static final int EOT = 0x04;
     private static final int ACK = 0x06;
     //private static final int NAK = 0x15;
-    private static final String encoding = "UTF-8";
 
     private static final int bufferSize = 8192;
     private ByteBuffer byteBuffer;
@@ -82,7 +81,7 @@ public class PvtClaimIOHandler implements IHandler {
         try {
             // 取得したxmlをPVT登録キューに送る
             bos.flush();
-            String pvtXml = baos.toString(encoding);
+            String pvtXml = baos.toString(server.getEncoding());
             // PvtClaimListenWorkに登録処理をさせる
             server.postPvt(pvtXml);
             

@@ -89,6 +89,10 @@ public class PvtServletServer implements ServletContextListener {
         }
         exec = null;
     }
+    
+    public String getEncoding() {
+        return encoding;
+    }
 
     // PvtClaimIOHanlderから呼ばれる
     public void postPvt(String pvtXml) {
