@@ -18,18 +18,17 @@ import open.dolphin.session.PVTServiceBean;
  */
 public class PvtPostTask implements Callable {
     
-    private static final String jndiNamePvt
-            = "java:global/OpenDolphin-server-2.3/" + PVTServiceBean.class.getSimpleName();
-    private static final String jndiNameMsd
-            = "java:global/OpenDolphin-server-2.3/" + MasudaServiceBean.class.getSimpleName();
-    
+    private static final String jndiDolphin = "java:global/OpenDolphin-server-2.3/";
+    private static final String jndiNamePvt = jndiDolphin + PVTServiceBean.class.getSimpleName();
+    private static final String jndiNameMsd = jndiDolphin + MasudaServiceBean.class.getSimpleName();
+
     private static final Logger logger = Logger.getLogger(PvtPostTask.class.getSimpleName());
     
     private String pvtXml;
 
     // ここはInjectionダメみたい
     private PVTServiceBean pvtServiceBean;
-
+    
     private MasudaServiceBean masudaServiceBean;
     
     

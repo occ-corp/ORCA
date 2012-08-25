@@ -1091,7 +1091,8 @@ public class MasudaServiceBean {
             UserPropertyModel model = (UserPropertyModel) 
                     em.createQuery("from UserPropertyModel u where u.key = :key and u.value = :value")
                     .setParameter("key", "jmariCode")
-                    .setParameter("value", jmariCode).getSingleResult();
+                    .setParameter("value", jmariCode)
+                    .getSingleResult();
             fid = model.getFacilityModel().getFacilityId();
         } catch (NoResultException ex) {
         } catch (NonUniqueResultException ex) {

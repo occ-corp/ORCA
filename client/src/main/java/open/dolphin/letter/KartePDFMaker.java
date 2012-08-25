@@ -212,7 +212,12 @@ public class KartePDFMaker extends AbstractPDFMaker {
         // タイトルのフォント
         Font font = new Font(baseFont, titleFontSize);
         String title = createTitle(model);
-        String bookmark = FRMT_DATE_WITH_TIME.format(model.getDocInfoModel().getFirstConfirmDate());
+        // しおりのタイトルは日付とDocInfo.tilte
+        StringBuilder sb = new StringBuilder();
+        sb.append(FRMT_DATE_WITH_TIME.format(model.getDocInfoModel().getFirstConfirmDate()));
+        sb.append("\n");
+        sb.append(model.getDocInfoModel().getTitle());
+        String bookmark = sb.toString();
 
         // タイトルにしおりを登録する
         String mark = String.valueOf(++bookmarkNumber);

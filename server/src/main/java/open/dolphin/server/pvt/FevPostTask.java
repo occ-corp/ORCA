@@ -15,8 +15,8 @@ import open.dolphin.session.MasudaServiceBean;
  */
 public class FevPostTask implements Runnable {
     
-    private static final String jndiName 
-            = "java:global/OpenDolphin-server-2.3/" + MasudaServiceBean.class.getSimpleName();
+    private static final String jndiDolphin = "java:global/OpenDolphin-server-2.3/";
+    private static final String jndiNameMsd = jndiDolphin + MasudaServiceBean.class.getSimpleName();
 
     private PatientVisitModel model;
     private boolean sendToFEV;
@@ -28,7 +28,7 @@ public class FevPostTask implements Runnable {
     public FevPostTask( PatientVisitModel pvt) throws NamingException {
 
         InitialContext ic = new InitialContext();
-        masudaServiceBean = (MasudaServiceBean) ic.lookup(jndiName);
+        masudaServiceBean = (MasudaServiceBean) ic.lookup(jndiNameMsd);
         if (pvt == null) {
             sendToFEV = false;
             return;
