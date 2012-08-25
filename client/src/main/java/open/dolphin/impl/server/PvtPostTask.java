@@ -44,9 +44,9 @@ public class PvtPostTask implements Runnable {
         boolean sendToFEV = sharePath != null 
                 && !sharePath.isEmpty() 
                 && Project.getBoolean(MiscSettingPanel.SEND_PATIENT_INFO, MiscSettingPanel.DEFAULT_SENDPATIENTINFO);
-        PatientVisitModel oldPvt = MasudaDelegater.getInstance().getLastPvtInThisMonth(pvt);
-        
+
         if (sendToFEV) {
+            PatientVisitModel oldPvt = MasudaDelegater.getInstance().getLastPvtInThisMonth(pvt);
             FEV70Exporter fev = new FEV70Exporter(pvt, oldPvt, sharePath);
             fev.export();
         }

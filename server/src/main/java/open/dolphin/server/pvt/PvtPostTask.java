@@ -66,8 +66,8 @@ public class PvtPostTask implements Runnable {
         // FEV-70 export処理
         if (sendToFEV) {
             String ptId = pvt.getPatientId();
-            PatientVisitModel history = server.getMasudaServiceBean().getLastPvtInThisMonth(fid, ptId);
-            FEV70Exporter fev = new FEV70Exporter(pvt, history, sharePath);
+            PatientVisitModel oldPvt = server.getMasudaServiceBean().getLastPvtInThisMonth(fid, ptId);
+            FEV70Exporter fev = new FEV70Exporter(pvt, oldPvt, sharePath);
             fev.export();
         }
     }
