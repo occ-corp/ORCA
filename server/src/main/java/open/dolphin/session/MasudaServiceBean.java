@@ -1037,14 +1037,13 @@ public class MasudaServiceBean {
     // UserPropertyを保存する
     public int postUserProperties(List<UserPropertyModel> list) {
     
-        final String sql = "from UserPropertyModel u where u.key = :key and u.value = :val and u.facilityId = :fid and u.userId = :uid";
+        final String sql = "from UserPropertyModel u where u.key = :key and u.facilityId = :fid and u.userId = :uid";
         
         for (UserPropertyModel model : list) {
             // 既存のpropertyを取得する
             List<UserPropertyModel> exist = (List<UserPropertyModel>) 
                     em.createQuery(sql)
                     .setParameter("key", model.getKey())
-                    .setParameter("val", model.getValue())
                     .setParameter("fid", model.getFacilityId())
                     .setParameter("uid", model.getUserId())
                     .getResultList();
