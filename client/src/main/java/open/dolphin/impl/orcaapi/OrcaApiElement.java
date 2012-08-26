@@ -69,7 +69,7 @@ public class OrcaApiElement {
                 addContent(new Element("string").setAttribute("name", "InsuranceProvider_WholeName").addContent(model.getInsuranceClass()));
                 addContent(new Element("string").setAttribute("name", "HealthInsuredPerson_Symbol").addContent(model.getClientGroup()));
                 addContent(new Element("string").setAttribute("name", "HealthInsuredPerson_Number").addContent(model.getClientNumber()));
-                addContent(new Element("string").setAttribute("name", "RelationToInsuredPerson").addContent("true".equals(model.getFamilyClass()) ? "1" : "2"));
+                addContent(new Element("string").setAttribute("name", "RelationToInsuredPerson").addContent(Boolean.valueOf(model.getFamilyClass()) ? "1" : "2"));
                 addContent(new Element("string").setAttribute("name", "Certificate_IssuedDate").addContent(model.getStartDate()));
                 addContent(new Element("string").setAttribute("name", "Certificate_ExpiredDate").addContent(model.getExpiredDate()));
                 PVTPublicInsuranceItemModel[] publicInsuranceModels = model.getPVTPublicInsuranceItem();

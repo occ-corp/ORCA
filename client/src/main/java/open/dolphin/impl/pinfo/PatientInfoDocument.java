@@ -702,7 +702,7 @@ public class PatientInfoDocument extends AbstractChartDocument {
             rowData = new String[2];
             rowData[0] = "本人家族区分";
             String test = insurance.getFamilyClass();
-            if (test.equals("true")) {
+            if (Boolean.valueOf(test)) {
                 test = "本人";
             } else {
                 test = "家族";

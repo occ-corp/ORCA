@@ -44,8 +44,8 @@ public class PvtPostTask implements Runnable {
 
         // 施設プロパティーを取得する
         Map<String, String> propMap = server.getMasudaServiceBean().getUserPropertyMap(fid);
-        boolean pvtOnServer = "true".equals(propMap.get("pvtOnServer"));
-        boolean fevOnServer = "true".equals(propMap.get("fevOnServer"));
+        boolean pvtOnServer = Boolean.valueOf(propMap.get("pvtOnServer"));
+        boolean fevOnServer = Boolean.valueOf(propMap.get("fevOnServer"));
         String sharePath = propMap.get("fevSharePath");
         boolean sendToFEV = 
                 sharePath != null 
