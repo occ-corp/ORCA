@@ -1035,48 +1035,66 @@ public class MasudaServiceBean {
     }
     
     // UserPropertyを保存する
-    public int postUserProperties(String fid, List<UserPropertyModel> list) {
+    public int postUserProperties(List<UserPropertyModel> list) {
+    
+        final String sql = "from UserPropertyModel u where u.key = :key and u.value = :val and u.facilityId = :fid and u.userId = :uid";
+        
+        for (UserPropertyModel model : list) {
+            // 既存のpropertyを取得する
+            List<UserPropertyModel> exist = (List<UserPropertyModel>) 
+                    em.createQuery(sql)
+                    .setParameter("key", model.getKey())
+                    .setParameter("val", model.getValue())
+                    .setParameter("fid", model.getFacilityId())
+                    .setParameter("uid", model.getUserId())
+                    .getResultList();
 
-        final String deleteSql = "delete from UserPropertyModel u where u.facilityModel.facilityId = :fid";
-        final String facilitySql = "from FacilityModel f where f.facilityId = :fid";
-
-        em.createQuery(deleteSql).setParameter("fid", fid);
-
-        try {
-            FacilityModel facility = (FacilityModel) 
-                em.createQuery(facilitySql)
-                .setParameter("fid", fid)
-                .getSingleResult();
-            for (UserPropertyModel model : list) {
-                model.setFacilityModel(facility);
+            if (exist.size() == 1) {
+                // あれば更新
+                model.setId(exist.get(0).getId());
+                em.merge(model);
+            } else if (exist.isEmpty()) {
+                // なければ追加
+                em.persist(model);
+            } else {
+                // ダブってたら一旦削除してから追加
+                for (UserPropertyModel toDel : exist) {
+                    em.remove(toDel);
+                }
                 em.persist(model);
             }
-            return list.size();
-        } catch (NoResultException ex) {
-            return 0;
-        } catch (NonUniqueResultException ex) {
-            return 0;
         }
+        return list.size();
     }
     
     // UserPropertyを取得する
-    public List<UserPropertyModel> getUserProperties(String fid) {
+    public List<UserPropertyModel> getUserProperties(String userId) {
         
-        final String sql = "from UserPropertyModel u where u.facilityModel.facilityId = :fid";
+        int pos = userId.indexOf(":");
+        String fid = userId.substring(0, pos);
+        String userIdAsLocal = userId.substring(pos + 1);
         
+        final String sql = "from UserPropertyModel u where u.facilityId = :fid and (u.userId is NULL or u.userId = :uid)";
+        
+        List<UserPropertyModel> list = (List<UserPropertyModel>)
+                em.createQuery(sql)
+                .setParameter("fid", fid)
+                .setParameter("uid", userIdAsLocal)
+                .getResultList();
+
+        return list;
+    }
+    
+    // サーバーで利用する施設共通プロパティー(userId = NULL)を取得
+    public Map<String, String> getUserPropertyMap(String fid) {
+        
+        final String sql = "from UserPropertyModel u where u.facilityId = :fid and u.userId is NULL";
         List<UserPropertyModel> list = (List<UserPropertyModel>)
                 em.createQuery(sql)
                 .setParameter("fid", fid)
                 .getResultList();
         
-        return list;
-    }
-    
-    // ユーザープロパティー
-    public Map<String, String> getUserPropertyMap(String fid) {
-        
         Map<String, String> propMap = new HashMap<String, String>();
-        List<UserPropertyModel> list = getUserProperties(fid);
         for (UserPropertyModel model : list) {
             propMap.put(model.getKey(), model.getValue());
         }
@@ -1093,7 +1111,7 @@ public class MasudaServiceBean {
                     .setParameter("key", "jmariCode")
                     .setParameter("value", jmariCode)
                     .getSingleResult();
-            fid = model.getFacilityModel().getFacilityId();
+            fid = model.getFacilityId();
         } catch (NoResultException ex) {
         } catch (NonUniqueResultException ex) {
         }

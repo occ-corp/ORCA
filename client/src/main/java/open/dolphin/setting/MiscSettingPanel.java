@@ -1030,7 +1030,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     private void loadProperties() {
         
         Properties prop = Project.getUserDefaults();
-        List<UserPropertyModel> list = MasudaDelegater.getInstance().getUserProperties();
+        String userId = Project.getUserModel().getUserId();
+        List<UserPropertyModel> list = MasudaDelegater.getInstance().getUserProperties(userId);
         if (list == null || list.isEmpty()) {
             return;
         }
@@ -1046,6 +1047,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         
         List<UserPropertyModel> list = new ArrayList<UserPropertyModel>();
         Properties prop = Project.getUserDefaults();
+        String idAsLocal = Project.getUserModel().idAsLocal();
+        String userId = Project.getUserModel().getUserId();
+        String facilityId = Project.getFacilityId();
         
         for (Iterator itr = prop.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
@@ -1054,9 +1058,14 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             UserPropertyModel propModel = new UserPropertyModel();
             propModel.setKey(key);
             propModel.setValue(value);
+            propModel.setFacilityId(facilityId);
+            // ユーザー固有ならばuserId(=idAsLocal)を設定する
+            if (!propModel.isFacilityCommon(key)) {
+                propModel.setUserId(idAsLocal);
+            }
             list.add(propModel);
         }
         
-        MasudaDelegater.getInstance().postUserProperties(list);
+        MasudaDelegater.getInstance().postUserProperties(userId, list);
     }
 }

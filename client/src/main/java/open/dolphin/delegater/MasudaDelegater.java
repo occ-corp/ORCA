@@ -7,7 +7,6 @@ import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.*;
-import open.dolphin.project.Project;
 import open.dolphin.util.BeanUtils;
 
 /**
@@ -637,10 +636,9 @@ public class MasudaDelegater extends BusinessDelegater {
         return list;
     }
     
-    public void postUserProperties(List<UserPropertyModel> list) {
+    public void postUserProperties(String userId, List<UserPropertyModel> list) {
         
-        String fid = Project.getFacilityId();
-        String path = RES_BASE + "userProperty/" + fid;
+        String path = RES_BASE + "userProperty/" + userId;
         
         String json = getConverter().toJson(list);
         
@@ -653,10 +651,9 @@ public class MasudaDelegater extends BusinessDelegater {
         debug(status, enityStr);
     }
     
-    public List<UserPropertyModel> getUserProperties() {
+    public List<UserPropertyModel> getUserProperties(String userId) {
         
-        String fid = Project.getFacilityId();
-        String path = RES_BASE + "userProperty/" + fid;
+        String path = RES_BASE + "userProperty/" + userId;
         
         ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)

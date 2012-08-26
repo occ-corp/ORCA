@@ -1,7 +1,6 @@
 
 package open.dolphin.infomodel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import java.io.Serializable;
 import javax.persistence.*;
 
@@ -13,6 +12,13 @@ import javax.persistence.*;
 @Table(name = "msd_userProperty")
 public class UserPropertyModel implements Serializable {
     
+    private static final String[] commonKeys = {
+        "baseURI", "facilityId", "jmariCode",
+        "claimAddress", "claimPort", "CLAIM01", "claimHostName", "orcaUserId", "orcaUserPassword",
+        "pvtOnServer", "fevOnServer", "fevSharePath",
+        "pacsServerIp", "pacsServerPort", "pacsServerAE"
+    };
+    
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
@@ -23,10 +29,9 @@ public class UserPropertyModel implements Serializable {
     @Column(name = "c_value", length = 16384)   // MySqlではLONGVARCHARになっちゃう…
     private String value;
     
-    @JsonIgnore
-    @ManyToOne
-    @JoinColumn(name="facility_id", nullable=false)
-    private FacilityModel facilityModel;
+    private String facilityId;
+    
+    private String userId;
     
     public UserPropertyModel() {
     }
@@ -40,8 +45,11 @@ public class UserPropertyModel implements Serializable {
     public String getValue() {
         return value;
     }
-    public FacilityModel getFacilityModel() {
-        return facilityModel;
+    public String getFacilityId() {
+        return facilityId;
+    }
+    public String getUserId() {
+        return userId;
     }
     
     public void setId(long id) {
@@ -53,7 +61,19 @@ public class UserPropertyModel implements Serializable {
     public void setValue(String value){
         this.value = value;
     }
-    public void setFacilityModel(FacilityModel model) {
-        facilityModel = model;
+    public void setFacilityId(String facilityId) {
+        this.facilityId = facilityId;
+    }
+    public void setUserId(String userId) {
+        this.userId = userId;
+    }
+    
+    public boolean isFacilityCommon(String testKey) {
+        for (String commonKey : commonKeys) {
+            if (commonKey.equals(testKey)) {
+                return true;
+            }
+        }
+        return false;
     }
 }

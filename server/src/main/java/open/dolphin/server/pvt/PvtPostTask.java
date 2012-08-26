@@ -45,7 +45,7 @@ public class PvtPostTask implements Runnable {
         // 施設プロパティーを取得する
         Map<String, String> propMap = server.getMasudaServiceBean().getUserPropertyMap(fid);
         boolean pvtOnServer = "true".equals(propMap.get("pvtOnServer"));
-        boolean fevOnServer = "ture".equals(propMap.get("fevOnServer"));
+        boolean fevOnServer = "true".equals(propMap.get("fevOnServer"));
         String sharePath = propMap.get("fevSharePath");
         boolean sendToFEV = 
                 sharePath != null 
@@ -58,6 +58,7 @@ public class PvtPostTask implements Runnable {
             StringBuilder sb = new StringBuilder();
             sb.append("PVT post: ").append(pvt.getPvtDate());
             sb.append(", Fid=").append(pvt.getFacilityId());
+            sb.append("(").append(jmariNum).append(")");
             sb.append(", PtID=").append(pvt.getPatientId());
             sb.append(", Name=").append(pvt.getPatientName());
             logger.info(sb.toString());
