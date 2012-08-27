@@ -11,7 +11,7 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import open.dolphin.infomodel.IInfoModel;
-import open.dolphin.session.PVTServiceBean;
+import open.dolphin.session.PvtServiceMediator;
 
 /**
  * AsyncServertを分離
@@ -21,25 +21,25 @@ import open.dolphin.session.PVTServiceBean;
 public class PvtAsyncServlet extends HttpServlet {
 
     @Inject
-    private PVTServiceBean pvtServiceBean;
+    private PvtServiceMediator pvtServiceMediator;
     
     @Override
     protected void doGet(HttpServletRequest servletReq, HttpServletResponse servletRes) 
             throws ServletException, IOException {
         
         // JBOSS終了時にぬるぽ
-        if (pvtServiceBean == null) {
+        if (pvtServiceMediator == null) {
             return;
         }
         
         final AsyncContext ac = servletReq.startAsync();
         final String fid = getRemoteFacility(servletReq.getRemoteUser());
-        pvtServiceBean.getPvtMediator().subscribePvtTopic(ac, fid);
+        pvtServiceMediator.subscribePvtTopic(ac, fid);
         
         ac.addListener(new AsyncListener() {
             
             private void remove() {
-                pvtServiceBean.getPvtMediator().removeAsyncContext(fid, ac);
+                pvtServiceMediator.removeAsyncContext(fid, ac);
             }
 
             @Override

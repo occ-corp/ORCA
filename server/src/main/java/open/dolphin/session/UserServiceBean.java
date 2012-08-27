@@ -2,7 +2,6 @@ package open.dolphin.session;
 
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.inject.Named;
 import javax.persistence.EntityExistsException;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -13,7 +12,6 @@ import open.dolphin.infomodel.*;
  *
  * @author kazushi Minagawa, Digital Globe, Inc.
  */
-@Named
 @Stateless
 public class UserServiceBean { //implements UserServiceBeanLocal {
 
