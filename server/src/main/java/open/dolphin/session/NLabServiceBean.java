@@ -5,7 +5,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -15,7 +14,6 @@ import open.dolphin.infomodel.*;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
-@Named
 @Stateless
 public class NLabServiceBean {
 

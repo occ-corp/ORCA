@@ -11,6 +11,7 @@ import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.PvtListModel;
 import open.dolphin.infomodel.PvtMessageModel;
 import open.dolphin.session.PVTServiceBean;
+import open.dolphin.session.PvtServiceMediator;
 
 /**
  * PVTResource2
@@ -25,6 +26,9 @@ public class PVTResource2 extends AbstractResource {
     
     @Inject
     private PVTServiceBean pvtServiceBean;
+    
+    @Inject
+    private PvtServiceMediator pvtServiceMediator;
     
     @Context
     private HttpServletRequest servletReq;
@@ -101,7 +105,7 @@ public class PVTResource2 extends AbstractResource {
     public String getPvtListModel() {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        PvtListModel model = pvtServiceBean.getPvtMediator().getPvtListModel(fid);
+        PvtListModel model = pvtServiceMediator.getPvtListModel(fid);
         
         String json = getConverter().toJson(model);
         debug(json);
@@ -117,7 +121,7 @@ public class PVTResource2 extends AbstractResource {
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         int from = Integer.valueOf(param);
         
-        List<PvtMessageModel> list = pvtServiceBean.getPvtMediator().getPvtMessageList(fid, from);
+        List<PvtMessageModel> list = pvtServiceMediator.getPvtMessageList(fid, from);
 
         String json = getConverter().toJson(list);
         debug(json);

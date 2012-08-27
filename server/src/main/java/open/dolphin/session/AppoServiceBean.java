@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.AppointmentModel;
@@ -13,7 +12,6 @@ import open.dolphin.infomodel.AppointmentModel;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
-@Named
 @Stateless
 public class AppoServiceBean {
 

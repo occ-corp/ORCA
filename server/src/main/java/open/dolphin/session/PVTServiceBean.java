@@ -4,7 +4,6 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -16,7 +15,6 @@ import open.dolphin.infomodel.*;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-@Named
 @Stateless
 public class PVTServiceBean { //implements PVTServiceBeanLocal {
 
@@ -287,9 +285,5 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         } catch (Exception e) {
         }
         return 0;
-    }
-    
-    public PvtServiceMediator getPvtMediator() {
-        return mediator;
     }
 }

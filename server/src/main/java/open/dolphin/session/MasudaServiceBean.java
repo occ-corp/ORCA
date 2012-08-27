@@ -3,7 +3,6 @@ package open.dolphin.session;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.ejb.Stateless;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
@@ -20,7 +19,6 @@ import org.hibernate.search.jpa.Search;
  * MasudaServiceBean
  * @author masuda, Masuda Naika
  */
-@Named
 @Stateless
 public class MasudaServiceBean {
 

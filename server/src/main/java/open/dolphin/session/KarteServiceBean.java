@@ -3,7 +3,6 @@ package open.dolphin.session;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.ejb.Stateless;
-import javax.inject.Named;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
@@ -15,7 +14,6 @@ import org.hibernate.search.jpa.Search;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
-@Named
 @Stateless
 public class KarteServiceBean {
 
