@@ -1090,7 +1090,7 @@ public class MasudaServiceBean {
     // サーバーで利用する施設共通プロパティー(userId = facilityId)を取得
     public Map<String, String> getUserPropertyMap(String fid) {
         
-        final String sql = "from UserPropertyModel u where u.facilityId = :fid and u.userId = :fid";
+        final String sql = "from UserPropertyModel u where u.userId = :fid";
         List<UserPropertyModel> list = (List<UserPropertyModel>)
                 em.createQuery(sql)
                 .setParameter("fid", fid)
