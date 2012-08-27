@@ -1037,29 +1037,32 @@ public class MasudaServiceBean {
     // UserPropertyを保存する
     public int postUserProperties(List<UserPropertyModel> list) {
     
-        final String sql = "from UserPropertyModel u where u.key = :key and u.facilityId = :fid and u.userId = :uid";
+        final String sql1 = "from UserPropertyModel u where u.key = :key and u.facilityId = :fid and u.userId = :uid";
+        final String sql2 = "delete " + sql1;
         
         for (UserPropertyModel model : list) {
-            // 既存のpropertyを取得する
-            List<UserPropertyModel> exist = (List<UserPropertyModel>) 
-                    em.createQuery(sql)
-                    .setParameter("key", model.getKey())
-                    .setParameter("fid", model.getFacilityId())
-                    .setParameter("uid", model.getUserId())
-                    .getResultList();
-
-            if (exist.size() == 1) {
+            try {
+                // 既存のpropertyを取得する
+                UserPropertyModel exist = (UserPropertyModel) 
+                        em.createQuery(sql1)
+                        .setParameter("key", model.getKey())
+                        .setParameter("fid", model.getFacilityId())
+                        .setParameter("uid", model.getUserId())
+                        .getSingleResult();
                 // あれば更新
-                model.setId(exist.get(0).getId());
+                model.setId(exist.getId());
                 em.merge(model);
-            } else if (exist.isEmpty()) {
+            } catch (NoResultException ex) {
                 // なければ追加
                 em.persist(model);
-            } else {
+            } catch (NonUniqueResultException ex) {
                 // ダブってたら一旦削除してから追加
-                for (UserPropertyModel toDel : exist) {
-                    em.remove(toDel);
-                }
+                int num = em.createQuery(sql2)
+                        .setParameter("key", model.getKey())
+                        .setParameter("fid", model.getFacilityId())
+                        .setParameter("uid", model.getUserId())
+                        .executeUpdate();
+                System.out.println("delete :" + num);
                 em.persist(model);
             }
         }
@@ -1073,7 +1076,7 @@ public class MasudaServiceBean {
         String fid = userId.substring(0, pos);
         String userIdAsLocal = userId.substring(pos + 1);
         
-        final String sql = "from UserPropertyModel u where u.facilityId = :fid and (u.userId is NULL or u.userId = :uid)";
+        final String sql = "from UserPropertyModel u where u.facilityId = :fid and (u.userId = :fid or u.userId = :uid)";
         
         List<UserPropertyModel> list = (List<UserPropertyModel>)
                 em.createQuery(sql)
@@ -1084,10 +1087,10 @@ public class MasudaServiceBean {
         return list;
     }
     
-    // サーバーで利用する施設共通プロパティー(userId = NULL)を取得
+    // サーバーで利用する施設共通プロパティー(userId = facilityId)を取得
     public Map<String, String> getUserPropertyMap(String fid) {
         
-        final String sql = "from UserPropertyModel u where u.facilityId = :fid and u.userId is NULL";
+        final String sql = "from UserPropertyModel u where u.facilityId = :fid and u.userId = :fid";
         List<UserPropertyModel> list = (List<UserPropertyModel>)
                 em.createQuery(sql)
                 .setParameter("fid", fid)

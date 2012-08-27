@@ -1059,9 +1059,13 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             propModel.setKey(key);
             propModel.setValue(value);
             propModel.setFacilityId(facilityId);
-            // ユーザー固有ならばuserId(=idAsLocal)を設定する
+
             if (!propModel.isFacilityCommon(key)) {
+                // ユーザー固有ならばuserId(=idAsLocal)を設定する
                 propModel.setUserId(idAsLocal);
+            } else {
+                // 施設共通ならfacilityIdを設定する
+                propModel.setUserId(facilityId);
             }
             list.add(propModel);
         }
