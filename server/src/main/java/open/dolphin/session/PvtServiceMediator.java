@@ -103,15 +103,14 @@ public class PvtServiceMediator {
         for (Iterator itr = facilityContextMap.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
             FacilityContext facilityContext = (FacilityContext) entry.getValue();
-            List<PatientVisitModel> pvtList = facilityContext.pvtList;
-            
-            for (Iterator<PatientVisitModel> itr1 = pvtList.iterator(); itr.hasNext();) {
-                PatientVisitModel pvt = itr1.next();
+            List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();
+            for (PatientVisitModel pvt : facilityContext.pvtList) {
                 // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
                 if (pvt.hasStateBit(BIT_SAVE_CLAIM) || pvt.hasStateBit(BIT_MODIFY_CLAIM)) {
-                    itr1.remove();
+                    toRemove.add(pvt);
                 }
             }
+            facilityContext.pvtList.removeAll(toRemove);
             // 受付番号を振りなおす
             //int counter = 0;
             //for (PatientVisitModel pvt : facilityContext.pvtList) {
