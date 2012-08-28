@@ -62,7 +62,6 @@ public class JerseyClient {
         // pvt同期用のクライアントを別に用意する
         Client client2 = Client.create();
         webResource2 = client2.resource(baseURI);
-
     }
 
     // QueryParam付のWebResource
