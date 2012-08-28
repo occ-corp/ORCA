@@ -10,11 +10,13 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Schedule;
 import javax.ejb.Timeout;
+import javax.inject.Inject;
 import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.AsyncContext;
 import open.dolphin.infomodel.*;
+import open.dolphin.mbean.AsyncContextHolder;
 
 /**
  * PvtServiceMediator
@@ -45,19 +47,19 @@ public class PvtServiceMediator {
 
     private static final Logger logger = Logger.getLogger(PvtServiceMediator.class.getSimpleName());
     
+    @Inject
+    private AsyncContextHolder contextHolder;
+    
     @PersistenceContext
     private EntityManager em;
     
     
     private class FacilityContext {
 
-        private final List<AsyncContext> acContextList = new ArrayList<AsyncContext>();
         private final List<PvtMessageModel> pvtMessageList = new CopyOnWriteArrayList<PvtMessageModel>();
         private final List<PatientVisitModel> pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
-
-        private FacilityContext() {
-        }
     }
+    
    
     @PostConstruct
     public void init() {
@@ -102,14 +104,15 @@ public class PvtServiceMediator {
         for (Iterator itr = facilityContextMap.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
             FacilityContext facilityContext = (FacilityContext) entry.getValue();
-            List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();
-            for (PatientVisitModel pvt : facilityContext.pvtList) {
+            List<PatientVisitModel> pvtList = facilityContext.pvtList;
+            
+            for (Iterator<PatientVisitModel> itr1 = pvtList.iterator(); itr.hasNext();) {
+                PatientVisitModel pvt = itr1.next();
                 // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
                 if (pvt.hasStateBit(BIT_SAVE_CLAIM) || pvt.hasStateBit(BIT_MODIFY_CLAIM)) {
-                    toRemove.add(pvt);
+                    itr1.remove();
                 }
             }
-            facilityContext.pvtList.removeAll(toRemove);
             // 受付番号を振りなおす
             //int counter = 0;
             //for (PatientVisitModel pvt : facilityContext.pvtList) {
@@ -130,16 +133,18 @@ public class PvtServiceMediator {
         FacilityContext context = getFacilityContext(fid);
         context.pvtMessageList.add(msg);
         String nextId = String.valueOf(context.pvtMessageList.size());
-        synchronized (context.acContextList) {
-            for (AsyncContext ac : context.acContextList) {
-                try {
+
+        List<AsyncContext> acList = contextHolder.getAsyncContextList();
+        synchronized (acList) {
+            for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
+                AsyncContext ac = itr.next();
+                String acFid = (String) ac.getRequest().getAttribute("fid");
+                if (fid != null && fid.equals(acFid)) {
+                    itr.remove();
                     ac.getRequest().setAttribute("nextId", nextId);
                     ac.dispatch("/openSource/pvt2/nextId");
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
                 }
             }
-            context.acContextList.clear();
         }
     }
     
@@ -151,22 +156,7 @@ public class PvtServiceMediator {
         }
         return context;
     }
-    
-    public void removeAsyncContext(String fid, AsyncContext ac) {
-        FacilityContext context = getFacilityContext(fid);
-        synchronized (context.acContextList) {
-            context.acContextList.remove(ac);
-        }
-    }
-    
-    public void subscribePvtTopic(final AsyncContext ac, String fid) {
 
-        FacilityContext context = getFacilityContext(fid);
-        synchronized (context.acContextList) {
-            context.acContextList.add(ac);
-        }
-    }
-    
     public PvtListModel getPvtListModel(String fid) {
         FacilityContext context = getFacilityContext(fid);
         PvtListModel model = new PvtListModel();

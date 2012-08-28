@@ -1,8 +1,12 @@
 package open.dolphin.rest;
 
+import java.io.IOException;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
@@ -10,6 +14,7 @@ import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.PvtListModel;
 import open.dolphin.infomodel.PvtMessageModel;
+import open.dolphin.mbean.AsyncContextHolder;
 import open.dolphin.session.PVTServiceBean;
 import open.dolphin.session.PvtServiceMediator;
 
@@ -21,6 +26,8 @@ import open.dolphin.session.PvtServiceMediator;
 
 @Path("pvt2")
 public class PVTResource2 extends AbstractResource {
+    
+    private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
 
     private static final boolean debug = false;
     
@@ -29,6 +36,9 @@ public class PVTResource2 extends AbstractResource {
     
     @Inject
     private PvtServiceMediator pvtServiceMediator;
+    
+    @Inject
+    private AsyncContextHolder contextHolder;
     
     @Context
     private HttpServletRequest servletReq;
@@ -98,7 +108,50 @@ public class PVTResource2 extends AbstractResource {
 
         debug(String.valueOf(cnt));
     }
+    
+    @GET
+    @Path("subscribe")
+    public void subscribePvtTopic() {
 
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        final AsyncContext ac = servletReq.startAsync();
+        // timeoutを設定
+        ac.setTimeout(asyncTimeout);
+        // requestにfidを記録しておく
+        ac.getRequest().setAttribute("fid", fid);
+        contextHolder.addAsyncContext(ac);
+        //System.out.println("AsyncContextHolder size = " + contextHolder.getAsyncContextList().size());
+
+        ac.addListener(new AsyncListener() {
+
+            private void remove() {
+                contextHolder.removeAsyncContext(ac);
+            }
+
+            @Override
+            public void onComplete(AsyncEvent event) throws IOException {
+            }
+
+            @Override
+            public void onTimeout(AsyncEvent event) throws IOException {
+                remove();
+                //System.out.println("ON TIMEOUT");
+                //event.getThrowable().printStackTrace(System.out);
+            }
+
+            @Override
+            public void onError(AsyncEvent event) throws IOException {
+                remove();
+                //System.out.println("ON ERROR");
+                //event.getThrowable().printStackTrace(System.out);
+            }
+
+            @Override
+            public void onStartAsync(AsyncEvent event) throws IOException {
+            }
+        });
+    }
+    
     @GET
     @Path("pvtListModel")
     @Produces(MEDIATYPE_JSON_UTF8)

@@ -1086,30 +1086,25 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 @Override
                 protected void succeeded(Void result) {
                     logger.debug("delete succeeded");
-
-                    List<RegisteredDiagnosisModel> removeList = new ArrayList<RegisteredDiagnosisModel>();
-                    for (RegisteredDiagnosisModel rd : allDiagnosis) {
-                        String status = rd.getStatus();
-                        if (DIAGNOSIS_DELETED.equals(status)) {
-                            removeList.add(rd);
+                    
+                    for (Iterator<RegisteredDiagnosisModel> itr = allDiagnosis.iterator(); itr.hasNext();) {
+                        RegisteredDiagnosisModel rd = itr.next();
+                        if (DIAGNOSIS_DELETED.equals(rd.getStatus())) {
+                            itr.remove();
                         }
                     }
-                    allDiagnosis.removeAll(removeList);
-
                 }
             };
 
             deleteTask.execute();
         } else {
             // データベースから削除する項目はなくてもテーブルからは削除
-            List<RegisteredDiagnosisModel> removeList = new ArrayList<RegisteredDiagnosisModel>();
-            for (RegisteredDiagnosisModel rd : allDiagnosis) {
-                String status = rd.getStatus();
-                if (DIAGNOSIS_DELETED.equals(status)) {
-                    removeList.add(rd);
+            for (Iterator<RegisteredDiagnosisModel> itr = allDiagnosis.iterator(); itr.hasNext();) {
+                RegisteredDiagnosisModel rd = itr.next();
+                if (DIAGNOSIS_DELETED.equals(rd.getStatus())) {
+                    itr.remove();
                 }
             }
-            allDiagnosis.removeAll(removeList);
         }
         undoQue.clear();
         redoQue.clear();

@@ -8,6 +8,7 @@ import open.dolphin.util.HashUtil;
 /**
  * JerseyClient
  * @author Kazushi Minagawa. Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 public class JerseyClient {
 
@@ -15,16 +16,13 @@ public class JerseyClient {
     private static final String USER_NAME = "userName";
     private static final String PASSWORD = "password";
     private String baseURI;
-    private WebResource webResource;
     private String userName;
     private String password;
     
+    private WebResource webResource;
     private WebResource webResource2;
-    
-//masuda^   timeoutをのばす
+
     private static final int TIMEOUT1 = 30;
-    private static final int TIMEOUT2 = 60;
-//masuda$
 
     private JerseyClient() {
     }
@@ -54,28 +52,19 @@ public class JerseyClient {
         if (baseURI == null || baseURI.equals(oldURI)) {
             return;
         }
-        
-//masuda^
-        //int readTimeout = Project.getInt("jersey.read.timeout") * 1000;
+
         int readTimeout = TIMEOUT1 * 1000;
-//masuda$
         
         Client client = Client.create();
         client.setReadTimeout(readTimeout);
         webResource = client.resource(baseURI);
 
-//masuda^   pvt同期用のクライアントを別に用意する
+        // pvt同期用のクライアントを別に用意する
         Client client2 = Client.create();
-        client2.setReadTimeout(TIMEOUT2 * 1000);
         webResource2 = client2.resource(baseURI);
-//masuda$
+
     }
 
-    //public WebResource.Builder getResource(String path) {
-    //    return webResource.path(path).header(USER_NAME, userName).header(PASSWORD, password);
-    //}
-    
-//masuda^
     // QueryParam付のWebResource
     public WebResource.Builder getResource(String path, MultivaluedMap<String, String> qmap) {
         if (qmap != null) {
@@ -84,9 +73,8 @@ public class JerseyClient {
         return webResource.path(path).header(USER_NAME, userName).header(PASSWORD, password);
     }
     
-    // pvt同期用のクライアントを別に用意する
+    // pvt同期用のクライアント
     public WebResource.Builder getAsyncResource(String path) {
         return webResource2.path(path).header(USER_NAME, userName).header(PASSWORD, password);
     }
-//masuda$
 }
