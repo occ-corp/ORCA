@@ -113,6 +113,7 @@ public class PVTResource2 extends AbstractResource {
     @Path("subscribe")
     public void subscribePvtTopic() {
         
+        // JBOSS終了時にぬるぽ？
         if (contextHolder == null) {
             return;
         }
