@@ -112,6 +112,10 @@ public class PVTResource2 extends AbstractResource {
     @GET
     @Path("subscribe")
     public void subscribePvtTopic() {
+        
+        if (contextHolder == null) {
+            return;
+        }
 
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         final AsyncContext ac = servletReq.startAsync();
@@ -125,7 +129,9 @@ public class PVTResource2 extends AbstractResource {
         ac.addListener(new AsyncListener() {
 
             private void remove() {
-                contextHolder.removeAsyncContext(ac);
+                if (contextHolder != null) {
+                    contextHolder.removeAsyncContext(ac);
+                }
             }
 
             @Override
