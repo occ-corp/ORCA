@@ -7,6 +7,7 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.RoleModel;
 import open.dolphin.infomodel.UserModel;
+import open.dolphin.mbean.UserCache;
 import open.dolphin.session.UserServiceBean;
 
 /**
@@ -23,6 +24,9 @@ public class UserResource extends AbstractResource {
     
     @Inject
     private UserServiceBean userServiceBean;
+    
+    @Inject
+    private UserCache userCache;
     
     @Context
     private HttpServletRequest servletReq;
@@ -83,7 +87,7 @@ public class UserResource extends AbstractResource {
         
         debug(cntStr);
         
-        UserCache.getInstance().getMap().clear();
+        userCache.getMap().clear();
 
         return cntStr;
     }
@@ -108,7 +112,7 @@ public class UserResource extends AbstractResource {
         
         debug(cntStr);
         
-        UserCache.getInstance().getMap().clear();
+        userCache.getMap().clear();
 
         return cntStr;
     }
@@ -122,7 +126,7 @@ public class UserResource extends AbstractResource {
 
         debug(String.valueOf(result));
         
-        UserCache.getInstance().getMap().clear();
+        userCache.getMap().clear();
     }
 
 

@@ -1,13 +1,14 @@
 package open.dolphin.rest;
 
 import java.io.IOException;
-import java.util.concurrent.ConcurrentHashMap;
+import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Inject;
 import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import open.dolphin.mbean.UserCache;
 import open.dolphin.session.UserServiceBean;
 
 /**
@@ -30,6 +31,9 @@ public class LogFilter implements Filter {
 
     @Inject
     private UserServiceBean userService;
+    
+    @Inject
+    private UserCache userCache;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -45,7 +49,7 @@ public class LogFilter implements Filter {
         //System.err.println(userName);
         //System.err.println(password);
         
-        ConcurrentHashMap<String, String> userMap = UserCache.getInstance().getMap();
+        Map<String, String> userMap = userCache.getMap();
         boolean authentication = password.equals(userMap.get(userName));
         
         if (!authentication) {
