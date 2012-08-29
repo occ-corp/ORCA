@@ -141,8 +141,12 @@ public class PvtServiceMediator {
                 String acFid = (String) ac.getRequest().getAttribute("fid");
                 if (fid != null && fid.equals(acFid)) {
                     itr.remove();
-                    ac.getRequest().setAttribute("nextId", nextId);
-                    ac.dispatch("/openSource/pvt2/nextId");
+                    try {
+                        ac.getRequest().setAttribute("nextId", nextId);
+                        ac.dispatch("/openSource/pvt2/nextId");
+                    } catch (Exception ex) {
+                        //logger.warning(ex.toString());
+                    }
                 }
             }
         }
