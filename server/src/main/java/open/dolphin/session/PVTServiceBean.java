@@ -188,7 +188,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 // クライアントに通知
                 PvtMessageModel msg = new PvtMessageModel(pvt);
                 msg.setPatientVisitModel(pvt);
-                mediator.notifyMerge(fid, msg);
+                mediator.notifyMerge(msg);
                 return 0;   // 追加０個
             }
         }
@@ -200,7 +200,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // クライアントに通知
         PvtMessageModel msg = new PvtMessageModel(pvt);
         msg.setPatientVisitModel(pvt);
-        mediator.notifyAdd(fid, msg);
+        mediator.notifyAdd(msg);
         
         return 1;   // 追加１個
     }
@@ -243,7 +243,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 model.setMemo(memo);
                 model.setOwnerUUID(msg.getOwnerUUID());
                 // クライアントに通知
-                mediator.notifyState(fid, msg);
+                mediator.notifyState(msg);
                 ret = 1;
                 break;
             }
@@ -279,7 +279,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             }
 
             // クライアントに通知
-            mediator.notifyDelete(fid, msg);
+            mediator.notifyDelete(msg);
             return 1;
 
         } catch (Exception e) {

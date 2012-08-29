@@ -120,14 +120,16 @@ public class PvtServiceMediator {
             // クライアントに伝える
             String fid = (String) entry.getKey();
             PvtMessageModel msg = new PvtMessageModel();
+            msg.setFacilityId(fid);
             msg.setCommand(PvtMessageModel.CMD_RENEW);
-            notifyEvent(fid, msg);
+            notifyEvent(msg);
         }
         logger.info("PvtServiceMediator: renew pvtList");
     }
     
-    private void notifyEvent(final String fid, final PvtMessageModel msg) {
+    private void notifyEvent(PvtMessageModel msg) {
 
+        String fid = msg.getFacilityId();
         FacilityContext context = getFacilityContext(fid);
         context.pvtMessageList.add(msg);
         String nextId = String.valueOf(context.pvtMessageList.size());
@@ -180,23 +182,22 @@ public class PvtServiceMediator {
         return tomorrow;
     }
 
-    public void notifyAdd(String fid, PvtMessageModel msg) {
+    public void notifyAdd(PvtMessageModel msg) {
         msg.setCommand(PvtMessageModel.CMD_ADD);
-        notifyEvent(fid, msg);
+        notifyEvent(msg);
     }
-    public void notifyDelete(String fid, PvtMessageModel msg) {
+    public void notifyDelete(PvtMessageModel msg) {
         msg.setCommand(PvtMessageModel.CMD_DELETE);
-        notifyEvent(fid, msg);
+        notifyEvent(msg);
     }
-    public void notifyState(String fid, PvtMessageModel msg) {
+    public void notifyState(PvtMessageModel msg) {
         msg.setCommand(PvtMessageModel.CMD_STATE);
-        notifyEvent(fid, msg);
+        notifyEvent(msg);
     }
-    public void notifyMerge(String fid, PvtMessageModel msg) {
+    public void notifyMerge(PvtMessageModel msg) {
         msg.setCommand(PvtMessageModel.CMD_MERGE);
-        notifyEvent(fid, msg);
+        notifyEvent(msg);
     }
-    
     
     // 起動後最初のPvtListを作る
     private void initializePvtList() {

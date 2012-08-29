@@ -271,7 +271,8 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
                  // クライアントに通知
                 PvtMessageModel msg = new PvtMessageModel(pvt);
                 msg.setPatientVisitModel(pvt);
-                mediator.notifyMerge(fid, msg);
+                //msg.setFacilityId(fid);
+                mediator.notifyMerge(msg);
             }
         }
     }
