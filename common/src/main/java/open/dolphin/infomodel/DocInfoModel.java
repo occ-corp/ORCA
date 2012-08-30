@@ -120,6 +120,18 @@ public class DocInfoModel extends InfoModel implements Comparable {
     private boolean sendMml;
     //----------------------------------
     
+//masuda^
+    // 入院病室・診療科等 "605号室:内科"、nullなら外来
+    private String admissionInfo;
+
+    public String getAdmissionInfo() {
+        return admissionInfo;
+    }
+    
+    public void setAdmissionInfo(String admissionInfo) {
+        this.admissionInfo = admissionInfo;
+    }
+ //masuda$
     
     public DocInfoModel() {
     }

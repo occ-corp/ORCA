@@ -169,6 +169,7 @@ public final class MMLTable {
     }
 //masuda$
     
+    // jma-receipt-manual-460.pdf P.746
     private static final HashMap<String, String> departmentCode;
     static {
      
@@ -193,7 +194,6 @@ public final class MMLTable {
         departmentCode.put("皮膚ひ尿器科", "18");
         departmentCode.put("皮膚科", "19");
         departmentCode.put("ひ尿器科", "20");
-        departmentCode.put("泌尿器", "20");
         departmentCode.put("性病科", "21");
         departmentCode.put("こう門科", "22");
         departmentCode.put("産婦人科", "23");
@@ -202,15 +202,20 @@ public final class MMLTable {
         departmentCode.put("眼科", "26");
         departmentCode.put("耳鼻いんこう科", "27");
         departmentCode.put("気管食道科", "28");
-        departmentCode.put("理学診療科", "29");
+        departmentCode.put("理学診療科", "29"); // 欠？
         departmentCode.put("放射線科", "30");
         departmentCode.put("麻酔科", "31");
-        departmentCode.put("人工透析科", "32");
+        departmentCode.put("人工透析科", "32"); // 欠？
         departmentCode.put("心療内科", "33");
-        departmentCode.put("アレルギー", "34");
-        departmentCode.put("リウマチ ", "35");
-        departmentCode.put("リハビリ", "36");
+        departmentCode.put("アレルギー科", "34");
+        departmentCode.put("リウマチ科", "35");
+        departmentCode.put("リハビリテーション科", "36");
+        departmentCode.put("病理診断科", "37");
+        departmentCode.put("臨床検査科", "38");
+        departmentCode.put("救急科", "39");
         departmentCode.put("鍼灸", "A1");
+        
+        departmentCode.put("医事", "AM");  // Division of Accounting and Management
     }    
     public static String getDepartmentCode(String key) {
        return (String)departmentCode.get(key);

@@ -129,9 +129,9 @@ public class DocumentHistory {
         };
     }
     
-    private INSURANCES ins = INSURANCES.ALL;
-    private static enum INSURANCES {
-        ALL, PUBLIC, SELF
+    private FILTER ins = FILTER.ALL;
+    private static enum FILTER {
+        ALL, PUBLIC, SELF, ADMISSION
     }
     private List<DocInfoModel> docInfoList;
 //masuda$
@@ -306,6 +306,17 @@ public class DocumentHistory {
                         }
                     }
                     break;
+                case ADMISSION:
+                    newHistory.clear();
+                    for (DocInfoModel model : docInfoList) {
+                        if (model.getAdmissionInfo() != null) {
+                            newHistory.add(model);
+                        }
+                    }
+                    break;
+                case ALL:
+                default:
+                    break;
             }
         }
 
@@ -326,15 +337,19 @@ public class DocumentHistory {
 
         StringBuilder sb = new StringBuilder();
         switch (ins) {
-            case ALL:
-                sb.append("全て ");
-                break;
             case PUBLIC:
                 sb.append("健保 ");
                 break;
             case SELF:
                 sb.append("自費 ");
                 break;
+            case ADMISSION:
+                sb.append("入院");
+                break;
+            case ALL:
+            default:
+                sb.append("全て ");
+                break;                
         }
 
         if (newHistory != null && !newHistory.isEmpty()) {
@@ -615,7 +630,7 @@ public class DocumentHistory {
         countField = view.getCntLbl();
         
 //masuda^   件数フィールドをクリックすると全て選択する
-        countField.setToolTipText("左クリックで全選択、右クリックで保険選択");
+        countField.setToolTipText("左クリックで全選択、右クリックで保険・入院選択");
         countField.addMouseListener(new MouseAdapter(){
             @Override
             public void mouseClicked(MouseEvent e) {
@@ -638,7 +653,7 @@ public class DocumentHistory {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ins = INSURANCES.ALL;
+                ins = FILTER.ALL;
                 updateHistory(docInfoList);
             }
         });
@@ -648,7 +663,7 @@ public class DocumentHistory {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ins = INSURANCES.PUBLIC;
+                ins = FILTER.PUBLIC;
                 updateHistory(docInfoList);
             }
         });
@@ -657,10 +672,21 @@ public class DocumentHistory {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                ins = INSURANCES.SELF;
+                ins = FILTER.SELF;
                 updateHistory(docInfoList);
             }
         });
+        
+        JMenuItem admission = new JMenuItem("入院");
+        admission.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ins = FILTER.ADMISSION;
+                updateHistory(docInfoList);
+            }
+        });
+        
         JPopupMenu popup = new JPopupMenu();
         popup.add(all);
         popup.add(publicIns);

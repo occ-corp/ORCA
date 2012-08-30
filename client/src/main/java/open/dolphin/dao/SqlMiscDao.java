@@ -2,9 +2,11 @@
 package open.dolphin.dao;
 
 import java.sql.Connection;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import open.dolphin.infomodel.ClaimConst;
 import open.dolphin.infomodel.DiseaseEntry;
@@ -37,6 +39,54 @@ public final class SqlMiscDao extends SqlDaoBean {
     private SqlMiscDao() {
     }
 
+    
+    // 入院中？ "605号室:内科"
+    public String getAdmissionInfo(String patientId, Date date) {
+        
+        long orcaPtId = getOrcaPtID(patientId);
+        String sql = "select brmnum, nyuinka from tbl_ptnyuinrrk "
+                + "where nyuinchukbn = '1' and ptid = ? "
+                + "and nyuinymd <= ? and taiinymd >= ? "
+                + "and hospnum = ?";
+        SimpleDateFormat frmt = new SimpleDateFormat("yyyyMMdd");
+        String dateStr = frmt.format(date);
+        
+        Connection con = null;
+        PreparedStatement ps = null;
+        String ret = null;
+        
+        try {
+            con = getConnection();
+            ps = con.prepareStatement(sql);
+            ps.setLong(1, orcaPtId);
+            ps.setString(2, dateStr);
+            ps.setString(3, dateStr);
+            ps.setInt(4, getHospNum());
+
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                StringBuilder sb = new StringBuilder();
+                sb.append(rs.getString(1));
+                sb.append("号室：");
+                sb.append(rs.getString(2));
+                ret = sb.toString();
+            }
+
+            rs.close();
+            ps.close();
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            processError(e);
+            closeConnection(con);
+
+        } finally {
+            closeConnection(con);
+        }
+        return ret;
+    }
+    
     public List<DrugInteractionModel> checkInteraction(Collection<String> drug1, Collection<String> drug2) {
         // 引数はdrugcdの配列ｘ２
 
