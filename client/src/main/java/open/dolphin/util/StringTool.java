@@ -214,4 +214,18 @@ public final class StringTool {
         }
         return sb.toString();
     }
+    
+//masuda^   http://www.alqmst.co.jp/tech/040601.html
+    public boolean isZenkaku(char c) {
+        if (c <= '\u007e' || // 英数字
+            c == '\u00a5' || // \記号
+            c == '\u203e' || // ~記号
+            (c >= '\uff61' && c <= '\uff9f')) // 半角カナ
+        {
+            return false;
+        } else {
+            return true;
+        }
+    }
+//masuda$
 }

@@ -148,6 +148,12 @@
             <version>6.3.1</version>
             <type>jar</type>
         </dependency>
+        <dependency>
+            <groupId>net.sf.cb2java</groupId>
+            <artifactId>cb2java</artifactId>
+            <version>0.3.1</version>
+            <type>jar</type>
+        </dependency>
     </dependencies>
   
     <build>

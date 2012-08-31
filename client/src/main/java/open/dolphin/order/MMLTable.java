@@ -1,6 +1,7 @@
 package open.dolphin.order;
 
 import java.util.HashMap;
+import java.util.Map;
 
 /**
  * MML Table Dictionary class.
@@ -13,7 +14,7 @@ public final class MMLTable {
     public MMLTable() {
     }
     
-    private static final HashMap<String, String> claimClassCode;
+    private static final Map<String, String> claimClassCode;
     static {
 //masuda^   ORCA「データベーステーブル仕様書」(orca-table18.pdf)に合わせて変更
 /*
@@ -164,12 +165,12 @@ public final class MMLTable {
     }
     
 //masuda^
-    public static HashMap<String, String> getClaimClassCodeMap() {
+    public static Map<String, String> getClaimClassCodeMap() {
         return claimClassCode;
     }
 //masuda$
     
-    // jma-receipt-manual-460.pdf P.746
+    // jma-receipt-manual-460.pdf P.746, MML0028
     private static final HashMap<String, String> departmentCode;
     static {
      
@@ -219,5 +220,59 @@ public final class MMLTable {
     }    
     public static String getDepartmentCode(String key) {
        return (String)departmentCode.get(key);
-    }   
+    }
+    
+    // MML0016 Outcome（転帰）
+    private static final Map<String, String> mml0016Map;
+    
+    static {
+        mml0016Map = new HashMap<String, String>();
+        mml0016Map.put("died", "死亡");
+        mml0016Map.put("worsening", "悪化");
+        mml0016Map.put("unchanged", "不変");
+        mml0016Map.put("recovering", "回復");
+        mml0016Map.put("fullyRecovered", "全治");
+        mml0016Map.put("sequelae", "続発症（の発生）");
+        mml0016Map.put("end", "終了");
+        mml0016Map.put("pause", "中止");
+        mml0016Map.put("continued", "継続");
+        mml0016Map.put("transfer", "転医");
+        mml0016Map.put("transferAcute", "転医(急性病院へ）");
+        mml0016Map.put("transferChronic", "転医(慢性病院へ）");
+        mml0016Map.put("home", "自宅等へ退院");
+        mml0016Map.put("unknown", "不明");
+    }
+    
+    private static final Map<String, String> claim011Map;
+    
+    static {
+        claim011Map = new HashMap<String, String>();
+        claim011Map.put("001", "入院");
+        claim011Map.put("002", "退院");
+        claim011Map.put("003", "転棟");
+        claim011Map.put("004", "転科");
+        claim011Map.put("005", "転室");
+        claim011Map.put("006", "外泊");
+        claim011Map.put("007", "帰院");
+        claim011Map.put("008", "担当医");
+        claim011Map.put("009", "一般食");
+        claim011Map.put("010", "特食（加算）");
+        claim011Map.put("011", "選択食");
+        claim011Map.put("012", "食止め");
+    }
+    
+    private static final Map<String, String> claim012Map;
+    
+    static {
+        claim012Map = new HashMap<String, String>();
+        claim012Map.put("01", "一般入院");
+        claim012Map.put("02", "特定入院");
+    }
+    
+    private static final Map<String, String> claim013Map;
+    
+    static {
+        claim013Map = new HashMap<String, String>();
+        claim013Map.put("01", "継続入院");
+    }
 }

@@ -95,8 +95,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
             closeConnection(con);
         }
@@ -150,8 +148,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
             closeConnection(con);
         }
@@ -192,8 +188,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
             closeConnection(con);
         }
@@ -241,8 +235,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
             closeConnection(con);
         }
@@ -289,8 +281,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
             closeConnection(con);
         }
@@ -336,8 +326,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
             closeConnection(con);
         }

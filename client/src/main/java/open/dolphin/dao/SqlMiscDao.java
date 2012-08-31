@@ -21,6 +21,8 @@ import open.dolphin.util.MMLDate;
  * @author masuda, Masuda Naika
  */
 public final class SqlMiscDao extends SqlDaoBean {
+    
+    private static final String ORCA_DB_CHARSET = "EUC-JP";
 
     private static final SqlMiscDao instance;
 
@@ -34,7 +36,8 @@ public final class SqlMiscDao extends SqlDaoBean {
 
     private static List<Integer> syskanri1006;
     
-    private static byte[] syskanri1001;
+    private static Map<String, byte[]> kanriTblMap;
+
 
     private SqlMiscDao() {
     }
@@ -296,11 +299,12 @@ public final class SqlMiscDao extends SqlDaoBean {
     
     // 有床か無床か
     public boolean hasBed() {
-        getSyskanri1001();
+        byte[] kanritbl = getKanriTbl("1001");
         boolean ret = false;
-        final int indexBedNum = 355;    // 2 + 1 + 7 + 1 + 24 + 120 + 120 + 80;
+        final int start = 355;    // 2 + 1 + 7 + 1 + 24 + 120 + 120 + 80;
+        final int length = 4;
         try {
-            String strNum = new String(Arrays.copyOfRange(syskanri1001, indexBedNum, indexBedNum + 4));
+            String strNum = getString(kanritbl, start, length);
             if (Integer.valueOf(strNum) > 0) {
                 ret = true;
             }
@@ -309,34 +313,48 @@ public final class SqlMiscDao extends SqlDaoBean {
         return ret;
     }
     
-    // 医療機関情報1001を取得する
-    private void getSyskanri1001() {
-        
-        if (syskanri1001 != null) {
-            return;
+    private String getString(byte[] kanritbl, int start, int length) throws Exception {
+        byte[] bytes = Arrays.copyOfRange(kanritbl, start, start + length);
+        String ret = new String(bytes, ORCA_DB_CHARSET);
+        return ret;
+    }
+    
+    // 医療機関情報を取得する
+    private byte[] getKanriTbl(String kanricd) {
+
+        if (kanriTblMap == null) {
+            kanriTblMap = new HashMap<String, byte[]>();
         }
         
-        final String sql = "select kanritbl from tbl_syskanri where kanricd = '1001'";
+        byte[] kanritbl = kanriTblMap.get(kanricd);
+        
+        if (kanritbl != null) {
+            return kanritbl;
+        }
+        
+        final String sql = "select kanritbl from tbl_syskanri where kanricd = ?";
         
         Connection con = null;
-        Statement st = null;
+        PreparedStatement ps = null;
 
         try {
             con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+            ps = con.prepareStatement(sql);
+            ps.setString(1, kanricd);
+            ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                syskanri1001 = rs.getString(1).getBytes();
+                kanritbl = rs.getString(1).getBytes(ORCA_DB_CHARSET);
+                kanriTblMap.put(kanricd, kanritbl);
             }
             rs.close();
-            closeStatement(st);
-            closeConnection(con);
+            ps.close();
 
         } catch (Exception e) {
             processError(e);
-            closeStatement(st);
-            closeConnection(con);
+        } finally {
+           closeConnection(con); 
         }
+        return kanritbl;
     }
     
 /*  もっさり。。。
