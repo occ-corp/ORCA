@@ -1,6 +1,7 @@
 
 package open.dolphin.dao;
 
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -36,7 +37,7 @@ public final class SqlMiscDao extends SqlDaoBean {
 
     private static List<Integer> syskanri1006;
     
-    private static Map<String, byte[]> kanriTblMap;
+    private static Map<String, KanriTblModel> kanriTblMap;
 
 
     private SqlMiscDao() {
@@ -299,56 +300,61 @@ public final class SqlMiscDao extends SqlDaoBean {
     
     // 有床か無床か
     public boolean hasBed() {
-        byte[] kanritbl = getKanriTbl("1001");
+        
         boolean ret = false;
-        final int start = 355;    // 2 + 1 + 7 + 1 + 24 + 120 + 120 + 80;
-        final int length = 4;
+        
         try {
-            String strNum = getString(kanritbl, start, length);
+            KanriTblModel kanritbl = getKanriTbl("1001");
+            String strNum = kanritbl.getString("SYS-1001-BEDSU");
             if (Integer.valueOf(strNum) > 0) {
                 ret = true;
             }
-        } catch (Exception e) {
+        } catch (Exception ex) {
         }
-        return ret;
-    }
-    
-    private String getString(byte[] kanritbl, int start, int length) throws Exception {
-        byte[] bytes = Arrays.copyOfRange(kanritbl, start, start + length);
-        String ret = new String(bytes, ORCA_DB_CHARSET);
+
         return ret;
     }
     
     // 医療機関情報を取得する
-    private byte[] getKanriTbl(String kanricd) {
+    private KanriTblModel getKanriTbl(String kanricd) {
 
         if (kanriTblMap == null) {
-            kanriTblMap = new HashMap<String, byte[]>();
+            kanriTblMap = new HashMap<String, KanriTblModel>();
         }
         
-        byte[] kanritbl = kanriTblMap.get(kanricd);
+        KanriTblModel kanritbl = kanriTblMap.get(kanricd);
         
         if (kanritbl != null) {
             return kanritbl;
         }
-        
+
         final String sql = "select kanritbl from tbl_syskanri where kanricd = ?";
         
         Connection con = null;
         PreparedStatement ps = null;
 
         try {
+            byte[] bytes = null;
             con = getConnection();
             ps = con.prepareStatement(sql);
             ps.setString(1, kanricd);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                kanritbl = rs.getString(1).getBytes(ORCA_DB_CHARSET);
-                kanriTblMap.put(kanricd, kanritbl);
+                bytes = rs.getString(1).getBytes(ORCA_DB_CHARSET);
             }
             rs.close();
             ps.close();
-
+            
+            // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
+            IncReader reader = new IncReader(kanricd);
+            Map<String, int[]> map = reader.getMap();
+            
+            // 両方取得できたらマップに登録する
+            kanritbl = new KanriTblModel();
+            kanritbl.setBytes(bytes);
+            kanritbl.setMap(map);
+            kanriTblMap.put(kanricd, kanritbl);
+            
         } catch (Exception e) {
             processError(e);
         } finally {
@@ -799,4 +805,32 @@ public final class SqlMiscDao extends SqlDaoBean {
         return ret;
     }
 */
+    
+    // kanritblのバイト列とデータ名、位置、データ長を保持するクラス
+    private class KanriTblModel {
+
+        private byte[] bytes;
+        private Map<String, int[]> map;
+
+        private void setBytes(byte[] bytes) {
+            this.bytes = bytes;
+        }
+
+        private void setMap(Map<String, int[]> map) {
+            this.map = map;
+        }
+        
+        private String getString(String columnName) {
+            String ret = null;
+            int[] data = map.get(columnName);
+            int start = data[0];
+            int length = data[1];
+            byte[] strBytes =  Arrays.copyOfRange(bytes, start, start + length);
+            try {
+                ret = new String(strBytes, ORCA_DB_CHARSET);
+            } catch (UnsupportedEncodingException ex) {
+            }
+            return ret;
+        }
+    }
 }
