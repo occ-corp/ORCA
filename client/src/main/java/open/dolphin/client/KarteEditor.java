@@ -18,7 +18,6 @@ import open.dolphin.delegater.DocumentDelegater;
 import open.dolphin.exception.DolphinException;
 import open.dolphin.helper.DBTask;
 import open.dolphin.infomodel.*;
-import open.dolphin.order.MMLTable;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.tr.PTransferHandler;

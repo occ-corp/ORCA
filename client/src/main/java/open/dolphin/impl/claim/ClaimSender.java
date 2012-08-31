@@ -8,7 +8,6 @@ import open.dolphin.client.*;
 import open.dolphin.infomodel.*;
 import open.dolphin.message.ClaimHelper;
 import open.dolphin.message.MessageBuilder;
-import open.dolphin.order.MMLTable;
 import open.dolphin.project.Project;
 import open.dolphin.util.ZenkakuUtils;
 import org.apache.log4j.Level;

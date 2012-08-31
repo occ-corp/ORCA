@@ -13,7 +13,6 @@ import javax.swing.*;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.helper.ComponentMemory;
 import open.dolphin.infomodel.*;
-import open.dolphin.order.MMLTable;
 
 /**
  * MakeBaseChargeStamp.java

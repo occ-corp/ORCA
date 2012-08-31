@@ -6,7 +6,6 @@ import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
 import open.dolphin.infomodel.*;
-import open.dolphin.order.MMLTable;
 import open.dolphin.project.Project;
 
 /**

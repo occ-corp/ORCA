@@ -1,4 +1,4 @@
-package open.dolphin.order;
+package open.dolphin.infomodel;
 
 import java.util.HashMap;
 import java.util.Map;

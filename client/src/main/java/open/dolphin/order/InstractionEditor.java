@@ -1,6 +1,5 @@
 package open.dolphin.order;
 
-import open.dolphin.infomodel.TensuMaster;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

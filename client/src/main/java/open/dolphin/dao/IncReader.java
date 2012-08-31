@@ -14,22 +14,25 @@ public class IncReader {
     private static final int COLUMN_COUNT = 5;
     private static final String CAMMA = ",";
     private static final String COMMENT_MARK = "*";
-    private static final String TARGET_MARK = "-TBL";
+    private static final String TABLE = "TBL";
     private static final String[] IGNORES = new String[]{"GF"};
     private static final String ENCODING = "UTF-8";
     
-    private String orcaVer = "orca46";
-
+    private String kanricd;
+    private String orcaVer;
     
-    private String kanricd; // "orca46/CSPK1001.csv"
-    
-    public IncReader(String kanricd) {
+    public IncReader(String kanricd, String orcaVer) {
         this.kanricd = kanricd;
+        this.orcaVer = orcaVer.toLowerCase();
     }
     
     public Map<String, int[]> getMap() throws UnsupportedEncodingException, IOException {
         
         StringBuilder sb = new StringBuilder();
+        sb.append("SYS-").append(kanricd).append("-");
+        String prefix = sb.toString();
+        
+        sb = new StringBuilder();
         sb.append("inc/").append(orcaVer).append("/");
         sb.append("CPSK").append(kanricd).append(".csv");
         String incResource = sb.toString();
@@ -42,7 +45,7 @@ public class IncReader {
         Map<String, Integer> nameNumMap = new HashMap<String, Integer>();
         Map<String, int[]> ret = new HashMap<String, int[]>();
         int pos = 0;
-        
+
         while ((line = br.readLine()) != null) {
             
             // コメントならcontinue;
@@ -56,19 +59,19 @@ public class IncReader {
                 continue;
             }
             String level = datum[1];
-            String name = datum[2];
+            String name = datum[2].replace(prefix, "");
             String type = datum[3];
             String length = datum[4];
             
             // SYS-XXXX-TBL行を探す
             if (kanriTblLevel == null) {
-                if (name.endsWith(TARGET_MARK)) {
+                if (name.equals(TABLE)) {
                    kanriTblLevel = level; 
                 }
                 continue;
             }
             
-            // GFならcontinue
+            // GFなどならcontinue
             boolean skip = false;
             for (String ignore : IGNORES) {
                 if (ignore.equals(type)) {
@@ -84,6 +87,7 @@ public class IncReader {
             if (kanriTblLevel != null && kanriTblLevel.equals(level)) {
                 break;
             }
+            
             // 出現回数を記録する
             Integer num = nameNumMap.get(name);
             if (num == null) {

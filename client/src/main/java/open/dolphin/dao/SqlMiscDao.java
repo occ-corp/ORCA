@@ -49,8 +49,8 @@ public final class SqlMiscDao extends SqlDaoBean {
         
         long orcaPtId = getOrcaPtID(patientId);
         String sql = "select brmnum, nyuinka from tbl_ptnyuinrrk "
-                + "where nyuinchukbn = '1' and ptid = ? "
-                + "and nyuinymd <= ? and taiinymd >= ? "
+                + "where taiincd <> '  ' and ptid = ? "
+                + "and tenstunymd <= ? and taiinymd >= ? "
                 + "and hospnum = ?";
         SimpleDateFormat frmt = new SimpleDateFormat("yyyyMMdd");
         String dateStr = frmt.format(date);
@@ -71,7 +71,7 @@ public final class SqlMiscDao extends SqlDaoBean {
 
             if (rs.next()) {
                 StringBuilder sb = new StringBuilder();
-                sb.append(rs.getString(1));
+                sb.append(rs.getString(1).substring(2));
                 sb.append("号室：");
                 sb.append(rs.getString(2));
                 ret = sb.toString();
@@ -305,7 +305,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         
         try {
             KanriTblModel kanritbl = getKanriTbl("1001");
-            String strNum = kanritbl.getString("SYS-1001-BEDSU");
+            String strNum = kanritbl.getString("BEDSU");
             if (Integer.valueOf(strNum) > 0) {
                 ret = true;
             }
@@ -346,15 +346,18 @@ public final class SqlMiscDao extends SqlDaoBean {
             ps.close();
             
             // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
-            IncReader reader = new IncReader(kanricd);
+            String orcaVer = (ORCA_DB_VER46.equals(getOrcaDbVersion())) ? "orca46" : "orca45";
+            IncReader reader = new IncReader(kanricd, orcaVer);
             Map<String, int[]> map = reader.getMap();
-            
+
             // 両方取得できたらマップに登録する
-            kanritbl = new KanriTblModel();
-            kanritbl.setBytes(bytes);
-            kanritbl.setMap(map);
-            kanriTblMap.put(kanricd, kanritbl);
-            
+            if (bytes != null && map != null) {
+                kanritbl = new KanriTblModel();
+                kanritbl.setBytes(bytes);
+                kanritbl.setMap(map);
+                kanriTblMap.put(kanricd, kanritbl);
+            }
+
         } catch (Exception e) {
             processError(e);
         } finally {
@@ -822,7 +825,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         
         private String getString(String columnName) {
             String ret = null;
-            int[] data = map.get(columnName);
+            int[] data = map.get(columnName.toUpperCase());
             int start = data[0];
             int length = data[1];
             byte[] strBytes =  Arrays.copyOfRange(bytes, start, start + length);

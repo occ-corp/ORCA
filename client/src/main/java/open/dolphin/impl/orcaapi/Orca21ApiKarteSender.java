@@ -8,7 +8,6 @@ import java.util.List;
 import open.dolphin.client.Chart;
 import open.dolphin.client.IKarteSender;
 import open.dolphin.infomodel.*;
-import open.dolphin.order.MMLTable;
 import open.dolphin.project.Project;
 import open.dolphin.util.ZenkakuUtils;
 
