@@ -1,6 +1,7 @@
 package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
@@ -19,9 +20,11 @@ public class AdmissionModel extends KarteEntryBean {
     @JsonDeserialize(contentAs=DocumentModel.class)
     @ElementCollection
     @CollectionTable(name="msd_admission_documents")
-    @OneToMany(fetch=FetchType.LAZY)    // PostgresだとEAGERだめ。MySQLは大丈夫
+    @OneToMany(fetch=FetchType.LAZY)
     private List<DocumentModel> documents;
     
+    @ManyToOne
+    @JoinColumn(name="room_id")
     private RoomModel roomModel;
     
     
@@ -70,6 +73,14 @@ public class AdmissionModel extends KarteEntryBean {
         setStatus(docInfo.getStatus());
     }
     
+    public void setChildDocInfoList() {
+        List<DocInfoModel> list = new ArrayList<DocInfoModel>();
+        for (DocumentModel model : documents) {
+            list.add(model.getDocInfoModel());
+        }
+        docInfo.setChildDocInfoList(list);
+        
+    }
     public boolean isInHospital(Date d) {
         Date started = getStarted();
         Date ended = getEnded();

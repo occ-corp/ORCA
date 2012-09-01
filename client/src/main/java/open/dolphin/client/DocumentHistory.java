@@ -308,11 +308,6 @@ public class DocumentHistory {
                     break;
                 case ADMISSION:
                     newHistory.clear();
-                    for (DocInfoModel model : docInfoList) {
-                        if (model.getAdmissionInfo() != null) {
-                            newHistory.add(model);
-                        }
-                    }
                     break;
                 case ALL:
                 default:

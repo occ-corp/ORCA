@@ -70,7 +70,8 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
         String sql = QUERY_TENSU_BY_SHINKU;
-
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        
         Connection con = null;
         PreparedStatement ps;
 
@@ -80,7 +81,7 @@ public final class SqlMasterDao extends SqlDaoBean {
             ps.setString(1, shinku);
             ps.setString(2, now);
             ps.setString(3, now);
-            ps.setInt(4, getHospNum());
+            ps.setInt(4, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
@@ -122,7 +123,8 @@ public final class SqlMasterDao extends SqlDaoBean {
             }
         }
         String sql = buf.toString();
-
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        
         Connection con = null;
         PreparedStatement ps;
 
@@ -133,7 +135,7 @@ public final class SqlMasterDao extends SqlDaoBean {
             ps.setString(2, name);
             ps.setString(3, now);
             ps.setString(4, now);
-            ps.setInt(5, getHospNum());
+            ps.setInt(5, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
@@ -162,6 +164,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
         String sql = QUERY_TENSU_BY_CODE;
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
 
         Connection con = null;
         PreparedStatement ps;
@@ -173,7 +176,7 @@ public final class SqlMasterDao extends SqlDaoBean {
             ps.setString(1, "^" + regExp);
             ps.setString(2, now);
             ps.setString(3, now);
-            ps.setInt(4, getHospNum());
+            ps.setInt(4, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
@@ -202,6 +205,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
         String sql =QUERY_TENSU_BY_TEN;
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
 
         Connection con = null;
         PreparedStatement ps;
@@ -220,7 +224,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
             ps.setString(3, now);
             ps.setString(4, now);
-            ps.setInt(5, getHospNum());
+            ps.setInt(5, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
@@ -249,7 +253,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
 //masuda^ Version46 対応
-        String sql = ORCA_DB_VER46.equals(getOrcaDbVersion())
+        String sql = SyskanriInfo.getInstance().isOrca46()
                 ? QUERY_DISEASE_BY_NAME_46
                 : QUERY_DISEASE_BY_NAME;
 //masuda$
@@ -295,7 +299,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
 //masuda^ Version46 対応
-        String sql = ORCA_DB_VER46.equals(getOrcaDbVersion())
+        String sql = SyskanriInfo.getInstance().isOrca46()
                 ? QUERY_DISEASE_BY_CODE_46
                 : QUERY_DISEASE_BY_CODE;
 //masuda$

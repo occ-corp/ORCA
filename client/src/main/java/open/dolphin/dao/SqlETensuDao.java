@@ -2,8 +2,9 @@
 package open.dolphin.dao;
 
 import java.sql.*;
-import java.util.*;
+import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.*;
 import open.dolphin.infomodel.*;
 
 /**
@@ -114,6 +115,7 @@ public class SqlETensuDao extends SqlDaoBean {
         }
         
         StringBuilder sb = new StringBuilder();
+        SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
         String ymd = addSingleQuote(yyyyMMddFrmt.format(date));
         sb.append(SELECT_ETENSU_1);
         sb.append(" where srycd in (").append(getCodes(srycds)).append(")");
@@ -156,6 +158,7 @@ public class SqlETensuDao extends SqlDaoBean {
             return Collections.emptyList();
         }
         
+        SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
         String ymd = addSingleQuote(yyyyMMddFrmt.format(date));
         StringBuilder sb = new StringBuilder();
         sb.append(SELECT_ETENSU_2);
@@ -200,6 +203,7 @@ public class SqlETensuDao extends SqlDaoBean {
             return Collections.emptyList();
         }
         
+        SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
         String ymd = addSingleQuote(yyyyMMddFrmt.format(date));
         StringBuilder sb = new StringBuilder();
         switch(tableNumber) {
@@ -259,6 +263,7 @@ public class SqlETensuDao extends SqlDaoBean {
             return Collections.emptyList();
         }
         
+        SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
         StringBuilder sb = new StringBuilder();
         String ymd = addSingleQuote(yyyyMMddFrmt.format(date));
         sb.append(SELECT_ETENSU_5);

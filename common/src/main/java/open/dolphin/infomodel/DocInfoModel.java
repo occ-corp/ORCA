@@ -1,10 +1,7 @@
 package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
 import javax.persistence.Column;
 import javax.persistence.Embeddable;
 import javax.persistence.Transient;
@@ -120,16 +117,15 @@ public class DocInfoModel extends InfoModel implements Comparable {
     private boolean sendMml;
     //----------------------------------
     
-//masuda^
-    // 入院病室・診療科等 "605号室:内科"、nullなら外来
-    private String admissionInfo;
-
-    public String getAdmissionInfo() {
-        return admissionInfo;
-    }
+//masuda^   入院カルテの子docInfo
+    @Transient
+    private List<DocInfoModel> chidDocInfoList;
     
-    public void setAdmissionInfo(String admissionInfo) {
-        this.admissionInfo = admissionInfo;
+    public void setChildDocInfoList(List<DocInfoModel> list) {
+        chidDocInfoList = list;
+    }
+    public List<DocInfoModel> getChildDocInfoList() {
+        return chidDocInfoList;
     }
  //masuda$
     

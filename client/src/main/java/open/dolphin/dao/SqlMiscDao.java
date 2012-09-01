@@ -35,15 +35,9 @@ public final class SqlMiscDao extends SqlDaoBean {
         return instance;
     }
 
-    private static List<Integer> syskanri1006;
-    
-    private static Map<String, KanriTblModel> kanriTblMap;
-
-
     private SqlMiscDao() {
     }
 
-    
     // 入院中？ "605号室:内科"
     public String getAdmissionInfo(String patientId, Date date) {
         
@@ -54,6 +48,7 @@ public final class SqlMiscDao extends SqlDaoBean {
                 + "and hospnum = ?";
         SimpleDateFormat frmt = new SimpleDateFormat("yyyyMMdd");
         String dateStr = frmt.format(date);
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
         
         Connection con = null;
         PreparedStatement ps = null;
@@ -65,7 +60,7 @@ public final class SqlMiscDao extends SqlDaoBean {
             ps.setLong(1, orcaPtId);
             ps.setString(2, dateStr);
             ps.setString(3, dateStr);
-            ps.setInt(4, getHospNum());
+            ps.setInt(4, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
@@ -90,7 +85,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         }
         return ret;
     }
-    
+
     public List<DrugInteractionModel> checkInteraction(Collection<String> drug1, Collection<String> drug2) {
         // 引数はdrugcdの配列ｘ２
 
@@ -140,7 +135,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         if (srycdList == null || srycdList.isEmpty()) {
             return false;
         }
-        
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
         boolean ret = false;
 
         StringBuilder sb = new StringBuilder();
@@ -148,7 +143,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append("where yukoedymd = '99999999' and ");
         sb.append("gaikanrikbn = 1 and ");      //１：外来管理加算が算定できない診療行為
         sb.append("hospnum = ");
-        sb.append(String.valueOf(getHospNum()));
+        sb.append(String.valueOf(hospNum));
         sb.append(" and ");
         sb.append("srycd in (");
         sb.append(getCodes(srycdList));
@@ -183,6 +178,7 @@ public final class SqlMiscDao extends SqlDaoBean {
             return false;
         }
 
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
         boolean ret = false;
 
         StringBuilder sb = new StringBuilder();
@@ -190,7 +186,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append("where yukoedymd = '99999999' and ");
         sb.append("houksnkbn = 5 and ");      //５：腫瘍マーカー
         sb.append("hospnum = ");
-        sb.append(String.valueOf(getHospNum()));
+        sb.append(String.valueOf(hospNum));
         sb.append(" and ");
         sb.append("srycd in (");
         sb.append(getCodes(srycdList));
@@ -216,154 +212,6 @@ public final class SqlMiscDao extends SqlDaoBean {
             closeConnection(con);
         }
         return ret;
-    }
-    
-    public String getOrcaStaffCode(String userName) {
-        
-        String orcaStaffCode = "";
-        
-        final String sql = "select kbncd, kanritbl from tbl_syskanri where kanricd = '1010'";
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            while(rs.next()) {
-                String kbncd = rs.getString(1);
-                String orcaUserName = rs.getString(2).substring(0, 16).trim();
-                if (userName.equals(orcaUserName)) {
-                    orcaStaffCode = kbncd.trim();
-                    break;
-                }
-            }
-
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-            
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
-        }
-        
-        return orcaStaffCode;
-    }
-
-    public boolean getSyskanriFlag(int code) {
-
-        getSyskanri1006();
-        boolean flag = syskanri1006.contains(code);
-        return flag;
-    }
-
-    // 施設情報フラグ情報を取得する
-    private void getSyskanri1006() {
-
-        if (syskanri1006 != null) {
-            return;
-        }
-
-        final String sql = "select kbncd, kanritbl from tbl_syskanri where kanricd = '1006' order by kbncd";
-
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            syskanri1006 = new ArrayList<Integer>();
-            while (rs.next()) {
-                int kbncd = rs.getInt(1);
-                String kanritbl = rs.getString(2);
-                for (int i = 0; i < kanritbl.length(); ++i) {
-                    int index = (kbncd - 1) * 500 + i + 1;
-                    char c = kanritbl.charAt(i);
-                    if (c == '1') {
-                        syskanri1006.add(index);
-                    }
-                }
-            }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-            
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
-        }
-    }
-    
-    // 有床か無床か
-    public boolean hasBed() {
-        
-        boolean ret = false;
-        
-        try {
-            KanriTblModel kanritbl = getKanriTbl("1001");
-            String strNum = kanritbl.getString("BEDSU");
-            if (Integer.valueOf(strNum) > 0) {
-                ret = true;
-            }
-        } catch (Exception ex) {
-        }
-
-        return ret;
-    }
-    
-    // 医療機関情報を取得する
-    private KanriTblModel getKanriTbl(String kanricd) {
-
-        if (kanriTblMap == null) {
-            kanriTblMap = new HashMap<String, KanriTblModel>();
-        }
-        
-        KanriTblModel kanritbl = kanriTblMap.get(kanricd);
-        
-        if (kanritbl != null) {
-            return kanritbl;
-        }
-
-        final String sql = "select kanritbl from tbl_syskanri where kanricd = ?";
-        
-        Connection con = null;
-        PreparedStatement ps = null;
-
-        try {
-            byte[] bytes = null;
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, kanricd);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                bytes = rs.getString(1).getBytes(ORCA_DB_CHARSET);
-            }
-            rs.close();
-            ps.close();
-            
-            // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
-            String orcaVer = (ORCA_DB_VER46.equals(getOrcaDbVersion())) ? "orca46" : "orca45";
-            IncReader reader = new IncReader(kanricd, orcaVer);
-            Map<String, int[]> map = reader.getMap();
-
-            // 両方取得できたらマップに登録する
-            if (bytes != null && map != null) {
-                kanritbl = new KanriTblModel();
-                kanritbl.setBytes(bytes);
-                kanritbl.setMap(map);
-                kanriTblMap.put(kanricd, kanritbl);
-            }
-
-        } catch (Exception e) {
-            processError(e);
-        } finally {
-           closeConnection(con); 
-        }
-        return kanritbl;
     }
     
 /*  もっさり。。。
@@ -422,11 +270,12 @@ public final class SqlMiscDao extends SqlDaoBean {
         }
 
         int todayInt = MMLDate.getTodayInt();
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
         
         StringBuilder sb = new StringBuilder();
         sb.append(SELECT_TBL_TENSU);
         sb.append("where hospnum = ");
-        sb.append(String.valueOf(getHospNum()));
+        sb.append(String.valueOf(hospNum));
         sb.append(" and ");
         sb.append("srycd in (");
         sb.append(getCodes(srycdList));
@@ -485,7 +334,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append(")");
         String sql = sb.toString();
 
-        if (ORCA_DB_VER46.equals(getOrcaDbVersion())) {
+        if (SyskanriInfo.getInstance().isOrca46()) {
             sql = sql.replace("icd10", "icd10_1");
         }
 
@@ -808,32 +657,5 @@ public final class SqlMiscDao extends SqlDaoBean {
         return ret;
     }
 */
-    
-    // kanritblのバイト列とデータ名、位置、データ長を保持するクラス
-    private class KanriTblModel {
 
-        private byte[] bytes;
-        private Map<String, int[]> map;
-
-        private void setBytes(byte[] bytes) {
-            this.bytes = bytes;
-        }
-
-        private void setMap(Map<String, int[]> map) {
-            this.map = map;
-        }
-        
-        private String getString(String columnName) {
-            String ret = null;
-            int[] data = map.get(columnName.toUpperCase());
-            int start = data[0];
-            int length = data[1];
-            byte[] strBytes =  Arrays.copyOfRange(bytes, start, start + length);
-            try {
-                ret = new String(strBytes, ORCA_DB_CHARSET);
-            } catch (UnsupportedEncodingException ex) {
-            }
-            return ret;
-        }
-    }
 }

@@ -6,6 +6,7 @@ import java.util.*;
 import javax.swing.JOptionPane;
 import open.dolphin.dao.SqlETensuDao;
 import open.dolphin.dao.SqlMiscDao;
+import open.dolphin.dao.SyskanriInfo;
 import open.dolphin.delegater.DocumentDelegater;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.*;
@@ -581,7 +582,7 @@ public class CheckSantei extends CheckSanteiConst {
     
     private void setupVariables() {
         
-        SqlMiscDao dao = SqlMiscDao.getInstance();
+        SyskanriInfo syskanri = SyskanriInfo.getInstance();
         
         // ver 2.2m
         followMedicom = Project.getBoolean(MiscSettingPanel.FOLLOW_MEDICOM, true);  
@@ -591,33 +592,33 @@ public class CheckSantei extends CheckSanteiConst {
         //exMed = MiscSettingPanel.getStub().getDefaultExMed();
         
         // 時間外対応加算フラグ
-        if (dao.getSyskanriFlag(sk1006_jikangaiTaiou1)) {
+        if (syskanri.getSyskanriFlag(sk1006_jikangaiTaiou1)) {
             jikangaiTaiou = JikangaiTaiou.J_TAIOU1;
-        } else if (dao.getSyskanriFlag(sk1006_jikangaiTaiou2)
-                || dao.getSyskanriFlag(sk1006_chiikiKoken)) {
+        } else if (syskanri.getSyskanriFlag(sk1006_jikangaiTaiou2)
+                || syskanri.getSyskanriFlag(sk1006_chiikiKoken)) {
             jikangaiTaiou = JikangaiTaiou.J_TAIOU2;
-        } else if (dao.getSyskanriFlag(sk1006_jikangaiTaiou3)) {
+        } else if (syskanri.getSyskanriFlag(sk1006_jikangaiTaiou3)) {
             jikangaiTaiou = JikangaiTaiou.J_TAIOU3;
         } else {
             jikangaiTaiou = JikangaiTaiou.J_TAIOU_NON;
         }
         
         // 有床か無床か
-        hasBed = dao.hasBed();
+        hasBed = syskanri.hasBed();
         
         // 在宅療養支援診療所フラグ
-        if (dao.getSyskanriFlag(sk1006_zaitakuShien1)
-                || dao.getSyskanriFlag(sk1006_zaitakuShienHsp1)) {
+        if (syskanri.getSyskanriFlag(sk1006_zaitakuShien1)
+                || syskanri.getSyskanriFlag(sk1006_zaitakuShienHsp1)) {
             zaitakuShien = hasBed 
                     ? Shienshin.KYOKA_TANDOKU_WITH_BED  // 機能強化・単独・有床
                     : Shienshin.KYOKA_TANDOKU_WO_BED;   // 機能強化・単独・無床
-        } else if (dao.getSyskanriFlag(sk1006_zaitakuShien2)
-                || dao.getSyskanriFlag(sk1006_zaitakuShienHsp2)) {
+        } else if (syskanri.getSyskanriFlag(sk1006_zaitakuShien2)
+                || syskanri.getSyskanriFlag(sk1006_zaitakuShienHsp2)) {
             zaitakuShien = hasBed
                     ? Shienshin.KYOKA_RENKEI_WITH_BED   // 機能強化・連携・有床
                     : Shienshin.KYOKA_RENKEI_WO_BED;    // 機能強化・連携・無床
-        } else if (dao.getSyskanriFlag(sk1006_zaitakuShien3old)
-                || dao.getSyskanriFlag(sk1006_zaitakuShien3)) {
+        } else if (syskanri.getSyskanriFlag(sk1006_zaitakuShien3old)
+                || syskanri.getSyskanriFlag(sk1006_zaitakuShien3)) {
             zaitakuShien = Shienshin.SHIENSHIN;         // 普通の支援診
         } else {
             zaitakuShien = Shienshin.NON_SHIENSHIN;     // 非支援診
@@ -627,7 +628,7 @@ public class CheckSantei extends CheckSanteiConst {
         SanteiInfoModel info = context.getPatient().getSanteiInfoModel();
         homeCare = info.isHomeMedicalCare();
         nursingHomeCare = info.isNursingHomeMedicalCare();
-        zaitakuSougouKanri = dao.getSyskanriFlag(sk1006_zaiiSoukan);
+        zaitakuSougouKanri = syskanri.getSyskanriFlag(sk1006_zaiiSoukan);
         zaitakuSougouKanri = zaitakuSougouKanri && info.isZaitakuSougouKanri();
         
         // 登録されている病名を収集

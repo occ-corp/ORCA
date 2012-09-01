@@ -10,7 +10,7 @@ import open.dolphin.client.AutoRomanListener;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.GUIFactory;
 import open.dolphin.client.RegexConstrainedDocument;
-import open.dolphin.dao.SqlMiscDao;
+import open.dolphin.dao.SyskanriInfo;
 import open.dolphin.helper.GridBagBuilder;
 import open.dolphin.project.Project;
 import open.dolphin.project.ProjectStub;
@@ -118,8 +118,8 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
             @Override
             public void actionPerformed(ActionEvent ev) {
                 orcaStaffCodeField.setText("");
-                SqlMiscDao dao = SqlMiscDao.getInstance();
-                String orcaStaffCode = dao.getOrcaStaffCode(orcaUserIdField.getText().trim());
+                SyskanriInfo syskanri = SyskanriInfo.getInstance();
+                String orcaStaffCode = syskanri.getOrcaStaffCode(orcaUserIdField.getText().trim());
                 orcaStaffCodeField.setText(orcaStaffCode);
             }
         });

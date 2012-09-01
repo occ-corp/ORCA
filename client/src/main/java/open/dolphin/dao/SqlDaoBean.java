@@ -2,7 +2,6 @@ package open.dolphin.dao;
 
 import java.sql.*;
 import java.text.DecimalFormat;
-import java.text.SimpleDateFormat;
 import java.util.Collection;
 import javax.sql.DataSource;
 import open.dolphin.infomodel.DiseaseEntry;
@@ -42,7 +41,6 @@ public class SqlDaoBean extends DaoBean {
         if (dataSource == null) {
             setupDataSource();
         }
-        setHospNum();
 //masuda$
     }
 
@@ -68,13 +66,10 @@ public class SqlDaoBean extends DaoBean {
 
     protected static final String HOSPNUM_SRYCD = " and hospnum = ? order by srycd";
     
-    protected static final SimpleDateFormat yyyyMMddFrmt = new SimpleDateFormat("yyyyMMdd");
     protected static final DecimalFormat srycdFrmt = new DecimalFormat("000000000");
     
     
     private static DataSource dataSource;
-    private static int hospNum;
-    private static String dbVersion;
 
     
     protected DiseaseEntry getDiseaseEntry(ResultSet rs) throws SQLException {
@@ -152,60 +147,6 @@ public class SqlDaoBean extends DaoBean {
         }
         return sb.toString();
     }
-    
-    // ORCA 4.6対応
-    protected String getOrcaDbVersion() {
-        return dbVersion;
-    }
-    protected int getHospNum() {
-        return hospNum;
-    }
-
-    // ORCAのデータベースバージョンとhospNumを取得する
-    private void setHospNum() {
-
-        if (dbVersion != null) {
-            return;
-        }
-
-        Connection con = null;
-        Statement st = null;
-        String sql = null;
-        hospNum = 1;
-        String jmari = Project.getString(Project.JMARI_CODE);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append("select hospnum, kanritbl from tbl_syskanri where kanricd='1001' and kanritbl like '%");
-        sb.append(jmari);
-        sb.append("%'");
-        sql = sb.toString();
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                hospNum = rs.getInt(1);
-            }
-        } catch (Exception e) {
-            processError(e);
-            closeConnection(con);
-            closeStatement(st);
-        }
-
-        sql = "select version from tbl_dbkanri where kanricd='ORCADB00'";
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                dbVersion = rs.getString(1);
-            }
-        } catch (Exception e) {
-            processError(e);
-            closeConnection(con);
-            closeStatement(st);
-        }
-    }
 
     // ORCAのptidを取得する
     protected final long getOrcaPtID(String patientId){
@@ -215,11 +156,12 @@ public class SqlDaoBean extends DaoBean {
         final String sql = "select ptid from tbl_ptnum where hospnum = ? and ptnum = ?";
         Connection con = null;
         PreparedStatement ps = null;
-
+        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        
         try {
             con = getConnection();
             ps = con.prepareStatement(sql);
-            ps.setInt(1, getHospNum());
+            ps.setInt(1, hospNum);
             ps.setString(2, patientId);
 
             ResultSet rs = ps.executeQuery();
@@ -346,7 +288,20 @@ public class SqlDaoBean extends DaoBean {
             }
         }
     }
-
+    
+//masuda^
+    public void closePreparedStatement(PreparedStatement ps) {
+        if (ps != null) {
+            try {
+                ps.close();
+            }
+            catch (SQLException e) {
+            	e.printStackTrace(System.err);
+            }
+        }
+    }
+//masuda$
+    
     public void closeConnection(Connection con) {
         if (con != null) {
             try {
