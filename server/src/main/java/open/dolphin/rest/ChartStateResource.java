@@ -12,8 +12,8 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.mbean.ServletContextHolder;
-import open.dolphin.session.PVTServiceBean;
 import open.dolphin.session.ChartStateServiceBean;
+import open.dolphin.session.PVTServiceBean;
 
 /**
  *
@@ -28,6 +28,9 @@ public class ChartStateResource extends AbstractResource {
     
     @Inject
     private PVTServiceBean pvtServiceBean;
+    
+    @Inject
+    private ChartStateServiceBean chartStateService;
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -111,7 +114,7 @@ public class ChartStateResource extends AbstractResource {
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         int from = Integer.valueOf(param);
         
-        List<ChartStateMsgModel> list = contextHolder.getChartStateMsgList(fid, from);
+        List<ChartStateMsgModel> list = chartStateService.getChartStateMsgList(fid, from);
 
         String json = getConverter().toJson(list);
         debug(json);
@@ -122,11 +125,11 @@ public class ChartStateResource extends AbstractResource {
     // 参：きしだのはてな もっとJavaEE6っぽくcometチャットを実装する
     // http://d.hatena.ne.jp/nowokay/20110416/1302978207
     @GET
-    @Path("nextId")
+    @Path("currentId")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String pushNextId() {
-        String nextId = (String) servletReq.getAttribute("nextId");
-        return nextId;
+    public String getCurrentId() {
+        String currentId = (String) servletReq.getAttribute("currentId");
+        return currentId;
     }
 
     @Override

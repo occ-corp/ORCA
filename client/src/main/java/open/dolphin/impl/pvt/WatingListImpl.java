@@ -22,6 +22,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import open.dolphin.client.*;
+import open.dolphin.delegater.ChartStateDelegater;
 import open.dolphin.delegater.PVTDelegater;
 import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.*;
@@ -39,7 +40,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-public class WatingListImpl extends AbstractMainComponent {
+public class WatingListImpl extends AbstractMainComponent implements IChartStateListener {
 
     // Window Title
     private static final String NAME = "受付リスト";
@@ -160,8 +161,6 @@ public class WatingListImpl extends AbstractMainComponent {
     private int waitingPvtCount;
     private Date waitingPvtDate;
     
-    // PvtMessageの現番号
-    private int currentId;
     // PatientVisitModelの全部
     private List<PatientVisitModel> pvtList;
     
@@ -598,26 +597,20 @@ public class WatingListImpl extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getFullPvt();
-        PvtEventListener listener = new PvtEventListener();
-        pvtDelegater.addPropertyChangeListener(PVTDelegater.PVT_MESSAGE_EVENT, listener);
-        pvtDelegater.subscribePvt();
+        ChartStateListener listener = ChartStateListener.getInstance();
+        listener.addListener(this);
         timerTask = new UpdatePvtInfoTask();
         restartTimer();
         enter();
     }
-    
-    // サーバーからのプッシュを処理する
-    private class PvtEventListener implements PropertyChangeListener {
 
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            
-            List<ChartStateMsgModel> list = pvtDelegater.getPvtMessageList(currentId);
-            currentId = (Integer) evt.getNewValue();
-            if (list == null) {
+    @Override
+    public void stateChanged(List<ChartStateMsgModel> msgList) {
+
+            if (msgList == null || msgList.isEmpty()) {
                 return;
             }
-            for (ChartStateMsgModel msg : list) {
+            for (ChartStateMsgModel msg : msgList) {
                 if (!clientUUID.equals(msg.getIssuerUUID())) {
                     updatePvtList(msg);
                 }
@@ -625,8 +618,7 @@ public class WatingListImpl extends AbstractMainComponent {
 
             // PvtInfoを更新する
             countPvt();
-            updatePvtInfo();
-        }
+            updatePvtInfo();        
     }
     
     /**
@@ -679,7 +671,6 @@ public class WatingListImpl extends AbstractMainComponent {
         sb.setLength(sb.length() - 1);
         String line = sb.toString();
         Project.setString("pvtTable.column.spec", line);
-        pvtDelegater.disposePollingTask();
     }
 
 
@@ -1368,7 +1359,6 @@ public class WatingListImpl extends AbstractMainComponent {
         // サーバーからpvtListを取得する
         PvtListModel model = pvtDelegater.getPvtListModel();
         pvtList = model.getPvtList();
-        currentId = model.getNextId();
 
         // フィルタリング
         filterPatients();
@@ -1422,7 +1412,8 @@ public class WatingListImpl extends AbstractMainComponent {
             @Override
             protected Void doInBackground() throws Exception {
                 // サーバーに投げる
-                pvtDelegater.updatePvtState(msg);
+                ChartStateDelegater del = ChartStateDelegater.getInstance();
+                del.updatePvtState(msg);
                 return null;
             }
 

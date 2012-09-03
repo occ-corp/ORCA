@@ -66,7 +66,7 @@ public class ChartStateServiceBean {
         String fid = msg.getFacilityId();
         FacilityContext context = contextHolder.getFacilityContext(fid);
         context.getChartStateMsgList().add(msg);
-        String nextId = String.valueOf(context.getChartStateMsgList().size());
+        String currentId = String.valueOf(context.getMsgCounter());
 
         List<AsyncContext> acList = contextHolder.getAsyncContextList();
         synchronized (acList) {
@@ -76,8 +76,8 @@ public class ChartStateServiceBean {
                 if (fid != null && fid.equals(acFid)) {
                     itr.remove();
                     try {
-                        ac.getRequest().setAttribute("nextId", nextId);
-                        ac.dispatch("/openSource/pvt2/nextId");
+                        ac.getRequest().setAttribute("currentId", currentId);
+                        ac.dispatch("/openSource/chartState/currentId");
                     } catch (Exception ex) {
                         //logger.warning(ex.toString());
                     }
@@ -89,11 +89,21 @@ public class ChartStateServiceBean {
     public PvtListModel getPvtListModel(String fid) {
         FacilityContext context = contextHolder.getFacilityContext(fid);
         PvtListModel model = new PvtListModel();
-        model.setNextId(context.getChartStateMsgList().size());
+        model.setCurrentId(context.getMsgCounter());
         model.setPvtList(context.getPvtList());
         return model;
     }
     
+    public List<ChartStateMsgModel> getChartStateMsgList(String fid, int currentId) {
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        List<ChartStateMsgModel> list = new ArrayList<ChartStateMsgModel>();
+        for (ChartStateMsgModel msg : context.getChartStateMsgList()) {
+            if (msg.getId() > currentId) {
+                list.add(msg);
+            }
+        }
+        return list;
+    }
 
     public void notifyAdd(ChartStateMsgModel msg) {
         msg.setCommand(ChartStateMsgModel.CMD.PVT_ADD);

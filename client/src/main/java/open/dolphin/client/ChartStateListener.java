@@ -79,9 +79,9 @@ public class ChartStateListener {
             
             while (isRunning) {
                 try {
-                    String str = ChartStateDelegater.getInstance().getNextId(currentId);
-                    int nextId = Integer.valueOf(str);
-                    exec.execute(new OnMessageTask(nextId));
+                    String str = ChartStateDelegater.getInstance().getCurrentId(currentId);
+                    currentId = Integer.valueOf(str);
+                    exec.execute(new OnMessageTask());
                 } catch (Exception e) {
                     //System.out.println(e.toString());
                 }
@@ -91,16 +91,10 @@ public class ChartStateListener {
     
     private class OnMessageTask implements Runnable {
 
-        private int nextId;
-
-        private OnMessageTask(int nextId) {
-            this.nextId = nextId;
-        }
-
         @Override
         public void run() {
             ChartStateDelegater del = ChartStateDelegater.getInstance();
-            List<ChartStateMsgModel> msgList = del.getPvtMessageList(nextId);
+            List<ChartStateMsgModel> msgList = del.getChartStateMsgList(currentId);
             for (IChartStateListener listener : listeners) {
                 listener.stateChanged(msgList);
             }

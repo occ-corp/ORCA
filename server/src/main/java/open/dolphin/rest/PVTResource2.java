@@ -27,7 +27,7 @@ public class PVTResource2 extends AbstractResource {
     private PVTServiceBean pvtServiceBean;
     
     @Inject
-    private ChartStateServiceBean pvtServiceMediator;
+    private ChartStateServiceBean chartStateService;
     
     @Context
     private HttpServletRequest servletReq;
@@ -87,7 +87,7 @@ public class PVTResource2 extends AbstractResource {
     public String getPvtListModel() {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        PvtListModel model = pvtServiceMediator.getPvtListModel(fid);
+        PvtListModel model = chartStateService.getPvtListModel(fid);
         
         String json = getConverter().toJson(model);
         debug(json);

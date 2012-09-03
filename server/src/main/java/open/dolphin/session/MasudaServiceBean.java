@@ -27,7 +27,7 @@ public class MasudaServiceBean {
     @PersistenceContext
     private EntityManager em;
 
-
+    
     // 定期処方
     @SuppressWarnings("unchecked")
     public List<RoutineMedModel> getRoutineMedModels(long karteId, int firstResult, int maxResults) {

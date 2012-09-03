@@ -52,7 +52,7 @@ public class ChartStateDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public List<ChartStateMsgModel> getPvtMessageList(int nextId) {
+    public List<ChartStateMsgModel> getChartStateMsgList(int nextId) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);
@@ -89,7 +89,7 @@ public class ChartStateDelegater extends BusinessDelegater {
         return list;
     }
     
-    public String getNextId(int id) {
+    public String getCurrentId(int id) {
         
         String path = POLLING_PATH + String.valueOf(id);
         String ret = JerseyClient.getInstance()

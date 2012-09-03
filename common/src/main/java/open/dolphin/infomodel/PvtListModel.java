@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class PvtListModel {
     
-    private int nextId;
+    private int currentId;
     
     @JsonDeserialize(contentAs=PatientVisitModel.class)
     private List<PatientVisitModel> pvtList;
@@ -18,11 +18,11 @@ public class PvtListModel {
     public PvtListModel() {
     }
     
-    public void setNextId(int id) {
-        nextId = id;
+    public void setCurrentId(int id) {
+        currentId = id;
     }
-    public int getNextId() {
-        return nextId;
+    public int getCurrentId() {
+        return currentId;
     }
     
     public void setPvtList(List<PatientVisitModel> list) {

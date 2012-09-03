@@ -16,12 +16,12 @@ import java.io.InputStreamReader;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
-import java.util.*;
 import java.util.List;
+import java.util.*;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
-import javax.swing.*;
 import javax.swing.Timer;
+import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
@@ -232,6 +232,9 @@ public class Dolphin implements MainWindow {
         if (remoteHost != null) {
             saveEnv.put(GUIConst.KEY_PACS_SETTING, getPacsSettingString());
         }
+        
+        // ChartStateListener
+        ChartStateListener.getInstance().start();
 //masuda$
         
         //ClientContext.getBootLogger().debug("services did start");
@@ -1212,6 +1215,9 @@ public class Dolphin implements MainWindow {
     }
 
     private void shutdown() {
+        
+        // ChartStateListener
+        ChartStateListener.getInstance().stop();
 
         if (providers != null) {
 
