@@ -1,10 +1,7 @@
-
 package open.dolphin.updater;
 
 import java.util.Date;
-import javax.annotation.PostConstruct;
-import javax.ejb.Singleton;
-import javax.ejb.Startup;
+import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.MsdUpdaterModel;
@@ -14,8 +11,7 @@ import open.dolphin.infomodel.MsdUpdaterModel;
  * 
  * @author masuda, Masuda Naika
  */
-@Startup
-@Singleton
+@Stateless
 public class Updater {
     
     private static final String SQL = 
@@ -31,12 +27,7 @@ public class Updater {
     @PersistenceContext
     private EntityManager em;
     
-    @PostConstruct
-    public void init() {
-        start();
-    }
-    
-    private void start() {
+    public void start() {
 
         for (AbstractUpdaterModule module : modules) {
             

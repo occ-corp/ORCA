@@ -9,7 +9,7 @@ import javax.inject.Singleton;
 import javax.servlet.AsyncContext;
 
 /**
- * ContextHolder
+ * サーブレットの諸情報を保持するクラス
  * @author masuda, Masuda Naika
  */
 @Singleton
@@ -19,6 +19,7 @@ public class ServletContextHolder {
     private GregorianCalendar today;
     private GregorianCalendar tomorrow;
 
+    // AsyncContextのリスト
     private final List<AsyncContext> acList = new ArrayList<AsyncContext>();
     
     // facilityIdとfaciltyContextのマップ
@@ -45,7 +46,6 @@ public class ServletContextHolder {
     public Map<String, FacilityContext> getFacilityContextMap() {
         return facilityContextMap;
     }    
-    
     
     public FacilityContext getFacilityContext(String fid) {
         FacilityContext context = facilityContextMap.get(fid);

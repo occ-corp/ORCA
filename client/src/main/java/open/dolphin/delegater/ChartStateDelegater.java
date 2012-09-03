@@ -1,4 +1,3 @@
-
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -10,8 +9,8 @@ import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
 
 /**
- *
- * @author masuda
+ * ChartState変化関連のデレゲータ
+ * @author masuda, Masuda Naika
  */
 public class ChartStateDelegater extends BusinessDelegater {
     
@@ -52,12 +51,12 @@ public class ChartStateDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public List<ChartStateMsgModel> getChartStateMsgList(int nextId) {
+    public List<ChartStateMsgModel> getChartStateMsgList(int currentId) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);
         sb.append("msgList/");
-        sb.append(String.valueOf(nextId));
+        sb.append(String.valueOf(currentId));
         String path = sb.toString();
 
         ClientResponse response = getResource(path, null)
@@ -77,7 +76,7 @@ public class ChartStateDelegater extends BusinessDelegater {
                 getConverter().fromJson(entityStr, typeRef);
 
         // pvtがのっかて来てるときは保険をデコード
-        if (list != null) {
+        if (list != null && !list.isEmpty()) {
             for (ChartStateMsgModel msg : list) {
                 PatientVisitModel pvt = msg.getPatientVisitModel();
                 if (pvt != null) {

@@ -27,83 +27,6 @@ public class ChartStateServiceBean {
     @PersistenceContext
     private EntityManager em;
     
-    
-    // pvtListをリニューアルする
-    public  void renewPvtList() {
-
-        Map<String, FacilityContext> map = contextHolder.getFacilityContextMap();
-        for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
-            FacilityContext facilityContext = (FacilityContext) entry.getValue();
-            List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();
-            List<PatientVisitModel> pvtList = facilityContext.getPvtList();
-            for (PatientVisitModel pvt : pvtList) {
-                // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
-                if (pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM) 
-                        || pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
-                    toRemove.add(pvt);
-                }
-            }
-            pvtList.removeAll(toRemove);
-            // 受付番号を振りなおす
-            //int counter = 0;
-            //for (PatientVisitModel pvt : facilityContext.pvtList) {
-            //    pvt.setNumber(++counter);
-            //}
-            facilityContext.getChartStateMsgList().clear();
-            // クライアントに伝える
-            String fid = (String) entry.getKey();
-            ChartStateMsgModel msg = new ChartStateMsgModel();
-            msg.setFacilityId(fid);
-            msg.setCommand(ChartStateMsgModel.CMD.PVT_RENEW);
-            notifyEvent(msg);
-        }
-        logger.info("PvtServiceMediator: renew pvtList");
-    }
-    
-    private void notifyEvent(ChartStateMsgModel msg) {
-
-        String fid = msg.getFacilityId();
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        context.getChartStateMsgList().add(msg);
-        String currentId = String.valueOf(context.getMsgCounter());
-
-        List<AsyncContext> acList = contextHolder.getAsyncContextList();
-        synchronized (acList) {
-            for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
-                AsyncContext ac = itr.next();
-                String acFid = (String) ac.getRequest().getAttribute("fid");
-                if (fid != null && fid.equals(acFid)) {
-                    itr.remove();
-                    try {
-                        ac.getRequest().setAttribute("currentId", currentId);
-                        ac.dispatch("/openSource/chartState/currentId");
-                    } catch (Exception ex) {
-                        //logger.warning(ex.toString());
-                    }
-                }
-            }
-        }
-    }
-
-    public PvtListModel getPvtListModel(String fid) {
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        PvtListModel model = new PvtListModel();
-        model.setCurrentId(context.getMsgCounter());
-        model.setPvtList(context.getPvtList());
-        return model;
-    }
-    
-    public List<ChartStateMsgModel> getChartStateMsgList(String fid, int currentId) {
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        List<ChartStateMsgModel> list = new ArrayList<ChartStateMsgModel>();
-        for (ChartStateMsgModel msg : context.getChartStateMsgList()) {
-            if (msg.getId() > currentId) {
-                list.add(msg);
-            }
-        }
-        return list;
-    }
 
     public void notifyAdd(ChartStateMsgModel msg) {
         msg.setCommand(ChartStateMsgModel.CMD.PVT_ADD);
@@ -120,6 +43,57 @@ public class ChartStateServiceBean {
     public void notifyMerge(ChartStateMsgModel msg) {
         msg.setCommand(ChartStateMsgModel.CMD.PVT_MERGE);
         notifyEvent(msg);
+    }
+    
+    private void notifyEvent(ChartStateMsgModel msg) {
+
+        String fid = msg.getFacilityId();
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        int currentId = context.getMsgCounter();
+        msg.setId(currentId);
+        context.getChartStateMsgList().add(msg);
+        context.incrementMsgCounter();
+
+        List<AsyncContext> acList = contextHolder.getAsyncContextList();
+        synchronized (acList) {
+            int minId = Integer.MAX_VALUE;
+            for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
+                AsyncContext ac = itr.next();
+                String acFid = (String) ac.getRequest().getAttribute("fid");
+                if (fid != null && fid.equals(acFid)) {
+                    itr.remove();
+                    try {
+                        ac.getRequest().setAttribute("currentId", String.valueOf(currentId));
+                        ac.dispatch("/openSource/chartState/currentId");
+                    } catch (Exception ex) {
+                        //logger.warning(ex.toString());
+                    }
+                    int id = (Integer) ac.getRequest().getAttribute("id");
+                    minId = Math.min(minId, id);
+                }
+            }
+            // ゴミ掃除
+            context.cleanUpMsgList(minId);
+        }
+    }
+
+    public PvtListModel getPvtListModel(String fid) {
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        PvtListModel model = new PvtListModel();
+        model.setCurrentId(context.getMsgCounter());
+        model.setPvtList(context.getPvtList());
+        return model;
+    }
+    
+    public List<ChartStateMsgModel> getChartStateMsgList(String fid, int currentId) {
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        List<ChartStateMsgModel> list = new ArrayList<ChartStateMsgModel>();
+        for (ChartStateMsgModel msg : context.getChartStateMsgList()) {
+            if (msg.getId() >= currentId) {
+                list.add(msg);
+            }
+        }
+        return list;
     }
     
     // 起動後最初のPvtListを作る
@@ -207,7 +181,6 @@ public class ChartStateServiceBean {
 
         // データベースから検索
         final String sql = "from RegisteredDiagnosisModel r where r.karte.id = :karteId";
-        @SuppressWarnings("unchecked")
         List<RegisteredDiagnosisModel> rdList =
                 em.createQuery(sql)
                 .setParameter("karteId", karteId)
@@ -224,5 +197,38 @@ public class ChartStateServiceBean {
         }
         pvt.setByomeiCount(byomeiCount);
         pvt.setByomeiCountToday(byomeiCountToday);
+    }
+    
+    // ０時にpvtListをリニューアルする
+    public void renewPvtList() {
+        
+        contextHolder.setToday();
+        
+        Map<String, FacilityContext> map = contextHolder.getFacilityContextMap();
+        for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry entry = (Map.Entry) itr.next();
+            FacilityContext facilityContext = (FacilityContext) entry.getValue();
+            List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();
+            List<PatientVisitModel> pvtList = facilityContext.getPvtList();
+            for (PatientVisitModel pvt : pvtList) {
+                // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
+                if (pvt.getStateBit(PatientVisitModel.BIT_SAVE_CLAIM) 
+                        || pvt.getStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
+                    toRemove.add(pvt);
+                }
+            }
+            pvtList.removeAll(toRemove);
+            
+            // ChartStateMsgListを初期化する
+            facilityContext.clearChartStateMsgList();
+            
+            // クライアントに伝える
+            String fid = (String) entry.getKey();
+            ChartStateMsgModel msg = new ChartStateMsgModel();
+            msg.setFacilityId(fid);
+            msg.setCommand(ChartStateMsgModel.CMD.PVT_RENEW);
+            notifyEvent(msg);
+        }
+        logger.info("ChartStateService: renew pvtList");
     }
 }

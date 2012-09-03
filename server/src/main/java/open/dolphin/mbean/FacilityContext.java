@@ -7,7 +7,7 @@ import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.infomodel.PatientVisitModel;
 
 /**
- *
+ * 施設の待合リストとChartStateMsgModelを保持するクラス
  * @author masuda, Masuda Naika
  */
 public class FacilityContext {
@@ -24,6 +24,11 @@ public class FacilityContext {
     
     public List<ChartStateMsgModel> getChartStateMsgList() {
         return chartStateMsgList;
+    }
+    
+    public void clearChartStateMsgList() {
+        chartStateMsgList.clear();
+        msgCounter = 0;
     }
     
     public List<PatientVisitModel> getPvtList() {

@@ -49,7 +49,7 @@ public class ChartStateResource extends AbstractResource {
         ac.setTimeout(asyncTimeout);
         // requestにfidとmsgIdを記録しておく
         ac.getRequest().setAttribute("fid", fid);
-        ac.getRequest().setAttribute("id", id);
+        ac.getRequest().setAttribute("id", Integer.valueOf(id));
         contextHolder.addAsyncContext(ac);
         //System.out.println("AsyncContextHolder size = " + contextHolder.getAsyncContextList().size());
 
@@ -112,9 +112,9 @@ public class ChartStateResource extends AbstractResource {
     public String getChartStateMsgList(@PathParam("param") String param){
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        int from = Integer.valueOf(param);
+        int currentId = Integer.valueOf(param);
         
-        List<ChartStateMsgModel> list = chartStateService.getChartStateMsgList(fid, from);
+        List<ChartStateMsgModel> list = chartStateService.getChartStateMsgList(fid, currentId);
 
         String json = getConverter().toJson(list);
         debug(json);

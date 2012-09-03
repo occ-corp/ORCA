@@ -597,28 +597,28 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
     private void startSyncMode() {
         setStatusInfo();
         getFullPvt();
-        ChartStateListener listener = ChartStateListener.getInstance();
-        listener.addListener(this);
+        ChartStateListener.getInstance().addListener(this);
         timerTask = new UpdatePvtInfoTask();
         restartTimer();
         enter();
     }
 
+    // ChartStateListener
     @Override
     public void stateChanged(List<ChartStateMsgModel> msgList) {
 
-            if (msgList == null || msgList.isEmpty()) {
-                return;
+        if (msgList == null || msgList.isEmpty()) {
+            return;
+        }
+        for (ChartStateMsgModel msg : msgList) {
+            if (!clientUUID.equals(msg.getIssuerUUID())) {
+                updatePvtList(msg);
             }
-            for (ChartStateMsgModel msg : msgList) {
-                if (!clientUUID.equals(msg.getIssuerUUID())) {
-                    updatePvtList(msg);
-                }
-            }
+        }
 
-            // PvtInfoを更新する
-            countPvt();
-            updatePvtInfo();        
+        // PvtInfoを更新する
+        countPvt();
+        updatePvtInfo();
     }
     
     /**
@@ -671,6 +671,9 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
         sb.setLength(sb.length() - 1);
         String line = sb.toString();
         Project.setString("pvtTable.column.spec", line);
+        
+        // ChartStateListenerから除去する
+        ChartStateListener.getInstance().removeListener(this);
     }
 
 
@@ -786,11 +789,11 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
             return false;
         }
         // Cancelなら開けない
-        if (pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
+        if (pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {
             return false;
         }
         // 開いてたら開けない
-        if (pvt.hasStateBit(PatientVisitModel.BIT_OPEN)) {
+        if (pvt.getStateBit(PatientVisitModel.BIT_OPEN)) {
             return false;
         }
         return true;
@@ -825,7 +828,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                 int row = pvtTable.rowAtPoint(e.getPoint());
                 PatientVisitModel obj = getSelectedPvt();
                 
-                if (row == selectedRow && obj != null && !obj.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
+                if (row == selectedRow && obj != null && !obj.getStateBit(PatientVisitModel.BIT_CANCEL)) {
                     String pop1 = "カルテを開く";
                     contextMenu.add(new JMenuItem(
                             new ReflectAction(pop1, WatingListImpl.this, "openKarte")));
@@ -838,7 +841,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                 }
                 
                 // pvt cancelのundo
-                if (row == selectedRow && obj != null && obj.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
+                if (row == selectedRow && obj != null && obj.getStateBit(PatientVisitModel.BIT_CANCEL)) {
                     contextMenu.add(new JMenuItem(
                             new ReflectAction("キャンセル取消", WatingListImpl.this, "undoCancelPvt")));
                     contextMenu.addSeparator();
@@ -1107,7 +1110,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
             super.getTableCellRendererComponent(table, value, isSelected, isFocused, row, col);
             
             PatientVisitModel pvt = (PatientVisitModel) sorter.getObject(row);
-            Color fore = pvt != null && pvt.hasStateBit(PatientVisitModel.BIT_CANCEL) ? CANCEL_PVT_COLOR : table.getForeground();
+            Color fore = pvt != null && pvt.getStateBit(PatientVisitModel.BIT_CANCEL) ? CANCEL_PVT_COLOR : table.getForeground();
             this.setForeground(fore);
             
             // 選択状態の場合はStripeTableCellRendererの配色を上書きしない
@@ -1120,7 +1123,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                     }
                 }
                 // 病名の状態に応じて背景色を変更 pns
-                if (!pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
+                if (!pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {
                     // 初診
                     if (pvt.isShoshin()) {
                         this.setBackground(SHOSHIN_COLOR);
@@ -1164,7 +1167,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                     }
                 }
 
-                if (pvt.hasStateBit(PatientVisitModel.BIT_UNFINISHED)) {
+                if (pvt.getStateBit(PatientVisitModel.BIT_UNFINISHED)) {
                     setBackground(KARTE_EMPTY_COLOR);
                 }
 
@@ -1200,7 +1203,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
             PatientVisitModel pvt = (PatientVisitModel) sorter.getObject(row);
             
             if (pvt != null) {
-                if (pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
+                if (pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {
                     this.setForeground(CANCEL_PVT_COLOR);
                 } else {
                     // 選択状態の場合はStripeTableCellRendererの配色を上書きしない
@@ -1316,14 +1319,14 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
 
         for (int i = 0; i < dataList.size(); i++) {
             PatientVisitModel pvt = dataList.get(i);
-            if (!pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM) && !pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
+            if (!pvt.getStateBit(PatientVisitModel.BIT_SAVE_CLAIM) && !pvt.getStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
                 // 診察未終了レコードをカウント，最初に見つかった未終了レコードの時間から待ち時間を計算
                 ++waitingPvtCount;
                 if (waitingPvtDate == null) {
                     waitingPvtDate = ModelUtils.getDateTimeAsObject(pvt.getPvtDate());
                 }
             }
-            if (!pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
+            if (!pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {
                 ++totalPvtCount;
             }
         }
@@ -1491,7 +1494,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                         // 発行者がpvtの所有者ならばstateを変更する
                         int newState = msg.getState();
                         pvt.setState(newState);
-                        if (pvt.hasStateBit(PatientVisitModel.BIT_OPEN)) {
+                        if (pvt.getStateBit(PatientVisitModel.BIT_OPEN)) {
                             // Chartを開いたら所有権セットする
                             pvt.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
                         } else {

@@ -510,8 +510,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         //TO DO
         Date pvtDate = ModelUtils.getDateTimeAsObject(pvt.getPvtDate());
         if (pvtDate != null
-                && !pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM)
-                && !pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) { // window open 前に呼ばれる
+                && !pvt.getStateBit(PatientVisitModel.BIT_SAVE_CLAIM)
+                && !pvt.getStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) { // window open 前に呼ばれる
             Date now = new Date();
             String waitingTime = "00:00";
             if (now.after(pvtDate)) {

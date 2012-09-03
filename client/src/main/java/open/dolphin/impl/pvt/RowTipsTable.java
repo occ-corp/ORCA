@@ -28,7 +28,7 @@ public class RowTipsTable extends JTable {
         if (pvt != null) {
             Date pvtDate = ModelUtils.getDateTimeAsObject(pvt.getPvtDate());
             String waitingTime = "";
-            if (!pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM) && !pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
+            if (!pvt.getStateBit(PatientVisitModel.BIT_SAVE_CLAIM) && !pvt.getStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
                 Date now = new Date();
                 waitingTime = " - 待ち時間 ";
                 if (now.after(pvtDate)) {

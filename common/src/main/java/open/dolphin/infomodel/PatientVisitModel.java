@@ -115,8 +115,15 @@ public class PatientVisitModel extends InfoModel {
 //pns$
     
 //masuda＾
-    public boolean hasStateBit(int stateBit) {
+    public boolean getStateBit(int stateBit) {
         return (status & (1 << stateBit)) != 0;
+    }
+    public void setStateBit(int stateBit, boolean flag) {
+        if (flag) {
+            status |= (1 << stateBit);
+        } else {
+            status &= ~(1 << stateBit);
+        }
     }
 //masuda$
     

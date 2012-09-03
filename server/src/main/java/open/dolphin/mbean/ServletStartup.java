@@ -1,4 +1,3 @@
-
 package open.dolphin.mbean;
 
 import java.util.Timer;
@@ -6,15 +5,16 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.ejb.Schedule;
+import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timeout;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import open.dolphin.session.ChartStateServiceBean;
+import open.dolphin.updater.Updater;
 
 /**
- *
- * @author masuda
+ * スタートアップ時にUpdaterとChartStateServiceBeanを自動実行
+ * @author masuda, Masuda Naika
  */
 @Singleton
 @Startup
@@ -26,10 +26,11 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     private ChartStateServiceBean chartStateService;
     
     @Inject
-    private ServletContextHolder contextHolder;
+    private Updater updater;
 
     @PostConstruct
     public void init() {
+        updater.start();
         chartStateService.initializePvtList();
     }
 
@@ -40,11 +41,10 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     // 日付が変わったらpvtListをクリアしクライアントに伝える
     @Schedule(hour="0", minute="0", persistent=false)
     public void dayChange() {
-        contextHolder.setToday();
         chartStateService.renewPvtList();
     }
     @Timeout
     public void timeout(Timer timer) {
-        logger.warning("ServletContextHolder: timeout occurred");
+        logger.warning("ServletStartup: timeout occurred");
     }
 }
