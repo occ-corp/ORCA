@@ -65,6 +65,7 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 String name = rs.getString(COLUMN_NAME);
                 hasMemo2 = columnName.equals(name);
             }
+            rs.close();
             
             boolean hasByomei = false;
             columnName = "byomei";
@@ -74,6 +75,7 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 String name = rs.getString(COLUMN_NAME);
                 hasByomei = columnName.equals(name);
             }
+            rs.close();
             
             boolean hasByomeiToday = false;
             columnName = "byomeitoday";
@@ -83,6 +85,7 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 String name = rs.getString(COLUMN_NAME);
                 hasByomeiToday = columnName.equals(name);
             }
+            rs.close();
 /*
             boolean hasCancerCare = false;
             columnName = "cancerCare";
@@ -92,6 +95,8 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 String name = rs.getString(COLUMN_NAME);
                 hasCancerCare = columnName.equals(name);
             }
+            rs.close();
+            
             boolean hasZaitakuSougouKanri = false;
             columnName = "zaitakuSougouKanri";
             tableName = "d_patient";
@@ -108,6 +113,8 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 String name = rs.getString(COLUMN_NAME);
                 hasHomeMedicalCare = columnName.equals(name);
             }
+            rs.close();
+            
             boolean hasNursingHomeMedicalCare = false;
             columnName = "nursingHomeMedicalCare";
             tableName = "d_patient";
@@ -116,36 +123,42 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
                 String name = rs.getString(COLUMN_NAME);
                 hasNursingHomeMedicalCare = columnName.equals(name);
             }
+            rs.close();
+            
 */
             boolean treeBytesIsMediumBlob = false;
-            columnName = "treeBytes";
-            tableName = "d_stamp_tree";
-            rs = dmd.getColumns(null, null, tableName, columnName);
-            if (rs.next()) {
-                String type = rs.getString(TYPE_NAME);
-                treeBytesIsMediumBlob = MEDIUM_BLOB.equals(type);
-            }
-            
             boolean pub_treeBytesIsMediumBlob = false;
-            columnName = "treeBytes";
-            tableName = "d_published_tree";
-            rs = dmd.getColumns(null, null, tableName, columnName);
-            if (rs.next()) {
-                String type = rs.getString(TYPE_NAME);
-                pub_treeBytesIsMediumBlob = MEDIUM_BLOB.equals(type);
-            }
-            
             boolean jpegByteIsMediumBlob = false;
-            columnName = "jpegByte";
-            tableName = "d_image";
-            rs = dmd.getColumns(null, null, tableName, columnName);
-            if (rs.next()) {
-                String type = rs.getString(TYPE_NAME);
-                jpegByteIsMediumBlob =MEDIUM_BLOB.equals(type);
+
+            if (mysql) {
+                columnName = "treeBytes";
+                tableName = "d_stamp_tree";
+                rs = dmd.getColumns(null, null, tableName, columnName);
+                if (rs.next()) {
+                    String type = rs.getString(TYPE_NAME);
+                    treeBytesIsMediumBlob = MEDIUM_BLOB.equals(type);
+                }
+                rs.close();
+
+                columnName = "treeBytes";
+                tableName = "d_published_tree";
+                rs = dmd.getColumns(null, null, tableName, columnName);
+                if (rs.next()) {
+                    String type = rs.getString(TYPE_NAME);
+                    pub_treeBytesIsMediumBlob = MEDIUM_BLOB.equals(type);
+                }
+                rs.close();
+
+                columnName = "jpegByte";
+                tableName = "d_image";
+                rs = dmd.getColumns(null, null, tableName, columnName);
+                if (rs.next()) {
+                    String type = rs.getString(TYPE_NAME);
+                    jpegByteIsMediumBlob = MEDIUM_BLOB.equals(type);
+                }
+                rs.close();
             }
-            
-            rs.close();
-            rs = null;
+
             
             Statement stmt = con.createStatement();
             
@@ -206,7 +219,7 @@ public class DbSchemaUpdater extends AbstractUpdaterModule {
 
             if (postgres) {
                 logger.info("Database is PostgreSQL.");
-                
+
                 // memo2 -> memo
                 if (hasMemo2) {
                     stmt.addBatch("update d_patient_memo set memo2 = memo where memo2 is null");
