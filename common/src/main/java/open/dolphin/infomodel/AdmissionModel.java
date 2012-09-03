@@ -26,7 +26,7 @@ public class AdmissionModel extends KarteEntryBean {
     @ManyToOne
     @JoinColumn(name="room_id")
     private RoomModel roomModel;
-    
+
     
     public AdmissionModel() {
         docInfo = new DocInfoModel();
@@ -56,7 +56,7 @@ public class AdmissionModel extends KarteEntryBean {
     public void setRoomModel(RoomModel roomModel) {
         this.roomModel = roomModel;
     }
-    
+
     public void toDetuch() {
         docInfo.setDocPk(getId());
         docInfo.setParentPk(getLinkId());

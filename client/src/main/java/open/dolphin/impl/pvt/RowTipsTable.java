@@ -4,7 +4,6 @@ package open.dolphin.impl.pvt;
 import java.awt.event.MouseEvent;
 import java.util.Date;
 import javax.swing.JTable;
-import open.dolphin.client.ChartImpl;
 import open.dolphin.infomodel.ModelUtils;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.table.ListTableSorter;
@@ -29,7 +28,7 @@ public class RowTipsTable extends JTable {
         if (pvt != null) {
             Date pvtDate = ModelUtils.getDateTimeAsObject(pvt.getPvtDate());
             String waitingTime = "";
-            if (!pvt.hasStateBit(ChartImpl.BIT_SAVE_CLAIM) && !pvt.hasStateBit(ChartImpl.BIT_MODIFY_CLAIM)) {
+            if (!pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM) && !pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
                 Date now = new Date();
                 waitingTime = " - 待ち時間 ";
                 if (now.after(pvtDate)) {

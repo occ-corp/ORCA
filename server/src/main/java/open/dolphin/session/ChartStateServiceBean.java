@@ -2,137 +2,71 @@ package open.dolphin.session;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.logging.Logger;
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import javax.ejb.Schedule;
-import javax.ejb.Timeout;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.inject.Singleton;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.AsyncContext;
 import open.dolphin.infomodel.*;
-import open.dolphin.mbean.AsyncContextHolder;
+import open.dolphin.mbean.FacilityContext;
+import open.dolphin.mbean.ServletContextHolder;
 
 /**
- * PvtServiceMediator
- *
- * RemovtePvtServiceのメディエーター役のSingleton EJB
- *
+ * ChartStateServiceBean
  * @author masuda, Masuda Naika
  */
-@Singleton
-public class PvtServiceMediator {
-    
-    public static final int BIT_OPEN            = 0;
-    public static final int BIT_SAVE_CLAIM      = 1;
-    public static final int BIT_MODIFY_CLAIM    = 2;
-    public static final int BIT_TREATMENT       = 3;
-    public static final int BIT_HURRY           = 4;
-    public static final int BIT_GO_OUT          = 5;
-    public static final int BIT_CANCEL          = 6;
-    public static final int BIT_UNFINISHED      = 8;
-
-    // facilityIdとfaciltyContextのマップ
-    private Map<String, FacilityContext> facilityContextMap 
-            = new ConcurrentHashMap<String, FacilityContext>();
-
-    // 今日と明日
-    private GregorianCalendar today;
-    private GregorianCalendar tomorrow;
-
-    private static final Logger logger = Logger.getLogger(PvtServiceMediator.class.getSimpleName());
+@Stateless
+public class ChartStateServiceBean {
+ 
+    private static final Logger logger = Logger.getLogger(ChartStateServiceBean.class.getSimpleName());
     
     @Inject
-    private AsyncContextHolder contextHolder;
+    private ServletContextHolder contextHolder;
     
     @PersistenceContext
     private EntityManager em;
     
     
-    private class FacilityContext {
-
-        private final List<PvtMessageModel> pvtMessageList = new CopyOnWriteArrayList<PvtMessageModel>();
-        private final List<PatientVisitModel> pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
-    }
-    
-   
-    @PostConstruct
-    public void init() {
-        initializePvtList();
-    }
-
-    @PreDestroy
-    public void stop() {
-
-    }
-
-    // 日付が変わったらpvtListをクリアしクライアントに伝える
-    @Schedule(hour="0", minute="0", persistent=false)
-    public void dayChange() {
-        setToday();
-        renewPvtList();
-    }
-    @Timeout
-    public void timeout(Timer timer) {
-        logger.warning("PvtServiceMediator: timeout occurred");
-    }
-    
-    // 今日と明日を設定する
-    private void setToday() {
-
-        today= new GregorianCalendar();
-        int year = today.get(GregorianCalendar.YEAR);
-        int month = today.get(GregorianCalendar.MONTH);
-        int date = today.get(GregorianCalendar.DAY_OF_MONTH);
-        today.clear();
-        today.set(year, month, date);
-
-        tomorrow = new GregorianCalendar();
-        tomorrow.setTime(today.getTime());
-        tomorrow.add(GregorianCalendar.DAY_OF_MONTH, 1);
-    }
-    
     // pvtListをリニューアルする
-    @SuppressWarnings("unchecked")
-    private void renewPvtList() {
+    public  void renewPvtList() {
 
-        for (Iterator itr = facilityContextMap.entrySet().iterator(); itr.hasNext();) {
+        Map<String, FacilityContext> map = contextHolder.getFacilityContextMap();
+        for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
             FacilityContext facilityContext = (FacilityContext) entry.getValue();
             List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();
-            for (PatientVisitModel pvt : facilityContext.pvtList) {
+            List<PatientVisitModel> pvtList = facilityContext.getPvtList();
+            for (PatientVisitModel pvt : pvtList) {
                 // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
-                if (pvt.hasStateBit(BIT_SAVE_CLAIM) || pvt.hasStateBit(BIT_MODIFY_CLAIM)) {
+                if (pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM) 
+                        || pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
                     toRemove.add(pvt);
                 }
             }
-            facilityContext.pvtList.removeAll(toRemove);
+            pvtList.removeAll(toRemove);
             // 受付番号を振りなおす
             //int counter = 0;
             //for (PatientVisitModel pvt : facilityContext.pvtList) {
             //    pvt.setNumber(++counter);
             //}
-            facilityContext.pvtMessageList.clear();
+            facilityContext.getChartStateMsgList().clear();
             // クライアントに伝える
             String fid = (String) entry.getKey();
-            PvtMessageModel msg = new PvtMessageModel();
+            ChartStateMsgModel msg = new ChartStateMsgModel();
             msg.setFacilityId(fid);
-            msg.setCommand(PvtMessageModel.CMD_RENEW);
+            msg.setCommand(ChartStateMsgModel.CMD.PVT_RENEW);
             notifyEvent(msg);
         }
         logger.info("PvtServiceMediator: renew pvtList");
     }
     
-    private void notifyEvent(PvtMessageModel msg) {
+    private void notifyEvent(ChartStateMsgModel msg) {
 
         String fid = msg.getFacilityId();
-        FacilityContext context = getFacilityContext(fid);
-        context.pvtMessageList.add(msg);
-        String nextId = String.valueOf(context.pvtMessageList.size());
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        context.getChartStateMsgList().add(msg);
+        String nextId = String.valueOf(context.getChartStateMsgList().size());
 
         List<AsyncContext> acList = contextHolder.getAsyncContextList();
         synchronized (acList) {
@@ -151,67 +85,42 @@ public class PvtServiceMediator {
             }
         }
     }
-    
-    private FacilityContext getFacilityContext(String fid) {
-        FacilityContext context = facilityContextMap.get(fid);
-        if (context == null) {
-            context = new FacilityContext();
-            facilityContextMap.put(fid, context);
-        }
-        return context;
-    }
 
     public PvtListModel getPvtListModel(String fid) {
-        FacilityContext context = getFacilityContext(fid);
+        FacilityContext context = contextHolder.getFacilityContext(fid);
         PvtListModel model = new PvtListModel();
-        model.setNextId(context.pvtMessageList.size());
-        model.setPvtList(context.pvtList);
+        model.setNextId(context.getChartStateMsgList().size());
+        model.setPvtList(context.getPvtList());
         return model;
     }
     
-    public List<PvtMessageModel> getPvtMessageList(String fid, int from) {
-        FacilityContext context = getFacilityContext(fid);
-        int to = context.pvtMessageList.size();
-        if (to > 0 && to > from && from >= 0) {
-            return context.pvtMessageList.subList(from, to);
-        } else {
-            return null;
-        }
-    }
 
-    public GregorianCalendar getToday() {
-        return today;
-    }
-    public GregorianCalendar getTomorrow() {
-        return tomorrow;
-    }
-
-    public void notifyAdd(PvtMessageModel msg) {
-        msg.setCommand(PvtMessageModel.CMD_ADD);
+    public void notifyAdd(ChartStateMsgModel msg) {
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_ADD);
         notifyEvent(msg);
     }
-    public void notifyDelete(PvtMessageModel msg) {
-        msg.setCommand(PvtMessageModel.CMD_DELETE);
+    public void notifyDelete(ChartStateMsgModel msg) {
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_DELETE);
         notifyEvent(msg);
     }
-    public void notifyState(PvtMessageModel msg) {
-        msg.setCommand(PvtMessageModel.CMD_STATE);
+    public void notifyState(ChartStateMsgModel msg) {
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
         notifyEvent(msg);
     }
-    public void notifyMerge(PvtMessageModel msg) {
-        msg.setCommand(PvtMessageModel.CMD_MERGE);
+    public void notifyMerge(ChartStateMsgModel msg) {
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_MERGE);
         notifyEvent(msg);
     }
     
     // 起動後最初のPvtListを作る
-    private void initializePvtList() {
+    public void initializePvtList() {
 
-        setToday();
+        contextHolder.setToday();
         
         // サーバーの「今日」で管理する
         final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-        String fromDate = frmt.format(today.getTime());
-        String toDate = frmt.format(tomorrow.getTime());
+        String fromDate = frmt.format(contextHolder.getToday().getTime());
+        String toDate = frmt.format(contextHolder.getTomorrow().getTime());
 
         // PatientVisitModelを施設IDで検索する
         final String sql =
@@ -232,8 +141,8 @@ public class PvtServiceMediator {
         for (PatientVisitModel pvt : result) {
             
             String fid = pvt.getFacilityId();
-            FacilityContext context = getFacilityContext(fid);
-            context.pvtList.add(pvt);
+            FacilityContext context = contextHolder.getFacilityContext(fid);
+            context.getPvtList().add(pvt);
 
             PatientModel patient = pvt.getPatientModel();
 
@@ -258,7 +167,7 @@ public class PvtServiceMediator {
              List<AppointmentModel> list =
                     em.createQuery("from AppointmentModel a where a.karte.id = :karteId and a.date = :date")
                     .setParameter("karteId", karteId)
-                    .setParameter("date", today.getTime())
+                    .setParameter("date", contextHolder.getToday().getTime())
                     .getResultList();
             if (list != null && !list.isEmpty()) {
                 AppointmentModel appo = list.get(0);

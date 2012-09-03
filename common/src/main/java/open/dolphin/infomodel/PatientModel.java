@@ -163,6 +163,16 @@ public class PatientModel extends InfoModel {
     public void setSanteiInfoModel(SanteiInfoModel info) {
         santeiInfo = info;
     }
+    
+    // 排他処理関連
+    @Transient
+    private String ownerUUID;   // 現在の所有者UUID
+    public void setOwnerUUID(String uuid) {
+        ownerUUID = uuid;
+    }
+    public String getOwnerUUID() {
+        return ownerUUID;
+    }
 //masuda$
     
     /**

@@ -599,7 +599,7 @@ public class Dolphin implements MainWindow {
     public void openKarte(PatientVisitModel pvt) {
         
 //masuda^   すでにChart, EditorFrameが開いていた時の処理はここで行う
-        if (pvt == null || (pvt.getState() & (1<< ChartImpl.BIT_CANCEL)) != 0) {
+        if (pvt == null || (pvt.getState() & (1<< PatientVisitModel.BIT_CANCEL)) != 0) {
             return;
         }
         // このクライアントでChartImplとEditorFrameを開いていた場合の処理
@@ -629,7 +629,7 @@ public class Dolphin implements MainWindow {
 
         // まだ開いていない場合
         boolean readOnly = Project.isReadOnly();
-        if (pvt.getOwnerUUID() != null) {
+        if (pvt.getPatientModel().getOwnerUUID() != null) {
             // ダイアログで確認する
             String ptName = pvt.getPatientName();
             String[] options = {"閲覧のみ", "強制的に編集", "キャンセル"};
@@ -643,7 +643,7 @@ public class Dolphin implements MainWindow {
                     readOnly = true;
                     break;
                 case 1:     // 強制的に編集するときは所有権横取り
-                    pvt.setOwnerUUID(clientUUID);
+                    pvt.getPatientModel().setOwnerUUID(clientUUID);
                     break;
                 case 2:     // キャンセル
                 case JOptionPane.CLOSED_OPTION:
@@ -651,7 +651,7 @@ public class Dolphin implements MainWindow {
             }
         } else {
             // 誰も開いていないときは自分が所有者
-            pvt.setOwnerUUID(clientUUID);
+            pvt.getPatientModel().setOwnerUUID(clientUUID);
         }
 //masuda$
         

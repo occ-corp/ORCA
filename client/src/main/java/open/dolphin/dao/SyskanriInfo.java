@@ -1,11 +1,13 @@
 package open.dolphin.dao;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import open.dolphin.project.Project;
 
 /**
@@ -16,17 +18,18 @@ public class SyskanriInfo extends SqlDaoBean {
 
     private static final SyskanriInfo instance;
     
-    private static final String ORCA_DB_CHARSET = "EUC-JP";
-    private static final String[] KANRICDS = new String[]{"1001", "5000", "5001", "5002", "5013"};
+    private static final String[] KANRICDS 
+            = new String[]{"1001", "5000", "5001", "5002", "5013"};
     
     public static final String ORCA46 = "orca46";
     public static final String ORCA45 = "orca45";
     
-    private String orcaVer;
+    private String orcaVer;     // "orca46" or "orca45"
+    
     private int hospNum;
     
     private List<Integer> syskanri1006;
-    private Map<String, KanriTblModel> kanriTblMap;
+    private Map<String, String> kanriTblMap;
     
     private static boolean initialized = false;
 
@@ -35,7 +38,6 @@ public class SyskanriInfo extends SqlDaoBean {
     }
     
     public SyskanriInfo() {
-        initialize();
     }
     
     public static SyskanriInfo getInstance() {
@@ -47,7 +49,7 @@ public class SyskanriInfo extends SqlDaoBean {
     
     private void initialize() {
         syskanri1006 = new ArrayList<Integer>();
-        kanriTblMap = new HashMap<String, KanriTblModel>();
+        kanriTblMap = new HashMap<String, String>();
         initialized = setHospNum();
         initialized &= setSyskanri1006();
 
@@ -103,9 +105,8 @@ public class SyskanriInfo extends SqlDaoBean {
     // 有床か無床か
     public boolean hasBed() {
         try {
-            KanriTblModel kanritbl = kanriTblMap.get("1001");
-            String strNum = kanritbl.getString("BEDSU");
-            if (Integer.valueOf(strNum) > 0) {
+            String value = kanriTblMap.get("SYS-1001-BEDSU");
+            if (Integer.valueOf(value) > 0) {
                 return true;
             }
         } catch (Exception ex) {
@@ -117,6 +118,9 @@ public class SyskanriInfo extends SqlDaoBean {
         return syskanri1006.contains(code);
     }
 
+    
+//============================================================================//
+    
     // ORCAのデータベースバージョンとhospNumを取得する
     private boolean setHospNum() {
         
@@ -220,26 +224,23 @@ public class SyskanriInfo extends SqlDaoBean {
         PreparedStatement ps = null;
 
         try {
-            byte[] bytes = null;
+            String data = null;
             con = getConnection();
             ps = con.prepareStatement(sql);
             ps.setString(1, kanricd);
             ResultSet rs = ps.executeQuery();
             if (rs.next()) {
-                bytes = rs.getString(1).getBytes(ORCA_DB_CHARSET);
+                data = rs.getString(1);
             }
             rs.close();
             
             // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
             IncReader reader = new IncReader(kanricd, orcaVer);
-            Map<String, int[]> map = reader.getMap();
+            Map<String, String> map = reader.getMap(data);
 
-            // 両方取得できたらマップに登録する
-            if (bytes != null && map != null) {
-                KanriTblModel kanritbl = new KanriTblModel();
-                kanritbl.setBytes(bytes);
-                kanritbl.setMap(map);
-                kanriTblMap.put(kanricd, kanritbl);
+            // 取得できたらマップに登録する
+            if (map != null && !map.isEmpty()) {
+                kanriTblMap.putAll(map);
             }
         } catch (Exception e) {
             processError(e);
@@ -249,34 +250,5 @@ public class SyskanriInfo extends SqlDaoBean {
             closeConnection(con);
         }
         return success;
-    }
-    
-    
-    // kanritblのバイト列とデータ名、位置、データ長を保持するクラス
-    private class KanriTblModel {
-
-        private byte[] bytes;
-        private Map<String, int[]> map;
-
-        private void setBytes(byte[] bytes) {
-            this.bytes = bytes;
-        }
-
-        private void setMap(Map<String, int[]> map) {
-            this.map = map;
-        }
-        
-        private String getString(String columnName) {
-            String ret = null;
-            int[] data = map.get(columnName.toUpperCase());
-            int start = data[0];
-            int length = data[1];
-            byte[] strBytes =  Arrays.copyOfRange(bytes, start, start + length);
-            try {
-                ret = new String(strBytes, ORCA_DB_CHARSET);
-            } catch (UnsupportedEncodingException ex) {
-            }
-            return ret;
-        }
     }
 }

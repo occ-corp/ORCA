@@ -10,7 +10,7 @@ import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.PvtMessageModel;
+import open.dolphin.infomodel.ChartStateMsgModel;
 
 /**
  *
@@ -48,7 +48,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
     
 //masuda^
     @Inject
-    private PvtServiceMediator mediator;
+    private ChartStateServiceBean mediator;
 //masuda$
 
     @SuppressWarnings("unchecked")
@@ -269,7 +269,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
             if (pvt.getPatientModel().getId() == pm.getId()) {
                 pvt.setPatientModel(pm);
                  // クライアントに通知
-                PvtMessageModel msg = new PvtMessageModel(pvt);
+                ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
                 msg.setPatientVisitModel(pvt);
                 //msg.setFacilityId(fid);
                 mediator.notifyMerge(msg);

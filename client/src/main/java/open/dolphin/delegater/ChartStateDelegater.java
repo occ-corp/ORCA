@@ -1,5 +1,7 @@
+
 package open.dolphin.delegater;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -8,76 +10,54 @@ import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
 
 /**
- * PVT 関連の Business Delegater　クラス。
  *
- * @author Kazushi Minagawa, Digital Globe, Inc.
- * @author modified by masuda, Masuda Naika
+ * @author masuda
  */
-public class PVTDelegater extends BusinessDelegater {
-
-    private static final String RES_PVT = "pvt2/";
+public class ChartStateDelegater extends BusinessDelegater {
+    
+    private static final String RES_CS = "chartState/";
+    private static final String POLLING_PATH = RES_CS + "subscribe/";
     
     private static final boolean debug = false;
-    private static final PVTDelegater instance;
+    private static final ChartStateDelegater instance;
 
     static {
-        instance = new PVTDelegater();
+        instance = new ChartStateDelegater();
     }
-
-    public static PVTDelegater getInstance() {
+    
+    private ChartStateDelegater() {
+    }
+    
+    public static ChartStateDelegater getInstance() {
         return instance;
     }
+    
+    public int updatePvtState(ChartStateMsgModel msg) {
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(RES_CS);
+        sb.append("state");
+        String path = sb.toString();
 
-    private PVTDelegater() {
-    }
+        String json = getConverter().toJson(msg);
 
-    /**
-     * 受付情報 PatientVisitModel をデータベースに登録する。
-     *
-     * @param pvtModel 受付情報 PatientVisitModel
-     * @param principal UserId と FacilityId
-     * @return 保存に成功した個数
-     */
-    public int addPvt(PatientVisitModel pvtModel) {
-
-        // convert
-        String json = getConverter().toJson(pvtModel);
-
-        // resource post
-        String path = RES_PVT;
         ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
-                .post(ClientResponse.class, json);
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = response.getEntity(String.class);
         debug(status, enityStr);
 
-        // result = count
-        int cnt = Integer.parseInt(enityStr);
-        return cnt;
+        return Integer.parseInt(enityStr);
     }
-
-    public int removePvt(long id) {
-
-        String path = RES_PVT + String.valueOf(id);
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .delete(ClientResponse.class);
-
-        int status = response.getStatus();
-        String enityStr = "delete response";
-        debug(status, enityStr);
-
-        return 1;
-    }
-
-    public PvtListModel getPvtListModel() {
+    
+    public List<ChartStateMsgModel> getPvtMessageList(int nextId) {
 
         StringBuilder sb = new StringBuilder();
-        sb.append(RES_PVT);
-        sb.append("pvtListModel");
+        sb.append(RES_CS);
+        sb.append("msgList/");
+        sb.append(String.valueOf(nextId));
         String path = sb.toString();
 
         ClientResponse response = getResource(path, null)
@@ -91,22 +71,35 @@ public class PVTDelegater extends BusinessDelegater {
         if (status != HTTP200) {
             return null;
         }
+        
+        TypeReference typeRef = new TypeReference<List<ChartStateMsgModel>>(){};
+        List<ChartStateMsgModel> list = (List<ChartStateMsgModel>)
+                getConverter().fromJson(entityStr, typeRef);
 
-        PvtListModel model = (PvtListModel)
-                getConverter().fromJson(entityStr, PvtListModel.class);
-
-        // 保険をデコード
-        List<PatientVisitModel> pvtList = model.getPvtList();
-        if (pvtList != null && !pvtList.isEmpty()) {
-            for (PatientVisitModel pvt : pvtList) {
-                PatientModel pm = pvt.getPatientModel();
-                decodeHealthInsurance(pm);
+        // pvtがのっかて来てるときは保険をデコード
+        if (list != null) {
+            for (ChartStateMsgModel msg : list) {
+                PatientVisitModel pvt = msg.getPatientVisitModel();
+                if (pvt != null) {
+                    PatientModel pm = pvt.getPatientModel();
+                    decodeHealthInsurance(pm);
+                }
             }
         }
-
-        return model;
+        return list;
     }
-
+    
+    public String getNextId(int id) {
+        
+        String path = POLLING_PATH + String.valueOf(id);
+        String ret = JerseyClient.getInstance()
+                .getAsyncResource(path)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .get(String.class);
+        
+        return ret;
+    }
+    
     /**
      * バイナリの健康保険データをオブジェクトにデコードする。
      *

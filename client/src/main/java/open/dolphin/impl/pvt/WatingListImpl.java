@@ -114,7 +114,9 @@ public class WatingListImpl extends AbstractMainComponent {
     
     // Chart State
     private Integer[] chartBitArray = {
-        new Integer(ChartImpl.BIT_OPEN), new Integer(ChartImpl.BIT_MODIFY_CLAIM), new Integer(ChartImpl.BIT_SAVE_CLAIM)};
+        new Integer(PatientVisitModel.BIT_OPEN), 
+        new Integer(PatientVisitModel.BIT_MODIFY_CLAIM),
+        new Integer(PatientVisitModel.BIT_SAVE_CLAIM)};
     // Chart State を表示するアイコン
     private ImageIcon[] chartIconArray = {
         ClientContext.getImageIcon("open_16.gif"), 
@@ -326,7 +328,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 PatientVisitModel pm = getObject(row);
                 int state = pm.getState();
 
-                if ((state & (1 << ChartImpl.BIT_CANCEL)) != 0) {
+                if ((state & (1 << PatientVisitModel.BIT_CANCEL)) != 0) {
                     // cancel case
                     canEdit = false;
 
@@ -379,7 +381,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 if (col == memoColumn) {
                     String memo = ((String) value).trim();
                     if (memo != null && (!memo.equals(""))) {
-                        PvtMessageModel msg = new PvtMessageModel(pvt);
+                        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
                         updateState(msg);
                     }
 
@@ -389,7 +391,7 @@ public class WatingListImpl extends AbstractMainComponent {
                     BitAndIconPair pair = (BitAndIconPair) value;
                     int theBit = pair.getBit().intValue();
 
-                    if (theBit == ChartImpl.BIT_CANCEL) {
+                    if (theBit == PatientVisitModel.BIT_CANCEL) {
 
                         Object[] cstOptions = new Object[]{"はい", "いいえ"};
 
@@ -421,7 +423,7 @@ public class WatingListImpl extends AbstractMainComponent {
                         state = state | (1 << theBit);
                     }
 
-                    PvtMessageModel msg = new PvtMessageModel(pvt);
+                    ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
                     msg.setState(state);
                     updateState(msg);
                 }
@@ -528,7 +530,7 @@ public class WatingListImpl extends AbstractMainComponent {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {
                 if (evt.getPropertyName().equals(ChartImpl.CHART_STATE)) {
-                    updateState((PvtMessageModel) evt.getNewValue());
+                    updateState((ChartStateMsgModel) evt.getNewValue());
                 }
             }
         });
@@ -610,12 +612,12 @@ public class WatingListImpl extends AbstractMainComponent {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {
             
-            List<PvtMessageModel> list = pvtDelegater.getPvtMessageList(currentId);
+            List<ChartStateMsgModel> list = pvtDelegater.getPvtMessageList(currentId);
             currentId = (Integer) evt.getNewValue();
             if (list == null) {
                 return;
             }
-            for (PvtMessageModel msg : list) {
+            for (ChartStateMsgModel msg : list) {
                 if (!clientUUID.equals(msg.getIssuerUUID())) {
                     updatePvtList(msg);
                 }
@@ -793,11 +795,11 @@ public class WatingListImpl extends AbstractMainComponent {
             return false;
         }
         // Cancelなら開けない
-        if (pvt.hasStateBit(ChartImpl.BIT_CANCEL)) {
+        if (pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
             return false;
         }
         // 開いてたら開けない
-        if (pvt.hasStateBit(ChartImpl.BIT_OPEN)) {
+        if (pvt.hasStateBit(PatientVisitModel.BIT_OPEN)) {
             return false;
         }
         return true;
@@ -832,7 +834,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 int row = pvtTable.rowAtPoint(e.getPoint());
                 PatientVisitModel obj = getSelectedPvt();
                 
-                if (row == selectedRow && obj != null && !obj.hasStateBit(ChartImpl.BIT_CANCEL)) {
+                if (row == selectedRow && obj != null && !obj.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
                     String pop1 = "カルテを開く";
                     contextMenu.add(new JMenuItem(
                             new ReflectAction(pop1, WatingListImpl.this, "openKarte")));
@@ -845,7 +847,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 }
                 
                 // pvt cancelのundo
-                if (row == selectedRow && obj != null && obj.hasStateBit(ChartImpl.BIT_CANCEL)) {
+                if (row == selectedRow && obj != null && obj.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
                     contextMenu.add(new JMenuItem(
                             new ReflectAction("キャンセル取消", WatingListImpl.this, "undoCancelPvt")));
                     contextMenu.addSeparator();
@@ -1038,9 +1040,9 @@ public class WatingListImpl extends AbstractMainComponent {
         
         // updateStateする。
         int state = pvtModel.getState();
-        state = state & ~(1 << ChartImpl.BIT_CANCEL);
+        state = state & ~(1 << PatientVisitModel.BIT_CANCEL);
         pvtModel.setState(state);
-        PvtMessageModel msg = new PvtMessageModel(pvtModel);
+        ChartStateMsgModel msg = new ChartStateMsgModel(pvtModel);
         updateState(msg);
     }
     
@@ -1059,9 +1061,9 @@ public class WatingListImpl extends AbstractMainComponent {
         }
         
         // 自クライアントのWaitingListを変更
-        final PvtMessageModel msg = new PvtMessageModel(pvtModel);
+        final ChartStateMsgModel msg = new ChartStateMsgModel(pvtModel);
         msg.setIssuerUUID(clientUUID);
-        msg.setCommand(PvtMessageModel.CMD_DELETE);
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_DELETE);
         updatePvtList(msg);
         
         SwingWorker worker = new SwingWorker<Boolean, Void>() {
@@ -1114,7 +1116,7 @@ public class WatingListImpl extends AbstractMainComponent {
             super.getTableCellRendererComponent(table, value, isSelected, isFocused, row, col);
             
             PatientVisitModel pvt = (PatientVisitModel) sorter.getObject(row);
-            Color fore = pvt != null && pvt.hasStateBit(ChartImpl.BIT_CANCEL) ? CANCEL_PVT_COLOR : table.getForeground();
+            Color fore = pvt != null && pvt.hasStateBit(PatientVisitModel.BIT_CANCEL) ? CANCEL_PVT_COLOR : table.getForeground();
             this.setForeground(fore);
             
             // 選択状態の場合はStripeTableCellRendererの配色を上書きしない
@@ -1127,7 +1129,7 @@ public class WatingListImpl extends AbstractMainComponent {
                     }
                 }
                 // 病名の状態に応じて背景色を変更 pns
-                if (!pvt.hasStateBit(ChartImpl.BIT_CANCEL)) {
+                if (!pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
                     // 初診
                     if (pvt.isShoshin()) {
                         this.setBackground(SHOSHIN_COLOR);
@@ -1148,7 +1150,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 // 最初に chart bit をテストする
                 for (int i = 0; i < chartBitArray.length; i++) {
                     if ((state & (1 << chartBitArray[i])) != 0) {
-                        if (i == ChartImpl.BIT_OPEN && !clientUUID.equals(pvt.getOwnerUUID())) {
+                        if (i == PatientVisitModel.BIT_OPEN && !clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
                             icon = NETWORK_ICON;
                         } else {
                             icon = chartIconArray[i];
@@ -1171,7 +1173,7 @@ public class WatingListImpl extends AbstractMainComponent {
                     }
                 }
 
-                if (pvt.hasStateBit(ChartImpl.BIT_UNFINISHED)) {
+                if (pvt.hasStateBit(PatientVisitModel.BIT_UNFINISHED)) {
                     setBackground(KARTE_EMPTY_COLOR);
                 }
 
@@ -1207,7 +1209,7 @@ public class WatingListImpl extends AbstractMainComponent {
             PatientVisitModel pvt = (PatientVisitModel) sorter.getObject(row);
             
             if (pvt != null) {
-                if (pvt.hasStateBit(ChartImpl.BIT_CANCEL)) {
+                if (pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
                     this.setForeground(CANCEL_PVT_COLOR);
                 } else {
                     // 選択状態の場合はStripeTableCellRendererの配色を上書きしない
@@ -1323,14 +1325,14 @@ public class WatingListImpl extends AbstractMainComponent {
 
         for (int i = 0; i < dataList.size(); i++) {
             PatientVisitModel pvt = dataList.get(i);
-            if (!pvt.hasStateBit(ChartImpl.BIT_SAVE_CLAIM) && !pvt.hasStateBit(ChartImpl.BIT_MODIFY_CLAIM)) {
+            if (!pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM) && !pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
                 // 診察未終了レコードをカウント，最初に見つかった未終了レコードの時間から待ち時間を計算
                 ++waitingPvtCount;
                 if (waitingPvtDate == null) {
                     waitingPvtDate = ModelUtils.getDateTimeAsObject(pvt.getPvtDate());
                 }
             }
-            if (!pvt.hasStateBit(ChartImpl.BIT_CANCEL)) {
+            if (!pvt.hasStateBit(PatientVisitModel.BIT_CANCEL)) {
                 ++totalPvtCount;
             }
         }
@@ -1406,11 +1408,11 @@ public class WatingListImpl extends AbstractMainComponent {
         //pvtTable.repaint();
     }
     
-    private void updateState(final PvtMessageModel msg) {
+    private void updateState(final ChartStateMsgModel msg) {
 
         // まずは自クライアントの受付リストの状態カラムを更新する
         msg.setIssuerUUID(clientUUID);
-        msg.setCommand(PvtMessageModel.CMD_STATE);
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
         
         updatePvtList(msg);
 
@@ -1439,14 +1441,14 @@ public class WatingListImpl extends AbstractMainComponent {
     }
     
      // 待合リストを更新する
-    private void updatePvtList(PvtMessageModel msg) {
+    private void updatePvtList(ChartStateMsgModel msg) {
 
-        int command = msg.getCommand();
+        ChartStateMsgModel.CMD command = msg.getCommand();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();
         boolean assignedOnly = Project.getBoolean(ASSIGNED_ONLY, false);
 
         switch (command) {
-            case PvtMessageModel.CMD_ADD:
+            case PVT_ADD:
                 PatientVisitModel model = msg.getPatientVisitModel();
                 // pvtListに追加
                 pvtList.add(model);
@@ -1468,7 +1470,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 showLastRow();
                 break;
                 
-            case PvtMessageModel.CMD_STATE:
+            case PVT_STATE:
                 // pvtListを検索
                 List<PatientVisitModel> toUpdateList = new ArrayList<PatientVisitModel>(2);
                 for (PatientVisitModel pvt : pvtList) {
@@ -1493,17 +1495,17 @@ public class WatingListImpl extends AbstractMainComponent {
                     pvt.setByomeiCountToday(msg.getByomeiCountToday());
                     pvt.setMemo(msg.getMemo());
                     // 所有権を変更するのは、所有権が設定されていないか、発行者が所有権を持っている場合である
-                    if (pvt.getOwnerUUID() == null
-                            || msg.getIssuerUUID().equals(pvt.getOwnerUUID())) {
+                    if (pvt.getPatientModel().getOwnerUUID() == null
+                            || msg.getIssuerUUID().equals(pvt.getPatientModel().getOwnerUUID())) {
                         // 発行者がpvtの所有者ならばstateを変更する
                         int newState = msg.getState();
                         pvt.setState(newState);
-                        if (pvt.hasStateBit(ChartImpl.BIT_OPEN)) {
+                        if (pvt.hasStateBit(PatientVisitModel.BIT_OPEN)) {
                             // Chartを開いたら所有権セットする
-                            pvt.setOwnerUUID(msg.getOwnerUUID());
+                            pvt.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
                         } else {
                             // Chartを閉じたら所有権を手放す
-                            pvt.setOwnerUUID(null);
+                            pvt.getPatientModel().setOwnerUUID(null);
                             // PvtMessageModelのOwnerUUIDにもnullをセットする
                             msg.setOwnerUUID(null);
                         }
@@ -1515,7 +1517,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 }
                 break;
                 
-            case PvtMessageModel.CMD_DELETE:
+            case PVT_DELETE:
                 // pvtListから削除
                 PatientVisitModel toRemove = null;
                 for (PatientVisitModel pvt : pvtList) {
@@ -1543,12 +1545,12 @@ public class WatingListImpl extends AbstractMainComponent {
                 }
                 break;
                 
-            case PvtMessageModel.CMD_RENEW:
+            case PVT_RENEW:
                 // 日付が変わるとCMD_RENEWが送信される。pvtListをサーバーから取得する
                 getFullPvt();
                 break;
                 
-            case PvtMessageModel.CMD_MERGE:
+            case PVT_MERGE:
                 // 同じ時刻のPVTで、PVTには追加されず、患者情報や保険情報の更新のみの場合
                 // pvtListに変更
                 for (PatientVisitModel pvt : pvtList) {

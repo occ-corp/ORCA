@@ -46,16 +46,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      * カルテ状態の束縛プロパティ名
      */
     public static final String CHART_STATE = "chartStateProp";
-    public static final int BIT_OPEN = 0;
-    public static final int BIT_SAVE_CLAIM = 1;
-    public static final int BIT_MODIFY_CLAIM = 2;
-//masuda^
-    public static final int BIT_TREATMENT = 3;
-    public static final int BIT_HURRY = 4;
-    public static final int BIT_GO_OUT = 5;
-    public static final int BIT_CANCEL = 6;
-    public static final int BIT_UNFINISHED = 8;
-//masuda$
+
     private static final String EXT_ODT_TEMPLATE = ".odt";
     //  Chart インスタンスを管理するstatic 変数
     //private static ArrayList<ChartImpl> allCharts = new ArrayList<ChartImpl>(3);
@@ -519,8 +510,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         //TO DO
         Date pvtDate = ModelUtils.getDateTimeAsObject(pvt.getPvtDate());
         if (pvtDate != null
-                && !pvt.hasStateBit(BIT_SAVE_CLAIM)
-                && !pvt.hasStateBit(BIT_MODIFY_CLAIM)) { // window open 前に呼ばれる
+                && !pvt.hasStateBit(PatientVisitModel.BIT_SAVE_CLAIM)
+                && !pvt.hasStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) { // window open 前に呼ばれる
             Date now = new Date();
             String waitingTime = "00:00";
             if (now.after(pvtDate)) {
@@ -2268,7 +2259,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         model.setState(changed.getChartState());
 
 //masuda^   PvtMessageModelでWatingListに通知する。
-        PvtMessageModel msg = new PvtMessageModel(model);
+        ChartStateMsgModel msg = new ChartStateMsgModel(model);
         boundSupport.firePropertyChange(ChartImpl.CHART_STATE, null, msg);
 //masuda$
     }

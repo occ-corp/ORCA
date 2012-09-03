@@ -1,0 +1,138 @@
+
+package open.dolphin.rest;
+
+import java.io.IOException;
+import java.util.List;
+import javax.inject.Inject;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncEvent;
+import javax.servlet.AsyncListener;
+import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import open.dolphin.infomodel.ChartStateMsgModel;
+import open.dolphin.mbean.ServletContextHolder;
+import open.dolphin.session.PVTServiceBean;
+import open.dolphin.session.ChartStateServiceBean;
+
+/**
+ *
+ * @author masuda
+ */
+@Path("chartState")
+public class ChartStateResource extends AbstractResource {
+    
+    private static final boolean debug = false;
+    
+    private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
+    
+    @Inject
+    private PVTServiceBean pvtServiceBean;
+    
+    @Inject
+    private ServletContextHolder contextHolder;
+    
+    @Context
+    private HttpServletRequest servletReq;
+    
+    
+    @GET
+    @Path("subscribe/{id}")
+    public void listenChartState(@PathParam("id") String id) {
+
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        final AsyncContext ac = servletReq.startAsync();
+        // timeoutを設定
+        ac.setTimeout(asyncTimeout);
+        // requestにfidとmsgIdを記録しておく
+        ac.getRequest().setAttribute("fid", fid);
+        ac.getRequest().setAttribute("id", id);
+        contextHolder.addAsyncContext(ac);
+        //System.out.println("AsyncContextHolder size = " + contextHolder.getAsyncContextList().size());
+
+        ac.addListener(new AsyncListener() {
+
+            private void remove() {
+                // JBOSS終了時にぬるぽ？
+                try {
+                    contextHolder.removeAsyncContext(ac);
+                } catch (NullPointerException ex) {
+                }
+            }
+
+            @Override
+            public void onComplete(AsyncEvent event) throws IOException {
+            }
+
+            @Override
+            public void onTimeout(AsyncEvent event) throws IOException {
+                remove();
+                //System.out.println("ON TIMEOUT");
+                //event.getThrowable().printStackTrace(System.out);
+            }
+
+            @Override
+            public void onError(AsyncEvent event) throws IOException {
+                remove();
+                //System.out.println("ON ERROR");
+                //event.getThrowable().printStackTrace(System.out);
+            }
+
+            @Override
+            public void onStartAsync(AsyncEvent event) throws IOException {
+            }
+        });
+    }
+    
+    @PUT
+    @Path("state")
+    @Consumes(MEDIATYPE_JSON_UTF8)
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String putPvtState(String json) {
+        
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+
+        ChartStateMsgModel msg = (ChartStateMsgModel)
+                getConverter().fromJson(json, ChartStateMsgModel.class);
+        
+        // クライアントから送られてきたmsgにfidを設定
+        msg.setFacilityId(fid);
+        
+        int cnt = pvtServiceBean.updatePvtState(msg);
+
+        return String.valueOf(cnt);
+    }
+    
+    @GET
+    @Path("msgList/{param}")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public String getChartStateMsgList(@PathParam("param") String param){
+        
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        int from = Integer.valueOf(param);
+        
+        List<ChartStateMsgModel> list = contextHolder.getChartStateMsgList(fid, from);
+
+        String json = getConverter().toJson(list);
+        debug(json);
+        
+        return json;
+    }
+    
+    // 参：きしだのはてな もっとJavaEE6っぽくcometチャットを実装する
+    // http://d.hatena.ne.jp/nowokay/20110416/1302978207
+    @GET
+    @Path("nextId")
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String pushNextId() {
+        String nextId = (String) servletReq.getAttribute("nextId");
+        return nextId;
+    }
+
+    @Override
+    protected void debug(String msg) {
+        if (debug || DEBUG) {
+            super.debug(msg);
+        }
+    }
+}

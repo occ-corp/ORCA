@@ -8,6 +8,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
+import open.dolphin.mbean.ServletContextHolder;
 
 /**
  * PVTServiceBean
@@ -37,7 +38,10 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private EntityManager em;
     
     @Inject
-    private PvtServiceMediator mediator;
+    private ChartStateServiceBean chartStateService;
+    
+    @Inject
+    private ServletContextHolder contextHolder;
     
     //private static final Logger logger = Logger.getLogger(PVTServiceBean.class.getName());
 
@@ -162,7 +166,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         List<AppointmentModel> c =
                 em.createQuery(QUERY_APPO_BY_KARTE_ID_DATE)
                 .setParameter(ID, karteId)
-                .setParameter(DATE, mediator.getToday().getTime())
+                .setParameter(DATE, contextHolder.getToday().getTime())
                 .getResultList();
         if (c != null && !c.isEmpty()) {
             AppointmentModel appo = c.get(0);
@@ -170,15 +174,15 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         }
 
         // 受付嬢にORCAの受付ボタンを連打されたとき用ｗ 復活！！
-        List<PatientVisitModel> pvtList = mediator.getPvtListModel(fid).getPvtList();
+        List<PatientVisitModel> pvtList = chartStateService.getPvtListModel(fid).getPvtList();
         for (int i = 0; i < pvtList.size(); ++i) {
             PatientVisitModel test = pvtList.get(i);
             // pvt時刻が同じでキャンセルでないものは更新(merge)する
             if (test.getPvtDate().equals(pvt.getPvtDate()) 
-                    && (test.getState() & (1<< PvtServiceMediator.BIT_CANCEL)) ==0) {
+                    && (test.getState() & (1<< PatientVisitModel.BIT_CANCEL)) ==0) {
                 pvt.setId(test.getId());    // pvtId, state, ownerUUID, byomeiCountは既存のものを使う
                 pvt.setState(test.getState());
-                pvt.setOwnerUUID(test.getOwnerUUID());
+                pvt.getPatientModel().setOwnerUUID(test.getPatientModel().getOwnerUUID());
                 pvt.setByomeiCount(test.getByomeiCount());
                 pvt.setByomeiCountToday(test.getByomeiCountToday());
                 // データベースを更新
@@ -186,21 +190,21 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 // 新しいもので置き換える
                 pvtList.set(i, pvt);
                 // クライアントに通知
-                PvtMessageModel msg = new PvtMessageModel(pvt);
+                ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
                 msg.setPatientVisitModel(pvt);
-                mediator.notifyMerge(msg);
+                chartStateService.notifyMerge(msg);
                 return 0;   // 追加０個
             }
         }
         // 同じ時刻のPVTがないならばPVTをデータベースに登録(persist)する
-        mediator.setByomeiCount(karteId, pvt);   // 病名数をカウントする
+        chartStateService.setByomeiCount(karteId, pvt);   // 病名数をカウントする
         em.persist(pvt);
         // pvtListに追加
         pvtList.add(pvt);
         // クライアントに通知
-        PvtMessageModel msg = new PvtMessageModel(pvt);
+        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
         msg.setPatientVisitModel(pvt);
-        mediator.notifyAdd(msg);
+        chartStateService.notifyAdd(msg);
         
         return 1;   // 追加１個
     }
@@ -210,7 +214,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
      * Pvtの情報を更新する
      * 所有者、state、病名数、メモ
      */
-    public int updatePvtState(PvtMessageModel msg) {
+    public int updatePvtState(ChartStateMsgModel msg) {
         
         int ret = 0;
 
@@ -233,7 +237,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
 
         // pvtListのpvtStateとbyomei countとオーナーを更新
         String fid = msg.getFacilityId();
-        List<PatientVisitModel> pvtList = mediator.getPvtListModel(fid).getPvtList();
+        List<PatientVisitModel> pvtList = chartStateService.getPvtListModel(fid).getPvtList();
 
         for (PatientVisitModel model : pvtList) {
             if (model.getId() == pvtId) {
@@ -241,9 +245,9 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 model.setByomeiCount(byomeiCount);
                 model.setByomeiCountToday(byomeiCountToday);
                 model.setMemo(memo);
-                model.setOwnerUUID(msg.getOwnerUUID());
+                model.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
                 // クライアントに通知
-                mediator.notifyState(msg);
+                chartStateService.notifyState(msg);
                 ret = 1;
                 break;
             }
@@ -257,7 +261,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
      * @param PvtMessageModel msg
      * @return 削除件数
      */
-    public int removePvt(PvtMessageModel msg) {
+    public int removePvt(ChartStateMsgModel msg) {
 
         long id = msg.getPvtPk();
 
@@ -270,7 +274,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             }
             // pvtListから削除
             String fid = msg.getFacilityId();
-            List<PatientVisitModel> pvtList = mediator.getPvtListModel(fid).getPvtList();
+            List<PatientVisitModel> pvtList = chartStateService.getPvtListModel(fid).getPvtList();
             for (PatientVisitModel model : pvtList) {
                 if (model.getId() == id) {
                     pvtList.remove(model);
@@ -279,7 +283,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             }
 
             // クライアントに通知
-            mediator.notifyDelete(msg);
+            chartStateService.notifyDelete(msg);
             return 1;
 
         } catch (Exception e) {

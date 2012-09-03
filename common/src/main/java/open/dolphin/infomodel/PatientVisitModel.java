@@ -18,6 +18,18 @@ import javax.persistence.*;
 @Table(name = "d_patient_visit")
 public class PatientVisitModel extends InfoModel {
     
+//masuda^   ChartImplから引っ越し
+    // PVT state
+    public static final int BIT_OPEN = 0;
+    public static final int BIT_SAVE_CLAIM = 1;
+    public static final int BIT_MODIFY_CLAIM = 2;
+    public static final int BIT_TREATMENT = 3;
+    public static final int BIT_HURRY = 4;
+    public static final int BIT_GO_OUT = 5;
+    public static final int BIT_CANCEL = 6;
+    public static final int BIT_UNFINISHED = 8;
+//masuda$
+    
     public static final DataFlavor PVT_FLAVOR =
             new DataFlavor(open.dolphin.infomodel.PatientVisitModel.class, "Patient Visit");
     
@@ -103,16 +115,6 @@ public class PatientVisitModel extends InfoModel {
 //pns$
     
 //masuda＾
-    // 排他処理関連
-    @Transient
-    private String ownerUUID;   // 現在の所有者UUID
-    public void setOwnerUUID(String uuid) {
-        ownerUUID = uuid;
-    }
-    public String getOwnerUUID() {
-        return ownerUUID;
-    }
-    
     public boolean hasStateBit(int stateBit) {
         return (status & (1 << stateBit)) != 0;
     }

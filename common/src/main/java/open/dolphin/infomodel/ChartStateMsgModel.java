@@ -1,15 +1,16 @@
-
 package open.dolphin.infomodel;
 
 /**
- * Pvt状態変更通知用のモデル
+ * ChartState状態変更通知用のモデル
  *
  * @author masuda, Masuda Naika
  */
-public class PvtMessageModel {
+public class ChartStateMsgModel {
+    
+    private int id;
     
     private String issuerUUID;
-    private int command;
+    private CMD command;
     
     private long pvtPk;
     private int state;
@@ -20,17 +21,14 @@ public class PvtMessageModel {
     private String facilityId;
     
     private PatientVisitModel pvt;
+    private PatientModel patient;
     
-    public static final int CMD_STATE  = 1;
-    public static final int CMD_ADD    = 2;
-    public static final int CMD_DELETE = 3;
-    public static final int CMD_RENEW  = 4;
-    public static final int CMD_MERGE  = 5;
+    public static enum CMD {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_OWNER, PM_MERGE};
     
-    public PvtMessageModel() {
+    public ChartStateMsgModel() {
     }
     
-    public PvtMessageModel(PatientVisitModel pvt) {
+    public ChartStateMsgModel(PatientVisitModel pvt) {
         
         if (pvt == null) {
             return;
@@ -41,11 +39,14 @@ public class PvtMessageModel {
         this.byomeiCount = pvt.getByomeiCount();
         this.byomeiCountToday = pvt.getByomeiCountToday();
         this.memo = pvt.getMemo();
-        this.ownerUUID = pvt.getOwnerUUID();
+        this.ownerUUID = pvt.getPatientModel().getOwnerUUID();
         this.facilityId = pvt.getFacilityId();
     }
-
-    public void setCommand(int command) {
+    
+    public void setId(int id) {
+        this.id = id;
+    }
+    public void setCommand(CMD command) {
         this.command = command;
     }
     public void setPvtPk(long pk) {
@@ -69,6 +70,9 @@ public class PvtMessageModel {
     public void setPatientVisitModel(PatientVisitModel pvt) {
         this.pvt = pvt;
     }
+    public void setPatientModel(PatientModel patient) {
+        this.patient = patient;
+    }
     public void setMemo(String memo) {
         this.memo = memo;
     }
@@ -76,7 +80,10 @@ public class PvtMessageModel {
         facilityId = fid;
     }
     
-    public int getCommand() {
+    public int getId() {
+        return id;
+    }
+    public CMD getCommand() {
         return command;
     }
     public long getPvtPk() {
@@ -99,6 +106,9 @@ public class PvtMessageModel {
     }
     public PatientVisitModel getPatientVisitModel() {
         return pvt;
+    }
+    public PatientModel getPatientModel() {
+        return patient;
     }
     public String getMemo() {
         return memo;

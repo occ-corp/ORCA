@@ -1582,8 +1582,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     if (sendClaim) {
                         // CLAIMビットをセット
                         chartState = modify
-                                ? chartState | 1 << ChartImpl.BIT_MODIFY_CLAIM
-                                : chartState | 1 << ChartImpl.BIT_SAVE_CLAIM;
+                                ? chartState | 1 << PatientVisitModel.BIT_MODIFY_CLAIM
+                                : chartState | 1 << PatientVisitModel.BIT_SAVE_CLAIM;
                     }
 
                     // PVT state変更はWindow close時に待合リストから行う
@@ -1618,9 +1618,9 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                         empty |= STATUS_TMP.equals(docInfo.getStatus());
                         int chartState = chart.getChartState();
                         if (empty) {
-                            chartState = chartState | (1 << ChartImpl.BIT_UNFINISHED);
+                            chartState = chartState | (1 << PatientVisitModel.BIT_UNFINISHED);
                         } else {
-                            chartState = chartState & ~(1 << ChartImpl.BIT_UNFINISHED);
+                            chartState = chartState & ~(1 << PatientVisitModel.BIT_UNFINISHED);
                         }
                         chart.setChartState(chartState);
                     }
