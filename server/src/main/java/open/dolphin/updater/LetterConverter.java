@@ -43,7 +43,7 @@ public class LetterConverter extends AbstractUpdaterModule {
     public MsdUpdaterModel start() {
         
         boolean updated = true;
-        
+
         // TouTouLetterを変換する
         List<LetterModel> letterList = em.createQuery("from TouTouLetter").getResultList();
         for (LetterModel model : letterList) {
@@ -61,7 +61,7 @@ public class LetterConverter extends AbstractUpdaterModule {
             decodeAndFixPrimaryKeys(reply);
             convertTouTouReply(reply);
         }
- 
+
         return updated 
                 ? getResult(UPDATE_MEMO) 
                 : getResult(NO_UPDATE_MEMO);
@@ -331,6 +331,5 @@ public class LetterConverter extends AbstractUpdaterModule {
             }
         }
     }
-    
     
 }
