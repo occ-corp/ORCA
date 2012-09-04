@@ -76,6 +76,11 @@ public class ChartStateServiceBean {
             context.cleanUpMsgList(minId);
         }
     }
+    
+    public List<PatientVisitModel> getPvtList(String fid) {
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        return context.getPvtList();
+    }
 
     public PvtListModel getPvtListModel(String fid) {
         FacilityContext context = contextHolder.getFacilityContext(fid);

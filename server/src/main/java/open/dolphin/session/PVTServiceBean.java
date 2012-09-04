@@ -174,7 +174,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         }
 
         // 受付嬢にORCAの受付ボタンを連打されたとき用ｗ 復活！！
-        List<PatientVisitModel> pvtList = chartStateService.getPvtListModel(fid).getPvtList();
+        List<PatientVisitModel> pvtList = chartStateService.getPvtList(fid);
         for (int i = 0; i < pvtList.size(); ++i) {
             PatientVisitModel test = pvtList.get(i);
             // pvt時刻が同じでキャンセルでないものは更新(merge)する
@@ -237,7 +237,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
 
         // pvtListのpvtStateとbyomei countとオーナーを更新
         String fid = msg.getFacilityId();
-        List<PatientVisitModel> pvtList = chartStateService.getPvtListModel(fid).getPvtList();
+        List<PatientVisitModel> pvtList = chartStateService.getPvtList(fid);
 
         for (PatientVisitModel model : pvtList) {
             if (model.getId() == pvtId) {
@@ -274,7 +274,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             }
             // pvtListから削除
             String fid = msg.getFacilityId();
-            List<PatientVisitModel> pvtList = chartStateService.getPvtListModel(fid).getPvtList();
+            List<PatientVisitModel> pvtList = chartStateService.getPvtList(fid);
             for (PatientVisitModel model : pvtList) {
                 if (model.getId() == id) {
                     pvtList.remove(model);

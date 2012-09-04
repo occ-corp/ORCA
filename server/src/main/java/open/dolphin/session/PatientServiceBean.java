@@ -7,10 +7,10 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.ChartStateMsgModel;
 
 /**
  *
@@ -48,7 +48,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
     
 //masuda^
     @Inject
-    private ChartStateServiceBean mediator;
+    private ChartStateServiceBean chartStateService;
 //masuda$
 
     @SuppressWarnings("unchecked")
@@ -264,7 +264,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
     // pvtListのPatientModelを更新し、クライアントにも通知する
     private void updatePvtList(PatientModel pm) {
         String fid = pm.getFacilityId();
-        List<PatientVisitModel> pvtList = mediator.getPvtListModel(fid).getPvtList();
+        List<PatientVisitModel> pvtList = chartStateService.getPvtList(fid);
         for (PatientVisitModel pvt : pvtList) {
             if (pvt.getPatientModel().getId() == pm.getId()) {
                 pvt.setPatientModel(pm);
@@ -272,7 +272,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
                 ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
                 msg.setPatientVisitModel(pvt);
                 //msg.setFacilityId(fid);
-                mediator.notifyMerge(msg);
+                chartStateService.notifyMerge(msg);
             }
         }
     }

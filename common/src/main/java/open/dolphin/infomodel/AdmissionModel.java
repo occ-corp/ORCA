@@ -1,18 +1,32 @@
 package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 
 /**
- * 入院カルテモデル
+ * 入院カルテモデル（仮）
  * @author masuda, Masuda Naika
  */
 @Entity
 @Table(name = "msd_admission")
-public class AdmissionModel extends KarteEntryBean {
+public class AdmissionModel implements Serializable {
+    
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private long id;
+    
+    @Column(nullable=false)
+    @Temporal(value = TemporalType.TIMESTAMP)
+    private Date started;
+    
+    @Temporal(value = TemporalType.TIMESTAMP)
+    private Date ended;
+    
+    private String room;
     
     @Embedded
     private DocInfoModel docInfo;
@@ -23,14 +37,34 @@ public class AdmissionModel extends KarteEntryBean {
     @OneToMany(fetch=FetchType.LAZY)
     private List<DocumentModel> documents;
     
-    @ManyToOne
-    @JoinColumn(name="room_id")
-    private RoomModel roomModel;
-
     
     public AdmissionModel() {
         docInfo = new DocInfoModel();
-        docInfo.setDocType(DOC_TYPE_ADMISSION);
+        docInfo.setDocType(IInfoModel.DOC_TYPE_ADMISSION);
+    }
+    
+    public long getId() {
+        return id;
+    }
+    
+    public void setId(long id) {
+        this.id = id;
+    }
+    
+    public Date getStarted() {
+        return started;
+    }
+    
+    public void setStarted(Date started) {
+        this.started = started;
+    }
+    
+    public Date getEnded() {
+        return ended;
+    }
+    
+    public void setEnded(Date ended) {
+        this.ended = ended;
     }
 
     public DocInfoModel getDocInfoModel() {
@@ -48,29 +82,13 @@ public class AdmissionModel extends KarteEntryBean {
     public void setDocumentList(List<DocumentModel> documents) {
         this.documents = documents;
     }
-
-    public RoomModel getRoomModel() {
-        return roomModel;
+    
+    public String getRoom() {
+        return room;
     }
     
-    public void setRoomModel(RoomModel roomModel) {
-        this.roomModel = roomModel;
-    }
-
-    public void toDetuch() {
-        docInfo.setDocPk(getId());
-        docInfo.setParentPk(getLinkId());
-        docInfo.setConfirmDate(getConfirmed());
-        docInfo.setFirstConfirmDate(getStarted());
-        docInfo.setStatus(getStatus());
-    }
-    
-    public void toPersist() {
-        setLinkId(docInfo.getParentPk());
-        setLinkRelation(docInfo.getParentIdRelation());
-        setConfirmed(docInfo.getConfirmDate());
-        setFirstConfirmed(docInfo.getFirstConfirmDate());
-        setStatus(docInfo.getStatus());
+    public void setRoom(String room) {
+        this.room = room;
     }
     
     public void setChildDocInfoList() {
@@ -82,8 +100,7 @@ public class AdmissionModel extends KarteEntryBean {
         
     }
     public boolean isInHospital(Date d) {
-        Date started = getStarted();
-        Date ended = getEnded();
+
         if (started == null) {
             return false;
         }
