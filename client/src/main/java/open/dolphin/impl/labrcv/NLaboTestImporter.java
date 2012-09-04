@@ -66,6 +66,14 @@ public class NLaboTestImporter extends AbstractMainComponent {
     public void stop() {
     }
 
+    @Override
+    public void stateChanged(List<ChartStateMsgModel> msgList) {
+    }
+
+    @Override
+    public void updateLocalState(ChartStateMsgModel msg) {
+    }
+    
     public JProgressBar getProgressBar() {
         return getContext().getProgressBar();
     }

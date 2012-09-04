@@ -596,8 +596,12 @@ public class Dolphin implements MainWindow {
 
     // ChartImplを閉じたときのChartState状態変更処理
     public void karteClosed(PatientVisitModel pvt) {
+        
+        // PatientVisitModel.BIT_OPENとownerUUIDをリセットする
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, false);
         pvt.getPatientModel().setOwnerUUID(null);
+        
+        // ChartStateListenerに通知する
         ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
         msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
         ChartStateListener.getInstance().updateChartState(msg);
@@ -611,7 +615,7 @@ public class Dolphin implements MainWindow {
     public void openKarte(PatientVisitModel pvt) {
         
 //masuda^   すでにChart, EditorFrameが開いていた時の処理はここで行う
-        if (pvt == null || (pvt.getState() & (1<< PatientVisitModel.BIT_CANCEL)) != 0) {
+        if (pvt == null || (pvt.getStateBit(PatientVisitModel.BIT_CANCEL))) {
             return;
         }
         // このクライアントでChartImplとEditorFrameを開いていた場合の処理
@@ -665,21 +669,16 @@ public class Dolphin implements MainWindow {
             // 誰も開いていないときは自分が所有者
             pvt.getPatientModel().setOwnerUUID(clientUUID);
         }
-        
-        PluginLoader<Chart> loader = PluginLoader.load(Chart.class);
-        Iterator<Chart> iter = loader.iterator();
-        Chart chart = null;
-        if (iter.hasNext()) {
-            chart = iter.next();
-        }
+
+        Chart chart = new ChartImpl();
         chart.setContext(this);
-        chart.setPatientVisit(pvt);                 //
-        //chart.setReadOnly(Project.isReadOnly());    // RedaOnlyProp
+        chart.setPatientVisit(pvt);
         chart.setReadOnly(readOnly);
         chart.start();
         
         // PatientVisitModel.BIT_OPENを立てる
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
+        // ChartStateListenerに通知する
         ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
         msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
         ChartStateListener.getInstance().updateChartState(msg);

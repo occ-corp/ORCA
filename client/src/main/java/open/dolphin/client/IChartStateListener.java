@@ -4,7 +4,7 @@ import java.util.List;
 import open.dolphin.infomodel.ChartStateMsgModel;
 
 /**
- *　IChartStateListener
+ * IChartStateListener
  * @author masuda, Masuda Naika
  */
 public interface IChartStateListener {

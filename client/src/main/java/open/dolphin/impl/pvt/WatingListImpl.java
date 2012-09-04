@@ -36,7 +36,7 @@ import org.apache.commons.lang.time.DurationFormatUtils;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-public class WatingListImpl extends AbstractMainComponent implements IChartStateListener {
+public class WatingListImpl extends AbstractMainComponent {
 
     // Window Title
     private static final String NAME = "受付リスト";
@@ -320,17 +320,16 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                 }
 
                 // statusをチェックする
-                PatientVisitModel pm = getObject(row);
-                int state = pm.getState();
+                PatientVisitModel pvt = getObject(row);
 
-                if ((state & (1 << PatientVisitModel.BIT_CANCEL)) != 0) {
+                if (pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {
                     // cancel case
                     canEdit = false;
 
                 } else {
                     // Chartビットがたっている場合は不可
                     for (int i = 0; i < chartBitArray.length; i++) {
-                        if ((state & (1 << chartBitArray[i])) != 0) {
+                        if (pvt.getStateBit(chartBitArray[i])) {
                             canEdit = false;
                             break;
                         }
@@ -411,15 +410,14 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                     }
 
                     // unset all
-                    int state = 0;
+                    pvt.setState(0);
 
                     // set the bit
                     if (theBit != 0) {
-                        state = state | (1 << theBit);
+                        pvt.setStateBit(theBit, true);
                     }
 
                     ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
-                    msg.setState(state);
                     updateState(msg);
                 }
             }
@@ -1022,9 +1020,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
         }
         
         // updateStateする。
-        int state = pvtModel.getState();
-        state = state & ~(1 << PatientVisitModel.BIT_CANCEL);
-        pvtModel.setState(state);
+        pvtModel.setStateBit(PatientVisitModel.BIT_CANCEL, false);
         ChartStateMsgModel msg = new ChartStateMsgModel(pvtModel);
         updateState(msg);
     }
@@ -1126,13 +1122,11 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
 
             if (value != null && col == stateColumn) {
 
-                int state = ((Integer) value).intValue();
-
                 ImageIcon icon = null;
 
                 // 最初に chart bit をテストする
                 for (int i = 0; i < chartBitArray.length; i++) {
-                    if ((state & (1 << chartBitArray[i])) != 0) {
+                    if (pvt.getStateBit(chartBitArray[i])) {
                         if (i == PatientVisitModel.BIT_OPEN && !clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
                             icon = NETWORK_ICON;
                         } else {
@@ -1147,9 +1141,7 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
 
                     // bit 0 はパス
                     for (int i = 1; i < userBitArray.length; i++) {
-
-                        int bit = userBitArray[i].intValue();
-                        if ((state & (1 << bit)) != 0) {
+                        if (pvt.getStateBit(userBitArray[i])) {
                             icon = userIconArray[i];
                             break;
                         }

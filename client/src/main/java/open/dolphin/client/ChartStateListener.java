@@ -102,7 +102,7 @@ public class ChartStateListener {
         }
     }
     
-    // 自クライアントの状態変更後、サーバーにも通知するタスク
+    // 自クライアントの状態変更後、サーバーに通知するタスク
     private class UpdateStateTask implements Runnable {
         
         private ChartStateMsgModel msg;
@@ -132,6 +132,7 @@ public class ChartStateListener {
             // 状態変化モデルを取得しに行く
             ChartStateDelegater del = ChartStateDelegater.getInstance();
             List<ChartStateMsgModel> msgList = del.getChartStateMsgList(currentId);
+            
             // 各リスナーで更新処理をする
             for (IChartStateListener listener : listeners) {
                 listener.stateChanged(msgList);

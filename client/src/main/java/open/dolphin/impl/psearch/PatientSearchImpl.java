@@ -118,6 +118,15 @@ public class PatientSearchImpl extends AbstractMainComponent {
         }
     }
 
+    @Override
+    public void stateChanged(List<ChartStateMsgModel> msgList) {
+    }
+
+    @Override
+    public void updateLocalState(ChartStateMsgModel msg) {
+    }
+    
+    
     public PatientModel getSelectedPatinet() {
         return selectedPatient;
     }
