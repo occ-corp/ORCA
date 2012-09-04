@@ -1118,4 +1118,15 @@ public class MasudaServiceBean {
         return fid;
     }
     
+    // サーバーでPVT server socketを開くかどうか
+    public boolean usePvtServletServer() {
+        
+        long c = (Long) 
+                em.createQuery("select count(*) from UserPropertyModel u where u.key = :key and u.value = :value")
+                .setParameter("key", "pvtOnServer")
+                .setParameter("value", String.valueOf(true))
+                .getSingleResult();
+        return c > 0;
+    }
+    
 }

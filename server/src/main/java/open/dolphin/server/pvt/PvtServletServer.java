@@ -3,6 +3,7 @@ package open.dolphin.server.pvt;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -46,7 +47,12 @@ public class PvtServletServer implements ServletContextListener {
     
     @Override
     public void contextInitialized(ServletContextEvent sce) {
-
+        
+        if (!masudaServiceBean.usePvtServletServer()) {
+            logger.info("PVT Servlet Server disabled.");
+            return;
+        }
+        
         exec = Executors.newSingleThreadExecutor();
 
         try {
