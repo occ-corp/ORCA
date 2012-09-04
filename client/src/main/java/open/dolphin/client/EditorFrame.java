@@ -11,7 +11,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.List;
 import java.util.ResourceBundle;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
 import open.dolphin.helper.WindowSupport;
 import open.dolphin.infomodel.*;
@@ -27,9 +26,6 @@ public class EditorFrame extends AbstractMainTool implements Chart {
     // このクラスの２つのモード（状態）でメニューの制御に使用する
     public enum EditorMode {BROWSER, EDITOR};
     
-    // 全インスタンスを保持するリスト
-    private static List<Chart> allEditorFrames = new CopyOnWriteArrayList<Chart>();
-
     private static final String PROP_FRMAE_BOUNDS = "editorFrame.bounds";
     
     // このフレームの実のコンテキストチャート
@@ -74,14 +70,6 @@ public class EditorFrame extends AbstractMainTool implements Chart {
     private EditorFrameExtensions ext;
 //masuda$
     
-    /**
-     * 全インスタンスを保持するリストを返す。
-     * @return 全インスタンスを保持するリスト
-     */
-    public static List<Chart> getAllEditorFrames() {
-        return allEditorFrames;
-    }
-    
     private static PageFormat pageFormat = null;
     static {
         PrinterJob printJob = PrinterJob.getPrinterJob();
@@ -92,7 +80,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
      * EditorFrame オブジェクトを生成する。
      */
     public EditorFrame() {
-        allEditorFrames.add(EditorFrame.this);
+        Dolphin.getInstance().getAllEditorFrames().add(EditorFrame.this);
     }
     
     /**
@@ -547,7 +535,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         }
 //masuda$
         mediator.dispose();
-        allEditorFrames.remove(this);
+        Dolphin.getInstance().getAllEditorFrames().remove(this);
         Project.setRectangle(PROP_FRMAE_BOUNDS, getFrame().getBounds());
         getFrame().setVisible(false);
         getFrame().dispose();
@@ -979,18 +967,17 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         // すでに修正中の document があれば toFront するだけで帰る
         // ここはこのEditorFrameは除外しないといけない
         long baseDocPk = base.getDocInfoModel().getDocPk();
-        List<Chart> editorFrames = EditorFrame.getAllEditorFrames();
+        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
         if (editorFrames.isEmpty()) {
             return true;
         }
 
-        for (Chart chart : editorFrames) {
-            EditorFrame frame = (EditorFrame) chart;
-            long parentDocPk = frame.getParentDocPk();
-            if (frame != EditorFrame.this && baseDocPk == parentDocPk) {
+        for (EditorFrame ef : editorFrames) {
+            long parentDocPk = ef.getParentDocPk();
+            if (ef != EditorFrame.this && baseDocPk == parentDocPk) {
                 // parentPkが同じEditorFrameがある場合はFrameをtoFrontする
-                chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
-                chart.getFrame().toFront();
+                ef.getFrame().setExtendedState(java.awt.Frame.NORMAL);
+                ef.getFrame().toFront();
                 return false;
             }
         }

@@ -201,7 +201,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private boolean isKarteOpened(PatientModel patient) {
         if (patient != null) {
             boolean opened = false;
-            java.util.List<ChartImpl> allCharts = ChartImpl.getAllChart();
+            List<ChartImpl> allCharts = Dolphin.getInstance().getAllCharts();
             for (ChartImpl chart : allCharts) {
                 if (chart.getPatient().getId() == patient.getId()) {
                     opened = true;

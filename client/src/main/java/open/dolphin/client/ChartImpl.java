@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.ExecutionException;
 import javax.swing.Timer;
 import javax.swing.*;
@@ -46,10 +45,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     public static final String CHART_STATE = "chartStateProp";
 
     private static final String EXT_ODT_TEMPLATE = ".odt";
-    //  Chart インスタンスを管理するstatic 変数
-    //private static ArrayList<ChartImpl> allCharts = new ArrayList<ChartImpl>(3);
-    // masuda 
-    private static List<ChartImpl> allCharts = new CopyOnWriteArrayList<ChartImpl>();
 
     private static final String PROP_FRMAE_BOUNDS = "chartFrame.bounds";
     // Document Plugin を格納する TabbedPane
@@ -68,8 +63,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     private PatientVisitModel pvt;
     // Read Only の時 true
     private boolean readOnly;
-    // Chart のステート 
-    private int chartState;
     // Chart内のドキュメントに共通の MEDIATOR 
     private ChartMediator mediator;
     // State Mgr
@@ -167,9 +160,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     @Override
     public void setPatientVisit(PatientVisitModel pvt) {
         this.pvt = pvt;
-//masuda^   ChartStateを設定する
-        this.chartState = pvt.getState();
-//masuda$
     }
 
     /**
@@ -715,13 +705,13 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             @Override
             public void windowOpened(WindowEvent e) {
                 // Window がオープンされた時の処理を行う
-                ChartImpl.windowOpened(ChartImpl.this);
+                windowOpened(ChartImpl.this);
             }
 
             @Override
             public void windowClosed(WindowEvent e) {
                 // Window がクローズされた時の処理を行う
-                ChartImpl.windowClosed(ChartImpl.this);
+                windowClosed(ChartImpl.this);
             }
 
             @Override
@@ -2128,26 +2118,13 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     }
 
     /**
-     * ** Chart Instance を管理するための static クラス *
-     */
-    /**
-     * オープンしている全インスタンスを保持するリストを返す。
-     *
-     * @return オープンしている ChartPlugin のリスト
-     */
-    //public static ArrayList<ChartImpl> getAllChart() {
-    public static List<ChartImpl> getAllChart() {
-        return allCharts;
-    }
-
-    /**
      * チャートウインドウのオープンを通知する。
      *
      * @param opened オープンした ChartPlugin
      */
-    public static void windowOpened(ChartImpl opened) {
+    public void windowOpened(ChartImpl opened) {
         // インスタンスを保持するリストへ追加する
-        allCharts.add(opened);
+        Dolphin.getInstance().getAllCharts().add(opened);
     }
 
     /**
@@ -2155,10 +2132,10 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      *
      * @param closed クローズした ChartPlugin
      */
-    public static void windowClosed(ChartImpl closed) {
+    public void windowClosed(ChartImpl closed) {
 
         // インスタンスリストから取り除く
-        if (allCharts.remove(closed)) {
+        if (Dolphin.getInstance().getAllCharts().remove(closed)) {
             // 状態変化を通知する
             PatientVisitModel model = closed.getPatientVisit();
             Dolphin.getInstance().karteClosed(model);
@@ -2190,21 +2167,20 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
     private boolean canOpenNewKarte() {
 
-        List<Chart> editorFrames = EditorFrame.getAllEditorFrames();
+        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
         if (editorFrames.isEmpty()) {
             return true;
         }
 
         String patientId = getKarte().getPatient().getPatientId();
-        for (Chart chart : editorFrames) {
+        for (EditorFrame ef : editorFrames) {
             // 新規カルテだとDocInfoのstatusは"N"
-            EditorFrame ef = (EditorFrame) chart;
             String status = ef.getDocInfoStatus();
-            String id = chart.getKarte().getPatient().getPatientId();
+            String id = ef.getKarte().getPatient().getPatientId();
             if (patientId.equals(id) && IInfoModel.STATUS_NONE.equals(status)) {
                 // 新規カルテのEditorFrameがある場合はFrameをtoFrontする
-                chart.getFrame().setExtendedState(Frame.NORMAL);
-                chart.getFrame().toFront();
+                ef.getFrame().setExtendedState(Frame.NORMAL);
+                ef.getFrame().toFront();
                 return false;
             }
         }
@@ -2215,18 +2191,18 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     private boolean canCloseChartImpl() {
 
         // この患者のEditorFrameが開いたままなら、インスペクタを閉じられないようにする
-        List<Chart> editorFrames = EditorFrame.getAllEditorFrames();
+        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
         if (editorFrames != null && !editorFrames.isEmpty()) {
             long ptId = getPatient().getId();
-            for (Chart chart : editorFrames) {
-                long id = chart.getPatient().getId();
+            for (EditorFrame ef : editorFrames) {
+                long id = ef.getPatient().getId();
                 if (ptId == id) {
                     // よくわからないEditorFrameが残っていて、Frameがぬるぽのときがあるので
                     try {
                         // 最小化してたらFrameを再表示させる
-                        chart.getFrame().setExtendedState(Frame.NORMAL);
+                        ef.getFrame().setExtendedState(Frame.NORMAL);
                         String title = ClientContext.getFrameTitle("インスペクタ");
-                        JOptionPane.showMessageDialog(chart.getFrame(),
+                        JOptionPane.showMessageDialog(ef.getFrame(),
                                 "インスペクタを閉じる前にカルテエディタを閉じてください。",
                                 title, JOptionPane.WARNING_MESSAGE);
                         return false;

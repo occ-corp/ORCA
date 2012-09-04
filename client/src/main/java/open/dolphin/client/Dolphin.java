@@ -18,6 +18,7 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.Timer;
@@ -94,6 +95,20 @@ public class Dolphin implements MainWindow {
     private MainView view;
 
 //masuda^
+    // allEditorFramesはEditorFrameから移動
+    private List<EditorFrame> allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
+    
+    public List<EditorFrame> getAllEditorFrames() {
+        return allEditorFrames;
+    }
+    
+    // allChartsはChartImplから移動
+    private List<ChartImpl> allCharts = new CopyOnWriteArrayList<ChartImpl>();
+    
+    public List<ChartImpl> getAllCharts() {
+        return allCharts;
+    }
+    
     // Dolphinをstatic instanceにする
     private static Dolphin instance;
     public static Dolphin getInstance() {
@@ -621,7 +636,6 @@ public class Dolphin implements MainWindow {
         // このクライアントでChartImplとEditorFrameを開いていた場合の処理
         boolean opened = false;
         long ptId = pvt.getPatientModel().getId();
-        List<ChartImpl> allCharts = ChartImpl.getAllChart();
         for (ChartImpl chart : allCharts) {
             if (chart.getPatient().getId() == ptId) {
                 chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
@@ -630,8 +644,8 @@ public class Dolphin implements MainWindow {
                 break;
             }
         }
-        List<Chart> editorFrames = EditorFrame.getAllEditorFrames();
-        for (Chart chart : editorFrames) {
+
+        for (Chart chart : allEditorFrames) {
             if (chart.getPatient().getId() == ptId) {
                 chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
                 chart.getFrame().toFront();
@@ -1042,9 +1056,8 @@ public class Dolphin implements MainWindow {
         boolean dirty = false;
 
         // Chart を調べる
-        List<ChartImpl> allChart = ChartImpl.getAllChart();
-        if (allChart != null && allChart.size() > 0) {
-            for (ChartImpl chart : allChart) {
+        if (allCharts != null && allCharts.size() > 0) {
+            for (ChartImpl chart : allCharts) {
                 if (chart.isDirty()) {
                     dirty = true;
                     break;
@@ -1058,7 +1071,6 @@ public class Dolphin implements MainWindow {
         }
 
         // EditorFrameのチェックを行う
-        java.util.List<Chart> allEditorFrames = EditorFrame.getAllEditorFrames();
         if (allEditorFrames != null && allEditorFrames.size() > 0) {
             for (Chart chart : allEditorFrames) {
                 if (chart.isDirty()) {
@@ -1090,11 +1102,9 @@ public class Dolphin implements MainWindow {
         }
 //pns$
 //masuda^   終了時は強制的に開いたままのChartImplとEditorFrameを閉じちゃう
-        List<Chart> allFrame = EditorFrame.getAllEditorFrames();
-        for (Chart chart : allFrame) {
+        for (Chart chart : allEditorFrames) {
             chart.stop();
         }
-        List<ChartImpl> allCharts = ChartImpl.getAllChart();
         for (ChartImpl chart : allCharts) {
             chart.stop();
         }
@@ -1698,13 +1708,11 @@ public class Dolphin implements MainWindow {
     public void editDisconItem() {
         DisconItemPanel panel = new DisconItemPanel();
         panel.enter();
-        panel = null;
     }
 
     public void editUsingDrug() {
         UsingDrugPanel panel = new UsingDrugPanel();
         panel.enter();
-        panel = null;
     }
 //masuda$
 }

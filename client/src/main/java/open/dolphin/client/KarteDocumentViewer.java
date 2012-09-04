@@ -942,20 +942,18 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             return true;
         }
 
-        
-        List<Chart> editorFrames = EditorFrame.getAllEditorFrames();
+        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
         if (editorFrames.isEmpty()) {
             return true;
         }
 
         long baseDocPk = base.getDocInfoModel().getDocPk();
-        for (Chart chart : editorFrames) {
-            EditorFrame frame = (EditorFrame) chart;
-            long parentDocPk = frame.getParentDocPk();
+        for (EditorFrame ef : editorFrames) {
+            long parentDocPk = ef.getParentDocPk();
             if (baseDocPk == parentDocPk) {
                 // parentPkが同じEditorFrameがある場合はFrameをtoFrontする
-                chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
-                chart.getFrame().toFront();
+                ef.getFrame().setExtendedState(java.awt.Frame.NORMAL);
+                ef.getFrame().toFront();
                 return false;
             }
         }
