@@ -95,6 +95,18 @@ public class Dolphin implements MainWindow {
     private MainView view;
 
 //masuda^
+    // SchemaBox
+    private ImageBox imageBox;
+    // PacsService
+    private PacsService pacsService;
+
+    // clientのUUID
+    private String clientUUID;
+
+    public String getClientUUID() {
+        return clientUUID;
+    }
+    
     // allEditorFramesはEditorFrameから移動
     private List<EditorFrame> allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
     
@@ -109,27 +121,17 @@ public class Dolphin implements MainWindow {
         return allCharts;
     }
     
-    // Dolphinをstatic instanceにする
-    private static Dolphin instance;
-    public static Dolphin getInstance() {
-        return instance;
-    }
-    // SchemaBox
-    private ImageBox imageBox;
-    // PacsService
-    private PacsService pacsService;
-    
     // ChartMediatorを経由せずに、Dolphin.getInstance().getStampBox()でスタンプ箱を取得できるようにする。
     // AbstractCodeHelper, SOA/PCodeHelperから使用
     public StampBoxPlugin getStampBox() {
         return stampBox;
     }
 
-    // clientのUUID
-    private String clientUUID;
-
-    public String getClientUUID() {
-        return clientUUID;
+    // Dolphinをstatic instanceにする
+    private static Dolphin instance;
+    
+    public static Dolphin getInstance() {
+        return instance;
     }
 //masuda$
     

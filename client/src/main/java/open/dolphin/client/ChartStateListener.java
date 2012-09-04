@@ -24,7 +24,7 @@ public class ChartStateListener {
     private ChartStateListenTask listenTask;
     private Thread thread;
     
-    // ChartStateMsgListを取得して各listenerに通知するタスク
+    // 状態変化を各listenerに通知するタスク
     private Executor exec;
     
     private static final ChartStateListener instance;
