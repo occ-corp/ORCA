@@ -630,9 +630,13 @@ public class Dolphin implements MainWindow {
     public void openKarte(PatientVisitModel pvt) {
         
 //masuda^   すでにChart, EditorFrameが開いていた時の処理はここで行う
-        if (pvt == null || (pvt.getStateBit(PatientVisitModel.BIT_CANCEL))) {
+        if (pvt == null) {
             return;
         }
+        if (pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {
+            return;
+        }
+        
         // このクライアントでChartImplとEditorFrameを開いていた場合の処理
         boolean opened = false;
         long ptId = pvt.getPatientModel().getId();
@@ -645,10 +649,10 @@ public class Dolphin implements MainWindow {
             }
         }
 
-        for (Chart chart : allEditorFrames) {
-            if (chart.getPatient().getId() == ptId) {
-                chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
-                chart.getFrame().toFront();
+        for (EditorFrame ef : allEditorFrames) {
+            if (ef.getPatient().getId() == ptId) {
+                ef.getFrame().setExtendedState(java.awt.Frame.NORMAL);
+                ef.getFrame().toFront();
                 break;
             }
         }
