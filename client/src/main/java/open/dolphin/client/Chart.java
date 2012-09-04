@@ -23,10 +23,10 @@ public interface Chart extends MainTool {
     
     public void setPatientVisit(PatientVisitModel model);
     
-    public int getChartState();
+    //public int getChartState();
     
-    public void setChartState(int state);
-    
+    //public void setChartState(int state);
+
     public boolean isReadOnly();
     
     public void setReadOnly(boolean b);

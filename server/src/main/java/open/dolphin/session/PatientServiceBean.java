@@ -269,10 +269,11 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
             if (pvt.getPatientModel().getId() == pm.getId()) {
                 pvt.setPatientModel(pm);
                  // クライアントに通知
-                ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
-                msg.setPatientVisitModel(pvt);
-                //msg.setFacilityId(fid);
-                chartStateService.notifyMerge(msg);
+                ChartStateMsgModel msg = new ChartStateMsgModel();
+                msg.setPatientModel(pm);
+                msg.setFacilityId(fid);
+                msg.setCommand(ChartStateMsgModel.CMD.PM_MERGE);
+                chartStateService.notifyEvent(msg);
             }
         }
     }

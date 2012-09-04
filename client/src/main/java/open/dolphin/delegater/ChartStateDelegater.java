@@ -31,7 +31,7 @@ public class ChartStateDelegater extends BusinessDelegater {
         return instance;
     }
     
-    public int updatePvtState(ChartStateMsgModel msg) {
+    public int updateChartState(ChartStateMsgModel msg) {
         
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);

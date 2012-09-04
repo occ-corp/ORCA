@@ -1572,31 +1572,22 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     //----------------------------------------------
                     // 保存
                     //----------------------------------------------
-//masuda^   シングルトン化
+//masuda^   シングルトン化など
                     //DocumentDelegater ddl = new DocumentDelegater();
                     DocumentDelegater ddl = DocumentDelegater.getInstance();
-//masuda$
-//masuda^                    
-                    int chartState = chart.getChartState();
-                     
+
+                    PatientVisitModel pvt = chart.getPatientVisit();
                     if (sendClaim) {
                         // CLAIMビットをセット
-                        chartState = modify
-                                ? chartState | 1 << PatientVisitModel.BIT_MODIFY_CLAIM
-                                : chartState | 1 << PatientVisitModel.BIT_SAVE_CLAIM;
+                        if (modify) {
+                            pvt.setStateBit(PatientVisitModel.BIT_SAVE_CLAIM, false);
+                            pvt.setStateBit(PatientVisitModel.BIT_MODIFY_CLAIM, true);
+                        } else {
+                            pvt.setStateBit(PatientVisitModel.BIT_SAVE_CLAIM, true);
+                        }
                     }
-
-                    // PVT state変更はWindow close時に待合リストから行う
-                    chart.setChartState(chartState);
                     ddl.postDocument(model);
-/*
-                    //----------------------------------------------
-                    // Send
-                    //----------------------------------------------
-                    for (IKarteSender sender : senderList) {
-                        sender.send(model);
-                    }
-*/
+
                     KarteContentSender sender = new KarteContentSender();
                     sender.sendKarte(chart, model);
 //masuda$ 
@@ -1616,13 +1607,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                         boolean empty = len < MinimalKarteLength;
                         // 仮保存の場合もUNFINISHED flagを立てる
                         empty |= STATUS_TMP.equals(docInfo.getStatus());
-                        int chartState = chart.getChartState();
-                        if (empty) {
-                            chartState = chartState | (1 << PatientVisitModel.BIT_UNFINISHED);
-                        } else {
-                            chartState = chartState & ~(1 << PatientVisitModel.BIT_UNFINISHED);
-                        }
-                        chart.setChartState(chartState);
+                        PatientVisitModel pvt = chart.getPatientVisit();
+                        pvt.setStateBit(PatientVisitModel.BIT_UNFINISHED, empty);
                     }
 //masuda$
                     // 印刷

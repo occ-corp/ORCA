@@ -192,7 +192,8 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 // クライアントに通知
                 ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
                 msg.setPatientVisitModel(pvt);
-                chartStateService.notifyMerge(msg);
+                msg.setCommand(ChartStateMsgModel.CMD.PVT_MERGE);
+                chartStateService.notifyEvent(msg);
                 return 0;   // 追加０個
             }
         }
@@ -204,58 +205,12 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // クライアントに通知
         ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
         msg.setPatientVisitModel(pvt);
-        chartStateService.notifyAdd(msg);
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_ADD);
+        chartStateService.notifyEvent(msg);
         
         return 1;   // 追加１個
     }
 
-   
-    /**
-     * Pvtの情報を更新する
-     * 所有者、state、病名数、メモ
-     */
-    public int updatePvtState(ChartStateMsgModel msg) {
-        
-        int ret = 0;
-
-        long pvtId = msg.getPvtPk();
-        int state = msg.getState();
-        int byomeiCount = msg.getByomeiCount();
-        int byomeiCountToday = msg.getByomeiCountToday();
-        String memo = msg.getMemo();
-
-        // データベースから該当PVTを取得
-        PatientVisitModel exist = em.find(PatientVisitModel.class, pvtId);
-        // WatingListから開いていないとexist = nullなので
-        if (exist != null) {
-            // データベースのpvtStateを更新
-            exist.setState(state);
-            exist.setByomeiCount(byomeiCount);
-            exist.setByomeiCountToday(byomeiCountToday);
-            exist.setMemo(memo);
-        }
-
-        // pvtListのpvtStateとbyomei countとオーナーを更新
-        String fid = msg.getFacilityId();
-        List<PatientVisitModel> pvtList = chartStateService.getPvtList(fid);
-
-        for (PatientVisitModel model : pvtList) {
-            if (model.getId() == pvtId) {
-                model.setState(state);
-                model.setByomeiCount(byomeiCount);
-                model.setByomeiCountToday(byomeiCountToday);
-                model.setMemo(memo);
-                model.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
-                // クライアントに通知
-                chartStateService.notifyState(msg);
-                ret = 1;
-                break;
-            }
-        }
-        
-        return ret;
-    }
-    
     /**
      * 受付情報を削除する。
      * @param PvtMessageModel msg
@@ -283,7 +238,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             }
 
             // クライアントに通知
-            chartStateService.notifyDelete(msg);
+            chartStateService.notifyEvent(msg);
             return 1;
 
         } catch (Exception e) {

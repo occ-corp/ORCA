@@ -594,6 +594,15 @@ public class Dolphin implements MainWindow {
         this.providers = providers;
     }
 
+    // ChartImplを閉じたときのChartState状態変更処理
+    public void karteClosed(PatientVisitModel pvt) {
+        pvt.setStateBit(PatientVisitModel.BIT_OPEN, false);
+        pvt.getPatientModel().setOwnerUUID(null);
+        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
+        ChartStateListener.getInstance().updateChartState(msg);
+    }
+    
     /**
      * カルテをオープンする。
      * @param pvt 患者来院情報
@@ -656,7 +665,6 @@ public class Dolphin implements MainWindow {
             // 誰も開いていないときは自分が所有者
             pvt.getPatientModel().setOwnerUUID(clientUUID);
         }
-//masuda$
         
         PluginLoader<Chart> loader = PluginLoader.load(Chart.class);
         Iterator<Chart> iter = loader.iterator();
@@ -669,6 +677,13 @@ public class Dolphin implements MainWindow {
         //chart.setReadOnly(Project.isReadOnly());    // RedaOnlyProp
         chart.setReadOnly(readOnly);
         chart.start();
+        
+        // PatientVisitModel.BIT_OPENを立てる
+        pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
+        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
+        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
+        ChartStateListener.getInstance().updateChartState(msg);
+//masuda$        
     }
 
     /**

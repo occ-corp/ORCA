@@ -1,4 +1,3 @@
-
 package open.dolphin.rest;
 
 import java.io.IOException;
@@ -13,7 +12,6 @@ import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.ChartStateServiceBean;
-import open.dolphin.session.PVTServiceBean;
 
 /**
  *
@@ -25,9 +23,6 @@ public class ChartStateResource extends AbstractResource {
     private static final boolean debug = false;
     
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
-    
-    @Inject
-    private PVTServiceBean pvtServiceBean;
     
     @Inject
     private ChartStateServiceBean chartStateService;
@@ -91,7 +86,7 @@ public class ChartStateResource extends AbstractResource {
     @Path("state")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putPvtState(String json) {
+    public String putChartState(String json) {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
 
@@ -101,7 +96,7 @@ public class ChartStateResource extends AbstractResource {
         // クライアントから送られてきたmsgにfidを設定
         msg.setFacilityId(fid);
         
-        int cnt = pvtServiceBean.updatePvtState(msg);
+        int cnt = chartStateService.updateChartState(msg);
 
         return String.valueOf(cnt);
     }

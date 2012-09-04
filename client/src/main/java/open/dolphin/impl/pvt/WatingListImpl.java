@@ -7,8 +7,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.beans.EventHandler;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -22,9 +20,7 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import open.dolphin.client.*;
-import open.dolphin.delegater.ChartStateDelegater;
 import open.dolphin.delegater.PVTDelegater;
-import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.ColumnSpec;
@@ -522,18 +518,6 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
             }
         });
 
-        // Chart のリスナになる
-        // 患者カルテの Open/Save/SaveTemp の通知を受けて受付リストの表示を制御する
-        ChartImpl.addPropertyChangeListener(ChartImpl.CHART_STATE, new PropertyChangeListener() {
-
-            @Override
-            public void propertyChange(PropertyChangeEvent evt) {
-                if (evt.getPropertyName().equals(ChartImpl.CHART_STATE)) {
-                    updateState((ChartStateMsgModel) evt.getNewValue());
-                }
-            }
-        });
-
         // 来院リストテーブル 選択
         pvtTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -619,6 +603,11 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
         // PvtInfoを更新する
         countPvt();
         updatePvtInfo();
+    }
+    
+    @Override
+    public void updateLocalState(ChartStateMsgModel msg) {
+        updatePvtList(msg);
     }
     
     /**
@@ -1403,35 +1392,8 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
     
     private void updateState(final ChartStateMsgModel msg) {
 
-        // まずは自クライアントの受付リストの状態カラムを更新する
-        msg.setIssuerUUID(clientUUID);
         msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
-        
-        updatePvtList(msg);
-
-        // データベースを更新する
-        SimpleWorker worker = new SimpleWorker<Void, Void>() {
-
-            @Override
-            protected Void doInBackground() throws Exception {
-                // サーバーに投げる
-                ChartStateDelegater del = ChartStateDelegater.getInstance();
-                del.updatePvtState(msg);
-                return null;
-            }
-
-            @Override
-            protected void succeeded(Void result) {
-                ClientContext.getBootLogger().debug("ChartState の更新成功");
-            }
-
-            @Override
-            protected void failed(Throwable cause) {
-                ClientContext.getBootLogger().warn("ChartState の更新失敗");
-            }
-        };
-
-        worker.execute();
+        ChartStateListener.getInstance().updateChartState(msg);
     }
     
      // 待合リストを更新する
@@ -1566,6 +1528,25 @@ public class WatingListImpl extends AbstractMainComponent implements IChartState
                         // 保存した選択中の行を選択状態にする
                         pvtTable.getSelectionModel().addSelectionInterval(sRow, sRow);
                         break;
+                    }
+                }
+                break;
+                
+            case PM_MERGE:
+                // 患者モデルに変更があった場合
+                // pvtListに変更
+                PatientModel pm = msg.getPatientModel();
+                long pk = pm.getId();
+                for (PatientVisitModel pvt : pvtList) {
+                    if (pvt.getPatientModel().getId() == pk) {
+                        pvt.setPatientModel(pm);
+                    }
+                }
+                // tableModelに変更
+                for (int row = 0; row < tableDataList.size(); ++row) {
+                    PatientVisitModel pvt = tableDataList.get(row);
+                    if (pvt.getPatientModel().getId() == pk) {
+                        pvt.setPatientModel(pm);
                     }
                 }
                 break;

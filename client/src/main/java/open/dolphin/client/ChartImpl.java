@@ -3,8 +3,6 @@ package open.dolphin.client;
 import java.awt.*;
 import java.awt.event.*;
 import java.beans.EventHandler;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -52,8 +50,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     //private static ArrayList<ChartImpl> allCharts = new ArrayList<ChartImpl>(3);
     // masuda 
     private static List<ChartImpl> allCharts = new CopyOnWriteArrayList<ChartImpl>();
-    // Chart 状態の通知を行うための static 束縛サポート
-    private static PropertyChangeSupport boundSupport = new PropertyChangeSupport(new Object());
+
     private static final String PROP_FRMAE_BOUNDS = "chartFrame.bounds";
     // Document Plugin を格納する TabbedPane
     private JTabbedPane tabbedPane;
@@ -213,41 +210,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     @Override
     public PatientModel getPatient() {
         return getKarte().getPatientModel();
-    }
-
-    /**
-     * チャートのステート属性を返す。
-     *
-     * @return チャートのステート属性
-     */
-    @Override
-    public int getChartState() {
-        return chartState;
-    }
-
-    /**
-     * チャートのステートを設定する。
-     *
-     * @param chartState チャートステート
-     */
-    @Override
-    public void setChartState(int chartState) {
-
-//masuda^
-        this.chartState = chartState;
-        /*
-         * int old = this.chartState; this.chartState = chartState;
-         *
-         * if (this.chartState == old) { return; }
-         *
-         * long pvtPK = (this.getPatientVisit() != null) ?
-         * this.getPatientVisit().getId() : 0L;
-         *
-         * if (pvtPK == 0L) { return; }
-         *
-         * ChartImpl.fireChanged(ChartImpl.this);
-         */
-//masuda$        
     }
 
     /**
@@ -2179,49 +2141,13 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     }
 
     /**
-     * チャートステートの束縛リスナを登録する。
-     *
-     * @param prop 束縛プロパティ名
-     * @param l 束縛リスナ
-     */
-    public static void addPropertyChangeListener(String prop,
-            PropertyChangeListener l) {
-        boundSupport.addPropertyChangeListener(prop, l);
-    }
-
-    /**
-     * チャートステートの束縛リスナを削除する。
-     *
-     * @param prop 束縛プロパティ名
-     * @param l 束縛リスナ
-     */
-    public static void removePropertyChangeListener(String prop,
-            PropertyChangeListener l) {
-        boundSupport.removePropertyChangeListener(prop, l);
-    }
-
-    /**
      * チャートウインドウのオープンを通知する。
      *
      * @param opened オープンした ChartPlugin
      */
     public static void windowOpened(ChartImpl opened) {
-
         // インスタンスを保持するリストへ追加する
         allCharts.add(opened);
-
-//        // PVT (Chart) の状態を設定する
-//        PatientVisitModel model = opened.getPatientVisit();
-//        int state = model.getState();
-//        state = state | (1);        // SET BIT OPEN
-//        model.setState(state);
-//        boundSupport.firePropertyChange(ChartImpl.CHART_STATE, null, model);
-//masuda^   復活
-        int state = opened.getChartState();
-        state = state | (1);        // SET BIT OPEN
-        opened.setChartState(state);
-        fireChanged(opened);
-//masuda$
     }
 
     /**
@@ -2233,36 +2159,12 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         // インスタンスリストから取り除く
         if (allCharts.remove(closed)) {
-
-//            PatientVisitModel model = closed.getPatientVisit();
-//            int state = model.getState();
-//            state = state & ~(1);   // UNSET BIT OPEN
-//            model.setState(state);
-//            boundSupport.firePropertyChange(ChartImpl.CHART_STATE, null, model);
-//            closed = null;
-//masuda^   復活
-            int state = closed.getChartState();
-            state = state & ~(1);   // UNSET BIT OPEN
-            closed.setChartState(state);
-            fireChanged(closed);
-//masuda$
+            // 状態変化を通知する
+            PatientVisitModel model = closed.getPatientVisit();
+            Dolphin.getInstance().karteClosed(model);
         }
     }
 
-    /**
-     * チャート状態の変化を通知する。
-     *
-     * @param 変化のあった ChartPlugin
-     */
-    public static void fireChanged(ChartImpl changed) {
-        PatientVisitModel model = changed.getPatientVisit();
-        model.setState(changed.getChartState());
-
-//masuda^   PvtMessageModelでWatingListに通知する。
-        ChartStateMsgModel msg = new ChartStateMsgModel(model);
-        boundSupport.firePropertyChange(ChartImpl.CHART_STATE, null, msg);
-//masuda$
-    }
 //masuda^
     // ChartDocumentの別ウィンドウを開く
     private HashMap<ChartDocument, JFrame> inactiveProvidersMap;  // 別ウィンドウで開いているChartDocumentとそのJFrame

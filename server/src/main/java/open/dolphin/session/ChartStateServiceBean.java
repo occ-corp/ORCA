@@ -28,24 +28,7 @@ public class ChartStateServiceBean {
     private EntityManager em;
     
 
-    public void notifyAdd(ChartStateMsgModel msg) {
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_ADD);
-        notifyEvent(msg);
-    }
-    public void notifyDelete(ChartStateMsgModel msg) {
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_DELETE);
-        notifyEvent(msg);
-    }
-    public void notifyState(ChartStateMsgModel msg) {
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
-        notifyEvent(msg);
-    }
-    public void notifyMerge(ChartStateMsgModel msg) {
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_MERGE);
-        notifyEvent(msg);
-    }
-    
-    private void notifyEvent(ChartStateMsgModel msg) {
+    public void notifyEvent(ChartStateMsgModel msg) {
 
         String fid = msg.getFacilityId();
         FacilityContext context = contextHolder.getFacilityContext(fid);
@@ -99,6 +82,53 @@ public class ChartStateServiceBean {
             }
         }
         return list;
+    }
+    
+    /**
+     * Pvtの情報を更新する
+     * 所有者、state、病名数、メモ
+     */
+    public int updateChartState(ChartStateMsgModel msg) {
+        
+        int ret = 0;
+
+        long pvtId = msg.getPvtPk();
+        int state = msg.getState();
+        int byomeiCount = msg.getByomeiCount();
+        int byomeiCountToday = msg.getByomeiCountToday();
+        String memo = msg.getMemo();
+
+        // データベースから該当PVTを取得
+        PatientVisitModel exist = em.find(PatientVisitModel.class, pvtId);
+        // WatingListから開いていないとexist = nullなので
+        if (exist != null) {
+            // データベースのpvtStateを更新
+            exist.setState(state);
+            exist.setByomeiCount(byomeiCount);
+            exist.setByomeiCountToday(byomeiCountToday);
+            exist.setMemo(memo);
+        }
+
+        // pvtListのpvtStateとbyomei countとオーナーを更新
+        String fid = msg.getFacilityId();
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        List<PatientVisitModel> pvtList = context.getPvtList();
+
+        for (PatientVisitModel model : pvtList) {
+            if (model.getId() == pvtId) {
+                model.setState(state);
+                model.setByomeiCount(byomeiCount);
+                model.setByomeiCountToday(byomeiCountToday);
+                model.setMemo(memo);
+                model.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
+                // クライアントに通知
+                notifyEvent(msg);
+                ret = 1;
+                break;
+            }
+        }
+        
+        return ret;
     }
     
     // 起動後最初のPvtListを作る

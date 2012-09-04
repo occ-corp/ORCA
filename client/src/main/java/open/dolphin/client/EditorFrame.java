@@ -169,25 +169,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
     public void setPatientVisit(PatientVisitModel model) {
         realChart.setPatientVisit(model);
     }
-    
-    /**
-     * Chart state を返す。
-     * @return Chart の state 属性
-     */
-    @Override
-    public int getChartState() {
-        return realChart.getChartState();
-    }
-    
-    /**
-     * Chart state を設定する。
-     * @param state Chart の state
-     */
-    @Override
-    public void setChartState(int state) {
-        realChart.setChartState(state);
-    }
-    
+
     /**
      * ReadOnly かどうかを返す。
      * @return readOnly の時 true
