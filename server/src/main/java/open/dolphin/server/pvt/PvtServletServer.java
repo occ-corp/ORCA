@@ -3,7 +3,6 @@ package open.dolphin.server.pvt;
 import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
-import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
@@ -73,6 +72,10 @@ public class PvtServletServer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
+        
+        if (serverThread == null) {
+            return;
+        }
         
         // ServerThreadを中止させる
         serverThread.stop();
