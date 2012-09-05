@@ -74,6 +74,10 @@ public class PvtServletServer implements ServletContextListener {
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
         
+        if (serverThread == null) {
+            return;
+        }
+        
         // ServerThreadを中止させる
         serverThread.stop();
         // thread終了を待つ
