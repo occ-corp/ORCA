@@ -158,10 +158,13 @@ public class Dolphin implements MainWindow {
         }
 
         // FocusPropertyChangeListenerを登録する
-        FocusPropertyChangeListener.register();
+        FocusPropertyChangeListener.getInstance().register();
 
         // 排他処理用のUUIDを決める
         clientUUID = UUID.randomUUID().toString();
+
+        // ChartStateListenerを開始する
+        ChartStateListener.getInstance().start();
 //masuda$
 
         //------------------------------
@@ -249,9 +252,6 @@ public class Dolphin implements MainWindow {
         if (remoteHost != null) {
             saveEnv.put(GUIConst.KEY_PACS_SETTING, getPacsSettingString());
         }
-        
-        // ChartStateListener
-        ChartStateListener.getInstance().start();
 //masuda$
         
         //ClientContext.getBootLogger().debug("services did start");
@@ -1116,7 +1116,11 @@ public class Dolphin implements MainWindow {
         }
 
         // FocusProperetyChangeListenerを破棄する
-        FocusPropertyChangeListener.dispose();
+        FocusPropertyChangeListener.getInstance().dispose();
+        
+        // ChartStateListenerを中止する
+        ChartStateListener.getInstance().stop();
+        
         // ORCA apiを破棄する
         OrcaApi.getInstance().dispose();
 //masuda$
@@ -1245,9 +1249,6 @@ public class Dolphin implements MainWindow {
     }
 
     private void shutdown() {
-        
-        // ChartStateListener
-        ChartStateListener.getInstance().stop();
 
         if (providers != null) {
 

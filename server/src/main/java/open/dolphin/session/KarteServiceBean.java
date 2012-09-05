@@ -43,10 +43,10 @@ public class KarteServiceBean {
     private static final String QUERY_PATIENT_MEMO 
             = "from PatientMemoModel p where p.karte.id=:karteId";
 
-    private static final String QUERY_DOCUMENT_INCLUDE_MODIFIED 
-            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate and d.status !='D'";
-    private static final String QUERY_DOCUMENT 
-            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate and (d.status='F' or d.status='T')";
+    //private static final String QUERY_DOCUMENT_INCLUDE_MODIFIED 
+    //        = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate and d.status !='D'";
+    //private static final String QUERY_DOCUMENT 
+    //        = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate and (d.status='F' or d.status='T')";
     private static final String QUERY_DOCUMENT_BY_LINK_ID 
             = "from DocumentModel d where d.linkId=:id";
 
@@ -91,12 +91,16 @@ public class KarteServiceBean {
             = "from PatientModel p where p.facilityId=:fid and p.patientId=:pid";
 
 //masuda^
+    private static final String DOC_TYPES = "docTypes";
     private static final String QUERY_LASTDOC_DATE 
             = "select max(m.started) from DocumentModel m where m.karte.id = :karteId and (m.status = 'F' or m.status = 'T')";
     private static final String QUERY_APPOINTMENTS 
             = "from AppointmentModel a where a.karte.id = :karteId and a.started >= :fromDate";
-    private static final String QUERY_DOCUMENT_INCLUDE_MODIFIED2 
-            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate";
+    private static final String QUERY_DOCUMENT_INCLUDE_MODIFIED 
+            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate ";
+    private static final String QUERY_DOCUMENT 
+            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate "
+            + "and (d.status='F' or d.status='T')";
 //masuda$
     
     @PersistenceContext
@@ -288,7 +292,7 @@ public class KarteServiceBean {
 //masuda^
             //documents = (List<DocumentModel>)em.createQuery(QUERY_DOCUMENT_INCLUDE_MODIFIED)
             documents = 
-                    em.createQuery(QUERY_DOCUMENT_INCLUDE_MODIFIED2)
+                    em.createQuery(QUERY_DOCUMENT_INCLUDE_MODIFIED)
                     .setParameter(KARTE_ID, karteId)
                     .setParameter(FROM_DATE, fromDate)
                     .getResultList();

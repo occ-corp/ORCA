@@ -38,9 +38,13 @@ public class DocumentHistory {
     public static final String SELECTED_KARTES = "selectedKartes";
     public static final String HISTORY_UPDATED = "historyUpdated";
     
-    private static final String CMB_KARTE = "カルテ";
-    private static final String CMB_LETTER = "紹介状/診断書";
+    private static final String CMB_KARTE = "全カ";
+    private static final String CMB_KARTE_ADMISSION = "入院";
+    private static final String CMB_KARTE_OUT_PATIENT = "外来";
+    private static final String CMB_LETTER = "文書";
+    
     private static final Color SELF_INSURANCE_COLOR = new Color(255,255,102);
+    private static final Color ADMISSION_COLOR = new Color(200, 235, 100);
 
 
     // 文書履歴テーブル
@@ -124,14 +128,16 @@ public class DocumentHistory {
             new NameValuePair("全て", "0")
         };
         CONTENT_OBJECTS = new NameValuePair[]{
-            new NameValuePair(CMB_KARTE, IInfoModel.DOCTYPE_KARTE),
+            new NameValuePair(CMB_KARTE, IInfoModel.DOCTYPE_KARTE + "," + IInfoModel.DOCTYPE_KARTE_ADMISSION),
+            new NameValuePair(CMB_KARTE_OUT_PATIENT, IInfoModel.DOCTYPE_KARTE),
+            new NameValuePair(CMB_KARTE_ADMISSION, IInfoModel.DOCTYPE_KARTE_ADMISSION),
             new NameValuePair(CMB_LETTER, IInfoModel.DOCTYPE_LETTER)
         };
     }
     
     private FILTER ins = FILTER.ALL;
     private static enum FILTER {
-        ALL, PUBLIC, SELF, ADMISSION
+        ALL, PUBLIC, SELF
     }
     private List<DocInfoModel> docInfoList;
 //masuda$
@@ -278,6 +284,73 @@ public class DocumentHistory {
         }
     }
 
+    // 保険でフィルタリング
+    private void filterByInsurance(List<DocInfoModel> list) {
+
+        List<DocInfoModel> filtered = new ArrayList<DocInfoModel>();
+        switch (ins) {
+            case PUBLIC:
+                for (DocInfoModel model : list) {
+                    if (!model.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+                        filtered.add(model);
+                    }
+                }
+                list.clear();
+                list.addAll(filtered);
+                break;
+            case SELF:
+                list.clear();
+                for (DocInfoModel model : list) {
+                    if (model.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+                        filtered.add(model);
+                    }
+                }
+                list.clear();
+                list.addAll(filtered);
+                break;
+            case ALL:
+            default:
+                break;
+        }
+    }
+    
+    // 診療科でフィルタリング
+    private void filterByDepartment(List<DocInfoModel> list) {
+        
+        if (!view.getDeptChk().isSelected()) {
+            return ;
+        }
+        
+        String deptCode = Project.getUserModel().getDepartmentModel().getDepartment();
+        List<DocInfoModel> filtered = new ArrayList<DocInfoModel>();
+        
+        for (DocInfoModel model : list) {
+            if (deptCode != null && deptCode.equals(model.getDepartmentCode())) {
+                filtered.add(model);
+            }
+        }
+        list.clear();
+        list.addAll(filtered);
+    }
+    
+    // 入院・外来カルテでフィルタリング
+    private void filterByKarteType(List<DocInfoModel> list) {
+
+        final String allType = IInfoModel.DOCTYPE_KARTE + "," + IInfoModel.DOCTYPE_KARTE_ADMISSION;
+        if (allType.equals(extractionContent) || extractionContent == null) {
+            return;
+        }
+
+        List<DocInfoModel> filtered = new ArrayList<DocInfoModel>();
+        for (DocInfoModel model : list) {
+            if (extractionContent.equals(model.getDocType())) {
+                filtered.add(model);
+            }
+        }
+        list.clear();
+        list.addAll(filtered);
+    }
+    
     /**
      * 抽出期間等が変化し、履歴を再取得した場合等の処理で、履歴テーブルの更新、 最初の行の自動選択、束縛プロパティの変化通知を行う。
      */
@@ -289,30 +362,13 @@ public class DocumentHistory {
             docInfoList = new ArrayList<DocInfoModel>(newHistory);
 
             // 保険でフィルタリング
-            switch (ins) {
-                case PUBLIC:
-                    newHistory.clear();
-                    for (DocInfoModel model : docInfoList) {
-                        if (!model.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-                            newHistory.add(model);
-                        }
-                    }
-                    break;
-                case SELF:
-                    newHistory.clear();
-                    for (DocInfoModel model : docInfoList) {
-                        if (model.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-                            newHistory.add(model);
-                        }
-                    }
-                    break;
-                case ADMISSION:
-                    newHistory.clear();
-                    break;
-                case ALL:
-                default:
-                    break;
-            }
+            filterByInsurance(newHistory);
+            
+            // 診療科でフィルタリング
+            filterByDepartment(newHistory);
+            
+            // 入院カルテ・外来カルテでフィルタリング
+            filterByKarteType(newHistory);
         }
 
         // ソーティングする
@@ -338,9 +394,6 @@ public class DocumentHistory {
             case SELF:
                 sb.append("自費 ");
                 break;
-            case ADMISSION:
-                sb.append("入院");
-                break;
             case ALL:
             default:
                 sb.append("全て ");
@@ -356,8 +409,8 @@ public class DocumentHistory {
 
             // テーブルの最初の行の自動選択を行う
             JTable table = view.getTable();
-            int first = 0;
-            int last = 0;
+            int first;
+            int last;
 
             if (ascending) {
                 last = cnt - 1;
@@ -427,10 +480,18 @@ public class DocumentHistory {
             int index = contentCombo.getSelectedIndex();
             NameValuePair pair = contentObject[index];
 //masuda^   紹介状ならautoFetchCountは1にする
-            if (!IInfoModel.DOCTYPE_KARTE.equals(pair.getValue())) {
+            String content = pair.getValue();
+            if (IInfoModel.DOCTYPE_LETTER.equals(content)) {
                 autoFetchCount = 1;
             } else {
                 autoFetchCount = defaultAutoFetchCount;
+            }
+            // viewerが変化していない場合はフィルタリングするのみ
+            if (!IInfoModel.DOCTYPE_LETTER.equals(extractionContent)
+                    && !IInfoModel.DOCTYPE_LETTER.equals(content)) {
+                this.extractionContent = content;
+                updateHistory(docInfoList);
+                return;
             }
 //masuda$
             setExtractionContent(pair.getValue());
@@ -476,8 +537,7 @@ public class DocumentHistory {
 //masuda$
                 if (col == 1 && getObject(row) != null) {
                     DocInfoModel docInfo = getObject(row);
-                    return (docInfo.getDocType().equals(IInfoModel.DOCTYPE_KARTE) ||
-                            docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE));
+                    return docInfo.isDocTypeKarte();
                 }
                 return false;
             }
@@ -494,8 +554,7 @@ public class DocumentHistory {
                     return;
                 }
 
-                if (docInfo.getDocType().equals(IInfoModel.DOCTYPE_KARTE) ||
-                    docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE)) {
+                if (docInfo.isDocTypeKarte()) {
                     // 文書タイトルを変更し通知する
                     docInfo.setTitle((String) value);
                     titleChanged(docInfo);
@@ -668,16 +727,6 @@ public class DocumentHistory {
             @Override
             public void actionPerformed(ActionEvent e) {
                 ins = FILTER.SELF;
-                updateHistory(docInfoList);
-            }
-        });
-        
-        JMenuItem admission = new JMenuItem("入院");
-        admission.addActionListener(new ActionListener(){
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                ins = FILTER.ADMISSION;
                 updateHistory(docInfoList);
             }
         });
@@ -1062,14 +1111,16 @@ public class DocumentHistory {
 
             DocInfoModel info = tableModel.getObject(row);
 
-            // 自費保険のカラーリング
-            if (info != null && !isSelected
-                    && info.getDocType().equals(IInfoModel.DOCTYPE_KARTE)
+            // 自費保険・入院のカラーリング
+            if (info != null && !isSelected) {
+                if (info.isOutPatientKarte()
                     && info.getHealthInsurance() != null
                     && info.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-                setBackground(SELF_INSURANCE_COLOR);
+                    setBackground(SELF_INSURANCE_COLOR);
+                } else if (info.isAdmissionKarte()) {
+                    setBackground(ADMISSION_COLOR);
+                }
             }
-
             return this;
         }
     }

@@ -14,6 +14,7 @@ public class DocumentHistoryView extends JPanel{
     private JTable table;
     private JScrollPane scroll;
     private JComboBox docTypeCombo;
+    private JCheckBox deptChk;
     private JComboBox periodCombo;
     private JLabel cntLbl;
 
@@ -24,12 +25,15 @@ public class DocumentHistoryView extends JPanel{
         scroll = new JScrollPane(table);
         docTypeCombo = new JComboBox();
         fixComponentSize(docTypeCombo);
+        deptChk = new JCheckBox("自科");
+        fixComponentSize(deptChk);
         periodCombo = new JComboBox();
         fixComponentSize(periodCombo);
         cntLbl = new JLabel("0件");
         JPanel south = new JPanel();
         south.setLayout(new BoxLayout(south, BoxLayout.X_AXIS));
         south.add(docTypeCombo);
+        south.add(deptChk);
         south.add(periodCombo);
         south.add(Box.createHorizontalGlue());
         south.add(cntLbl);
@@ -50,6 +54,10 @@ public class DocumentHistoryView extends JPanel{
 
     public JComboBox getDocTypeCombo() {
         return docTypeCombo;
+    }
+    
+    public JCheckBox getDeptChk() {
+        return deptChk;
     }
 
     public JComboBox getExtractCombo() {

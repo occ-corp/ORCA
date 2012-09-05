@@ -213,15 +213,15 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @return DocInfoModel の Collection
      */
     public List<DocInfoModel> getDocumentList(DocumentSearchSpec spec) {
-        
-        if (spec.getDocType().equals(IInfoModel.DOCTYPE_KARTE)) {
+
+        if (spec.getDocType().startsWith("karte")) {
             return getKarteList(spec);
 
         } else if (spec.getDocType().equals(IInfoModel.DOCTYPE_LETTER)) {
             return getLetterList(spec);
 
         }
-        
+
         return null;
     }
     

@@ -46,12 +46,12 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
         this.modifiersEx = modifiersEx;
     }
 
-    public static void register() {
+    public void register() {
         KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         focusManager.addPropertyChangeListener(instance);
     }
 
-    public static void dispose() {
+    public void dispose() {
         KeyboardFocusManager focusManager = KeyboardFocusManager.getCurrentKeyboardFocusManager();
         focusManager.removePropertyChangeListener(instance);
     }
