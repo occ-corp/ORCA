@@ -32,7 +32,7 @@ public final class SqlMiscDao extends SqlDaoBean {
     }
 
     // 入院中の患者を検索する
-    public List<PatientModel> getInHospitalPatients(Date date) {
+    public List<AdmissionModel> getInHospitalPatients(Date date) {
         
         final String sql = "select TP.ptnum, TN.brmnum, TN.nyuinka, TN.nyuinymd from tbl_ptnyuinrrk TN "
                 + "inner join tbl_ptnum TP on TP.ptid = TN.ptid "
@@ -44,7 +44,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         
         Connection con = null;
         PreparedStatement ps = null;
-        List<PatientModel> ret = new ArrayList<PatientModel>();
+        List<AdmissionModel> ret = new ArrayList<AdmissionModel>();
 
         try {
             con = getConnection();
@@ -57,11 +57,16 @@ public final class SqlMiscDao extends SqlDaoBean {
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                PatientModel pm = new PatientModel();
-                pm.setPatientId(rs.getString(1));
-                pm.setRoom(getRoomNumber(rs.getString(2)));
-                pm.setDepartment(getDepartmentDesc(rs.getString(3)));
-                pm.setAdmissonDate(frmt.parse(rs.getString(4)));
+                String patientId = rs.getString(1);
+                String room = getRoomNumber(rs.getString(2));
+                String dept = getDepartmentDesc(rs.getString(3));
+                Date aDate = frmt.parse(rs.getString(4));
+                AdmissionModel model = new AdmissionModel();
+                model.setPatientId(patientId);
+                model.setRoom(room);
+                model.setDepartment(dept);
+                model.setStarted(aDate);
+                ret.add(model);
             }
 
             rs.close();
@@ -78,14 +83,27 @@ public final class SqlMiscDao extends SqlDaoBean {
 
         return ret;
     }
-    
+
     private String getRoomNumber(String str) {
+        
+        // 病棟番号を除去
         str = str.substring(2);
-        return String.valueOf(Integer.valueOf(str));
+        // 先頭のゼロを除去
+        StringBuilder sb = new StringBuilder();
+        boolean found = false;
+        for (int i = 0; i < str.length(); ++i) {
+            char c = str.charAt(i);
+            if (found) {
+                sb.append(c);
+            } else if (c != '0') {
+                found = true;
+            }
+        }
+        return sb.toString();
     }
     
-    private String getDepartmentDesc(String str) {
-        return MMLTable.getDepartmentDesc(str);
+    private String getDepartmentDesc(String code) {
+        return SyskanriInfo.getInstance().getOrcaDeptDesc(code.trim());
     }
 
     

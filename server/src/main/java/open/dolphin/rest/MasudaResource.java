@@ -498,6 +498,51 @@ public class MasudaResource extends AbstractResource {
         return json;
     }
     
+    @PUT
+    @Path("admission/patients")
+    @Consumes(MEDIATYPE_JSON_UTF8)
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String getAdmittedPatients(String json) {
+        
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        
+        TypeReference typeRef = new TypeReference<List<AdmissionModel>>(){};
+        List<AdmissionModel> list = (List<AdmissionModel>) 
+                getConverter().fromJson(json, typeRef);
+        
+        List<PatientModel> pmList = masudaServiceBean.getAdmittedPatients(fid, list);
+        
+        String ret = getConverter().toJson(pmList);
+        return ret;
+    }
+    
+    @PUT
+    @Path("admission")
+    @Consumes(MEDIATYPE_JSON_UTF8)
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String putAdmissionModels(String json) {
+        
+        TypeReference typeRef = new TypeReference<List<AdmissionModel>>(){};
+        List<AdmissionModel> list = (List<AdmissionModel>) 
+                getConverter().fromJson(json, typeRef);
+        
+        int cnt = masudaServiceBean.updateAdmissionModels(list);
+        
+        return String.valueOf(cnt);
+    }
+    
+    @DELETE
+    @Path("admission/{ids}")
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String deleteAdmissionModels(@PathParam("ids") String ids) {
+        
+        List<Long> idList = getConverter().toLongList(ids);
+        
+        int cnt = masudaServiceBean.deleteAdmissionModels(idList);
+        
+        return String.valueOf(cnt);
+    }
+    
     @Override
     protected void debug(String msg) {
         if (debug || DEBUG) {

@@ -112,6 +112,11 @@ public class SyskanriInfo extends SqlDaoBean {
     public int getBedNum() {
         return bedNum;
     }
+    
+    // ORCAの診療科名を返す
+    public String getOrcaDeptDesc(String code) {
+        return deptCodeDescMap.get(code);
+    }
 
     public boolean getSyskanriFlag(int code) {
         return syskanri1006.contains(code);
@@ -299,7 +304,9 @@ public class SyskanriInfo extends SqlDaoBean {
             ps.setString(1, kanricd);
             ResultSet rs = ps.executeQuery();
             while (rs.next()) {
+                // kbccdは余分な空白は除去
                 String kbncd = rs.getString(1).trim();
+                // これがカオスのkanritbl。こっちはそのままで
                 String kanritbl = rs.getString(2);
                 KanriTblModel model = new KanriTblModel(kbncd, kanritbl);
                 ret.add(model);

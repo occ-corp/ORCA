@@ -674,6 +674,33 @@ public class MasudaDelegater extends BusinessDelegater {
         return list;
     }
     
+    // 入院患者を取得する
+    public List<PatientModel> getAdmittedPatients(List<AdmissionModel> admissionList) {
+        
+        String path = RES_BASE + "admission/patients";
+        
+        String json = getConverter().toJson(admissionList);
+        
+        // ここは"get"だけど、admissionListを送りたいから"put"... いいのかなぁ
+        ClientResponse response = getResource(path, null)
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
+        
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return null;
+        }
+        
+        TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
+        List<PatientModel> list = (List<PatientModel>) 
+                getConverter().fromJson(entityStr, typeRef);
+        
+        return list;
+    }
+    
     @Override
     protected void debug(int status, String entity) {
         if (debug || DEBUG) {

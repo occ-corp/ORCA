@@ -1129,4 +1129,129 @@ public class MasudaServiceBean {
         return c > 0;
     }
     
+    // 入院中の患者モデルを取得する
+    public List<PatientModel> getAdmittedPatients(String fid, List<AdmissionModel> admissionList) {
+        
+        final String sql1 = 
+                "from AdmissionModl a where a.patient.patientId = :ptId a.patient.facilityId = :fid "
+                + "and a.started = :started order by a.id desc";
+        final String sql2 = "from PatientModel p where p.patientId = :ptId and p.facilityId = :fid";
+        
+        List<PatientModel> ret = new ArrayList<PatientModel>();
+        
+        for (AdmissionModel model : admissionList) {
+            
+            String patientId = model.getPatientId();
+            Date started = model.getStarted();
+            String dept = model.getDepartment();
+            String room = model.getRoom();
+            
+            // 既存の入院モデルを取得する
+            List<AdmissionModel> existList = (List<AdmissionModel>) 
+                    em.createQuery(sql1)
+                    .setParameter("pdId", patientId)
+                    .setParameter("fid", fid)
+                    .setParameter("started", started)
+                    .getResultList();
+            
+            AdmissionModel exist = null;
+            boolean first = true;
+
+            for (AdmissionModel am : existList) {
+                AdmissionModel tmp = em.find(AdmissionModel.class, am.getId());
+                if (first) {
+                    // 部屋と診療科を更新する
+                    tmp.setDepartment(dept);
+                    tmp.setRoom(room);
+                    exist = tmp;
+                } else {
+                    // 重複があれば除去
+                    em.remove(tmp);
+                }
+            }
+
+            // PatientModelを取得する
+            try {
+                PatientModel pm = (PatientModel) 
+                        em.createQuery(sql2)
+                        .setParameter("ptId", patientId)
+                        .setParameter("fid", fid)
+                        .getSingleResult();
+                //入院モデルをセット
+                if (exist == null) {
+                    // 既存入院モデルがなければここで作成して永続化する
+                    exist = new AdmissionModel();
+                    exist.setPatientModel(pm);
+                    exist.setStarted(started);
+                    exist.setRoom(room);
+                    exist.setDepartment(dept);
+                    em.persist(exist);
+                }
+                pm.setAdmissionModel(exist);
+                ret.add(pm);
+            } catch (Exception ex) {
+            }
+        }
+        
+        return ret;
+    }
+
+    // 入院モデルを取得する
+    public List<AdmissionModel> getAdmissionList(String fid, String patientId) {
+
+        final String sql =
+                "from AdmissionModl a where a.patient.patientId = :ptId a.patient.facilityId = :fid "
+                + "order by a.id desc";
+
+        // 既存の入院モデルを取得する
+        List<AdmissionModel> list = (List<AdmissionModel>) 
+                em.createQuery(sql)
+                .setParameter("pdId", patientId)
+                .setParameter("fid", fid)
+                .getResultList();
+        
+        return list;
+    }
+    
+    // 入院モデルを更新する
+    public int updateAdmissionModels(List<AdmissionModel> list) {
+        
+        int cnt = 0;
+        
+        for (AdmissionModel model : list) {
+            try {
+                em.merge(model);
+                cnt++;
+            } catch (Exception ex) {
+            }
+        }
+        return cnt;
+    }
+    
+    // 入院モデルを削除する。使うな危険？
+    public int deleteAdmissionModels(List<Long> ids) {
+        
+        int cnt = 0;
+        
+        for (long id : ids) {
+            try {
+                // 関連するDocumentModelを取得
+                List<DocumentModel> docList = (List<DocumentModel>)
+                        em.createQuery("from DocumentModel d where d.admission.id = :id")
+                        .setParameter("id", id)
+                        .getResultList();
+                // それぞれのDocumentModelのAdmissionModelを設定解除する
+                for (DocumentModel docModel : docList) {
+                    docModel.getDocInfoModel().setAdmissionModel(null);
+                }
+                // AdmissionModelを削除する
+                AdmissionModel exist = em.find(AdmissionModel.class, id);
+                em.remove(exist);
+                cnt++;
+            } catch (Exception ex) {
+            }
+        }
+        
+        return cnt;
+    }
 }

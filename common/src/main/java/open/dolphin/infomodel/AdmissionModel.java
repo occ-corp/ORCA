@@ -26,6 +26,14 @@ public class AdmissionModel implements IInfoModel {
     
     private String dept;
     
+    @ManyToOne
+    @JoinColumn(name="patient_id")
+    private PatientModel patient;
+    
+    @Transient
+    private String patientId;
+
+    
     public void setId(long id) {
         this.id = id;
     }
@@ -59,5 +67,20 @@ public class AdmissionModel implements IInfoModel {
     }
     public String getDepartment() {
         return dept;
+    }
+    
+    public void setPatientModel(PatientModel pm) {
+        patient = pm;
+        patientId = (patientId != null) ? pm.getPatientId() : null;
+     }
+    public PatientModel getPatientModel() {
+        return patient;
+    }
+    
+    public void setPatientId(String patientId) {
+        this.patientId = patientId;
+    }
+    public String getPatientId() {
+        return patientId;
     }
 }
