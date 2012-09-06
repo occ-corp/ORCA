@@ -314,7 +314,7 @@ public class MasudaResource extends AbstractResource {
     }
 
     @GET
-    @Path("search/grep/{param}")
+    @Path("search/grep")
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getSearchResult(
             @QueryParam("text") String text,
