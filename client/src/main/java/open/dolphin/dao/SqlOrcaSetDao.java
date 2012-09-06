@@ -51,7 +51,7 @@ public class SqlOrcaSetDao extends SqlDaoBean {
         StringBuilder sb = new StringBuilder();
         sb.append("select * from tbl_inputcd where ");
         if (true) {
-            int hospnum = SyskanriInfo.getInstance().getHospNum();
+            int hospnum = getHospNum();
             sb.append("hospnum=");
             sb.append(hospnum);
             sb.append(" and ");
@@ -167,7 +167,7 @@ public class SqlOrcaSetDao extends SqlDaoBean {
         
         int hospnum = -1;
         if (true) {
-            hospnum = SyskanriInfo.getInstance().getHospNum();
+            hospnum = getHospNum();
         }
         
         Connection con = null;

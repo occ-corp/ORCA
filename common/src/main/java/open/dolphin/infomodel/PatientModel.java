@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import javax.persistence.*;
 
@@ -172,6 +173,37 @@ public class PatientModel extends InfoModel {
     }
     public String getOwnerUUID() {
         return ownerUUID;
+    }
+    
+    // 入院関連
+    @JsonIgnore
+    @Transient
+    private Date admissionDate;     // 入院日
+    public void setAdmissonDate(Date date) {
+        admissionDate = date;
+    }
+    public Date getAdmissionDate() {
+        return admissionDate;
+    }
+    
+    @JsonIgnore
+    @Transient
+    private String room;            // 病室
+    public void setRoom(String room) {
+        this.room = room;
+    }
+    public String getRoom() {
+        return room;
+    }
+    
+    @JsonIgnore
+    @Transient
+    private String department;      // 診療科名
+    public void setDepartment(String dept) {
+        department = dept;
+    }
+    public String getDepartment() {
+        return department;
     }
 //masuda$
     

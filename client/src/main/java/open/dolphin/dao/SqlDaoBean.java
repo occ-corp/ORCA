@@ -104,6 +104,11 @@ public class SqlDaoBean extends DaoBean {
         tm.setDataKbn(rs.getString(15));
         return tm;
     }
+    
+    protected int getHospNum() {
+        return SyskanriInfo.getInstance().getHospNum();
+    }
+    
     // ひらがなをカタカナに変換
     protected String hiraganaToKatakana(String input) {
 
@@ -156,7 +161,7 @@ public class SqlDaoBean extends DaoBean {
         final String sql = "select ptid from tbl_ptnum where hospnum = ? and ptnum = ?";
         Connection con = null;
         PreparedStatement ps = null;
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         
         try {
             con = getConnection();

@@ -1,5 +1,7 @@
 package open.dolphin.dao;
 
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -17,10 +19,7 @@ import open.dolphin.project.Project;
 public class SyskanriInfo extends SqlDaoBean {
 
     private static final SyskanriInfo instance;
-    
-    private static final String[] KANRICDS 
-            = new String[]{"1001", "5000", "5001", "5002", "5013"};
-    
+
     public static final String ORCA46 = "orca46";
     public static final String ORCA45 = "orca45";
     
@@ -29,7 +28,10 @@ public class SyskanriInfo extends SqlDaoBean {
     private int hospNum;
     
     private List<Integer> syskanri1006;
-    private Map<String, String> kanriTblMap;
+    
+    private int bedNum;
+    
+    private Map<String, String> deptCodeDescMap;
     
     private static boolean initialized = false;
 
@@ -49,13 +51,11 @@ public class SyskanriInfo extends SqlDaoBean {
     
     private void initialize() {
         syskanri1006 = new ArrayList<Integer>();
-        kanriTblMap = new HashMap<String, String>();
+        deptCodeDescMap = new HashMap<String, String>();
         initialized = setHospNum();
         initialized &= setSyskanri1006();
-
-        for (String kanricd : KANRICDS) {
-            initialized &= setKanriTbl(kanricd);
-        }
+        initialized &= getSyskanri1001();
+        initialized &= getSyskanri1005();
     }
 
     
@@ -67,7 +67,8 @@ public class SyskanriInfo extends SqlDaoBean {
         return ORCA46.equals(orcaVer);
     }
     
-    public int getHospNum() {
+    @Override
+    public final int getHospNum() {
         return hospNum;
     }
 
@@ -104,14 +105,12 @@ public class SyskanriInfo extends SqlDaoBean {
     
     // 有床か無床か
     public boolean hasBed() {
-        try {
-            String value = kanriTblMap.get("SYS-1001-BEDSU");
-            if (Integer.valueOf(value) > 0) {
-                return true;
-            }
-        } catch (Exception ex) {
-        }
-        return false;
+        return bedNum > 0;
+    }
+    
+    // 病床数
+    public int getBedNum() {
+        return bedNum;
     }
 
     public boolean getSyskanriFlag(int code) {
@@ -214,41 +213,125 @@ public class SyskanriInfo extends SqlDaoBean {
         
         return success;
     }
-    
-    // 医療機関情報を取得する
-    private boolean setKanriTbl(String kanricd) {
 
-        final String sql = "select kanritbl from tbl_syskanri where kanricd = ?";
+    // kanricd 1001情報を取得。今は病床数のみ
+    private boolean getSyskanri1001() {
+        
         boolean success = true;
+        final String kanricd = "1001";
+        
+        List<KanriTblModel> list = getKanriTblModel(kanricd);
+        if (list.isEmpty()) {
+            return false;
+        }
+        
+        KanriTblModel model = list.get(0);
+        String kanritbl = model.getKanritbl();
+        
+        // CPSKxxx.csvを読み込むIncReaderを準備する
+        IncReader reader = new IncReader(kanricd, orcaVer);
+
+        try {
+            // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
+            Map<String, String> map = reader.getMap(kanritbl);
+            // 病床数を取得
+            String value = map.get("SYS-1001-BEDSU");
+            bedNum = Integer.valueOf(value);
+        } catch (NumberFormatException ex) {
+            success = false;
+        } catch (UnsupportedEncodingException ex) {
+            success = false;
+        } catch (IOException ex) {
+            success = false;
+        }
+
+        return success;
+    }
+    
+    // kanricd 1005情報を取得。科目IDと科目名の対応
+    private boolean getSyskanri1005() {
+        
+        boolean success = true;
+        final String kanricd = "1005";
+        
+        List<KanriTblModel> list = getKanriTblModel(kanricd);
+        if (list.isEmpty()) {
+            return false;
+        }
+        
+        // CPSKxxx.csvを読み込むIncReaderを準備する
+        IncReader reader = new IncReader(kanricd, orcaVer);
+        
+        for (KanriTblModel model : list) {
+            
+            String kbncd = model.getKbncd();
+            String kanritbl = model.getKanritbl();
+            
+            try {
+                // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
+                Map<String, String> map = reader.getMap(kanritbl);
+                // 診療科名を取得
+                String value = map.get("SYS-1005-SRYKANAME");
+                deptCodeDescMap.put(kbncd, value);
+            } catch (UnsupportedEncodingException ex) {
+                success = false;
+                break;
+            } catch (IOException ex) {
+                success = false;
+                break;
+            }
+        }
+        return success;
+    }
+    
+    // 管理テーブル情報を取得する
+    private List<KanriTblModel> getKanriTblModel(String kanricd) {
+        
+        final String sql = "select kbncd, kanritbl from tbl_syskanri where kanricd = ?";
+        List<KanriTblModel> ret = new ArrayList<KanriTblModel>();
+        
         Connection con = null;
         PreparedStatement ps = null;
 
         try {
-            String data = null;
             con = getConnection();
             ps = con.prepareStatement(sql);
             ps.setString(1, kanricd);
             ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                data = rs.getString(1);
+            while (rs.next()) {
+                String kbncd = rs.getString(1).trim();
+                String kanritbl = rs.getString(2);
+                KanriTblModel model = new KanriTblModel(kbncd, kanritbl);
+                ret.add(model);
             }
             rs.close();
-            
-            // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
-            IncReader reader = new IncReader(kanricd, orcaVer);
-            Map<String, String> map = reader.getMap(data);
 
-            // 取得できたらマップに登録する
-            if (map != null && !map.isEmpty()) {
-                kanriTblMap.putAll(map);
-            }
         } catch (Exception e) {
             processError(e);
-            success = false;
         } finally {
             closePreparedStatement(ps);
             closeConnection(con);
         }
-        return success;
+        return ret;
+    }
+    
+    // kbncdとkanritblのペアクラス
+    private class KanriTblModel {
+        
+        private String kbncd;
+        
+        private String kanritbl;
+        
+        private KanriTblModel(String kbncd, String kanritbl) {
+            this.kbncd = kbncd;
+            this.kanritbl = kanritbl;
+        }
+        private String getKbncd() {
+            return kbncd;
+        }
+        private String getKanritbl() {
+            return kanritbl;
+        }
+        
     }
 }

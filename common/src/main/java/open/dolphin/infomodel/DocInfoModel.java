@@ -5,9 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Date;
-import javax.persistence.Column;
-import javax.persistence.Embeddable;
-import javax.persistence.Transient;
+import javax.persistence.*;
 
 /**
  * DocInfoModel
@@ -120,14 +118,16 @@ public class DocInfoModel extends InfoModel implements Comparable {
     private boolean sendMml;
     //----------------------------------
     
-//masuda^   病室など
-    private String info;
+//masuda^   入院モデル
+    @ManyToOne
+    @JoinColumn(name="admission_id")
+    private AdmissionModel admission;
     
-    public String getInfo() {
-        return info;
+    public AdmissionModel getAdmissionModel() {
+        return admission;
     }
-    public void setInfo(String info) {
-        this.info = info;
+    public void setAdmissionModel(AdmissionModel admission) {
+        this.admission = admission;
     }
  //masuda$
     
@@ -926,29 +926,20 @@ public class DocInfoModel extends InfoModel implements Comparable {
     }
     
 //masuda^   処方のある日は日付に「薬」マークを付ける。入院なら「入」マークをつける
-    public String getFirstConfirmDateWithRp() {
-
-        if (IInfoModel.DOCTYPE_KARTE_ADMISSION.equals(docType)
-                || IInfoModel.DOCTYPE_KARTE_S_ADMISSION.equals(docType)) {
-            return getFirstConfirmDateTrimTime() + "入";
-        } else if (hasRp) {
-            return getFirstConfirmDateTrimTime() + "薬";
+    public String getFirstConfirmDateWithMark() {
+        StringBuilder sb = new StringBuilder();
+        sb.append(getFirstConfirmDateTrimTime());
+        if (admission != null) {
+            sb.append("入");
         }
-        return getFirstConfirmDateTrimTime();
+        if (hasRp) {
+            sb.append("薬");
+        }
+        return sb.toString();
     }
-    
-    public boolean isDocTypeKarte() {
-        boolean ret = isOutPatientKarte() || isAdmissionKarte();
-        return ret;
-    }
-    public boolean isOutPatientKarte() {
+    public boolean isKarte() {
         boolean ret = IInfoModel.DOCTYPE_KARTE.equals(docType)
                 || IInfoModel.DOCTYPE_S_KARTE.equals(docType);
-        return ret;
-    }
-    public boolean isAdmissionKarte() {
-        boolean ret = IInfoModel.DOCTYPE_KARTE_ADMISSION.equals(docType)
-                || IInfoModel.DOCTYPE_KARTE_S_ADMISSION.equals(docType);
         return ret;
     }
 //masuda$

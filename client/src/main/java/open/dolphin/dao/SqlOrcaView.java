@@ -66,7 +66,7 @@ public class SqlOrcaView extends SqlDaoBean {
      */
     public List<RegisteredDiagnosisModel> getOrcaDisease(String patientId, String from, String to, Boolean ascend) {
         
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         long orcaPtId = getOrcaPtID(patientId);
         if (orcaPtId == 0) {
             ClientContext.getBootLogger().warn("ptid=null");
@@ -134,7 +134,7 @@ public class SqlOrcaView extends SqlDaoBean {
      */
     public List<RegisteredDiagnosisModel> getActiveOrcaDisease(String patientId, boolean asc) {
 
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         long orcaPtId = getOrcaPtID(patientId);
         if (orcaPtId == 0) {
             ClientContext.getBootLogger().warn("ptid=null");

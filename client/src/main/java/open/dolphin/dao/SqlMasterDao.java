@@ -70,7 +70,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
         String sql = QUERY_TENSU_BY_SHINKU;
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         
         Connection con = null;
         PreparedStatement ps;
@@ -123,7 +123,7 @@ public final class SqlMasterDao extends SqlDaoBean {
             }
         }
         String sql = buf.toString();
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         
         Connection con = null;
         PreparedStatement ps;
@@ -164,7 +164,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
         String sql = QUERY_TENSU_BY_CODE;
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
 
         Connection con = null;
         PreparedStatement ps;
@@ -205,7 +205,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
         String sql =QUERY_TENSU_BY_TEN;
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
 
         Connection con = null;
         PreparedStatement ps;

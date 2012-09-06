@@ -10,11 +10,6 @@ public interface IInfoModel extends java.io.Serializable, java.lang.Cloneable {
 //masuda^
     // Default facility oid
     public static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
-    
-    // 入院２号カルテ
-    public static final String DOCTYPE_KARTE_ADMISSION = "karte_admission";
-    // 入院１号カルテ
-    public static final String DOCTYPE_KARTE_S_ADMISSION = "s_karte_admission";
 //masuda$
     
     /** ISO 8601 style date format */

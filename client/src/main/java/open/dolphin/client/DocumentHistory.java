@@ -38,7 +38,7 @@ public class DocumentHistory {
     public static final String SELECTED_KARTES = "selectedKartes";
     public static final String HISTORY_UPDATED = "historyUpdated";
     
-    private static final String CMB_KARTE = "全カ";
+    private static final String CMB_KARTE = "全て";
     private static final String CMB_KARTE_ADMISSION = "入院";
     private static final String CMB_KARTE_OUT_PATIENT = "外来";
     private static final String CMB_LETTER = "文書";
@@ -108,8 +108,10 @@ public class DocumentHistory {
         return defaultAutoFetchCount;
     }
     
+    // デフォルトのextractionPeriodから変更されたかどうか
     private boolean extractionIndexUpdated;
-    
+    private static final String ALL_KARTE = "ALL";
+    private static final String ADMISSION_KARTE = "ADMISSION";
     public static final NameValuePair[] EXTRACTION_OBJECTS;
     public static final NameValuePair[] CONTENT_OBJECTS;
     
@@ -128,9 +130,9 @@ public class DocumentHistory {
             new NameValuePair("全て", "0")
         };
         CONTENT_OBJECTS = new NameValuePair[]{
-            new NameValuePair(CMB_KARTE, IInfoModel.DOCTYPE_KARTE + "," + IInfoModel.DOCTYPE_KARTE_ADMISSION),
+            new NameValuePair(CMB_KARTE, ALL_KARTE),
             new NameValuePair(CMB_KARTE_OUT_PATIENT, IInfoModel.DOCTYPE_KARTE),
-            new NameValuePair(CMB_KARTE_ADMISSION, IInfoModel.DOCTYPE_KARTE_ADMISSION),
+            new NameValuePair(CMB_KARTE_ADMISSION, ADMISSION_KARTE),
             new NameValuePair(CMB_LETTER, IInfoModel.DOCTYPE_LETTER)
         };
     }
@@ -336,8 +338,7 @@ public class DocumentHistory {
     // 入院・外来カルテでフィルタリング
     private void filterByKarteType(List<DocInfoModel> list) {
 
-        final String allType = IInfoModel.DOCTYPE_KARTE + "," + IInfoModel.DOCTYPE_KARTE_ADMISSION;
-        if (allType.equals(extractionContent) || extractionContent == null) {
+        if (ALL_KARTE.equals(extractionContent) || extractionContent == null) {
             return;
         }
 
@@ -383,8 +384,9 @@ public class DocumentHistory {
         // 文書履歴テーブルにデータの Arraylist を設定する
         tableModel.setDataProvider(newHistory);
 
+//masuda    setExtractionPeriodに移動
         // 束縛プロパティの通知を行う
-        boundSupport.firePropertyChange(HISTORY_UPDATED, false, true);
+        //boundSupport.firePropertyChange(HISTORY_UPDATED, false, true);
 
         StringBuilder sb = new StringBuilder();
         switch (ins) {
@@ -509,7 +511,7 @@ public class DocumentHistory {
         String[] columnNames = ClientContext.getStringArray("docHistory.columnNames"); // {"確定日", "内容"};
         //String[] methodNames = ClientContext.getStringArray("docHistory.methodNames"); // {"getFirstConfirmDateTrimTime",// "getTitle"};
 //masuda    薬マークを付ける
-        String[] methodNames = new String[]{"getFirstConfirmDateWithRp", "getTitle"};
+        String[] methodNames = new String[]{"getFirstConfirmDateWithMark", "getTitle"};
         Class[] columnClasses = {String.class, String.class};
 
 //masuda^
@@ -537,7 +539,7 @@ public class DocumentHistory {
 //masuda$
                 if (col == 1 && getObject(row) != null) {
                     DocInfoModel docInfo = getObject(row);
-                    return docInfo.isDocTypeKarte();
+                    return docInfo.isKarte();
                 }
                 return false;
             }
@@ -554,7 +556,7 @@ public class DocumentHistory {
                     return;
                 }
 
-                if (docInfo.isDocTypeKarte()) {
+                if (docInfo.isKarte()) {
                     // 文書タイトルを変更し通知する
                     docInfo.setTitle((String) value);
                     titleChanged(docInfo);
@@ -571,9 +573,9 @@ public class DocumentHistory {
         //view.getTable().getColumnModel().getColumn(1).setPreferredWidth(190);
 
         if (ClientContext.isMac()) {
-            view.getTable().getColumnModel().getColumn(0).setPreferredWidth(115);
+            view.getTable().getColumnModel().getColumn(0).setPreferredWidth(120);
         } else {
-            view.getTable().getColumnModel().getColumn(0).setPreferredWidth(100);
+            view.getTable().getColumnModel().getColumn(0).setPreferredWidth(115);
         }
         view.getTable().getColumnModel().getColumn(1).setPreferredWidth(180);
         view.getTable().setFocusable(false);
@@ -945,7 +947,10 @@ public class DocumentHistory {
     public void setExtractionContent(String extractionContent) {
         String old = this.extractionContent;
         this.extractionContent = extractionContent;
-        boundSupport.firePropertyChange(DOCUMENT_TYPE, old, this.extractionContent);
+        // 束縛プロパティの通知を行う
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(DOCUMENT_TYPE, old, this.extractionContent);
+        }
         getDocumentHistory();
     }
 
@@ -963,6 +968,10 @@ public class DocumentHistory {
      */
     public void setExtractionPeriod(Date extractionPeriod) {
         this.extractionPeriod = extractionPeriod;
+        // 束縛プロパティの通知を行う
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(HISTORY_UPDATED, false, true);
+        }
         getDocumentHistory();
     }
 
@@ -1113,11 +1122,13 @@ public class DocumentHistory {
 
             // 自費保険・入院のカラーリング
             if (info != null && !isSelected) {
-                if (info.isOutPatientKarte()
-                    && info.getHealthInsurance() != null
-                    && info.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-                    setBackground(SELF_INSURANCE_COLOR);
-                } else if (info.isAdmissionKarte()) {
+                if (info.getAdmissionModel() == null) {
+                    if (info.isKarte()
+                            && info.getHealthInsurance() != null
+                            && info.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+                        setBackground(SELF_INSURANCE_COLOR);
+                    }
+                } else {
                     setBackground(ADMISSION_COLOR);
                 }
             }

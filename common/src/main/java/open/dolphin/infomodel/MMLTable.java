@@ -1,6 +1,7 @@
 package open.dolphin.infomodel;
 
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -216,12 +217,26 @@ public final class MMLTable {
         departmentCode.put("救急科", "39");
         departmentCode.put("鍼灸", "A1");
         
-        departmentCode.put("医事", "AM");  // Division of Accounting and Management
+        //departmentCode.put("医事", "AM");  // Division of Accounting and Management
     }    
     public static String getDepartmentCode(String key) {
        return (String)departmentCode.get(key);
     }
     
+    public static String getDepartmentDesc(String code) {
+        if (code == null) {
+            return null;
+        }
+        for (Iterator itr = departmentCode.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry entry = (Map.Entry) itr.next();
+            String value = (String) entry.getValue();
+            if (code.equals(value)) {
+                return (String) entry.getKey();
+            }
+        }
+        return null;
+    }
+
     // MML0016 Outcome（転帰）
     private static final Map<String, String> mml0016Map;
     

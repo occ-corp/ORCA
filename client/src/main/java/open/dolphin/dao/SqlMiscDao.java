@@ -1,7 +1,5 @@
-
 package open.dolphin.dao;
 
-import java.io.UnsupportedEncodingException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
@@ -9,10 +7,7 @@ import java.sql.Statement;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.*;
-import open.dolphin.infomodel.ClaimConst;
-import open.dolphin.infomodel.DiseaseEntry;
-import open.dolphin.infomodel.DrugInteractionModel;
-import open.dolphin.infomodel.TensuMaster;
+import open.dolphin.infomodel.*;
 import open.dolphin.order.MasterItem;
 import open.dolphin.util.MMLDate;
 
@@ -22,8 +17,6 @@ import open.dolphin.util.MMLDate;
  * @author masuda, Masuda Naika
  */
 public final class SqlMiscDao extends SqlDaoBean {
-    
-    private static final String ORCA_DB_CHARSET = "EUC-JP";
 
     private static final SqlMiscDao instance;
 
@@ -38,38 +31,37 @@ public final class SqlMiscDao extends SqlDaoBean {
     private SqlMiscDao() {
     }
 
-    // 入院中？ "605号室:内科"
-    public String getAdmissionInfo(String patientId, Date date) {
+    // 入院中の患者を検索する
+    public List<PatientModel> getInHospitalPatients(Date date) {
         
-        long orcaPtId = getOrcaPtID(patientId);
-        String sql = "select brmnum, nyuinka from tbl_ptnyuinrrk "
-                + "where taiincd <> '  ' and ptid = ? "
-                + "and tenstunymd <= ? and taiinymd >= ? "
-                + "and hospnum = ?";
+        final String sql = "select TP.ptnum, TN.brmnum, TN.nyuinka, TN.nyuinymd from tbl_ptnyuinrrk TN "
+                + "inner join tbl_ptnum TP on TP.ptid = TN.ptid "
+                + "where TN.tennyuymd <= ? and TN.tenstuymd <= ? and TN.hospnum = ?";
+        
         SimpleDateFormat frmt = new SimpleDateFormat("yyyyMMdd");
         String dateStr = frmt.format(date);
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         
         Connection con = null;
         PreparedStatement ps = null;
-        String ret = null;
-        
+        List<PatientModel> ret = new ArrayList<PatientModel>();
+
         try {
             con = getConnection();
             ps = con.prepareStatement(sql);
-            ps.setLong(1, orcaPtId);
+            ps.setString(1, dateStr);
             ps.setString(2, dateStr);
             ps.setString(3, dateStr);
             ps.setInt(4, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
-            if (rs.next()) {
-                StringBuilder sb = new StringBuilder();
-                sb.append(rs.getString(1).substring(2));
-                sb.append("号室：");
-                sb.append(rs.getString(2));
-                ret = sb.toString();
+            while (rs.next()) {
+                PatientModel pm = new PatientModel();
+                pm.setPatientId(rs.getString(1));
+                pm.setRoom(getRoomNumber(rs.getString(2)));
+                pm.setDepartment(getDepartmentDesc(rs.getString(3)));
+                pm.setAdmissonDate(frmt.parse(rs.getString(4)));
             }
 
             rs.close();
@@ -83,9 +75,20 @@ public final class SqlMiscDao extends SqlDaoBean {
         } finally {
             closeConnection(con);
         }
+
         return ret;
     }
+    
+    private String getRoomNumber(String str) {
+        str = str.substring(2);
+        return String.valueOf(Integer.valueOf(str));
+    }
+    
+    private String getDepartmentDesc(String str) {
+        return MMLTable.getDepartmentDesc(str);
+    }
 
+    
     public List<DrugInteractionModel> checkInteraction(Collection<String> drug1, Collection<String> drug2) {
         // 引数はdrugcdの配列ｘ２
 
@@ -135,7 +138,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         if (srycdList == null || srycdList.isEmpty()) {
             return false;
         }
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         boolean ret = false;
 
         StringBuilder sb = new StringBuilder();
@@ -178,7 +181,7 @@ public final class SqlMiscDao extends SqlDaoBean {
             return false;
         }
 
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         boolean ret = false;
 
         StringBuilder sb = new StringBuilder();
@@ -270,7 +273,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         }
 
         int todayInt = MMLDate.getTodayInt();
-        int hospNum = SyskanriInfo.getInstance().getHospNum();
+        int hospNum = getHospNum();
         
         StringBuilder sb = new StringBuilder();
         sb.append(SELECT_TBL_TENSU);

@@ -125,6 +125,17 @@ public class PatientVisitModel extends InfoModel {
             status &= ~(1 << stateBit);
         }
     }
+    
+    // 入院モデル
+    @JsonIgnore
+    @Transient
+    private AdmissionModel admission;
+    public void setAdmissionModel(AdmissionModel model) {
+        admission = model;
+    }
+    public AdmissionModel getAdmissionModel() {
+        return admission;
+    }
 //masuda$
     
     /**
