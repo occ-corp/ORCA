@@ -5,7 +5,6 @@ import javax.swing.ImageIcon;
 import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ChartStateListener;
 import open.dolphin.client.ClientContext;
-import open.dolphin.impl.pvt.WatingListImpl;
 import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.infomodel.PatientModel;
 
@@ -25,11 +24,11 @@ public class AdmissionList extends AbstractMainComponent {
     private static final String[] PROPERTY_NAMES = {
         "getRoom", "getPatientId", "getPatientName", "getPatientGenderDesc", 
         "getPatientAgeBirthday", "getDoctorName", "getDeptName", "getAdmissionDate", 
-        "getStateInteger"};
+        "isOpened"};
     // 来院テーブルのクラス名
     private static final Class[] COLUMN_CLASSES = {
         String.class, String.class, String.class, String.class, String.class, 
-        String.class, String.class, String.class, Integer.class};
+        String.class, String.class, String.class, Boolean.class};
     // 来院テーブルのカラム幅
     private static final int[] COLUMN_WIDTH = {
         20, 80, 130, 40, 100, 100, 50, 80, 30};

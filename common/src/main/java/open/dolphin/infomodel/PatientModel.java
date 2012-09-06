@@ -2,6 +2,7 @@ package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -175,7 +176,6 @@ public class PatientModel extends InfoModel {
     }
     
     // 入院モデル
-    @JsonIgnore
     @Transient
     private AdmissionModel admission;
     public void setAdmissionModel(AdmissionModel model) {
@@ -874,5 +874,20 @@ public class PatientModel extends InfoModel {
     public String getAgeBirthday2() {
         return ModelUtils.getAgeBirthday2(birthday);
     }
+    
+    public String getRoom() {
+        return (admission != null) ? admission.getRoom() : null;
+    }
+    public String getDeptName() {
+        return (admission != null) ? admission.getDepartment() : null;
+    }
+    public String getAdmissionDate() {
+        if (admission != null) {
+            SimpleDateFormat frmt = new SimpleDateFormat(DATE_WITHOUT_TIME);
+            return frmt.format(admission.getStarted());
+        }
+        return null;
+    }
+
 //masuda$
 }

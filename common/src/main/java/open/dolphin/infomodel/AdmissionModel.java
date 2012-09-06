@@ -26,6 +26,8 @@ public class AdmissionModel implements IInfoModel {
     
     private String dept;
     
+    private String doctor;
+    
     @ManyToOne
     @JoinColumn(name="patient_id")
     private PatientModel patient;
@@ -82,5 +84,12 @@ public class AdmissionModel implements IInfoModel {
     }
     public String getPatientId() {
         return patientId;
+    }
+    
+    public void setDoctorName(String name) {
+        doctor = name;
+    }
+    public String getDoctorName() {
+        return doctor;
     }
 }

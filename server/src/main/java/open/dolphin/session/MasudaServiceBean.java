@@ -1145,6 +1145,7 @@ public class MasudaServiceBean {
             Date started = model.getStarted();
             String dept = model.getDepartment();
             String room = model.getRoom();
+            String doctor = model.getDoctorName();
             
             // 既存の入院モデルを取得する
             List<AdmissionModel> existList = (List<AdmissionModel>) 
@@ -1158,15 +1159,17 @@ public class MasudaServiceBean {
             boolean first = true;
 
             for (AdmissionModel am : existList) {
-                AdmissionModel tmp = em.find(AdmissionModel.class, am.getId());
                 if (first) {
                     // 部屋と診療科を更新する
-                    tmp.setDepartment(dept);
-                    tmp.setRoom(room);
-                    exist = tmp;
+                    am.setDepartment(dept);
+                    am.setRoom(room);
+                    am.setDoctorName(doctor);
+                    em.merge(am);
+                    exist = am;
                 } else {
                     // 重複があれば除去
-                    em.remove(tmp);
+                    AdmissionModel toDel = em.find(AdmissionModel.class, am.getId());
+                    em.remove(toDel);
                 }
             }
 
@@ -1185,6 +1188,7 @@ public class MasudaServiceBean {
                     exist.setStarted(started);
                     exist.setRoom(room);
                     exist.setDepartment(dept);
+                    exist.setDoctorName(doctor);
                     em.persist(exist);
                 }
                 pm.setAdmissionModel(exist);

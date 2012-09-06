@@ -34,8 +34,8 @@ public final class SqlMiscDao extends SqlDaoBean {
     // 入院中の患者を検索する
     public List<AdmissionModel> getInHospitalPatients(Date date) {
         
-        final String sql = "select TP.ptnum, TN.brmnum, TN.nyuinka, TN.nyuinymd from tbl_ptnyuinrrk TN "
-                + "inner join tbl_ptnum TP on TP.ptid = TN.ptid "
+        final String sql = "select TP.ptnum, TN.brmnum, TN.nyuinka, TN.nyuinymd , TN.drcd1 "
+                + "from tbl_ptnyuinrrk TN inner join tbl_ptnum TP on TP.ptid = TN.ptid "
                 + "where TN.tennyuymd <= ? and TN.tenstuymd <= ? and TN.hospnum = ?";
         
         SimpleDateFormat frmt = new SimpleDateFormat("yyyyMMdd");
@@ -61,11 +61,13 @@ public final class SqlMiscDao extends SqlDaoBean {
                 String room = getRoomNumber(rs.getString(2));
                 String dept = getDepartmentDesc(rs.getString(3));
                 Date aDate = frmt.parse(rs.getString(4));
+                String doctor = getOrcaStaffName(rs.getString(5));
                 AdmissionModel model = new AdmissionModel();
                 model.setPatientId(patientId);
                 model.setRoom(room);
                 model.setDepartment(dept);
                 model.setStarted(aDate);
+                model.setDoctorName(doctor);
                 ret.add(model);
             }
 
@@ -82,6 +84,11 @@ public final class SqlMiscDao extends SqlDaoBean {
         }
 
         return ret;
+    }
+    
+    private String getOrcaStaffName(String code) {
+        String staffName = SyskanriInfo.getInstance().getOrcaStaffName(code);
+        return staffName;
     }
 
     private String getRoomNumber(String str) {

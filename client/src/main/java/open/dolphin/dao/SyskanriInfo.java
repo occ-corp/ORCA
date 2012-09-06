@@ -6,10 +6,7 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import open.dolphin.project.Project;
 
 /**
@@ -27,11 +24,14 @@ public class SyskanriInfo extends SqlDaoBean {
     
     private int hospNum;
     
+    // 施設基準でflagが立っている物の番号リスト, 1006
     private List<Integer> syskanri1006;
-    
+    // 病床数, 1001
     private int bedNum;
-    
+    // ORCAに登録されている診療科IDと診療科名のマップ, 1005
     private Map<String, String> deptCodeDescMap;
+    // ORCAに登録されている職員IDと氏名のマップ, 1010
+    private Map<String, String> staffCodeNameMap;
     
     private static boolean initialized = false;
 
@@ -52,10 +52,13 @@ public class SyskanriInfo extends SqlDaoBean {
     private void initialize() {
         syskanri1006 = new ArrayList<Integer>();
         deptCodeDescMap = new HashMap<String, String>();
+        staffCodeNameMap = new HashMap<String, String>();
+        
         initialized = setHospNum();
         initialized &= setSyskanri1006();
         initialized &= getSyskanri1001();
         initialized &= getSyskanri1005();
+        initialized &= getSyskanri1010();
     }
 
     
@@ -71,37 +74,9 @@ public class SyskanriInfo extends SqlDaoBean {
     public final int getHospNum() {
         return hospNum;
     }
-
-    public String getOrcaStaffCode(String userName) {
-        
-        String orcaStaffCode = "";
-        
-        final String sql = "select kbncd, kanritbl from tbl_syskanri where kanricd = '1010'";
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            while(rs.next()) {
-                String kbncd = rs.getString(1);
-                String orcaUserName = rs.getString(2).substring(0, 16).trim();
-                if (userName.equals(orcaUserName)) {
-                    orcaStaffCode = kbncd.trim();
-                    break;
-                }
-            }
-            rs.close();
-        } catch (Exception e) {
-            processError(e);
-        } finally {
-            closeStatement(st);
-            closeConnection(con);
-        }
-        
-        return orcaStaffCode;
-    }
+    
+    
+//============================================================================//
     
     // 有床か無床か
     public boolean hasBed() {
@@ -118,10 +93,36 @@ public class SyskanriInfo extends SqlDaoBean {
         return deptCodeDescMap.get(code);
     }
 
+    // 施設基準が設定されているかどうかを返す
     public boolean getSyskanriFlag(int code) {
         return syskanri1006.contains(code);
     }
 
+    // ORCA職員IDから名前を取得する
+    public String getOrcaStaffName(String code) {
+        return staffCodeNameMap.get(code);
+    }
+    
+    // ORCA職員名から職員IDを取得する
+    public String getOrcaStaffCode(String userName) {
+        
+        String orcaStaffCode = "";
+        
+        if (userName == null || userName.isEmpty()) {
+            return orcaStaffCode;
+        }
+        
+        for(Iterator itr = staffCodeNameMap.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry entry = (Map.Entry) itr.next();
+            String value = (String) entry.getValue();
+            if (userName.equals(value)) {
+                orcaStaffCode = (String) entry.getKey();
+                break;
+            }
+        }
+        
+        return orcaStaffCode;
+    }
     
 //============================================================================//
     
@@ -278,6 +279,42 @@ public class SyskanriInfo extends SqlDaoBean {
                 // 診療科名を取得
                 String value = map.get("SYS-1005-SRYKANAME");
                 deptCodeDescMap.put(kbncd, value);
+            } catch (UnsupportedEncodingException ex) {
+                success = false;
+                break;
+            } catch (IOException ex) {
+                success = false;
+                break;
+            }
+        }
+        return success;
+    }
+    
+    // ORCAの職員情報を取得する
+    private boolean getSyskanri1010() {
+        
+        boolean success = true;
+        final String kanricd = "1010";
+        
+        List<KanriTblModel> list = getKanriTblModel(kanricd);
+        if (list.isEmpty()) {
+            return false;
+        }
+        
+        // CPSKxxx.csvを読み込むIncReaderを準備する
+        IncReader reader = new IncReader(kanricd, orcaVer);
+        
+        for (KanriTblModel model : list) {
+            
+            String kbncd = model.getKbncd();
+            String kanritbl = model.getKanritbl();
+            
+            try {
+                // CPSKxxxx.csvからカラム名とデータ位置・データ長のマップを取得する
+                Map<String, String> map = reader.getMap(kanritbl);
+                // 職員名を取得
+                String value = map.get("SYS-1010-NAME");
+                staffCodeNameMap.put(kbncd, value);
             } catch (UnsupportedEncodingException ex) {
                 success = false;
                 break;

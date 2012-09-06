@@ -11,7 +11,7 @@ import open.dolphin.client.ClientContext;
  */
 public class AdmissionListView extends JPanel {
     
-    private JButton kutuBtn;
+    private JButton updateBtn;
     private JLabel infoLbl;
     private JTable table;
 
@@ -20,10 +20,10 @@ public class AdmissionListView extends JPanel {
         JPanel panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
-        kutuBtn = new JButton();
-        kutuBtn.setIcon(ClientContext.getImageIcon("kutu01.gif"));
-        kutuBtn.setAlignmentY(BOTTOM_ALIGNMENT);
-        panel.add(kutuBtn);
+        updateBtn = new JButton();
+        updateBtn.setIcon(ClientContext.getImageIcon("ref_241.gif"));
+        updateBtn.setAlignmentY(BOTTOM_ALIGNMENT);
+        panel.add(updateBtn);
 
         infoLbl = new JLabel();
         infoLbl.setFont(new Font("Lucida Grande", 0, 10));
@@ -39,8 +39,8 @@ public class AdmissionListView extends JPanel {
         this.add(scroll, BorderLayout.CENTER);
     }
 
-    public JButton getKutuBtn() {
-        return kutuBtn;
+    public JButton getUpdateBtn() {
+        return updateBtn;
     }
 
     public JTable getTable() {
