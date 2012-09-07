@@ -40,6 +40,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final String FEV_SHAREPATH = "fevSharePath";
     public static final String USE_FEV = "useFev";
     public static final String FEV40_PATH = "fev40Path";
+    public static final String USE_WINE = "useWine";
+    public static final String WINE_PATH = "winePath";
     public static final String SEND_PATIENT_INFO = "sendPatientInfo";
     public static final String PVT_ON_SERVER = "pvtOnServer";
     public static final String FEV_ON_SERVER = "fevOnServer";
@@ -78,6 +80,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final int DEFAULT_LBLPRT_PORT = 9100;
     public static final boolean DEFAULT_USEFEV = false;
     public static final String DEFAULT_FEV40_PATH = "C:\\Program Files\\Fukuda Denshi\\ECG Viewer FEV-40\\FEV-40.EXE";
+    public static final String DEFAULT_WINE_PATH = "/opt/local/bin/wine";
+    public static final boolean DEFAULT_USE_WINE = false;
     public static final boolean DEFAULT_SENDPATIENTINFO = false;
     public static final String DEFAULT_SHAREPATH = null;
     public static final boolean DEFAULT_FOLLOW_MEDICOM = true;
@@ -119,12 +123,17 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     private JTextField tf_lblPrtAddress;
     private JTextField tf_lblPrtPort;
     private JCheckBox cb_UseFev;
+    private JCheckBox cb_UseWine;
     private JCheckBox cb_SendPatientInfo;
     private JCheckBox cb_Yakujo;
     private JCheckBox cb_Santei;
     private JButton btn_openFEV;
+    private JButton btn_openWine;
     private JTextField tf_fevSharePath;
     private JTextField tf_fev40Path;
+    private JTextField tf_winePath;
+    private JLabel lbl_useWine;
+    private JLabel lbl_winePath;
     private JLabel lbl_fev40Path;
     private JRadioButton rb_inMed;
     private JRadioButton rb_exMed;
@@ -218,6 +227,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         String programFolder = ClientContext.isWin()
                 ? System.getenv("PROGRAMFILES")
                 : "~/.wine/drive_c/Program Files/";
+        String userHome = System.getProperty("user.home");
 
         // ラベルプリンタ、FEV-40
         GridBagBuilder gbl = new GridBagBuilder("ラベルプリンタQL-580N設定");
@@ -259,7 +269,23 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(lbl_fev40Path, 0, row, GridBagConstraints.EAST);
         gbl.add(tf_fev40Path, 1, row, GridBagConstraints.CENTER);
         gbl.add(btn_openFEV, 2, row, GridBagConstraints.WEST);
-
+        
+        row++;
+        lbl_useWine = new JLabel("Wineを使う");
+        cb_UseWine = new JCheckBox();
+        gbl.add(cb_UseWine, 0, row, GridBagConstraints.EAST);
+        gbl.add(lbl_useWine, 1, row, GridBagConstraints.WEST);
+        
+        row++;
+        lbl_winePath = new JLabel("Wineのパス");
+        tf_winePath = GUIFactory.createTextField(20, null, null, null);
+        btn_openWine = new JButton("開く");
+        listener = new MyBtnActionListener(userHome, tf_winePath);
+        btn_openWine.addActionListener(listener);
+        gbl.add(lbl_winePath, 0, row, GridBagConstraints.EAST);
+        gbl.add(tf_winePath, 1, row, GridBagConstraints.CENTER);
+        gbl.add(btn_openWine, 2, row, GridBagConstraints.WEST);
+        
         row++;
         lbl_fev70 = new JLabel("PVT受信時、FEV-70に患者情報自動登録を行う");
         cb_SendPatientInfo = new JCheckBox();
@@ -267,7 +293,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(lbl_fev70, 1, row, GridBagConstraints.WEST);
 
         row++;
-        lbl_fevShareFolder = new JLabel("共有フォルダ:");
+        lbl_fevShareFolder = new JLabel("共有フォルダ");
         gbl.add(lbl_fevShareFolder, 0, row, GridBagConstraints.EAST);
         tf_fevSharePath = GUIFactory.createTextField(20, null, null, null);
         gbl.add(tf_fevSharePath, 1, row, GridBagConstraints.WEST);
@@ -614,6 +640,11 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         lbl_fev40Path.setEnabled(b);
         tf_fev40Path.setEnabled(b);
         btn_openFEV.setEnabled(b);
+        cb_UseWine.setEnabled(b);
+        lbl_winePath.setEnabled(b);
+        tf_winePath.setEnabled(b);
+        btn_openWine.setEnabled(b);
+        lbl_useWine.setEnabled(b);
     }
 
     private void controlPacs() {
@@ -702,6 +733,12 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         val = model.fev40Path;
         val = val != null ? val : "";
         tf_fev40Path.setText(val);
+        
+        // Wine
+        val = model.winePath;
+        val = val != null ? val : "";
+        tf_winePath.setText(val);
+        cb_UseWine.setSelected(model.useWine);
 
         // Use Fev
         cb_UseFev.setSelected(model.useFEV);
@@ -795,6 +832,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         model.fev40Path = tf_fev40Path.getText().trim();
         model.fevSharePath = tf_fevSharePath.getText().trim();
         model.sendPatientInfo = cb_SendPatientInfo.isSelected();
+        model.useWine = cb_UseWine.isSelected();
+        model.winePath = tf_winePath.getText().trim();
         // 薬剤情報
         model.followMedicom = cb_Yakujo.isSelected();
         // 算定
@@ -848,6 +887,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         private boolean sendPatientInfo;
         private String fevSharePath;
         private String fev40Path;
+        private boolean useWine;
+        private String winePath;
         private boolean followMedicom;
         private boolean santeiCheck;
         private boolean defaultExMed;
@@ -886,6 +927,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             sendPatientInfo = Project.getBoolean(SEND_PATIENT_INFO, DEFAULT_SENDPATIENTINFO);
             fevSharePath = Project.getString(FEV_SHAREPATH, DEFAULT_SHAREPATH);
             fev40Path = Project.getString(FEV40_PATH, DEFAULT_FEV40_PATH);
+            useWine = Project.getBoolean(USE_WINE, DEFAULT_USE_WINE);
+            winePath = Project.getString(WINE_PATH, DEFAULT_WINE_PATH);
             // 薬剤情報
             followMedicom = Project.getBoolean(FOLLOW_MEDICOM, DEFAULT_FOLLOW_MEDICOM);
             // 算定
@@ -936,6 +979,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             Project.setBoolean(SEND_PATIENT_INFO, sendPatientInfo);
             Project.setString(FEV_SHAREPATH, fevSharePath);
             Project.setString(FEV40_PATH, fev40Path);
+            Project.setBoolean(USE_WINE, useWine);
+            Project.setString(WINE_PATH, winePath);
             Project.setBoolean(FOLLOW_MEDICOM, followMedicom);
             Project.setBoolean(SANTEI_CHECK, santeiCheck);
             Project.setBoolean(RP_OUT, defaultExMed);

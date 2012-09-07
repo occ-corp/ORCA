@@ -1,6 +1,7 @@
 
 package open.dolphin.client;
 
+import java.io.File;
 import java.io.IOException;
 import javax.swing.JOptionPane;
 import open.dolphin.project.Project;
@@ -14,10 +15,9 @@ import open.dolphin.setting.MiscSettingPanel;
 
 public class ShowEcgViewer {
     
-    private static final String WINE_KEY = "~/.wine/";
-    private static final String USER_HOME = "~";
-    private static final String WINE_PATH = "/opt/local/bin/wine";
-
+    private static final String TILDE_SLASH = "~/";
+    private static final int TILDE_SLASH_LENGTH = TILDE_SLASH.length();
+    
     public  ShowEcgViewer() {
     }
 
@@ -25,21 +25,27 @@ public class ShowEcgViewer {
 
         String id = context.getPatient().getPatientId();
         String fev40Path = Project.getString(MiscSettingPanel.FEV40_PATH, MiscSettingPanel.DEFAULT_FEV40_PATH);
-
+        String winePath = Project.getString(MiscSettingPanel.WINE_PATH, MiscSettingPanel.DEFAULT_WINE_PATH);
+        boolean useWine = Project.getBoolean(MiscSettingPanel.USE_WINE, MiscSettingPanel.DEFAULT_USE_WINE);
+        String userHome = System.getProperty("user.home");
+        
         if (fev40Path == null || fev40Path.trim().equals("")) {
             return;
         }
-
+        
+        if (fev40Path.startsWith(TILDE_SLASH)) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(userHome);
+            sb.append(File.separator);
+            sb.append(fev40Path.substring(TILDE_SLASH_LENGTH));
+            fev40Path = sb.toString();
+        }
 
         try {
-            String[] cmd;
-            if (fev40Path.contains(WINE_KEY)) {
-                String home = System.getProperty("user.home");
-                fev40Path = fev40Path.replace(USER_HOME, home);
-                cmd = new String[]{WINE_PATH, fev40Path, id};
-            } else {
-                cmd = new String[]{fev40Path, id};
-            }
+            String[] cmd = useWine
+                    ? new String[]{winePath, fev40Path, id}
+                    : new String[]{fev40Path, id};
+
             new ProcessBuilder(cmd).start();
             
         } catch (IOException ex) {
