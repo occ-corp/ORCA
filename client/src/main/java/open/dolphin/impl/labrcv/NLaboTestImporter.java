@@ -614,10 +614,6 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    protected void postStateChange() {
-    }
-    
-    @Override
-    public void processStateChange(StateMsgModel msg) {
+    public void stateChanged(StateMsgModel msg) {
     }
 }

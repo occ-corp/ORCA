@@ -162,9 +162,6 @@ public class Dolphin implements MainWindow {
 
         // 排他処理用のUUIDを決める
         clientUUID = UUID.randomUUID().toString();
-
-        // ChartStateListenerを開始する
-        StateChangeMediator.getInstance().start();
 //masuda$
 
         //------------------------------
@@ -563,6 +560,11 @@ public class Dolphin implements MainWindow {
 //                }
 //            });
 //        }
+        
+
+        // ChartStateListenerを開始する
+        StateChangeMediator.getInstance().start();
+        
         windowSupport.getFrame().setVisible(true);
     }
 

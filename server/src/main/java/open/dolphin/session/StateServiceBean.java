@@ -31,6 +31,11 @@ public class StateServiceBean {
     public void notifyEvent(StateMsgModel msg) {
 
         String fid = msg.getFacilityId();
+        if (fid == null) {
+            logger.warning("Facility id is null.");
+            return;
+        }
+        
         FacilityContext context = contextHolder.getFacilityContext(fid);
         int currentId = context.getMsgCounter();
         msg.setId(currentId);
@@ -43,13 +48,16 @@ public class StateServiceBean {
             for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
                 AsyncContext ac = itr.next();
                 String acFid = (String) ac.getRequest().getAttribute("fid");
-                if (fid != null && fid.equals(acFid)) {
+                String acUUID = (String) ac.getRequest().getAttribute("clientUUID");
+                String issuerUUID = msg.getIssuerUUID();
+                // 同一施設かつStateMsgModelの発行者でないクライアントに通知する
+                if (fid.equals(acFid) && !issuerUUID.equals(acUUID)) {
                     itr.remove();
                     try {
                         ac.getRequest().setAttribute("currentId", String.valueOf(currentId));
                         ac.dispatch("/openSource/chartState/currentId");
                     } catch (Exception ex) {
-                        //logger.warning(ex.toString());
+                        logger.warning("Exception in ac.dispatch.");
                     }
                     int id = (Integer) ac.getRequest().getAttribute("id");
                     minId = Math.min(minId, id);
@@ -57,7 +65,6 @@ public class StateServiceBean {
             }
             // ゴミ掃除
             context.cleanUpMsgList(minId);
-            System.out.println("Message List size = " + context.getStateMsgList().size());
         }
     }
     
@@ -66,7 +73,7 @@ public class StateServiceBean {
         return context.getPvtList();
     }
     
-    public List<StateMsgModel> getChartStateMsgList(String fid, int currentId) {
+    public List<StateMsgModel> getStateMsgList(String fid, int currentId) {
         FacilityContext context = contextHolder.getFacilityContext(fid);
         List<StateMsgModel> list = new ArrayList<StateMsgModel>();
         for (StateMsgModel msg : context.getStateMsgList()) {
@@ -76,6 +83,11 @@ public class StateServiceBean {
         }
         return list;
     }
+    
+    public int getMsgCounter(String fid) {
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        return context.getMsgCounter();
+     }
     
     /**
      * Pvtの情報を更新する

@@ -3,6 +3,7 @@ package open.dolphin.delegater;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.MultivaluedMap;
+import open.dolphin.client.Dolphin;
 import open.dolphin.util.HashUtil;
 
 /**
@@ -12,19 +13,26 @@ import open.dolphin.util.HashUtil;
  */
 public class JerseyClient {
 
-    private static final JerseyClient instance = new JerseyClient();
+    private static final JerseyClient instance;
     private static final String USER_NAME = "userName";
     private static final String PASSWORD = "password";
+    private static final String CLIENT_UUID = "clientUUID";
+    private static final int TIMEOUT1 = 30;
+    
+    private String clientUUID;
     private String baseURI;
     private String userName;
     private String password;
     
     private WebResource webResource;
     private WebResource webResource2;
-
-    private static final int TIMEOUT1 = 30;
+    
+    static {
+        instance = new JerseyClient();
+    }
 
     private JerseyClient() {
+        clientUUID = Dolphin.getInstance().getClientUUID();
     }
 
     public static JerseyClient getInstance() {
@@ -74,6 +82,6 @@ public class JerseyClient {
     
     // pvt同期用のクライアント
     public WebResource.Builder getAsyncResource(String path) {
-        return webResource2.path(path).header(USER_NAME, userName).header(PASSWORD, password);
+        return webResource2.path(path).header(USER_NAME, userName).header(PASSWORD, password).header(CLIENT_UUID, clientUUID);
     }
 }

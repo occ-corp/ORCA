@@ -33,27 +33,19 @@ public abstract class AbstractStateListener {
     }
     
     // サーバーからの状態通知を処理する
-    public final void stateChanged(List<StateMsgModel> msgList) {
-        
+    public final void processMessage(List<StateMsgModel> msgList) {
+        // 自クライアント以外の変更が送られてくる
         if (msgList == null || msgList.isEmpty()) {
             return;
         }
         for (StateMsgModel msg : msgList) {
-            // 自クライアントは更新済みなのでそれ以外のもののみ処理する
-            if (!clientUUID.equals(msg.getIssuerUUID())) {
-                processStateChange(msg);
-            }
+            stateChanged(msg);
         }
-        // 更新後の処理
-        postStateChange();
     }
     
     // 変更処理
-    protected abstract void processStateChange(StateMsgModel msg);
-    
-    // 更新後の処理
-    protected abstract void postStateChange(); 
-    
+    protected abstract void stateChanged(StateMsgModel msg);
+
     // FakePatientVisitModelを作る
     protected PatientVisitModel createFakePvt(PatientModel pm) {
 

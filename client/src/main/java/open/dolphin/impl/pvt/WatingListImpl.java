@@ -845,12 +845,12 @@ public class WatingListImpl extends AbstractMainComponent {
                     // 担当分のみ表示
                     JCheckBoxMenuItem item2 = new JCheckBoxMenuItem(pop6);
                     contextMenu.add(item2);
-                    item2.setSelected(Project.getBoolean(ASSIGNED_ONLY, false));
+                    item2.setSelected(isAssignedOnly());
                     item2.addActionListener(new ActionListener() {
 
                         @Override
                         public void actionPerformed(ActionEvent ae) {
-                            boolean now = Project.getBoolean(ASSIGNED_ONLY, false);
+                            boolean now = isAssignedOnly();
                             Project.setBoolean(ASSIGNED_ONLY, !now);
                             filterPatients();
                         }
@@ -1033,7 +1033,7 @@ public class WatingListImpl extends AbstractMainComponent {
         msg.setParamFromPvt(pvtModel);
         msg.setIssuerUUID(clientUUID);
         msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
-        processStateChange(msg);
+        stateChanged(msg);
         
         SwingWorker worker = new SwingWorker<Boolean, Void>() {
 
@@ -1359,12 +1359,10 @@ public class WatingListImpl extends AbstractMainComponent {
     
     // 受付番号を振り、フィルタリングしてtableModelに設定する
     private void filterPatients() {
-        
-        boolean assignedOnly = Project.getBoolean(ASSIGNED_ONLY, false);
-        
+
         List<PatientVisitModel> list;
         
-        if (assignedOnly) {
+        if (isAssignedOnly()) {
             list = new ArrayList<PatientVisitModel>();
             for (PatientVisitModel pvt : pvtList) {
                 String doctorId = pvt.getDoctorId();
@@ -1383,22 +1381,18 @@ public class WatingListImpl extends AbstractMainComponent {
         pvtTableModel.setDataProvider(list);
         //pvtTable.repaint();
     }
+    
+    private boolean isAssignedOnly() {
+        return Project.getBoolean(ASSIGNED_ONLY, false);
+    }
 
     // ChartStateListener
+    // 待合リストを更新する
     @Override
-    protected void postStateChange() {
-        // PvtInfoを更新する
-        countPvt();
-        updatePvtInfo();
-    }
-    
-     // 待合リストを更新する
-    @Override
-    public void processStateChange(StateMsgModel msg) {
+    public void stateChanged(StateMsgModel msg) {
 
         StateMsgModel.CMD command = msg.getCommand();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();
-        boolean assignedOnly = Project.getBoolean(ASSIGNED_ONLY, false);
 
         switch (command) {
             case PVT_ADD:
@@ -1406,7 +1400,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 // pvtListに追加
                 pvtList.add(model);
                 // 担当でないならばテーブルに追加しない
-                if (assignedOnly) {
+                if (isAssignedOnly()) {
                     String doctorId = model.getDoctorId();
                     if (doctorId != null && !doctorId.equals(orcaId) && !doctorId.equals(UN_ASSIGNED_ID)) {
                         break;
@@ -1526,5 +1520,9 @@ public class WatingListImpl extends AbstractMainComponent {
                 }
                 break;
         }
+        
+        // PvtInfoを更新する
+        countPvt();
+        updatePvtInfo();
     }
 }

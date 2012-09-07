@@ -24,6 +24,8 @@ public class StateResource extends AbstractResource {
     
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
     
+    private static final String CLIENT_UUID = "clientUUID";
+    
     @Inject
     private StateServiceBean stateServiceBean;
     
@@ -33,20 +35,22 @@ public class StateResource extends AbstractResource {
     @Context
     private HttpServletRequest servletReq;
     
-    
+
     @GET
     @Path("subscribe/{id}")
     public void listenChartState(@PathParam("id") String id) {
 
         String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String clientUUID = servletReq.getHeader("clientUUID");
+        
         final AsyncContext ac = servletReq.startAsync();
         // timeoutを設定
         ac.setTimeout(asyncTimeout);
-        // requestにfidとmsgIdを記録しておく
+        // requestにfid, msgIdを記録しておく
         ac.getRequest().setAttribute("fid", fid);
         ac.getRequest().setAttribute("id", Integer.valueOf(id));
+        ac.getRequest().setAttribute(CLIENT_UUID, clientUUID);
         contextHolder.addAsyncContext(ac);
-        //System.out.println("AsyncContextHolder size = " + contextHolder.getAsyncContextList().size());
 
         ac.addListener(new AsyncListener() {
 
@@ -104,12 +108,12 @@ public class StateResource extends AbstractResource {
     @GET
     @Path("msgList/{param}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getChartStateMsgList(@PathParam("param") String param){
+    public String getStateMsgList(@PathParam("param") String param){
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         int currentId = Integer.valueOf(param);
         
-        List<StateMsgModel> list = stateServiceBean.getChartStateMsgList(fid, currentId);
+        List<StateMsgModel> list = stateServiceBean.getStateMsgList(fid, currentId);
 
         String json = getConverter().toJson(list);
         debug(json);
@@ -123,8 +127,18 @@ public class StateResource extends AbstractResource {
     @Path("currentId")
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String getCurrentId() {
-        String currentId = (String) servletReq.getAttribute("currentId");
-        return currentId;
+        // ac.dispatchならattributeにfidが設定されている
+        String fid = (String) servletReq.getAttribute("fid");
+        return (String) servletReq.getAttribute("currentId");
+    }
+    
+    @GET
+    @Path("initialId")
+    @Produces(MEDIATYPE_TEXT_UTF8)
+    public String getInitialId() {
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        int msgCounter = stateServiceBean.getMsgCounter(fid);
+        return String.valueOf(msgCounter);
     }
 
     @Override

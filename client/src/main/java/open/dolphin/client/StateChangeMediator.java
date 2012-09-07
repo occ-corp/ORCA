@@ -19,7 +19,7 @@ public class StateChangeMediator {
     private List<AbstractStateListener> listeners;
     
     // スレッド
-    private ChartStateListenTask listenTask;
+    private StateListenTask listenTask;
     private Thread thread;
     
     // 状態変化を各listenerに通知するタスク
@@ -33,6 +33,7 @@ public class StateChangeMediator {
 
     private StateChangeMediator() {
         clientUUID = Dolphin.getInstance().getClientUUID();
+        listeners = new ArrayList<AbstractStateListener>();
     }
 
     public static StateChangeMediator getInstance() {
@@ -55,9 +56,9 @@ public class StateChangeMediator {
     
     
     public void start() {
-        listeners = new ArrayList<AbstractStateListener>();
+
         exec = Executors.newSingleThreadExecutor();
-        listenTask = new ChartStateListenTask();
+        listenTask = new StateListenTask();
         thread = new Thread(listenTask, "ChartState Listen Task");
         thread.start();
     }
@@ -74,11 +75,16 @@ public class StateChangeMediator {
     }
 
     // Commetでサーバーと同期するスレッド
-    private class ChartStateListenTask implements Runnable {
+    private class StateListenTask implements Runnable {
         
-        private int currentId = 0;
+        private int currentId;
         
-        private boolean isRunning = true;
+        private boolean isRunning;
+        
+        private StateListenTask() {
+            isRunning = true;
+            currentId = StateDelegater.getInstance().getInitialId();
+        }
 
         private void stop() {
             isRunning = false;
@@ -89,7 +95,7 @@ public class StateChangeMediator {
             
             while (isRunning) {
                 try {
-                    String str = StateDelegater.getInstance().getCurrentId(currentId);
+                    String str = StateDelegater.getInstance().subscribe(currentId);
                     currentId = Integer.valueOf(str);
                     exec.execute(new OnMessageTask(currentId));
                 } catch (Exception e) {
@@ -112,7 +118,7 @@ public class StateChangeMediator {
         public void run() {
             // まずは自クライアントを更新
             for (AbstractStateListener listener : listeners) {
-                listener.processStateChange(msg);
+                listener.stateChanged(msg);
             }
             // サーバーに更新を通知
             StateDelegater del = StateDelegater.getInstance();
@@ -138,7 +144,7 @@ public class StateChangeMediator {
             
             // 各リスナーで更新処理をする
             for (AbstractStateListener listener : listeners) {
-                listener.stateChanged(msgList);
+                listener.processMessage(msgList);
             }
         }
     }

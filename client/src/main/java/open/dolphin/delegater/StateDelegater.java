@@ -57,7 +57,11 @@ public class StateDelegater extends BusinessDelegater {
         int status = response.getStatus();
         String enityStr = response.getEntity(String.class);
         debug(status, enityStr);
-
+        
+        if (status != HTTP200) {
+            return -1;
+        }
+        
         return Integer.parseInt(enityStr);
     }
     
@@ -98,7 +102,26 @@ public class StateDelegater extends BusinessDelegater {
         return list;
     }
     
-    public String getCurrentId(int id) {
+    public int getInitialId() {
+        
+        String path = RES_CS + "initialId";
+        
+        ClientResponse response = getResource(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .get(ClientResponse.class);
+        
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return 0;
+        }
+        
+        return Integer.valueOf(entityStr);
+    }
+    
+    public String subscribe(int id) {
         
         String path = POLLING_PATH + String.valueOf(id);
         String ret = JerseyClient.getInstance()

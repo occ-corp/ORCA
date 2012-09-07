@@ -14,7 +14,6 @@ import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ClientContext;
-import open.dolphin.client.Dolphin;
 import open.dolphin.client.StateChangeMediator;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
@@ -633,11 +632,7 @@ public class AdmissionList extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    protected void postStateChange() {
-    }
-    
-    @Override
-    public void processStateChange(StateMsgModel msg) {
+    public void stateChanged(StateMsgModel msg) {
 
     }
 }
