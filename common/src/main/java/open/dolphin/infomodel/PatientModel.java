@@ -179,6 +179,7 @@ public class PatientModel extends InfoModel {
     }
     
     // 入院モデル
+    // bi-directional references, @JsonIdentityInfo added to PatientModel
     @Transient
     private AdmissionModel admission;
     public void setAdmissionModel(AdmissionModel model) {

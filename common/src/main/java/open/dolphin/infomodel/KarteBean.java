@@ -1,6 +1,8 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.Date;
 import java.util.List;
@@ -13,6 +15,7 @@ import javax.persistence.*;
  * @author Minagawa,Kazushi
  * @author modified by masuda, Masuda Naika
  */
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
 @Entity
 @Table(name = "d_karte")
 public class KarteBean extends InfoModel {
@@ -54,11 +57,11 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<DocInfoModel> docInfoList;
 
-    // bi-directional references, added @JsonIdentityInfo annotation to PatientMemoModel
+    // bi-directional references, @JsonIdentityInfo added to KarteBean
     @Transient
     private List<PatientMemoModel> memoList;
     
-    // bi-directional references, added @JsonIdentityInfo annotation to AppointModel
+    // bi-directional references, @JsonIdentityInfo added to KarteBean
     @Transient
     private List<AppointmentModel> appoList;
 

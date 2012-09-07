@@ -103,19 +103,21 @@ public class AdmissionList extends AbstractMainComponent {
 
     @Override
     public void stop() {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < columnSpecs.size(); i++) {
-            ColumnSpec cs = columnSpecs.get(i);
-            cs.setWidth(table.getColumnModel().getColumn(i).getPreferredWidth());
-            sb.append(cs.getName()).append(",");
-            sb.append(cs.getMethod()).append(",");
-            sb.append(cs.getCls()).append(",");
-            sb.append(cs.getWidth()).append(",");
-        }
-        sb.setLength(sb.length() - 1);
-        String line = sb.toString();
-        Project.setString(COLUMN_SPEC_NAME, line);
         
+        if (columnSpecs != null) {
+            StringBuilder sb = new StringBuilder();
+            for (int i = 0; i < columnSpecs.size(); i++) {
+                ColumnSpec cs = columnSpecs.get(i);
+                cs.setWidth(table.getColumnModel().getColumn(i).getPreferredWidth());
+                sb.append(cs.getName()).append(",");
+                sb.append(cs.getMethod()).append(",");
+                sb.append(cs.getCls()).append(",");
+                sb.append(cs.getWidth()).append(",");
+            }
+            sb.setLength(sb.length() - 1);
+            String line = sb.toString();
+            Project.setString(COLUMN_SPEC_NAME, line);
+        }
         // ChartStateListenerから除去する
         ChartStateListener.getInstance().removeListener(this);
     }

@@ -28,7 +28,6 @@ public class AdmissionModel implements IInfoModel {
     
     private String doctor;
     
-    // bi-directional references, added @JsonIdentityInfo annotation to PatientModel
     @ManyToOne
     @JoinColumn(name="patient_id")
     private PatientModel patient;
