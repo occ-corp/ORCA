@@ -43,7 +43,6 @@ public class WatingListImpl extends AbstractMainComponent {
     private static final int INDEX_MODIFY_SEND_ICON = 1;
     // 担当医未定の ORCA 医師ID
     private static final String UN_ASSIGNED_ID = "18080";
-    private String orcaId;
     
     // JTableレンダラ用の男性カラー
     private static final Color MALE_COLOR = new Color(230, 243, 243);
@@ -284,9 +283,8 @@ public class WatingListImpl extends AbstractMainComponent {
         timeFormatter = new SimpleDateFormat("HH:mm");
         
         executor = Executors.newSingleThreadScheduledExecutor();
-        clientUUID = Dolphin.getInstance().getClientUUID();
+        
         pvtDelegater = PVTDelegater.getInstance();
-        orcaId = Project.getUserModel().getOrcaId();
     }
     
     /**
@@ -841,7 +839,7 @@ public class WatingListImpl extends AbstractMainComponent {
                         EventHandler.create(ActionListener.class, WatingListImpl.this, "switchAgeDisplay"));
 
                 // 担当分のみ表示: getOrcaId() != nullでメニュー
-                if (Project.getUserModel().getOrcaId() != null) {
+                if (orcaId != null) {
                     contextMenu.addSeparator();
 
                     // 担当分のみ表示
@@ -1330,20 +1328,19 @@ public class WatingListImpl extends AbstractMainComponent {
     // pvtを全取得する
     private void getFullPvt() {
 
-        SwingWorker worker = new SwingWorker<PvtListModel, Void>() {
+        SwingWorker worker = new SwingWorker<List<PatientVisitModel>, Void>() {
 
             @Override
-            protected PvtListModel doInBackground() throws Exception {
+            protected List<PatientVisitModel> doInBackground() throws Exception {
                 setBusy(true);
                 // サーバーからpvtListを取得する
-                return pvtDelegater.getPvtListModel();
+                return pvtDelegater.getPvtList();
             }
 
             @Override
             protected void done() {
                 try {
-                    PvtListModel listModel = get();
-                    pvtList = listModel.getPvtList();
+                    pvtList = get();
 
                 } catch (InterruptedException ex) {
                 } catch (ExecutionException ex) {

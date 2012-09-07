@@ -23,7 +23,7 @@ public class ServletStartup {
 private static final Logger logger = Logger.getLogger(ServletStartup.class.getSimpleName());
 
     @Inject
-    private StateServiceBean chartStateService;
+    private StateServiceBean stateServiceBean;
     
     @Inject
     private Updater updater;
@@ -31,7 +31,7 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     @PostConstruct
     public void init() {
         updater.start();
-        chartStateService.initializePvtList();
+        stateServiceBean.initializePvtList();
     }
 
     @PreDestroy
@@ -41,7 +41,7 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     // 日付が変わったらpvtListをクリアしクライアントに伝える
     @Schedule(hour="0", minute="0", persistent=false)
     public void dayChange() {
-        chartStateService.renewPvtList();
+        stateServiceBean.renewPvtList();
     }
     @Timeout
     public void timeout(Timer timer) {

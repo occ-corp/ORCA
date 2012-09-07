@@ -61,9 +61,6 @@ public class AdmissionList extends AbstractMainComponent {
     // ネットワークアイコン
     private static final ImageIcon NETWORK_ICON = ClientContext.getImageIcon("ntwrk_16.gif");
     
-    // このクライアントのUUID
-    private String clientUUID;
-    
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "admissionTable.column.spec";
     // カラム仕様リスト
@@ -208,8 +205,6 @@ public class AdmissionList extends AbstractMainComponent {
                 stateColumn = i;
             }
         }
-
-        clientUUID = Dolphin.getInstance().getClientUUID();
     }
     
     /**

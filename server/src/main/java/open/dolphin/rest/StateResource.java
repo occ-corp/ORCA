@@ -18,14 +18,14 @@ import open.dolphin.session.StateServiceBean;
  * @author masuda
  */
 @Path("chartState")
-public class ChartStateResource extends AbstractResource {
+public class StateResource extends AbstractResource {
     
     private static final boolean debug = false;
     
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
     
     @Inject
-    private StateServiceBean chartStateService;
+    private StateServiceBean stateServiceBean;
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -96,7 +96,7 @@ public class ChartStateResource extends AbstractResource {
         // クライアントから送られてきたmsgにfidを設定
         msg.setFacilityId(fid);
         
-        int cnt = chartStateService.updateChartState(msg);
+        int cnt = stateServiceBean.updateChartState(msg);
 
         return String.valueOf(cnt);
     }
@@ -109,7 +109,7 @@ public class ChartStateResource extends AbstractResource {
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         int currentId = Integer.valueOf(param);
         
-        List<StateMsgModel> list = chartStateService.getChartStateMsgList(fid, currentId);
+        List<StateMsgModel> list = stateServiceBean.getChartStateMsgList(fid, currentId);
 
         String json = getConverter().toJson(list);
         debug(json);

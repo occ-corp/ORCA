@@ -1,10 +1,14 @@
 package open.dolphin.delegater;
 
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import open.dolphin.infomodel.*;
+import open.dolphin.infomodel.HealthInsuranceModel;
+import open.dolphin.infomodel.PVTHealthInsuranceModel;
+import open.dolphin.infomodel.PatientModel;
+import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.util.BeanUtils;
 
 /**
@@ -73,11 +77,11 @@ public class PVTDelegater extends BusinessDelegater {
         return 1;
     }
 
-    public PvtListModel getPvtListModel() {
+    public List<PatientVisitModel> getPvtList() {
 
         StringBuilder sb = new StringBuilder();
         sb.append(RES_PVT);
-        sb.append("pvtListModel");
+        sb.append("pvtList");
         String path = sb.toString();
 
         ClientResponse response = getResource(path, null)
@@ -92,11 +96,11 @@ public class PVTDelegater extends BusinessDelegater {
             return null;
         }
 
-        PvtListModel model = (PvtListModel)
-                getConverter().fromJson(entityStr, PvtListModel.class);
+        TypeReference typeRef = new TypeReference<List<PatientVisitModel>>(){};
+        List<PatientVisitModel> pvtList = (List<PatientVisitModel>)
+                getConverter().fromJson(entityStr, typeRef);
 
         // 保険をデコード
-        List<PatientVisitModel> pvtList = model.getPvtList();
         if (pvtList != null && !pvtList.isEmpty()) {
             for (PatientVisitModel pvt : pvtList) {
                 PatientModel pm = pvt.getPatientModel();
@@ -104,7 +108,7 @@ public class PVTDelegater extends BusinessDelegater {
             }
         }
 
-        return model;
+        return pvtList;
     }
 
     /**

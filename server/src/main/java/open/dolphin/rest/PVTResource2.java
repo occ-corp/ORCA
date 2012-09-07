@@ -1,13 +1,13 @@
 package open.dolphin.rest;
 
 import java.util.Collection;
+import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.PvtListModel;
 import open.dolphin.session.PVTServiceBean;
 import open.dolphin.session.StateServiceBean;
 
@@ -26,7 +26,7 @@ public class PVTResource2 extends AbstractResource {
     private PVTServiceBean pvtServiceBean;
     
     @Inject
-    private StateServiceBean chartStateService;
+    private StateServiceBean stateServiceBean;
     
     @Context
     private HttpServletRequest servletReq;
@@ -76,12 +76,12 @@ public class PVTResource2 extends AbstractResource {
     
 
     @GET
-    @Path("pvtListModel")
+    @Path("pvtList")
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getPvtListModel() {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        PvtListModel model = chartStateService.getPvtListModel(fid);
+        List<PatientVisitModel> model = stateServiceBean.getPvtList(fid);
         
         String json = getConverter().toJson(model);
         debug(json);

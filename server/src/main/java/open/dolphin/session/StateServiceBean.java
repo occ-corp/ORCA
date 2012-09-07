@@ -34,7 +34,7 @@ public class StateServiceBean {
         FacilityContext context = contextHolder.getFacilityContext(fid);
         int currentId = context.getMsgCounter();
         msg.setId(currentId);
-        context.getChartStateMsgList().add(msg);
+        context.getStateMsgList().add(msg);
         context.incrementMsgCounter();
 
         List<AsyncContext> acList = contextHolder.getAsyncContextList();
@@ -57,6 +57,7 @@ public class StateServiceBean {
             }
             // ゴミ掃除
             context.cleanUpMsgList(minId);
+            System.out.println("Message List size = " + context.getStateMsgList().size());
         }
     }
     
@@ -64,19 +65,11 @@ public class StateServiceBean {
         FacilityContext context = contextHolder.getFacilityContext(fid);
         return context.getPvtList();
     }
-
-    public PvtListModel getPvtListModel(String fid) {
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        PvtListModel model = new PvtListModel();
-        model.setCurrentId(context.getMsgCounter());
-        model.setPvtList(context.getPvtList());
-        return model;
-    }
     
     public List<StateMsgModel> getChartStateMsgList(String fid, int currentId) {
         FacilityContext context = contextHolder.getFacilityContext(fid);
         List<StateMsgModel> list = new ArrayList<StateMsgModel>();
-        for (StateMsgModel msg : context.getChartStateMsgList()) {
+        for (StateMsgModel msg : context.getStateMsgList()) {
             if (msg.getId() >= currentId) {
                 list.add(msg);
             }
@@ -255,7 +248,7 @@ public class StateServiceBean {
             pvtList.removeAll(toRemove);
             
             // ChartStateMsgListを初期化する
-            facilityContext.clearChartStateMsgList();
+            facilityContext.clearStateMsgList();
             
             // クライアントに伝える
             String fid = (String) entry.getKey();

@@ -3,8 +3,8 @@ package open.dolphin.mbean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import open.dolphin.infomodel.StateMsgModel;
 import open.dolphin.infomodel.PatientVisitModel;
+import open.dolphin.infomodel.StateMsgModel;
 
 /**
  * 施設の待合リストとChartStateMsgModelを保持するクラス
@@ -22,11 +22,11 @@ public class FacilityContext {
         pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
     }
     
-    public List<StateMsgModel> getChartStateMsgList() {
+    public List<StateMsgModel> getStateMsgList() {
         return chartStateMsgList;
     }
     
-    public void clearChartStateMsgList() {
+    public void clearStateMsgList() {
         chartStateMsgList.clear();
         msgCounter = 0;
     }
@@ -47,7 +47,7 @@ public class FacilityContext {
         
         List<StateMsgModel> toRemove = new ArrayList<StateMsgModel>();
         for(StateMsgModel msg : chartStateMsgList) {
-            if (msg.getId() < minId) {
+            if (msg.getId() <= minId) {
                 toRemove.add(msg);
             }
         }

@@ -16,9 +16,6 @@ public class StateChangeMediator {
     // このクライアントのUUID
     private String clientUUID;
 
-    // このクライアントが更新済みのStateMsgModelの番号
-    private int currentId;
-    
     private List<AbstractStateListener> listeners;
     
     // スレッド
@@ -41,7 +38,6 @@ public class StateChangeMediator {
     public static StateChangeMediator getInstance() {
         return instance;
     }
-
     
     public void addListener(AbstractStateListener listener) {
         listeners.add(listener);
@@ -79,8 +75,10 @@ public class StateChangeMediator {
 
     // Commetでサーバーと同期するスレッド
     private class ChartStateListenTask implements Runnable {
-
-        private boolean isRunning;
+        
+        private int currentId = 0;
+        
+        private boolean isRunning = true;
 
         private void stop() {
             isRunning = false;
@@ -88,8 +86,6 @@ public class StateChangeMediator {
         
         @Override
         public void run() {
-            
-            isRunning = true;
             
             while (isRunning) {
                 try {

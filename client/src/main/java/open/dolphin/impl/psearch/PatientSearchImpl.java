@@ -10,7 +10,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -39,7 +42,6 @@ import open.dolphin.util.StringTool;
  */
 public class PatientSearchImpl extends AbstractMainComponent {
 
-    //private int number = 10000;
     private final String NAME = "患者検索";
     private static final String[] COLUMN_NAMES = {"ID", "氏名", "カナ", "性別", "生年月日", "受診日"};
     private final String[] METHOD_NAMES = {"patientId", "fullName", "kanaName", "genderDesc", "ageBirthday", "pvtDateTrimTime"};
@@ -611,26 +613,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         if (canOpen(getSelectedPatinet())) {
 
             // 来院情報を生成する
-            PatientVisitModel pvt = new PatientVisitModel();
-            pvt.setId(0L);
-            //pvt.setNumber(number++);
-            pvt.setPatientModel(getSelectedPatinet());
-
-            //--------------------------------------------------------
-            // 受け付けを通していないのでログイン情報及び設定ファイルを使用する
-            // 診療科名、診療科コード、医師名、医師コード、JMARI
-            // 2.0
-            //---------------------------------------------------------
-            pvt.setDeptName(Project.getUserModel().getDepartmentModel().getDepartmentDesc());
-            pvt.setDeptCode(Project.getUserModel().getDepartmentModel().getDepartment());
-            pvt.setDoctorName(Project.getUserModel().getCommonName());
-            if (Project.getUserModel().getOrcaId()!=null) {
-                pvt.setDoctorId(Project.getUserModel().getOrcaId());
-            } else {
-                pvt.setDoctorId(Project.getUserModel().getUserId());
-            }
-            pvt.setJmariNumber(Project.getString(Project.JMARI_CODE));
-
+            PatientVisitModel pvt = createFakePvt(getSelectedPatinet());
             // カルテコンテナを生成する
             getContext().openKarte(pvt);
         }
@@ -657,38 +640,13 @@ public class PatientSearchImpl extends AbstractMainComponent {
     public void addAsPvt() {
 
         // 来院情報を生成する
-        PatientVisitModel pvt = new PatientVisitModel();
-        pvt.setId(0L);
-       // pvt.setNumber(number++);
-        pvt.setPatientModel(getSelectedPatinet());
-
-        //--------------------------------------------------------
-        // 受け付けを通していないのでログイン情報及び設定ファイルを使用する
-        // 診療科名、診療科コード、医師名、医師コード、JMARI
-        // 2.0
-        //---------------------------------------------------------
-        pvt.setDeptName(Project.getUserModel().getDepartmentModel().getDepartmentDesc());
-        pvt.setDeptCode(Project.getUserModel().getDepartmentModel().getDepartment());
-        pvt.setDoctorName(Project.getUserModel().getCommonName());
-        if (Project.getUserModel().getOrcaId()!=null) {
-            pvt.setDoctorId(Project.getUserModel().getOrcaId());
-        } else {
-            pvt.setDoctorId(Project.getUserModel().getUserId());
-        }
-        pvt.setJmariNumber(Project.getString(Project.JMARI_CODE));
-
-        // 来院日
-        pvt.setPvtDate(ModelUtils.getDateTimeAsString(new Date()));
-
-        final PatientVisitModel fPvt = pvt;
-
         SimpleWorker worker = new SimpleWorker<Void, Void>() {
 
             @Override
             protected Void doInBackground() {
-
+                PatientVisitModel pvt = createFakePvt(getSelectedPatinet());
                 PVTDelegater pdl = PVTDelegater.getInstance();
-                pdl.addPvt(fPvt);
+                pdl.addPvt(pvt);
                 return null;
             }
 

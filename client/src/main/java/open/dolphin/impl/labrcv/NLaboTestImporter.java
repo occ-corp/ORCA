@@ -38,15 +38,11 @@ public class NLaboTestImporter extends AbstractMainComponent {
     
     // 選択されている患者情報
     private NLaboImportSummary selectedLabo;
-    //private int number = 100000;
    
     // View
     private ListTableModel<NLaboImportSummary> tableModel;
     private NLabTestImportView view;
     
-    // このクライアントのUUID
-    private String clientUUID;
-
     
     /** Creates new NLaboTestImporter */
     public NLaboTestImporter() {
@@ -57,7 +53,6 @@ public class NLaboTestImporter extends AbstractMainComponent {
     public void start() {
         initComponents();
         connect();
-        clientUUID = Dolphin.getInstance().getClientUUID();
         enter();
     }
     
@@ -128,24 +123,10 @@ public class NLaboTestImporter extends AbstractMainComponent {
             }
         }
         
+        // 来院情報を生成する
         PatientModel patient = selectedLabo.getPatient();
-        PatientVisitModel pvt = new PatientVisitModel();
-        //pvt.setNumber(number++);
-        pvt.setPatientModel(patient);
-        
-        // 受け付けを通していないので診療科はユーザ登録してあるものを使用する
-        // 診療科名、診療科コード、医師名、医師コード、JMARI
-        // 2.0
-        pvt.setDeptName(Project.getUserModel().getDepartmentModel().getDepartmentDesc());
-        pvt.setDeptCode(Project.getUserModel().getDepartmentModel().getDepartment());
-        pvt.setDoctorName(Project.getUserModel().getCommonName());
-        if (Project.getUserModel().getOrcaId()!=null) {
-            pvt.setDoctorId(Project.getUserModel().getOrcaId());
-        } else {
-            pvt.setDoctorId(Project.getUserModel().getUserId());
-        }
-        pvt.setJmariNumber(Project.getString(Project.JMARI_CODE));
-        
+        PatientVisitModel pvt = createFakePvt(patient);
+
         // カルテコンテナを生成する
         getContext().openKarte(pvt);
     }
