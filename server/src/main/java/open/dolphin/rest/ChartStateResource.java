@@ -9,9 +9,9 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import open.dolphin.infomodel.ChartStateMsgModel;
+import open.dolphin.infomodel.StateMsgModel;
 import open.dolphin.mbean.ServletContextHolder;
-import open.dolphin.session.ChartStateServiceBean;
+import open.dolphin.session.StateServiceBean;
 
 /**
  *
@@ -25,7 +25,7 @@ public class ChartStateResource extends AbstractResource {
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
     
     @Inject
-    private ChartStateServiceBean chartStateService;
+    private StateServiceBean chartStateService;
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -90,8 +90,8 @@ public class ChartStateResource extends AbstractResource {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
 
-        ChartStateMsgModel msg = (ChartStateMsgModel)
-                getConverter().fromJson(json, ChartStateMsgModel.class);
+        StateMsgModel msg = (StateMsgModel)
+                getConverter().fromJson(json, StateMsgModel.class);
         
         // クライアントから送られてきたmsgにfidを設定
         msg.setFacilityId(fid);
@@ -109,7 +109,7 @@ public class ChartStateResource extends AbstractResource {
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         int currentId = Integer.valueOf(param);
         
-        List<ChartStateMsgModel> list = chartStateService.getChartStateMsgList(fid, currentId);
+        List<StateMsgModel> list = chartStateService.getChartStateMsgList(fid, currentId);
 
         String json = getConverter().toJson(list);
         debug(json);

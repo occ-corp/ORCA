@@ -39,7 +39,7 @@ import open.dolphin.util.StringTool;
  */
 public class PatientSearchImpl extends AbstractMainComponent {
 
-    private int number = 10000;
+    //private int number = 10000;
     private final String NAME = "患者検索";
     private static final String[] COLUMN_NAMES = {"ID", "氏名", "カナ", "性別", "生年月日", "受診日"};
     private final String[] METHOD_NAMES = {"patientId", "fullName", "kanaName", "genderDesc", "ageBirthday", "pvtDateTrimTime"};
@@ -118,15 +118,6 @@ public class PatientSearchImpl extends AbstractMainComponent {
         }
     }
 
-    @Override
-    public void stateChanged(List<ChartStateMsgModel> msgList) {
-    }
-
-    @Override
-    public void updateLocalState(ChartStateMsgModel msg) {
-    }
-    
-    
     public PatientModel getSelectedPatinet() {
         return selectedPatient;
     }
@@ -622,7 +613,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             // 来院情報を生成する
             PatientVisitModel pvt = new PatientVisitModel();
             pvt.setId(0L);
-            pvt.setNumber(number++);
+            //pvt.setNumber(number++);
             pvt.setPatientModel(getSelectedPatinet());
 
             //--------------------------------------------------------
@@ -668,7 +659,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         // 来院情報を生成する
         PatientVisitModel pvt = new PatientVisitModel();
         pvt.setId(0L);
-        pvt.setNumber(number++);
+       // pvt.setNumber(number++);
         pvt.setPatientModel(getSelectedPatinet());
 
         //--------------------------------------------------------
@@ -1249,4 +1240,15 @@ public class PatientSearchImpl extends AbstractMainComponent {
         return b;
     }
 //masuda$
+
+    // ChartStateListener
+    @Override
+    protected void postStateChange() {
+    }
+
+    @Override
+    public void processStateChange(StateMsgModel msg) {
+
+    }
+
 }

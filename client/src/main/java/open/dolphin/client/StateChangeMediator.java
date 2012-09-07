@@ -4,21 +4,22 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import open.dolphin.delegater.ChartStateDelegater;
-import open.dolphin.infomodel.ChartStateMsgModel;
+import open.dolphin.delegater.StateDelegater;
+import open.dolphin.infomodel.StateMsgModel;
 
 /**
- * Chart状態の変化をまとめて管理する
+ * カルテオープンなどの状態の変化をまとめて管理する
  * @author masuda, Masuda Naika
  */
-public class ChartStateListener {
+public class StateChangeMediator {
     
     // このクライアントのUUID
     private String clientUUID;
 
+    // このクライアントが更新済みのStateMsgModelの番号
     private int currentId;
     
-    private List<IChartStateListener> listeners;
+    private List<AbstractStateListener> listeners;
     
     // スレッド
     private ChartStateListenTask listenTask;
@@ -27,38 +28,38 @@ public class ChartStateListener {
     // 状態変化を各listenerに通知するタスク
     private Executor exec;
     
-    private static final ChartStateListener instance;
+    private static final StateChangeMediator instance;
 
     static {
-        instance = new ChartStateListener();
+        instance = new StateChangeMediator();
     }
 
-    private ChartStateListener() {
+    private StateChangeMediator() {
         clientUUID = Dolphin.getInstance().getClientUUID();
     }
 
-    public static ChartStateListener getInstance() {
+    public static StateChangeMediator getInstance() {
         return instance;
     }
 
     
-    public void addListener(IChartStateListener listener) {
+    public void addListener(AbstractStateListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(IChartStateListener listener) {
+    public void removeListener(AbstractStateListener listener) {
         listeners.remove(listener);
     }
     
     // 状態変更処理の共通入り口
-    public void updateChartState(ChartStateMsgModel msg) {
+    public void postStateMsg(StateMsgModel msg) {
         msg.setIssuerUUID(clientUUID);
         exec.execute(new UpdateStateTask(msg));
     }
     
     
     public void start() {
-        listeners = new ArrayList<IChartStateListener>();
+        listeners = new ArrayList<AbstractStateListener>();
         exec = Executors.newSingleThreadExecutor();
         listenTask = new ChartStateListenTask();
         thread = new Thread(listenTask, "ChartState Listen Task");
@@ -92,9 +93,9 @@ public class ChartStateListener {
             
             while (isRunning) {
                 try {
-                    String str = ChartStateDelegater.getInstance().getCurrentId(currentId);
+                    String str = StateDelegater.getInstance().getCurrentId(currentId);
                     currentId = Integer.valueOf(str);
-                    exec.execute(new OnMessageTask());
+                    exec.execute(new OnMessageTask(currentId));
                 } catch (Exception e) {
                     //System.out.println(e.toString());
                 }
@@ -105,36 +106,42 @@ public class ChartStateListener {
     // 自クライアントの状態変更後、サーバーに通知するタスク
     private class UpdateStateTask implements Runnable {
         
-        private ChartStateMsgModel msg;
+        private StateMsgModel msg;
         
-        private UpdateStateTask(ChartStateMsgModel msg) {
+        private UpdateStateTask(StateMsgModel msg) {
             this.msg = msg;
         }
 
         @Override
         public void run() {
             // まずは自クライアントを更新
-            for (IChartStateListener listener : listeners) {
-                listener.updateLocalState(msg);
+            for (AbstractStateListener listener : listeners) {
+                listener.processStateChange(msg);
             }
             // サーバーに更新を通知
-            ChartStateDelegater del = ChartStateDelegater.getInstance();
-            del.updateChartState(msg);
+            StateDelegater del = StateDelegater.getInstance();
+            del.putStateMsgModel(msg);
         }
         
     }
     
     // サーバーからの状態変化通知メッセージを処理するタスク
     private class OnMessageTask implements Runnable {
+        
+        private int id;
+        
+        private OnMessageTask(int id) {
+            this.id = id;
+        }
 
         @Override
         public void run() {
             // 状態変化モデルを取得しに行く
-            ChartStateDelegater del = ChartStateDelegater.getInstance();
-            List<ChartStateMsgModel> msgList = del.getChartStateMsgList(currentId);
+            StateDelegater del = StateDelegater.getInstance();
+            List<StateMsgModel> msgList = del.getChartStateMsgList(id);
             
             // 各リスナーで更新処理をする
-            for (IChartStateListener listener : listeners) {
+            for (AbstractStateListener listener : listeners) {
                 listener.stateChanged(msgList);
             }
         }

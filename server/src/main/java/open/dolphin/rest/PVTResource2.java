@@ -5,12 +5,11 @@ import javax.inject.Inject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.PvtListModel;
 import open.dolphin.session.PVTServiceBean;
-import open.dolphin.session.ChartStateServiceBean;
+import open.dolphin.session.StateServiceBean;
 
 /**
  * PVTResource2
@@ -27,7 +26,7 @@ public class PVTResource2 extends AbstractResource {
     private PVTServiceBean pvtServiceBean;
     
     @Inject
-    private ChartStateServiceBean chartStateService;
+    private StateServiceBean chartStateService;
     
     @Context
     private HttpServletRequest servletReq;
@@ -69,13 +68,8 @@ public class PVTResource2 extends AbstractResource {
 
         long pvtPK = Long.parseLong(pkStr);
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        
-        // msgを作成
-        ChartStateMsgModel msg = new ChartStateMsgModel();
-        msg.setPvtPk(pvtPK);
-        msg.setFacilityId(fid);
 
-        int cnt = pvtServiceBean.removePvt(msg);
+        int cnt = pvtServiceBean.removePvt(pvtPK, fid);
 
         debug(String.valueOf(cnt));
     }

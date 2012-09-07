@@ -3,7 +3,7 @@ package open.dolphin.mbean;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
-import open.dolphin.infomodel.ChartStateMsgModel;
+import open.dolphin.infomodel.StateMsgModel;
 import open.dolphin.infomodel.PatientVisitModel;
 
 /**
@@ -13,16 +13,16 @@ import open.dolphin.infomodel.PatientVisitModel;
 public class FacilityContext {
 
     private int msgCounter;
-    private final List<ChartStateMsgModel> chartStateMsgList;
+    private final List<StateMsgModel> chartStateMsgList;
     private final List<PatientVisitModel> pvtList;
 
     public FacilityContext() {
         msgCounter = 0;
-        chartStateMsgList = new CopyOnWriteArrayList<ChartStateMsgModel>();
+        chartStateMsgList = new CopyOnWriteArrayList<StateMsgModel>();
         pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
     }
     
-    public List<ChartStateMsgModel> getChartStateMsgList() {
+    public List<StateMsgModel> getChartStateMsgList() {
         return chartStateMsgList;
     }
     
@@ -45,8 +45,8 @@ public class FacilityContext {
     
     public void cleanUpMsgList(int minId) {
         
-        List<ChartStateMsgModel> toRemove = new ArrayList<ChartStateMsgModel>();
-        for(ChartStateMsgModel msg : chartStateMsgList) {
+        List<StateMsgModel> toRemove = new ArrayList<StateMsgModel>();
+        for(StateMsgModel msg : chartStateMsgList) {
             if (msg.getId() < minId) {
                 toRemove.add(msg);
             }

@@ -38,11 +38,14 @@ public class NLaboTestImporter extends AbstractMainComponent {
     
     // 選択されている患者情報
     private NLaboImportSummary selectedLabo;
-    private int number = 100000;
+    //private int number = 100000;
    
     // View
     private ListTableModel<NLaboImportSummary> tableModel;
     private NLabTestImportView view;
+    
+    // このクライアントのUUID
+    private String clientUUID;
 
     
     /** Creates new NLaboTestImporter */
@@ -54,6 +57,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
     public void start() {
         initComponents();
         connect();
+        clientUUID = Dolphin.getInstance().getClientUUID();
         enter();
     }
     
@@ -66,13 +70,6 @@ public class NLaboTestImporter extends AbstractMainComponent {
     public void stop() {
     }
 
-    @Override
-    public void stateChanged(List<ChartStateMsgModel> msgList) {
-    }
-
-    @Override
-    public void updateLocalState(ChartStateMsgModel msg) {
-    }
     
     public JProgressBar getProgressBar() {
         return getContext().getProgressBar();
@@ -133,7 +130,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         
         PatientModel patient = selectedLabo.getPatient();
         PatientVisitModel pvt = new PatientVisitModel();
-        pvt.setNumber(number++);
+        //pvt.setNumber(number++);
         pvt.setPatientModel(patient);
         
         // 受け付けを通していないので診療科はユーザ登録してあるものを使用する
@@ -633,4 +630,13 @@ public class NLaboTestImporter extends AbstractMainComponent {
         }
     }
 //masuda$
+
+    // ChartStateListener
+    @Override
+    protected void postStateChange() {
+    }
+    
+    @Override
+    public void processStateChange(StateMsgModel msg) {
+    }
 }

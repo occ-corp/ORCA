@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import open.dolphin.infomodel.ChartStateMsgModel;
+import open.dolphin.infomodel.StateMsgModel;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
@@ -48,7 +48,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
     
 //masuda^
     @Inject
-    private ChartStateServiceBean chartStateService;
+    private StateServiceBean chartStateService;
 //masuda$
 
     @SuppressWarnings("unchecked")
@@ -269,10 +269,10 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
             if (pvt.getPatientModel().getId() == pm.getId()) {
                 pvt.setPatientModel(pm);
                  // クライアントに通知
-                ChartStateMsgModel msg = new ChartStateMsgModel();
+                StateMsgModel msg = new StateMsgModel();
                 msg.setPatientModel(pm);
                 msg.setFacilityId(fid);
-                msg.setCommand(ChartStateMsgModel.CMD.PM_MERGE);
+                msg.setCommand(StateMsgModel.CMD.PM_MERGE);
                 chartStateService.notifyEvent(msg);
             }
         }

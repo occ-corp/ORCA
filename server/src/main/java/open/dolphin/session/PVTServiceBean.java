@@ -38,7 +38,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private EntityManager em;
     
     @Inject
-    private ChartStateServiceBean chartStateService;
+    private StateServiceBean chartStateService;
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -190,9 +190,10 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 // 新しいもので置き換える
                 pvtList.set(i, pvt);
                 // クライアントに通知
-                ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
+                StateMsgModel msg = new StateMsgModel();
+                msg.setParamFromPvt(pvt);
                 msg.setPatientVisitModel(pvt);
-                msg.setCommand(ChartStateMsgModel.CMD.PVT_MERGE);
+                msg.setCommand(StateMsgModel.CMD.PVT_MERGE);
                 chartStateService.notifyEvent(msg);
                 return 0;   // 追加０個
             }
@@ -203,9 +204,10 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // pvtListに追加
         pvtList.add(pvt);
         // クライアントに通知
-        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
+        StateMsgModel msg = new StateMsgModel();
+        msg.setParamFromPvt(pvt);
         msg.setPatientVisitModel(pvt);
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_ADD);
+        msg.setCommand(StateMsgModel.CMD.PVT_ADD);
         chartStateService.notifyEvent(msg);
         
         return 1;   // 追加１個
@@ -213,13 +215,11 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
 
     /**
      * 受付情報を削除する。
-     * @param PvtMessageModel msg
+     * @param pvtPk, fid
      * @return 削除件数
      */
-    public int removePvt(ChartStateMsgModel msg) {
-
-        long id = msg.getPvtPk();
-
+    public int removePvt(long id, String fid) {
+        
         try {
             // データベースから削除
             PatientVisitModel exist = em.find(PatientVisitModel.class, id);
@@ -228,7 +228,6 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 em.remove(exist);
             }
             // pvtListから削除
-            String fid = msg.getFacilityId();
             List<PatientVisitModel> pvtList = chartStateService.getPvtList(fid);
             for (PatientVisitModel model : pvtList) {
                 if (model.getId() == id) {
@@ -238,6 +237,11 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             }
 
             // クライアントに通知
+            // msgを作成
+            StateMsgModel msg = new StateMsgModel();
+            msg.setPvtPk(id);
+            msg.setFacilityId(fid);
+            msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
             chartStateService.notifyEvent(msg);
             return 1;
 

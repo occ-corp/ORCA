@@ -1,11 +1,11 @@
 package open.dolphin.infomodel;
 
 /**
- * ChartState状態変更通知用のモデル
+ * State変更通知用のモデル
  *
  * @author masuda, Masuda Naika
  */
-public class ChartStateMsgModel {
+public class StateMsgModel {
     
     private int id;
     
@@ -25,10 +25,11 @@ public class ChartStateMsgModel {
     
     public static enum CMD {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_OWNER, PM_MERGE};
     
-    public ChartStateMsgModel() {
+    public StateMsgModel() {
     }
     
-    public ChartStateMsgModel(PatientVisitModel pvt) {
+    
+    public void setParamFromPvt(PatientVisitModel pvt) {
         
         if (pvt == null) {
             return;

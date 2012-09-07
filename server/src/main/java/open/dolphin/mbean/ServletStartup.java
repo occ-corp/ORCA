@@ -9,7 +9,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timeout;
 import javax.inject.Inject;
-import open.dolphin.session.ChartStateServiceBean;
+import open.dolphin.session.StateServiceBean;
 import open.dolphin.updater.Updater;
 
 /**
@@ -23,7 +23,7 @@ public class ServletStartup {
 private static final Logger logger = Logger.getLogger(ServletStartup.class.getSimpleName());
 
     @Inject
-    private ChartStateServiceBean chartStateService;
+    private StateServiceBean chartStateService;
     
     @Inject
     private Updater updater;

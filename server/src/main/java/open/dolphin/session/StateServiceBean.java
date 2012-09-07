@@ -13,13 +13,13 @@ import open.dolphin.mbean.FacilityContext;
 import open.dolphin.mbean.ServletContextHolder;
 
 /**
- * ChartStateServiceBean
+ * StateServiceBean
  * @author masuda, Masuda Naika
  */
 @Stateless
-public class ChartStateServiceBean {
+public class StateServiceBean {
  
-    private static final Logger logger = Logger.getLogger(ChartStateServiceBean.class.getSimpleName());
+    private static final Logger logger = Logger.getLogger(StateServiceBean.class.getSimpleName());
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -28,7 +28,7 @@ public class ChartStateServiceBean {
     private EntityManager em;
     
 
-    public void notifyEvent(ChartStateMsgModel msg) {
+    public void notifyEvent(StateMsgModel msg) {
 
         String fid = msg.getFacilityId();
         FacilityContext context = contextHolder.getFacilityContext(fid);
@@ -73,10 +73,10 @@ public class ChartStateServiceBean {
         return model;
     }
     
-    public List<ChartStateMsgModel> getChartStateMsgList(String fid, int currentId) {
+    public List<StateMsgModel> getChartStateMsgList(String fid, int currentId) {
         FacilityContext context = contextHolder.getFacilityContext(fid);
-        List<ChartStateMsgModel> list = new ArrayList<ChartStateMsgModel>();
-        for (ChartStateMsgModel msg : context.getChartStateMsgList()) {
+        List<StateMsgModel> list = new ArrayList<StateMsgModel>();
+        for (StateMsgModel msg : context.getChartStateMsgList()) {
             if (msg.getId() >= currentId) {
                 list.add(msg);
             }
@@ -88,7 +88,7 @@ public class ChartStateServiceBean {
      * Pvtの情報を更新する
      * 所有者、state、病名数、メモ
      */
-    public int updateChartState(ChartStateMsgModel msg) {
+    public int updateChartState(StateMsgModel msg) {
         
         int ret = 0;
 
@@ -259,9 +259,9 @@ public class ChartStateServiceBean {
             
             // クライアントに伝える
             String fid = (String) entry.getKey();
-            ChartStateMsgModel msg = new ChartStateMsgModel();
+            StateMsgModel msg = new StateMsgModel();
             msg.setFacilityId(fid);
-            msg.setCommand(ChartStateMsgModel.CMD.PVT_RENEW);
+            msg.setCommand(StateMsgModel.CMD.PVT_RENEW);
             notifyEvent(msg);
         }
         logger.info("ChartStateService: renew pvtList");

@@ -5,33 +5,43 @@ import com.sun.jersey.api.client.ClientResponse;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import open.dolphin.client.Dolphin;
 import open.dolphin.infomodel.*;
+import open.dolphin.project.Project;
 import open.dolphin.util.BeanUtils;
 
 /**
- * ChartState変化関連のデレゲータ
+ * State変化関連のデレゲータ
  * @author masuda, Masuda Naika
  */
-public class ChartStateDelegater extends BusinessDelegater {
+public class StateDelegater extends BusinessDelegater {
     
     private static final String RES_CS = "chartState/";
     private static final String POLLING_PATH = RES_CS + "subscribe/";
     
     private static final boolean debug = false;
-    private static final ChartStateDelegater instance;
+    private static final StateDelegater instance;
+    
+    private String fid;
+    private String clientUUID;
 
     static {
-        instance = new ChartStateDelegater();
+        instance = new StateDelegater();
     }
     
-    private ChartStateDelegater() {
+    private StateDelegater() {
+        fid = Project.getFacilityId();
+        clientUUID = Dolphin.getInstance().getClientUUID();
     }
     
-    public static ChartStateDelegater getInstance() {
+    public static StateDelegater getInstance() {
         return instance;
     }
     
-    public int updateChartState(ChartStateMsgModel msg) {
+    public int putStateMsgModel(StateMsgModel msg) {
+        
+        msg.setFacilityId(fid);
+        msg.setIssuerUUID(clientUUID);
         
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);
@@ -51,7 +61,7 @@ public class ChartStateDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public List<ChartStateMsgModel> getChartStateMsgList(int currentId) {
+    public List<StateMsgModel> getChartStateMsgList(int currentId) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);
@@ -71,13 +81,13 @@ public class ChartStateDelegater extends BusinessDelegater {
             return null;
         }
         
-        TypeReference typeRef = new TypeReference<List<ChartStateMsgModel>>(){};
-        List<ChartStateMsgModel> list = (List<ChartStateMsgModel>)
+        TypeReference typeRef = new TypeReference<List<StateMsgModel>>(){};
+        List<StateMsgModel> list = (List<StateMsgModel>)
                 getConverter().fromJson(entityStr, typeRef);
 
         // pvtがのっかて来てるときは保険をデコード
         if (list != null && !list.isEmpty()) {
-            for (ChartStateMsgModel msg : list) {
+            for (StateMsgModel msg : list) {
                 PatientVisitModel pvt = msg.getPatientVisitModel();
                 if (pvt != null) {
                     PatientModel pm = pvt.getPatientModel();

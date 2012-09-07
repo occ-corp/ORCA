@@ -13,15 +13,15 @@ import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import open.dolphin.client.AbstractMainComponent;
-import open.dolphin.client.ChartStateListener;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.Dolphin;
+import open.dolphin.client.StateChangeMediator;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.AdmissionModel;
-import open.dolphin.infomodel.ChartStateMsgModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
+import open.dolphin.infomodel.StateMsgModel;
 import open.dolphin.project.Project;
 import open.dolphin.table.ColumnSpec;
 import open.dolphin.table.ListTableModel;
@@ -86,8 +86,6 @@ public class AdmissionList extends AbstractMainComponent {
     private Action openKarteAction;
     private Action copyAction;
     
-    private int number = 200000;
-    
     
     public AdmissionList() {
         setName(NAME);
@@ -119,7 +117,7 @@ public class AdmissionList extends AbstractMainComponent {
             Project.setString(COLUMN_SPEC_NAME, line);
         }
         // ChartStateListenerから除去する
-        ChartStateListener.getInstance().removeListener(this);
+        StateChangeMediator.getInstance().removeListener(this);
     }
     /**
      * メインウインドウのタブで受付リストに切り替わった時 コールされる。
@@ -130,32 +128,11 @@ public class AdmissionList extends AbstractMainComponent {
         getContext().getStatusLabel().setText(statusInfo);
     }
     
-    @Override
-    public void stateChanged(List<ChartStateMsgModel> msgList) {
-        
-        if (msgList == null || msgList.isEmpty()) {
-            return;
-        }
-        for (ChartStateMsgModel msg : msgList) {
-            if (!clientUUID.equals(msg.getIssuerUUID())) {
-                updateList(msg);
-            }
-        }
-
-        // PvtInfoを更新する
-        updateInfo();
-    }
-
-    @Override
-    public void updateLocalState(ChartStateMsgModel msg) {
-        updateList(msg);
-    }
-    
     // comet long polling機能を設定する
     private void startSyncMode() {
         setStatusInfo();
         getAdmittedPatients();
-        ChartStateListener.getInstance().addListener(this);
+        StateChangeMediator.getInstance().addListener(this);
         enter();
     }
     
@@ -450,7 +427,6 @@ public class AdmissionList extends AbstractMainComponent {
         
         PatientModel patient = getSelectedPatient();
         PatientVisitModel pvt = new PatientVisitModel();
-        pvt.setNumber(number++);
         pvt.setPatientModel(patient);
         
         // 受け付けを通していないので診療科はユーザ登録してあるものを使用する
@@ -512,9 +488,6 @@ public class AdmissionList extends AbstractMainComponent {
         view.getInfoLbl().setText(sb.toString());
     }
     
-    private void updateList(ChartStateMsgModel msg) {
-        
-    }
     
     private PatientModel getSelectedPatient() {
         selectedRow = table.getSelectedRow();
@@ -661,5 +634,15 @@ public class AdmissionList extends AbstractMainComponent {
         private ColumnSpec getColumnSpec() {
             return cs;
         }
+    }
+
+    // ChartStateListener
+    @Override
+    protected void postStateChange() {
+    }
+    
+    @Override
+    public void processStateChange(StateMsgModel msg) {
+
     }
 }

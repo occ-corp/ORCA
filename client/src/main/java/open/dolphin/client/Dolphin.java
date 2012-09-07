@@ -164,7 +164,7 @@ public class Dolphin implements MainWindow {
         clientUUID = UUID.randomUUID().toString();
 
         // ChartStateListenerを開始する
-        ChartStateListener.getInstance().start();
+        StateChangeMediator.getInstance().start();
 //masuda$
 
         //------------------------------
@@ -619,9 +619,10 @@ public class Dolphin implements MainWindow {
         pvt.getPatientModel().setOwnerUUID(null);
         
         // ChartStateListenerに通知する
-        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
-        ChartStateListener.getInstance().updateChartState(msg);
+        StateMsgModel msg = new StateMsgModel();
+        msg.setParamFromPvt(pvt);
+        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
+        StateChangeMediator.getInstance().postStateMsg(msg);
     }
     
     /**
@@ -699,9 +700,10 @@ public class Dolphin implements MainWindow {
         // PatientVisitModel.BIT_OPENを立てる
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
         // ChartStateListenerに通知する
-        ChartStateMsgModel msg = new ChartStateMsgModel(pvt);
-        msg.setCommand(ChartStateMsgModel.CMD.PVT_STATE);
-        ChartStateListener.getInstance().updateChartState(msg);
+        StateMsgModel msg = new StateMsgModel();
+        msg.setParamFromPvt(pvt);
+        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
+        StateChangeMediator.getInstance().postStateMsg(msg);
 //masuda$        
     }
 
@@ -1119,7 +1121,7 @@ public class Dolphin implements MainWindow {
         FocusPropertyChangeListener.getInstance().dispose();
         
         // ChartStateListenerを中止する
-        ChartStateListener.getInstance().stop();
+        StateChangeMediator.getInstance().stop();
         
         // ORCA apiを破棄する
         OrcaApi.getInstance().dispose();
