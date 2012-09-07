@@ -1,6 +1,8 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +16,7 @@ import javax.persistence.*;
  * @author Minagawa,kazushi
  * @author modified by masuda, Masuda Naika
  */
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
 @Entity
 @Table(name = "d_patient")
 public class PatientModel extends InfoModel {
@@ -887,6 +890,9 @@ public class PatientModel extends InfoModel {
             return frmt.format(admission.getStarted());
         }
         return null;
+    }
+    public String getDoctorName() {
+        return (admission != null) ? admission.getDoctorName() : null;
     }
     public boolean isOpened() {
         return ownerUUID != null;

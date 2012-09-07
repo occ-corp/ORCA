@@ -1,6 +1,7 @@
 package open.dolphin.infomodel;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
@@ -62,7 +63,8 @@ public class LaboModuleValue extends KarteEntryBean {
     private String laboratoryCenterCodeId;
     
     //private String confirmDate;
-    
+
+    @JsonManagedReference   // bi-directional references
     @JsonDeserialize(contentAs=LaboSpecimenValue.class)
     @OneToMany(mappedBy="laboModule", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<LaboSpecimenValue> laboSpecimens;

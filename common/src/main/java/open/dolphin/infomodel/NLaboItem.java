@@ -1,6 +1,6 @@
 package open.dolphin.infomodel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import javax.persistence.*;
 
 /**
@@ -95,7 +95,7 @@ public class NLaboItem extends InfoModel {
     // Sort Key
     private String sortKey;
 
-    @JsonIgnore // bi-directional references
+    @JsonBackReference  // bi-directional references
     @ManyToOne
     @JoinColumn(name="laboModule_id", nullable=false)
     private NLaboModule laboModule;

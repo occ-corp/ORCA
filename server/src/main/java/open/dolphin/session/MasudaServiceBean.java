@@ -1133,7 +1133,7 @@ public class MasudaServiceBean {
     public List<PatientModel> getAdmittedPatients(String fid, List<AdmissionModel> admissionList) {
         
         final String sql1 = 
-                "from AdmissionModl a where a.patient.patientId = :ptId a.patient.facilityId = :fid "
+                "from AdmissionModel a where a.patient.patientId = :ptId and a.patient.facilityId = :fid "
                 + "and a.started = :started order by a.id desc";
         final String sql2 = "from PatientModel p where p.patientId = :ptId and p.facilityId = :fid";
         
@@ -1150,7 +1150,7 @@ public class MasudaServiceBean {
             // 既存の入院モデルを取得する
             List<AdmissionModel> existList = (List<AdmissionModel>) 
                     em.createQuery(sql1)
-                    .setParameter("pdId", patientId)
+                    .setParameter("ptId", patientId)
                     .setParameter("fid", fid)
                     .setParameter("started", started)
                     .getResultList();
@@ -1192,11 +1192,18 @@ public class MasudaServiceBean {
                     em.persist(exist);
                 }
                 pm.setAdmissionModel(exist);
+                
+                // 患者の健康保険を取得する　これ忘れがちｗ
+                List<HealthInsuranceModel> insurances =
+                        em.createQuery("from HealthInsuranceModel h where h.patient.id = :pk")
+                        .setParameter("pk", pm.getId())
+                        .getResultList();
+                pm.setHealthInsurances(insurances);
                 ret.add(pm);
             } catch (Exception ex) {
             }
         }
-        
+
         return ret;
     }
 
@@ -1204,13 +1211,13 @@ public class MasudaServiceBean {
     public List<AdmissionModel> getAdmissionList(String fid, String patientId) {
 
         final String sql =
-                "from AdmissionModl a where a.patient.patientId = :ptId a.patient.facilityId = :fid "
+                "from AdmissionModel a where a.patient.patientId = :ptId and a.patient.facilityId = :fid "
                 + "order by a.id desc";
 
         // 既存の入院モデルを取得する
         List<AdmissionModel> list = (List<AdmissionModel>) 
                 em.createQuery(sql)
-                .setParameter("pdId", patientId)
+                .setParameter("ptId", patientId)
                 .setParameter("fid", fid)
                 .getResultList();
         

@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,11 +28,13 @@ public class DocumentModel extends KarteEntryBean {
     @Embedded
     private DocInfoModel docInfo;
     
+    @JsonManagedReference   // bi-directional references
     @JsonDeserialize(contentAs=ModuleModel.class)
     @IndexedEmbedded        // hibernate search
     @OneToMany(mappedBy="document", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<ModuleModel> modules;
     
+    @JsonManagedReference   // bi-directional references
     @JsonDeserialize(contentAs=SchemaModel.class)
     @OneToMany(mappedBy="document", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<SchemaModel> schema;

@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 
@@ -17,7 +18,7 @@ public class LaboItemValue extends InfoModel {
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
     
-    @JsonIgnore // bi-directional references
+    @JsonBackReference  // bi-directional references
     @ManyToOne
     @JoinColumn(name="specimen_id", nullable=false)
     private LaboSpecimenValue laboSpecimen;

@@ -76,12 +76,6 @@ public class UserResource extends AbstractResource {
                 getConverter().fromJson(json, UserModel.class);
         model.getFacilityModel().setFacilityId(fid);
 
-        // 関係を構築する
-        List<RoleModel> roles = model.getRoles();
-        for (RoleModel role : roles) {
-            role.setUserModel(model);
-        }
-
         int result = userServiceBean.addUser(model);
         String cntStr = String.valueOf(result);
         
@@ -101,12 +95,6 @@ public class UserResource extends AbstractResource {
         UserModel model = (UserModel)
                 getConverter().fromJson(json, UserModel.class);
         
-        // 関係を構築する
-        List<RoleModel> roles = model.getRoles();
-        for (RoleModel role : roles) {
-            role.setUserModel(model);
-        }
-
         int result = userServiceBean.updateUser(model);
         String cntStr = String.valueOf(result);
         

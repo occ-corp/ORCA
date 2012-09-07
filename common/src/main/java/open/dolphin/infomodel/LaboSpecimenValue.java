@@ -1,6 +1,8 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,7 +22,7 @@ public class LaboSpecimenValue extends InfoModel {
     @Id @GeneratedValue(strategy=GenerationType.AUTO)
     private long id;
     
-    @JsonIgnore // bi-directional references
+    @JsonBackReference  // bi-directional references
     @ManyToOne
     @JoinColumn(name="module_id", nullable=false)
     private LaboModuleValue laboModule;
@@ -31,6 +33,7 @@ public class LaboSpecimenValue extends InfoModel {
     
     private String specimenCodeId;
     
+    @JsonManagedReference   // bi-directional references
     @JsonDeserialize(contentAs=LaboItemValue.class)
     @OneToMany(mappedBy="laboSpecimen", cascade={CascadeType.PERSIST, CascadeType.REMOVE})
     private List<LaboItemValue> laboItems;

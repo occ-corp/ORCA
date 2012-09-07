@@ -511,9 +511,9 @@ public class MasudaResource extends AbstractResource {
                 getConverter().fromJson(json, typeRef);
         
         List<PatientModel> pmList = masudaServiceBean.getAdmittedPatients(fid, list);
-        
-        String ret = getConverter().toJson(pmList);
-        return ret;
+
+        String jsonRet = getConverter().toJson(pmList);
+        return jsonRet;
     }
     
     @PUT

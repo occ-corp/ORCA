@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import javax.swing.ImageIcon;
@@ -21,7 +22,7 @@ public class SchemaModel extends KarteEntryBean {
     @Column(nullable=false, length=16777215)    // MEDIUMBLOB
     private byte[] jpegByte;
     
-    @JsonIgnore // bi-directional references
+    @JsonBackReference // bi-directional references
     @ManyToOne
     @JoinColumn(name="doc_id", nullable=false)
     private DocumentModel document;

@@ -203,12 +203,36 @@ public class WatingListImpl extends AbstractMainComponent {
         // 仕様を保存
         columnSpecs = new ArrayList<ColumnSpec>();
         String[] params = line.split(",");
+
+        // 保存していた名称・メソッド・クラスが同じか調べる
         int len = params.length / 4;
+        // 項目数が同じか？
+        boolean same = len == COLUMN_NAMES.length;
+        // 各項目は同じか
+        if (same) {
+            List<String> savedColumns = new ArrayList<String>();
+            List<String> savedProps = new ArrayList<String>();
+            List<String> savedClasses = new ArrayList<String>();
+            for (int i = 0; i < len; ++i) {
+                int k = 4 * i;
+                savedColumns.add(params[k]);
+                savedProps.add(params[k + 1]);
+                savedClasses.add(params[k + 2]);
+            }
+            for (int i = 0; i < len; ++i) {
+                savedColumns.remove(COLUMN_NAMES[i]);
+                savedProps.remove(PROPERTY_NAMES[i]);
+                savedClasses.remove(COLUMN_CLASSES[i].getName());
+            }
+            // 同じならば空のはず
+            same &= savedColumns.isEmpty() && savedProps.isEmpty() && savedClasses.isEmpty();
+        }
         // 保存していた情報数が現在と違う場合は破棄
-        if (len != COLUMN_NAMES.length) {
+        if (!same) {
             params = defaultLine.split(",");
             len = params.length / 4;
         }
+        
         for (int i = 0; i < len; i++) {
             int k = 4 * i;
             String name = params[k];

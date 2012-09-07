@@ -51,17 +51,16 @@ public final class SqlMiscDao extends SqlDaoBean {
             ps = con.prepareStatement(sql);
             ps.setString(1, dateStr);
             ps.setString(2, dateStr);
-            ps.setString(3, dateStr);
-            ps.setInt(4, hospNum);
+            ps.setInt(3, hospNum);
 
             ResultSet rs = ps.executeQuery();
 
             while (rs.next()) {
-                String patientId = rs.getString(1);
-                String room = getRoomNumber(rs.getString(2));
-                String dept = getDepartmentDesc(rs.getString(3));
-                Date aDate = frmt.parse(rs.getString(4));
-                String doctor = getOrcaStaffName(rs.getString(5));
+                String patientId = rs.getString(1).trim();
+                String room = getRoomNumber(rs.getString(2).trim());
+                String dept = getDepartmentDesc(rs.getString(3).trim());
+                Date aDate = frmt.parse(rs.getString(4).trim());
+                String doctor = getOrcaStaffName(rs.getString(5).trim());
                 AdmissionModel model = new AdmissionModel();
                 model.setPatientId(patientId);
                 model.setRoom(room);
@@ -104,6 +103,7 @@ public final class SqlMiscDao extends SqlDaoBean {
                 sb.append(c);
             } else if (c != '0') {
                 found = true;
+                sb.append(c);
             }
         }
         return sb.toString();

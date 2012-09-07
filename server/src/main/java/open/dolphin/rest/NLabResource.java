@@ -74,14 +74,6 @@ public class NLabResource extends AbstractResource {
         NLaboModule module = (NLaboModule) 
                 getConverter().fromJson(json, NLaboModule.class);
         
-        List<NLaboItem> items = module.getItems();
-        // 関係を構築する
-        if (items!=null && items.size()>0) {
-            for (NLaboItem item : items) {
-                item.setLaboModule(module);
-            }
-        }
-        
         PatientModel patient = nLabServiceBean.create(fid, module);
 
         String ret = getConverter().toJson(patient);

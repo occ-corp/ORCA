@@ -1,11 +1,14 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import java.util.Date;
 import javax.persistence.*;
 
 /**
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
 @Entity
 @Table(name = "d_appo")
 public class AppointmentModel extends KarteEntryBean {

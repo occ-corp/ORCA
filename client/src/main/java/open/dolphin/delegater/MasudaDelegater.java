@@ -697,7 +697,7 @@ public class MasudaDelegater extends BusinessDelegater {
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>) 
                 getConverter().fromJson(entityStr, typeRef);
-        
+
         return list;
     }
     

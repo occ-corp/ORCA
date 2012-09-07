@@ -1,5 +1,7 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import javax.persistence.Entity;
 import javax.persistence.Lob;
 import javax.persistence.Table;
@@ -10,6 +12,7 @@ import org.hibernate.annotations.Type;
  *
  * @author Minagawa, Kazushi
  */
+@JsonIdentityInfo(generator=ObjectIdGenerators.IntSequenceGenerator.class, property="@id")
 @Entity
 @Table(name = "d_patient_memo")
 public class PatientMemoModel extends KarteEntryBean {

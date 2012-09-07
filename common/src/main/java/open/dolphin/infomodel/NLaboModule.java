@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import java.util.ArrayList;
 import java.util.List;
@@ -45,6 +46,7 @@ public class NLaboModule extends InfoModel {
     // Report format
     private String reportFormat;
 
+    @JsonManagedReference   // bi-directional references
     @JsonDeserialize(contentAs=NLaboItem.class)
     @OneToMany(mappedBy = "laboModule", cascade={CascadeType.ALL})
     private List<NLaboItem> items;

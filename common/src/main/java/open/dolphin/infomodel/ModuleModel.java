@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import javax.persistence.*;
 import org.apache.lucene.analysis.cjk.CJKAnalyzer;
@@ -33,7 +34,7 @@ public class ModuleModel extends KarteEntryBean {
     @Column(nullable=false)
     private byte[] beanBytes;
     
-    @JsonIgnore // bi-directional references
+    @JsonBackReference // bi-directional references
     @ManyToOne
     @JoinColumn(name="doc_id", nullable=false)
     private DocumentModel document;

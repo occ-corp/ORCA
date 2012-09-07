@@ -1,5 +1,6 @@
 package open.dolphin.impl.admission;
 
+import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
@@ -25,6 +26,7 @@ import open.dolphin.project.Project;
 import open.dolphin.table.ColumnSpec;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.ListTableSorter;
+import open.dolphin.table.StripeTableCellRenderer;
 
 /**
  * 入院患者リスト
@@ -41,12 +43,12 @@ public class AdmissionList extends AbstractMainComponent {
         "担当医", "診療科", "入院日", "状態"};
     // 来院テーブルのカラムメソッド
     private static final String[] PROPERTY_NAMES = {
-        "getRoom", "getPatientId", "getPatientName", "getPatientGenderDesc", "getPatientAgeBirthday", 
+        "getRoom", "getPatientId", "getFullName", "getGenderDesc", "getAgeBirthday", 
         "getDoctorName", "getDeptName", "getAdmissionDate", "isOpened"};
     // 来院テーブルのクラス名
     private static final Class[] COLUMN_CLASSES = {
         String.class, String.class, String.class, String.class, String.class, 
-        String.class, String.class, String.class, Boolean.class};
+        String.class, String.class, String.class, String.class};
     // 来院テーブルのカラム幅
     private static final int[] COLUMN_WIDTH = {
         20, 80, 130, 40, 100, 100, 50, 80, 30};
@@ -179,12 +181,36 @@ public class AdmissionList extends AbstractMainComponent {
         // 仕様を保存
         columnSpecs = new ArrayList<ColumnSpec>();
         String[] params = line.split(",");
+        
+        // 保存していた名称・メソッド・クラスが同じか調べる
         int len = params.length / 4;
+        // 項目数が同じか？
+        boolean same = len == COLUMN_NAMES.length;
+        // 各項目は同じか
+        if (same) {
+            List<String> savedColumns = new ArrayList<String>();
+            List<String> savedProps = new ArrayList<String>();
+            List<String> savedClasses = new ArrayList<String>();
+            for (int i = 0; i < len; ++i) {
+                int k = 4 * i;
+                savedColumns.add(params[k]);
+                savedProps.add(params[k + 1]);
+                savedClasses.add(params[k + 2]);
+            }
+            for (int i = 0; i < len; ++i) {
+                savedColumns.remove(COLUMN_NAMES[i]);
+                savedProps.remove(PROPERTY_NAMES[i]);
+                savedClasses.remove(COLUMN_CLASSES[i].getName());
+            }
+            // 同じならば空のはず
+            same &= savedColumns.isEmpty() && savedProps.isEmpty() && savedClasses.isEmpty();
+        }
         // 保存していた情報数が現在と違う場合は破棄
-        if (len != COLUMN_NAMES.length) {
+        if (!same) {
             params = defaultLine.split(",");
             len = params.length / 4;
         }
+
         for (int i = 0; i < len; i++) {
             int k = 4 * i;
             String name = params[k];
@@ -253,6 +279,11 @@ public class AdmissionList extends AbstractMainComponent {
         // 選択モード
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
+        // 連ドラ
+        PatientListTableRenderer renderer = new PatientListTableRenderer();
+        renderer.setTable(table);
+        renderer.setDefaultRenderer();
+
         // カラム幅
         changeColumnWidth();
         
@@ -468,7 +499,9 @@ public class AdmissionList extends AbstractMainComponent {
 
     private void updateInfo() {
         SimpleDateFormat frmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-        int num = tableModel.getDataProvider().size();
+        int num = (tableModel.getDataProvider() != null)
+                ? tableModel.getDataProvider().size()
+                : 0;
         StringBuilder sb = new StringBuilder();
         sb.append(frmt.format(new Date()));
         sb.append(" 入院患者数：");
@@ -572,6 +605,43 @@ public class AdmissionList extends AbstractMainComponent {
 
                 contextMenu.show(e.getComponent(), e.getX(), e.getY());
             }
+        }
+    }
+    
+    private class PatientListTableRenderer extends StripeTableCellRenderer {
+
+        public PatientListTableRenderer() {
+            super();
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table,
+                Object value,
+                boolean isSelected,
+                boolean isFocused,
+                int row, int col) {
+
+            super.getTableCellRendererComponent(table, value, isSelected, isFocused, row, col);
+            
+            PatientModel pm = (PatientModel) sorter.getObject(row);
+            
+            if (pm != null && col == stateColumn) {
+                if (pm.isOpened()) {
+                    if (clientUUID.equals(pm.getOwnerUUID())) {
+                        setIcon(OPEN_ICON);
+                    } else {
+                        setIcon(NETWORK_ICON);
+                    }
+                } else {
+                    setIcon(null);
+                }
+                setText("");
+            } else {
+                setIcon(null);
+                setText(value == null ? "" : value.toString());
+            }
+
+            return this;
         }
     }
     
