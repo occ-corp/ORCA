@@ -227,6 +227,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         String programFolder = ClientContext.isWin()
                 ? System.getenv("PROGRAMFILES")
                 : "~/.wine/drive_c/Program Files/";
+        String userHome = System.getProperty("user.home");
 
         // ラベルプリンタ、FEV-40
         GridBagBuilder gbl = new GridBagBuilder("ラベルプリンタQL-580N設定");
@@ -279,7 +280,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         lbl_winePath = new JLabel("Wineのパス");
         tf_winePath = GUIFactory.createTextField(20, null, null, null);
         btn_openWine = new JButton("開く");
-        listener = new MyBtnActionListener(programFolder, tf_winePath);
+        listener = new MyBtnActionListener(userHome, tf_winePath);
         btn_openWine.addActionListener(listener);
         gbl.add(lbl_winePath, 0, row, GridBagConstraints.EAST);
         gbl.add(tf_winePath, 1, row, GridBagConstraints.CENTER);
