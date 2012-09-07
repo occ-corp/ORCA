@@ -12,10 +12,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.List;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.TimeUnit;
+import java.util.concurrent.*;
 import javax.swing.*;
 import javax.swing.event.*;
 import javax.swing.table.TableColumn;
@@ -77,7 +74,8 @@ public class WatingListImpl extends AbstractMainComponent {
         130, 50, 60, 40, 80, 30};
     // 年齢生年月日メソッド 
     private final String[] AGE_METHOD = {"getPatientAgeBirthday", "getPatientBirthday"};
-    
+    // カラム仕様名
+    private static final String COLUMN_SPEC_NAME = "pvtTable.column.spec";
     // カラム仕様リスト
     private List<ColumnSpec> columnSpecs;
     // 受付時間カラム
@@ -200,7 +198,7 @@ public class WatingListImpl extends AbstractMainComponent {
         defaultLine = sb.toString();
 
         // preference から
-        String line = Project.getString("pvtTable.column.spec", defaultLine);
+        String line = Project.getString(COLUMN_SPEC_NAME, defaultLine);
 
         // 仕様を保存
         columnSpecs = new ArrayList<ColumnSpec>();
@@ -286,14 +284,14 @@ public class WatingListImpl extends AbstractMainComponent {
         // View のテーブルモデルを置き換える
         //------------------------------------------
         int len = columnSpecs.size();
-        String[] colunNames = new String[len];
+        String[] columnNames = new String[len];
         String[] methods = new String[len];
         Class[] cls = new Class[len];
         int[] width = new int[len];
         try {
             for (int i = 0; i < len; i++) {
                 ColumnSpec cp = columnSpecs.get(i);
-                colunNames[i] = cp.getName();
+                columnNames[i] = cp.getName();
                 methods[i] = cp.getMethod();
                 cls[i] = Class.forName(cp.getCls());
                 width[i] = cp.getWidth();
@@ -302,7 +300,7 @@ public class WatingListImpl extends AbstractMainComponent {
             e.printStackTrace(System.err);
         }
         pvtTable = view.getTable();
-        pvtTableModel = new ListTableModel<PatientVisitModel>(colunNames, 1, methods, cls) {
+        pvtTableModel = new ListTableModel<PatientVisitModel>(columnNames, 1, methods, cls) {
 
             @Override
             public boolean isCellEditable(int row, int col) {
@@ -548,15 +546,7 @@ public class WatingListImpl extends AbstractMainComponent {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // 同期モードではPvtListを取得し直し
-                SwingWorker worker = new SwingWorker() {
-
-                    @Override
-                    protected Object doInBackground() throws Exception {
-                        getFullPvt();
-                        return null;
-                    }
-                };
-                worker.execute();
+                getFullPvt();
             }
         });
 
@@ -657,7 +647,7 @@ public class WatingListImpl extends AbstractMainComponent {
         }
         sb.setLength(sb.length() - 1);
         String line = sb.toString();
-        Project.setString("pvtTable.column.spec", line);
+        Project.setString(COLUMN_SPEC_NAME, line);
         
         // ChartStateListenerから除去する
         ChartStateListener.getInstance().removeListener(this);
@@ -1338,21 +1328,34 @@ public class WatingListImpl extends AbstractMainComponent {
     // pvtを全取得する
     private void getFullPvt() {
 
-        setBusy(true);
+        SwingWorker worker = new SwingWorker<PvtListModel, Void>() {
 
-        // サーバーからpvtListを取得する
-        PvtListModel model = pvtDelegater.getPvtListModel();
-        pvtList = model.getPvtList();
+            @Override
+            protected PvtListModel doInBackground() throws Exception {
+                setBusy(true);
+                // サーバーからpvtListを取得する
+                return pvtDelegater.getPvtListModel();
+            }
 
-        // フィルタリング
-        filterPatients();
-        
-        // 最終行までスクロール
-        showLastRow();
-        countPvt();
-        updatePvtInfo();
-        
-        setBusy(false);
+            @Override
+            protected void done() {
+                try {
+                    PvtListModel listModel = get();
+                    pvtList = listModel.getPvtList();
+
+                } catch (InterruptedException ex) {
+                } catch (ExecutionException ex) {
+                }
+                // フィルタリング
+                filterPatients();
+                // 最終行までスクロール
+                showLastRow();
+                countPvt();
+                updatePvtInfo();
+                setBusy(false);
+            }
+        };
+        worker.execute();
     }
     
     // 受付番号を振り、フィルタリングしてtableModelに設定する

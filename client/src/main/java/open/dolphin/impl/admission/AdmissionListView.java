@@ -21,7 +21,7 @@ public class AdmissionListView extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
         updateBtn = new JButton();
-        updateBtn.setIcon(ClientContext.getImageIcon("ref_241.gif"));
+        updateBtn.setIcon(ClientContext.getImageIcon("ref_24.gif"));
         updateBtn.setAlignmentY(BOTTOM_ALIGNMENT);
         panel.add(updateBtn);
 

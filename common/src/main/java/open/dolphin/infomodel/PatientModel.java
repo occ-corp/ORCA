@@ -888,6 +888,9 @@ public class PatientModel extends InfoModel {
         }
         return null;
     }
+    public boolean isOpened() {
+        return ownerUUID != null;
+    }
 
 //masuda$
 }

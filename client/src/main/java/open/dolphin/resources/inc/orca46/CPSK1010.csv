@@ -1,3 +1,45 @@
+*******************************************************************
+* このファイルは CPSKxxxx.INCを、しし様、http://shishi.syuriken.jp の
+* Cobolrecで展開してMasuda Naikaが作成しました
+* http://cvs.orca.med.or.jp/cgi-bin/cvsweb/jma-receipt/cobol/copy/
+* CVS log for jma-receipt/cobol/copy/CPSK1010.INC  Revision 1.17
+*******************************************************************
+
+*******************************************************************
+* Project code name "ORCA"
+* 日医標準レセプトソフト（JMA standard receipt software）
+* Copyright(C) 2002 JMA (Japan Medical Association)
+*
+* This program is part of "JMA standard receipt software".
+*
+*     This program is distributed in the hope that it will be useful
+* for further advancement in medical care, according to JMA Open
+* Source License, but WITHOUT ANY WARRANTY.
+*     Everyone is granted permission to use, copy, modify and
+* redistribute this program, but only under the conditions described
+* in the JMA Open Source License. You should have received a copy of
+* this license along with this program. If not, stop using this
+* program and contact JMA, 2-28-16 Honkomagome, Bunkyo-ku, Tokyo,
+* 113-8621, Japan.
+********************************************************************
+************************************************************
+*         システム管理マスタ     (CPSK1010.INC)   *
+*         （１０１０）                            *
+*         職員情報                                *
+************************************************************
+************************************************************
+*  コピー句修正履歴
+* Maj/Min/Rev  修正者       日付      内容
+* 00-00-01     MCC-森脇     02/05/07  予備の修正
+*                                     麻薬ライセンスの追加
+* 01.00.02     NACL-多々納  05/12/01  請求書発行フラグ等追加
+* 01.00.03     NACL-多々納  06/04/10  診療費明書発行追加
+* 03.04.00     NACL-多々納  06/11/13  検査正式名称表示フラグ追加
+* 03.05.01     NACL-藤原    07/09/14  クライアント保存可否フラグ追加
+* 04.04.00     NACL-小豆沢  09/01/27  本院分院対応（他院ログインＩＤ追加）
+* 04.05.00     NACL-森脇    09/11/25  ユーザーログイン権限追加
+************************************************************
+
 No,レベル,項目名,宣言,桁数
 1,1,SYS-1010-REC,GF,0
 2,3,SYS-1010-KEY,GF,0
