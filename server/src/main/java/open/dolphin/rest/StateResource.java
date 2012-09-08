@@ -38,10 +38,10 @@ public class StateResource extends AbstractResource {
 
     @GET
     @Path("subscribe/{id}")
-    public void listenChartState(@PathParam("id") String id) {
+    public void subscribe(@PathParam("id") String id) {
 
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        String clientUUID = servletReq.getHeader("clientUUID");
+        String clientUUID = servletReq.getHeader(CLIENT_UUID);
         
         final AsyncContext ac = servletReq.startAsync();
         // timeoutを設定
@@ -90,7 +90,7 @@ public class StateResource extends AbstractResource {
     @Path("state")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putChartState(String json) {
+    public String updateState(String json) {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
 
@@ -100,7 +100,7 @@ public class StateResource extends AbstractResource {
         // クライアントから送られてきたmsgにfidを設定
         msg.setFacilityId(fid);
         
-        int cnt = stateServiceBean.updateChartState(msg);
+        int cnt = stateServiceBean.updateState(msg);
 
         return String.valueOf(cnt);
     }
@@ -124,21 +124,20 @@ public class StateResource extends AbstractResource {
     // 参：きしだのはてな もっとJavaEE6っぽくcometチャットを実装する
     // http://d.hatena.ne.jp/nowokay/20110416/1302978207
     @GET
-    @Path("currentId")
+    @Path("nextId")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String getCurrentId() {
-        // ac.dispatchならattributeにfidが設定されている
-        String fid = (String) servletReq.getAttribute("fid");
-        return (String) servletReq.getAttribute("currentId");
+    public String getNextId() {
+        String nextId = (String) servletReq.getAttribute("nextId");
+        return nextId;
     }
     
     @GET
-    @Path("initialId")
+    @Path("currentId")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String getInitialId() {
+    public String getCurrentId() {
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        int msgCounter = stateServiceBean.getMsgCounter(fid);
-        return String.valueOf(msgCounter);
+        int currentId = stateServiceBean.getCurrentMsgId(fid);
+        return String.valueOf(currentId);
     }
 
     @Override

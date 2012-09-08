@@ -37,35 +37,50 @@ public class StateServiceBean {
         }
         
         FacilityContext context = contextHolder.getFacilityContext(fid);
-        int currentId = context.getMsgCounter();
-        msg.setId(currentId);
+        
+        int nextId = context.getNextId();
+        msg.setId(nextId);
         context.getStateMsgList().add(msg);
-        context.incrementMsgCounter();
 
         List<AsyncContext> acList = contextHolder.getAsyncContextList();
         synchronized (acList) {
             int minId = Integer.MAX_VALUE;
             for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
+                
                 AsyncContext ac = itr.next();
+                int id = (Integer) ac.getRequest().getAttribute("id");
+                minId = Math.min(minId, id);
+                
                 String acFid = (String) ac.getRequest().getAttribute("fid");
                 String acUUID = (String) ac.getRequest().getAttribute("clientUUID");
                 String issuerUUID = msg.getIssuerUUID();
+                
                 // 同一施設かつStateMsgModelの発行者でないクライアントに通知する
                 if (fid.equals(acFid) && !issuerUUID.equals(acUUID)) {
                     itr.remove();
                     try {
-                        ac.getRequest().setAttribute("currentId", String.valueOf(currentId));
-                        ac.dispatch("/openSource/chartState/currentId");
+                        ac.getRequest().setAttribute("nextId", String.valueOf(nextId));
+                        ac.dispatch("/openSource/chartState/nextId");
                     } catch (Exception ex) {
                         logger.warning("Exception in ac.dispatch.");
                     }
-                    int id = (Integer) ac.getRequest().getAttribute("id");
-                    minId = Math.min(minId, id);
                 }
             }
             // ゴミ掃除
-            context.cleanUpMsgList(minId);
+            cleanUpMsgList(context, minId);
         }
+    }
+
+    private void cleanUpMsgList(FacilityContext context, int minId) {
+        
+        List<StateMsgModel> stateMsgList = context.getStateMsgList();
+        List<StateMsgModel> toRemove = new ArrayList<StateMsgModel>();
+        for(StateMsgModel msg : stateMsgList) {
+            if (msg.getId() <= minId) {
+                toRemove.add(msg);
+            }
+        }
+        stateMsgList.removeAll(toRemove);
     }
     
     public List<PatientVisitModel> getPvtList(String fid) {
@@ -84,16 +99,16 @@ public class StateServiceBean {
         return list;
     }
     
-    public int getMsgCounter(String fid) {
+    public int getCurrentMsgId(String fid) {
         FacilityContext context = contextHolder.getFacilityContext(fid);
-        return context.getMsgCounter();
+        return context.getCurrentId();
      }
     
     /**
      * Pvtの情報を更新する
      * 所有者、state、病名数、メモ
      */
-    public int updateChartState(StateMsgModel msg) {
+    public int updateState(StateMsgModel msg) {
         
         int ret = 0;
 

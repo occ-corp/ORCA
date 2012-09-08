@@ -12,46 +12,35 @@ import open.dolphin.infomodel.StateMsgModel;
  */
 public class FacilityContext {
 
-    private int msgCounter;
-    private final List<StateMsgModel> chartStateMsgList;
+    private int currentId;
+    private final List<StateMsgModel> stateMsgList;
     private final List<PatientVisitModel> pvtList;
 
     public FacilityContext() {
-        msgCounter = 0;
-        chartStateMsgList = new CopyOnWriteArrayList<StateMsgModel>();
+        currentId = 0;
+        stateMsgList = new CopyOnWriteArrayList<StateMsgModel>();
         pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
     }
     
     public List<StateMsgModel> getStateMsgList() {
-        return chartStateMsgList;
+        return stateMsgList;
     }
     
     public void clearStateMsgList() {
-        chartStateMsgList.clear();
-        msgCounter = 0;
+        stateMsgList.clear();
+        currentId = 0;
     }
     
     public List<PatientVisitModel> getPvtList() {
         return pvtList;
     }
     
-    public int getMsgCounter() {
-        return msgCounter;
+    public int getCurrentId() {
+        return currentId;
     }
     
-    public void incrementMsgCounter() {
-        msgCounter++;
-    }
-    
-    public void cleanUpMsgList(int minId) {
-        
-        List<StateMsgModel> toRemove = new ArrayList<StateMsgModel>();
-        for(StateMsgModel msg : chartStateMsgList) {
-            if (msg.getId() <= minId) {
-                toRemove.add(msg);
-            }
-        }
-        chartStateMsgList.removeAll(toRemove);
+    public int getNextId() {
+        return ++currentId;
     }
 }
 
