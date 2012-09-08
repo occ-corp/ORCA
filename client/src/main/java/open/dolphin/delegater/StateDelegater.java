@@ -102,9 +102,9 @@ public class StateDelegater extends BusinessDelegater {
         return list;
     }
     
-    public int getInitialId() {
+    public int getCurrentId() {
         
-        String path = RES_CS + "initialId";
+        String path = RES_CS + "currentId";
         
         ClientResponse response = getResource(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)

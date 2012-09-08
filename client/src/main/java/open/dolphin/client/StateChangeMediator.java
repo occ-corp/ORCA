@@ -83,7 +83,7 @@ public class StateChangeMediator {
         
         private StateListenTask() {
             isRunning = true;
-            currentId = StateDelegater.getInstance().getInitialId();
+            currentId = StateDelegater.getInstance().getCurrentId();
         }
 
         private void stop() {
