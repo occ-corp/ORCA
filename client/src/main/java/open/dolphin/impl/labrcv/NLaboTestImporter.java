@@ -43,10 +43,15 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private ListTableModel<NLaboImportSummary> tableModel;
     private NLabTestImportView view;
     
+    private String clientUUID;
+    private StateChangeListener scl;
+    
     
     /** Creates new NLaboTestImporter */
     public NLaboTestImporter() {
         setName(NAME);
+        clientUUID = Dolphin.getInstance().getClientUUID();
+        scl = StateChangeListener.getInstance();
     }
     
     @Override
@@ -125,7 +130,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         
         // 来院情報を生成する
         PatientModel patient = selectedLabo.getPatient();
-        PatientVisitModel pvt = StateChangeListener.getInstance().createFakePvt(patient);
+        PatientVisitModel pvt = scl.createFakePvt(patient);
 
         // カルテコンテナを生成する
         getContext().openKarte(pvt);

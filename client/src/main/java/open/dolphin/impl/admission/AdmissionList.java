@@ -53,8 +53,6 @@ public class AdmissionList extends AbstractMainComponent {
     private static final int[] COLUMN_WIDTH = {
         20, 80, 130, 40, 100, 100, 50, 80, 30};
     
-    private String clientUUID;
-    
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
     
@@ -85,10 +83,14 @@ public class AdmissionList extends AbstractMainComponent {
     private Action openKarteAction;
     private Action copyAction;
     
+    private String clientUUID;
+    private StateChangeListener scl;
+    
     
     public AdmissionList() {
         setName(NAME);
         clientUUID = Dolphin.getInstance().getClientUUID();
+        scl = StateChangeListener.getInstance();
     }
 
     @Override
@@ -117,7 +119,7 @@ public class AdmissionList extends AbstractMainComponent {
             Project.setString(COLUMN_SPEC_NAME, line);
         }
         // ChartStateListenerから除去する
-        StateChangeListener.getInstance().removeListener(this);
+        scl.removeListener(this);
     }
     /**
      * メインウインドウのタブで受付リストに切り替わった時 コールされる。
@@ -132,7 +134,7 @@ public class AdmissionList extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getAdmittedPatients();
-        StateChangeListener.getInstance().addListener(this);
+        scl.addListener(this);
         enter();
     }
     

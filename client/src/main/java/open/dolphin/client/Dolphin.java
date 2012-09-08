@@ -100,6 +100,9 @@ public class Dolphin implements MainWindow {
     // PacsService
     private PacsService pacsService;
 
+    // 状態変化リスナー
+    private StateChangeListener scl;
+    
     // clientのUUID
     private String clientUUID;
 
@@ -162,6 +165,7 @@ public class Dolphin implements MainWindow {
 
         // 排他処理用のUUIDを決める
         clientUUID = UUID.randomUUID().toString();
+        scl = StateChangeListener.getInstance();
 //masuda$
 
         //------------------------------
@@ -563,7 +567,7 @@ public class Dolphin implements MainWindow {
         
 
         // ChartStateListenerを開始する
-        StateChangeListener.getInstance().start();
+        scl.start();
         
         windowSupport.getFrame().setVisible(true);
     }
@@ -685,8 +689,8 @@ public class Dolphin implements MainWindow {
         chart.setReadOnly(readOnly);
         chart.start();
         
-        // 
-        StateChangeListener.getInstance().publishKarteOpened(pvt);
+        // publish state
+        scl.publishKarteOpened(pvt);
 //masuda$        
     }
 
@@ -1104,7 +1108,7 @@ public class Dolphin implements MainWindow {
         FocusPropertyChangeListener.getInstance().dispose();
         
         // ChartStateListenerを中止する
-        StateChangeListener.getInstance().stop();
+        scl.stop();
         
         // ORCA apiを破棄する
         OrcaApi.getInstance().dispose();

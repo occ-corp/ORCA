@@ -71,11 +71,16 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private ListTableModel<PatientModel> tableModel;
     private ListTableSorter sorter;
     private AbstractAction copyAction;
+    
+    private String clientUUID;
+    private StateChangeListener scl;
 
     
     /** Creates new PatientSearch */
     public PatientSearchImpl() {
         setName(NAME);
+        clientUUID = Dolphin.getInstance().getClientUUID();
+        scl = StateChangeListener.getInstance();
     }
 
     @Override
@@ -614,7 +619,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
             // 来院情報を生成する
             PatientModel pm = getSelectedPatient();
-            PatientVisitModel pvt = StateChangeListener.getInstance().createFakePvt(pm);
+            PatientVisitModel pvt = scl.createFakePvt(pm);
             // カルテコンテナを生成する
             getContext().openKarte(pvt);
         }
@@ -646,7 +651,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             @Override
             protected Void doInBackground() {
                 PatientModel pm = getSelectedPatient();
-                PatientVisitModel pvt = StateChangeListener.getInstance().createFakePvt(pm);
+                PatientVisitModel pvt = scl.createFakePvt(pm);
                 PVTDelegater pdl = PVTDelegater.getInstance();
                 pdl.addPvt(pvt);
                 return null;

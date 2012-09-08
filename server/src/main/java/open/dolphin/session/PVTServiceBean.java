@@ -237,7 +237,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                     break;
                 }
             }
-
+/*
             // クライアントに通知
             // msgを作成
             StateMsgModel msg = new StateMsgModel();
@@ -246,6 +246,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             msg.setIssuerUUID(null);
             msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
             stateServiceBean.notifyEvent(msg);
+*/
             return 1;
 
         } catch (Exception e) {

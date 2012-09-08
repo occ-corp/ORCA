@@ -76,10 +76,23 @@ public class StateChangeListener {
         exec.execute(new UpdateStateTask(msg));
     }
     
+    public void publishPvtDelete(PatientVisitModel pvt) {
+        
+        StateMsgModel msg = new StateMsgModel();
+        msg.setParamFromPvt(pvt);
+        msg.setIssuerUUID(clientUUID);
+        msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
+        
+        publish(msg);
+    }
+    
     public void publishPvtState(PatientVisitModel pvt) {
+        
         StateMsgModel msg = new StateMsgModel();
         msg.setParamFromPvt(pvt);
         msg.setCommand(StateMsgModel.CMD.PVT_STATE);
+        
+        publish(msg);
     }
     
     public void publishKarteOpened(PatientVisitModel pvt) {
