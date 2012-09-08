@@ -56,7 +56,7 @@ public class StateServiceBean {
                 String issuerUUID = msg.getIssuerUUID();
                 
                 // 同一施設かつStateMsgModelの発行者でないクライアントに通知する
-                if (fid.equals(acFid) && !issuerUUID.equals(acUUID)) {
+                if (fid.equals(acFid) && !acUUID.equals(issuerUUID)) {
                     itr.remove();
                     try {
                         ac.getRequest().setAttribute("nextId", String.valueOf(nextId));
@@ -66,7 +66,7 @@ public class StateServiceBean {
                     }
                 }
             }
-            // ゴミ掃除
+            // こまめにゴミ掃除
             cleanUpMsgList(context, minId);
         }
     }
@@ -277,10 +277,11 @@ public class StateServiceBean {
             // StateMsgListを初期化する
             facilityContext.clearStateMsgList();
             
-            // クライアントに伝える
+            // クライアントに伝える。サーバーで作るmsgはIssuerUUIDはnull
             String fid = (String) entry.getKey();
             StateMsgModel msg = new StateMsgModel();
             msg.setFacilityId(fid);
+            msg.setIssuerUUID(null);
             msg.setCommand(StateMsgModel.CMD.PVT_RENEW);
             notifyEvent(msg);
         }

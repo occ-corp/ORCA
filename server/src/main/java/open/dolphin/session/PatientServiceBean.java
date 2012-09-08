@@ -272,6 +272,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
                 StateMsgModel msg = new StateMsgModel();
                 msg.setPatientModel(pm);
                 msg.setFacilityId(fid);
+                msg.setIssuerUUID(null);
                 msg.setCommand(StateMsgModel.CMD.PM_MERGE);
                 stateServiceBean.notifyEvent(msg);
             }

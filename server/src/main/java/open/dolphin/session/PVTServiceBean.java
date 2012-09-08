@@ -193,6 +193,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 StateMsgModel msg = new StateMsgModel();
                 msg.setParamFromPvt(pvt);
                 msg.setPatientVisitModel(pvt);
+                msg.setIssuerUUID(null);
                 msg.setCommand(StateMsgModel.CMD.PVT_MERGE);
                 stateServiceBean.notifyEvent(msg);
                 return 0;   // 追加０個
@@ -207,6 +208,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         StateMsgModel msg = new StateMsgModel();
         msg.setParamFromPvt(pvt);
         msg.setPatientVisitModel(pvt);
+        msg.setIssuerUUID(null);
         msg.setCommand(StateMsgModel.CMD.PVT_ADD);
         stateServiceBean.notifyEvent(msg);
         
@@ -241,6 +243,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             StateMsgModel msg = new StateMsgModel();
             msg.setPvtPk(id);
             msg.setFacilityId(fid);
+            msg.setIssuerUUID(null);
             msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
             stateServiceBean.notifyEvent(msg);
             return 1;
