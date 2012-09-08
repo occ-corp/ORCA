@@ -65,69 +65,17 @@ public class StateDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public StateMsgModel subscribe() {
+    public String subscribe() throws Exception {
         
-        String path = SUBSCRIBE_PATH;
-        
-        ClientResponse response = JerseyClient.getInstance()
-                .getAsyncResource(path)
+        // できるだけ時間をとらないようにデシリアライズは後回しにする
+        String json = JerseyClient.getInstance()
+                .getAsyncResource(SUBSCRIBE_PATH)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .get(ClientResponse.class);
+                .get(String.class);
         
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-        
-        debug(status, entityStr);
-        
-        if (status != HTTP200) {
-            return null;
-        }
-        
-        StateMsgModel msg = (StateMsgModel) 
-                getConverter().fromJson(entityStr, StateMsgModel.class);
-        
-        // PatientModelが乗っかってきている場合は保険をデコード
-        PatientModel pm = msg.getPatientModel();
-        if (pm != null) {
-            decodeHealthInsurance(pm);
-        }
-        PatientVisitModel pvt = msg.getPatientVisitModel();
-        if (pvt.getPatientModel() != null) {
-            decodeHealthInsurance(pvt.getPatientModel());
-        }
-        return msg;
+        return json;
     }
     
-    /**
-     * バイナリの健康保険データをオブジェクトにデコードする。
-     *
-     * @param patient 患者モデル
-     */
-    private void decodeHealthInsurance(PatientModel patient) {
-
-        // Health Insurance を変換をする beanXML2PVT
-        Collection<HealthInsuranceModel> c = patient.getHealthInsurances();
-
-        if (c != null && c.size() > 0) {
-
-            List<PVTHealthInsuranceModel> list = new ArrayList<PVTHealthInsuranceModel>(c.size());
-
-            for (HealthInsuranceModel model : c) {
-                try {
-                    // byte[] を XMLDecord
-                    PVTHealthInsuranceModel hModel = (PVTHealthInsuranceModel) BeanUtils.xmlDecode(model.getBeanBytes());
-                    list.add(hModel);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-            }
-
-            patient.setPvtHealthInsurances(list);
-            patient.getHealthInsurances().clear();
-            patient.setHealthInsurances(null);
-        }
-    }
-
     @Override
     protected void debug(int status, String entity) {
         if (debug || DEBUG) {

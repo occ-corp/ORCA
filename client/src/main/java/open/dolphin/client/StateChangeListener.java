@@ -1,16 +1,15 @@
 package open.dolphin.client;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import open.dolphin.delegater.StateDelegater;
-import open.dolphin.infomodel.ModelUtils;
-import open.dolphin.infomodel.PatientModel;
-import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.StateMsgModel;
+import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
+import open.dolphin.util.BeanUtils;
 
 /**
  * カルテオープンなどの状態の変化をまとめて管理する
@@ -158,9 +157,9 @@ public class StateChangeListener {
             
             while (isRunning) {
                 try {
-                    StateMsgModel msg = StateDelegater.getInstance().subscribe();
-                    if (msg != null) {
-                        exec.execute(new OnMessageTask(msg));
+                    String json = StateDelegater.getInstance().subscribe();
+                    if (json != null) {
+                        exec.execute(new OnMessageTask(json));
                     }
                 } catch (Exception e) {
                     //System.out.println(e.toString());
@@ -191,21 +190,70 @@ public class StateChangeListener {
         
     }
     
-    // サーバーからの状態変化通知メッセージを処理するタスク
+    // 状態変化通知メッセージをデシリアライズし各リスナに処理を分配する
     private class OnMessageTask implements Runnable {
         
-        private StateMsgModel msg;
+        private String json;
         
-        private OnMessageTask(StateMsgModel msg) {
-            this.msg = msg;
+        private OnMessageTask(String json) {
+            this.json = json;
         }
 
         @Override
         public void run() {
+        
+            StateMsgModel msg = (StateMsgModel) 
+                    JsonConverter.getInstance().fromJson(json, StateMsgModel.class);
+            
+            if (msg == null) {
+                return;
+            }
+            
+            // PatientModelが乗っかってきている場合は保険をデコード
+            PatientModel pm = msg.getPatientModel();
+            if (pm != null) {
+                decodeHealthInsurance(pm);
+            }
+            PatientVisitModel pvt = msg.getPatientVisitModel();
+            if (pvt.getPatientModel() != null) {
+                decodeHealthInsurance(pvt.getPatientModel());
+            }
+            
             // 各リスナーで更新処理をする
             for (IStateChangeListener listener : listeners) {
                 listener.onMessage(msg);
             }
+        }
+    }
+    
+    /**
+     * バイナリの健康保険データをオブジェクトにデコードする。
+     *
+     * @param patient 患者モデル
+     */
+    private void decodeHealthInsurance(PatientModel patient) {
+
+        // Health Insurance を変換をする beanXML2PVT
+        Collection<HealthInsuranceModel> c = patient.getHealthInsurances();
+
+        if (c != null && !c.isEmpty()) {
+
+            List<PVTHealthInsuranceModel> list = new ArrayList<PVTHealthInsuranceModel>(c.size());
+
+            for (HealthInsuranceModel model : c) {
+                try {
+                    // byte[] を XMLDecord
+                    PVTHealthInsuranceModel hModel = (PVTHealthInsuranceModel) 
+                            BeanUtils.xmlDecode(model.getBeanBytes());
+                    list.add(hModel);
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+            }
+
+            patient.setPvtHealthInsurances(list);
+            patient.getHealthInsurances().clear();
+            patient.setHealthInsurances(null);
         }
     }
     
