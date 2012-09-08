@@ -615,10 +615,57 @@ public class NLaboTestImporter extends AbstractMainComponent {
             return this;
         }
     }
-//masuda$
 
     // ChartStateListener
     @Override
     public void onMessage(StateMsgModel msg) {
+
+        int sRow = -1;
+        long ptPk = msg.getPtPk();
+        List<NLaboImportSummary> list = tableModel.getDataProvider();
+        StateMsgModel.CMD command = msg.getCommand();
+
+        switch (command) {
+            case PVT_STATE:
+                for (int row = 0; row < list.size(); ++row) {
+                    NLaboImportSummary nlab = list.get(row);
+                    PatientModel pm = nlab.getPatient();
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        pm.setOwnerUUID(msg.getOwnerUUID());
+                        break;
+                    }
+                }
+                break;
+            case PVT_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    NLaboImportSummary nlab = list.get(row);
+                    PatientModel pm = nlab.getPatient();
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        nlab.setPatient(msg.getPatientVisitModel().getPatientModel());
+                        break;
+                    }
+                }
+                break;
+            case PM_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    NLaboImportSummary nlab = list.get(row);
+                    PatientModel pm = nlab.getPatient();
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        nlab.setPatient(msg.getPatientModel());
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        
+        if (sRow != -1) {
+            tableModel.fireTableRowsUpdated(sRow, sRow);
+        }
     }
+//masuda$
 }

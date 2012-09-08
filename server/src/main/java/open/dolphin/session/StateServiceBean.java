@@ -78,18 +78,20 @@ public class StateServiceBean {
         
         List<PatientVisitModel> pvtList = contextHolder.getPvtList(fid);
 
-        // データベースを更新
-        PatientVisitModel exist = em.find(PatientVisitModel.class, pvtId);
-        // WatingListから開いていないとpvt.id = 0で、exist = nullなので更新されない
-        if (exist != null) {
-            // データベースのpvtStateを更新
-            exist.setState(state);
-            exist.setByomeiCount(byomeiCount);
-            exist.setByomeiCountToday(byomeiCountToday);
-            exist.setMemo(memo);
+        // データベースのPatientVisitModelを更新
+        PatientVisitModel pvt = em.find(PatientVisitModel.class, pvtId);
+        if (pvt != null) {
+            pvt.setState(state);
+            pvt.setByomeiCount(byomeiCount);
+            pvt.setByomeiCountToday(byomeiCountToday);
+            pvt.setMemo(memo);
+        }
+        // データベースのPatientModelを更新
+        PatientModel pm = em.find(PatientModel.class, ptPk);
+        if (pm != null) {
+            pm.setOwnerUUID(ownerUUID);
         }
 
-        // WatingListから開いていないとpvt.id = 0なので更新されない。
         // pvtListを更新
         for (PatientVisitModel model : pvtList) {
             if (model.getId() == pvtId) {
@@ -133,7 +135,7 @@ public class StateServiceBean {
 
         // 患者の基本データを取得する
         // 来院情報と患者は ManyToOne の関係である
-        int counter = 0;
+        //int counter = 0;
 
         for (PatientVisitModel pvt : result) {
             

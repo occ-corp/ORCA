@@ -169,7 +169,6 @@ public class PatientModel extends InfoModel {
     }
     
     // 排他処理関連
-    @Transient
     private String ownerUUID;   // 現在の所有者UUID
     public void setOwnerUUID(String uuid) {
         ownerUUID = uuid;

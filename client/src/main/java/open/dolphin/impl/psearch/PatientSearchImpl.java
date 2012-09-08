@@ -1210,6 +1210,50 @@ public class PatientSearchImpl extends AbstractMainComponent {
     @Override
     public void onMessage(StateMsgModel msg) {
 
+        int sRow = -1;
+        long ptPk = msg.getPtPk();
+        List<PatientModel> list = tableModel.getDataProvider();
+        StateMsgModel.CMD command = msg.getCommand();
+        
+        switch (command) {
+            case PVT_STATE:
+                for (int row = 0; row < list.size(); ++row) {
+                    PatientModel pm = list.get(row);
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        pm.setOwnerUUID(msg.getOwnerUUID());
+                        break;
+                    }
+                }
+                break;
+            case PVT_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    PatientModel pm = list.get(row);
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        //pm = msg.getPatientVisitModel().getPatientModel();
+                        list.set(row, msg.getPatientVisitModel().getPatientModel());
+                        break;
+                    }
+                }
+                break;
+            case PM_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    PatientModel pm = list.get(row);
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        //pm = msg.getPatientModel();
+                        list.set(row, msg.getPatientModel());
+                        break;
+                    }
+                }
+                break;
+            default:
+                break;
+        }
+        
+        if (sRow != -1) {
+            tableModel.fireTableRowsUpdated(sRow, sRow);
+        }
     }
-
 }

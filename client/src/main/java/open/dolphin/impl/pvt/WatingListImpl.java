@@ -135,7 +135,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // State 設定用のcombobox model
     private BitAndIconPair[] stateComboArray;
     // State 設定用のcombobox
-    private JComboBox stateCmb;
+    private JComboBox<BitAndIconPair> stateCmb;
     private AbstractAction copyAction;
 
     // 受付数・待ち時間の更新間隔
@@ -279,7 +279,7 @@ public class WatingListImpl extends AbstractMainComponent {
         for (int i = 0; i < userBitArray.length; i++) {
             stateComboArray[i] = new BitAndIconPair(userBitArray[i], userIconArray[i]);
         }
-        stateCmb = new JComboBox(stateComboArray);
+        stateCmb = new JComboBox<BitAndIconPair>(stateComboArray);
         ComboBoxRenderer renderer = new ComboBoxRenderer();
         renderer.setPreferredSize(new Dimension(30, ClientContext.getHigherRowHeight()));
         stateCmb.setRenderer(renderer);
@@ -388,7 +388,7 @@ public class WatingListImpl extends AbstractMainComponent {
 
                 // ここはsorterから取得したらダメ
                 //final PatientVisitModel pvt = (PatientVisitModel) sorter.getObject(row);
-                final PatientVisitModel pvt = (PatientVisitModel) pvtTableModel.getObject(row);
+                final PatientVisitModel pvt = pvtTableModel.getObject(row);
                 
                 if (pvt == null || value == null) {
                     return;
@@ -779,7 +779,7 @@ public class WatingListImpl extends AbstractMainComponent {
     /**
      * 受付リストのコンテキストメニュークラス。
      */
-    class ContextListener extends MouseAdapter {
+    private class ContextListener extends MouseAdapter {
 
         @Override
         public void mousePressed(MouseEvent e) {
@@ -1081,15 +1081,17 @@ public class WatingListImpl extends AbstractMainComponent {
             super.getTableCellRendererComponent(table, value, isSelected, isFocused, row, col);
             
             PatientVisitModel pvt = (PatientVisitModel) sorter.getObject(row);
-            Color fore = pvt != null && pvt.getStateBit(PatientVisitModel.BIT_CANCEL) ? CANCEL_PVT_COLOR : table.getForeground();
+            Color fore = (pvt != null && pvt.getStateBit(PatientVisitModel.BIT_CANCEL))
+                    ? CANCEL_PVT_COLOR 
+                    : table.getForeground();
             this.setForeground(fore);
             
             // 選択状態の場合はStripeTableCellRendererの配色を上書きしない
             if (pvt != null && !isSelected) {
                 if (isSexRenderer()) {
-                    if (pvt.getPatientModel().getGender().equals(IInfoModel.MALE)) {
+                    if (IInfoModel.MALE.equals(pvt.getPatientModel().getGender())) {
                         this.setBackground(MALE_COLOR);
-                    } else if (pvt.getPatientModel().getGender().equals(IInfoModel.FEMALE)) {
+                    } else if (IInfoModel.FEMALE.equals(pvt.getPatientModel().getGender())) {
                         this.setBackground(FEMALE_COLOR);
                     }
                 }
@@ -1113,7 +1115,8 @@ public class WatingListImpl extends AbstractMainComponent {
                 // 最初に chart bit をテストする
                 for (int i = 0; i < chartBitArray.length; i++) {
                     if (pvt.getStateBit(chartBitArray[i])) {
-                        if (i == PatientVisitModel.BIT_OPEN && !clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
+                        if (i == PatientVisitModel.BIT_OPEN && 
+                                !clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
                             icon = NETWORK_ICON;
                         } else {
                             icon = chartIconArray[i];
@@ -1175,9 +1178,9 @@ public class WatingListImpl extends AbstractMainComponent {
                 } else {
                     // 選択状態の場合はStripeTableCellRendererの配色を上書きしない
                     if (isSexRenderer() && !isSelected) {
-                        if (pvt.getPatientModel().getGender().equals(IInfoModel.MALE)) {
+                        if (IInfoModel.MALE.equals(pvt.getPatientModel().getGender())) {
                             this.setBackground(MALE_COLOR);
-                        } else if (pvt.getPatientModel().getGender().equals(IInfoModel.FEMALE)) {
+                        } else if (IInfoModel.FEMALE.equals(pvt.getPatientModel().getGender())) {
                             this.setBackground(FEMALE_COLOR);
                         }
                     }
