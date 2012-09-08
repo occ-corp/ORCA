@@ -146,14 +146,11 @@ public class StateServiceBean {
             }
         }
 
-        // patientListを更新
-        PatientModel fake = new PatientModel();
-        fake.setId(ptPk);
+        // ptPkOwnerMapを更新
         if (ownerUUID == null) {
-            context.getPatientSet().remove(fake);
+            context.getPtPkOwnerMap().put(ptPk, ownerUUID);
         } else {
-            fake.setOwnerUUID(ownerUUID);
-            context.getPatientSet().add(fake);
+            context.getPtPkOwnerMap().remove(ptPk);
         }
 
         // クライアントに通知

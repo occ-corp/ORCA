@@ -1,10 +1,9 @@
 package open.dolphin.mbean;
 
 import java.util.List;
-import java.util.Set;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.CopyOnWriteArraySet;
-import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.StateMsgModel;
 
@@ -20,14 +19,14 @@ public class FacilityContext {
     private final List<StateMsgModel> stateMsgList;
     // 施設の待合リスト
     private final List<PatientVisitModel> pvtList;
-    // カルテを開いている患者リスト。ここに記録するのはidとownerUUIDだけのfake model
-    private final Set<PatientModel> patientSet;
+    // カルテを開いている患者の、ptPkとownerUUIDのマップ
+    private final Map<Long, String> patientMap;
 
     public FacilityContext() {
         currentId = 0;
         stateMsgList = new CopyOnWriteArrayList<StateMsgModel>();
         pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
-        patientSet = new CopyOnWriteArraySet<PatientModel>();
+        patientMap = new ConcurrentHashMap<Long, String>();
     }
     
     public List<StateMsgModel> getStateMsgList() {
@@ -43,8 +42,8 @@ public class FacilityContext {
         return pvtList;
     }
     
-    public Set<PatientModel> getPatientSet() {
-        return patientSet;
+    public Map<Long, String> getPtPkOwnerMap() {
+        return patientMap;
     }
     
     public int getCurrentId() {
@@ -53,16 +52,6 @@ public class FacilityContext {
     
     public int getNextId() {
         return ++currentId;
-    }
-    
-    // PatientModel.idからownerUUIDを取得する
-    public String getPtOwnerUUID(long ptPk) {
-        for (PatientModel pm : patientSet) {
-            if (ptPk == pm.getId()) {
-                return pm.getOwnerUUID();
-            }
-        }
-        return null;
     }
 }
 
