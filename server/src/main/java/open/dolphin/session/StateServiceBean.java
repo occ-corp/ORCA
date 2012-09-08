@@ -60,7 +60,7 @@ public class StateServiceBean {
                     itr.remove();
                     try {
                         ac.getRequest().setAttribute("nextId", String.valueOf(nextId));
-                        ac.dispatch("/openSource/chartState/nextId");
+                        ac.dispatch("/openSource/stateRes/nextId");
                     } catch (Exception ex) {
                         logger.warning("Exception in ac.dispatch.");
                     }
@@ -88,11 +88,11 @@ public class StateServiceBean {
         return context.getPvtList();
     }
     
-    public List<StateMsgModel> getStateMsgList(String fid, int currentId) {
+    public List<StateMsgModel> getStateMsgList(String fid, int fromMsgId) {
         FacilityContext context = contextHolder.getFacilityContext(fid);
         List<StateMsgModel> list = new ArrayList<StateMsgModel>();
         for (StateMsgModel msg : context.getStateMsgList()) {
-            if (msg.getId() >= currentId) {
+            if (msg.getId() >= fromMsgId) {
                 list.add(msg);
             }
         }
@@ -274,7 +274,7 @@ public class StateServiceBean {
             }
             pvtList.removeAll(toRemove);
             
-            // ChartStateMsgListを初期化する
+            // StateMsgListを初期化する
             facilityContext.clearStateMsgList();
             
             // クライアントに伝える
@@ -284,6 +284,6 @@ public class StateServiceBean {
             msg.setCommand(StateMsgModel.CMD.PVT_RENEW);
             notifyEvent(msg);
         }
-        logger.info("ChartStateService: renew pvtList");
+        logger.info("StateService: renew pvtList");
     }
 }

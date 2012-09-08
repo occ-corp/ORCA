@@ -16,7 +16,7 @@ import open.dolphin.util.BeanUtils;
  */
 public class StateDelegater extends BusinessDelegater {
     
-    private static final String RES_CS = "chartState/";
+    private static final String RES_CS = "stateRes/";
     private static final String POLLING_PATH = RES_CS + "subscribe/";
     
     private static final boolean debug = false;
@@ -65,12 +65,12 @@ public class StateDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public List<StateMsgModel> getChartStateMsgList(int currentId) {
+    public List<StateMsgModel> getStateMsgList(int fromMsgId) {
 
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);
         sb.append("msgList/");
-        sb.append(String.valueOf(currentId));
+        sb.append(String.valueOf(fromMsgId));
         String path = sb.toString();
 
         ClientResponse response = getResource(path, null)
@@ -121,9 +121,9 @@ public class StateDelegater extends BusinessDelegater {
         return Integer.valueOf(entityStr);
     }
     
-    public String subscribe(int id) {
+    public String subscribe(int currentId) {
         
-        String path = POLLING_PATH + String.valueOf(id);
+        String path = POLLING_PATH + String.valueOf(currentId);
         String ret = JerseyClient.getInstance()
                 .getAsyncResource(path)
                 .accept(MEDIATYPE_TEXT_UTF8)

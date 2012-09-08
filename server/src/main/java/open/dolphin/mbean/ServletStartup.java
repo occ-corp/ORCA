@@ -13,7 +13,7 @@ import open.dolphin.session.StateServiceBean;
 import open.dolphin.updater.Updater;
 
 /**
- * スタートアップ時にUpdaterとChartStateServiceBeanを自動実行
+ * スタートアップ時にUpdaterとStateServiceBeanを自動実行
  * @author masuda, Masuda Naika
  */
 @Singleton

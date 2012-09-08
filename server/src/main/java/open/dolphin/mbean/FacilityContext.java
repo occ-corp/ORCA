@@ -1,13 +1,12 @@
 package open.dolphin.mbean;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.StateMsgModel;
 
 /**
- * 施設の待合リストとChartStateMsgModelを保持するクラス
+ * 施設の待合リストと状態メッセージリストを保持するクラス
  * @author masuda, Masuda Naika
  */
 public class FacilityContext {

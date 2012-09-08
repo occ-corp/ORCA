@@ -17,7 +17,7 @@ import open.dolphin.session.StateServiceBean;
  *
  * @author masuda
  */
-@Path("chartState")
+@Path("stateRes")
 public class StateResource extends AbstractResource {
     
     private static final boolean debug = false;
@@ -111,9 +111,9 @@ public class StateResource extends AbstractResource {
     public String getStateMsgList(@PathParam("param") String param){
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        int currentId = Integer.valueOf(param);
+        int fromMsgId = Integer.valueOf(param);
         
-        List<StateMsgModel> list = stateServiceBean.getStateMsgList(fid, currentId);
+        List<StateMsgModel> list = stateServiceBean.getStateMsgList(fid, fromMsgId);
 
         String json = getConverter().toJson(list);
         debug(json);

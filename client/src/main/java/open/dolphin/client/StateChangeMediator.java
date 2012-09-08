@@ -140,7 +140,7 @@ public class StateChangeMediator {
         public void run() {
             // 状態変化モデルを取得しに行く
             StateDelegater del = StateDelegater.getInstance();
-            List<StateMsgModel> msgList = del.getChartStateMsgList(id);
+            List<StateMsgModel> msgList = del.getStateMsgList(id);
             
             // 各リスナーで更新処理をする
             for (AbstractStateListener listener : listeners) {
