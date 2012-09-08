@@ -20,13 +20,13 @@ public class FacilityContext {
     // 施設の待合リスト
     private final List<PatientVisitModel> pvtList;
     // カルテを開いている患者の、ptPkとownerUUIDのマップ
-    private final Map<Long, String> patientMap;
+    private final Map<Long, String> ptPkOwnerMap;
 
     public FacilityContext() {
         currentId = 0;
         stateMsgList = new CopyOnWriteArrayList<StateMsgModel>();
         pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
-        patientMap = new ConcurrentHashMap<Long, String>();
+        ptPkOwnerMap = new ConcurrentHashMap<Long, String>();
     }
     
     public List<StateMsgModel> getStateMsgList() {
@@ -43,7 +43,7 @@ public class FacilityContext {
     }
     
     public Map<Long, String> getPtPkOwnerMap() {
-        return patientMap;
+        return ptPkOwnerMap;
     }
     
     public int getCurrentId() {
