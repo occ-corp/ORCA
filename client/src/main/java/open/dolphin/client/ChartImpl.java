@@ -2137,8 +2137,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         // インスタンスリストから取り除く
         if (Dolphin.getInstance().getAllCharts().remove(closed)) {
             // 状態変化を通知する
-            PatientVisitModel model = closed.getPatientVisit();
-            Dolphin.getInstance().karteClosed(model);
+            StateChangeListener.getInstance().publishKarteClosed(closed.getPatientVisit());
         }
     }
 

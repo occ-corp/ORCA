@@ -14,7 +14,8 @@ import javax.swing.event.*;
 import javax.swing.table.TableColumn;
 import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ClientContext;
-import open.dolphin.client.StateChangeMediator;
+import open.dolphin.client.Dolphin;
+import open.dolphin.client.StateChangeListener;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.AdmissionModel;
@@ -52,6 +53,8 @@ public class AdmissionList extends AbstractMainComponent {
     private static final int[] COLUMN_WIDTH = {
         20, 80, 130, 40, 100, 100, 50, 80, 30};
     
+    private String clientUUID;
+    
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
     
@@ -85,6 +88,7 @@ public class AdmissionList extends AbstractMainComponent {
     
     public AdmissionList() {
         setName(NAME);
+        clientUUID = Dolphin.getInstance().getClientUUID();
     }
 
     @Override
@@ -113,7 +117,7 @@ public class AdmissionList extends AbstractMainComponent {
             Project.setString(COLUMN_SPEC_NAME, line);
         }
         // ChartStateListenerから除去する
-        StateChangeMediator.getInstance().removeListener(this);
+        StateChangeListener.getInstance().removeListener(this);
     }
     /**
      * メインウインドウのタブで受付リストに切り替わった時 コールされる。
@@ -128,7 +132,7 @@ public class AdmissionList extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getAdmittedPatients();
-        StateChangeMediator.getInstance().addListener(this);
+        StateChangeListener.getInstance().addListener(this);
         enter();
     }
     
@@ -632,7 +636,7 @@ public class AdmissionList extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    public void stateChanged(StateMsgModel msg) {
+    public void onMessage(StateMsgModel msg) {
 
     }
 }

@@ -120,7 +120,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         }
     }
 
-    public PatientModel getSelectedPatinet() {
+    public PatientModel getSelectedPatient() {
         return selectedPatient;
     }
 
@@ -164,7 +164,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
      */
     private void controlMenu() {
 
-        PatientModel pvt = getSelectedPatinet();
+        PatientModel pvt = getSelectedPatient();
         boolean enabled = canOpen(pvt);
         getContext().enabledAction(GUIConst.ACTION_OPEN_KARTE, enabled);
     }
@@ -610,10 +610,11 @@ public class PatientSearchImpl extends AbstractMainComponent {
      */
     public void openKarte() {
 
-        if (canOpen(getSelectedPatinet())) {
+        if (canOpen(getSelectedPatient())) {
 
             // 来院情報を生成する
-            PatientVisitModel pvt = createFakePvt(getSelectedPatinet());
+            PatientModel pm = getSelectedPatient();
+            PatientVisitModel pvt = StateChangeListener.getInstance().createFakePvt(pm);
             // カルテコンテナを生成する
             getContext().openKarte(pvt);
         }
@@ -644,7 +645,8 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
             @Override
             protected Void doInBackground() {
-                PatientVisitModel pvt = createFakePvt(getSelectedPatinet());
+                PatientModel pm = getSelectedPatient();
+                PatientVisitModel pvt = StateChangeListener.getInstance().createFakePvt(pm);
                 PVTDelegater pdl = PVTDelegater.getInstance();
                 pdl.addPvt(pvt);
                 return null;
@@ -1201,7 +1203,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    public void stateChanged(StateMsgModel msg) {
+    public void onMessage(StateMsgModel msg) {
 
     }
 

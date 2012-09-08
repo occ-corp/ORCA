@@ -9,7 +9,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.servlet.AsyncContext;
 import open.dolphin.infomodel.*;
-import open.dolphin.mbean.FacilityContext;
 import open.dolphin.mbean.ServletContextHolder;
 
 /**
@@ -35,22 +34,12 @@ public class StateServiceBean {
             logger.warning("Facility id is null.");
             return;
         }
-        
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        
-        int nextId = context.getNextId();
-        msg.setId(nextId);
-        context.getStateMsgList().add(msg);
 
         List<AsyncContext> acList = contextHolder.getAsyncContextList();
         synchronized (acList) {
-            int minId = Integer.MAX_VALUE;
             for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
                 
                 AsyncContext ac = itr.next();
-                int id = (Integer) ac.getRequest().getAttribute("id");
-                minId = Math.min(minId, id);
-                
                 String acFid = (String) ac.getRequest().getAttribute("fid");
                 String acUUID = (String) ac.getRequest().getAttribute("clientUUID");
                 String issuerUUID = msg.getIssuerUUID();
@@ -59,51 +48,19 @@ public class StateServiceBean {
                 if (fid.equals(acFid) && !acUUID.equals(issuerUUID)) {
                     itr.remove();
                     try {
-                        ac.getRequest().setAttribute("nextId", String.valueOf(nextId));
-                        ac.dispatch("/openSource/stateRes/nextId");
+                        ac.getRequest().setAttribute("stateMsg", msg);
+                        ac.dispatch("/openSource/stateRes/dispatch");
                     } catch (Exception ex) {
                         logger.warning("Exception in ac.dispatch.");
                     }
                 }
             }
-            // こまめにゴミ掃除
-            cleanUpMsgList(context, minId);
         }
     }
 
-    private void cleanUpMsgList(FacilityContext context, int minId) {
-        
-        List<StateMsgModel> stateMsgList = context.getStateMsgList();
-        List<StateMsgModel> toRemove = new ArrayList<StateMsgModel>();
-        for(StateMsgModel msg : stateMsgList) {
-            if (msg.getId() <= minId) {
-                toRemove.add(msg);
-            }
-        }
-        stateMsgList.removeAll(toRemove);
-    }
-    
     public List<PatientVisitModel> getPvtList(String fid) {
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        return context.getPvtList();
+        return contextHolder.getPvtList(fid);
     }
-    
-    public List<StateMsgModel> getStateMsgList(String fid, int fromMsgId) {
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        List<StateMsgModel> list = new ArrayList<StateMsgModel>();
-        for (StateMsgModel msg : context.getStateMsgList()) {
-            if (msg.getId() >= fromMsgId) {
-                list.add(msg);
-            }
-        }
-        return list;
-    }
-    
-    public int getCurrentMsgId(String fid) {
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        return context.getCurrentId();
-     }
-    
     /**
      * status情報を更新する
      */
@@ -119,8 +76,7 @@ public class StateServiceBean {
         String ownerUUID = msg.getOwnerUUID();
         long ptPk = msg.getPtPk();
         
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        List<PatientVisitModel> pvtList = context.getPvtList();
+        List<PatientVisitModel> pvtList = contextHolder.getPvtList(fid);
 
         // データベースを更新
         PatientVisitModel exist = em.find(PatientVisitModel.class, pvtId);
@@ -144,13 +100,6 @@ public class StateServiceBean {
                 model.getPatientModel().setOwnerUUID(ownerUUID);
                 break;
             }
-        }
-
-        // ptPkOwnerMapを更新
-        if (ownerUUID == null) {
-            context.getPtPkOwnerMap().put(ptPk, ownerUUID);
-        } else {
-            context.getPtPkOwnerMap().remove(ptPk);
         }
 
         // クライアントに通知
@@ -189,8 +138,7 @@ public class StateServiceBean {
         for (PatientVisitModel pvt : result) {
             
             String fid = pvt.getFacilityId();
-            FacilityContext context = contextHolder.getFacilityContext(fid);
-            context.getPvtList().add(pvt);
+            contextHolder.getPvtList(fid).add(pvt);
 
             PatientModel patient = pvt.getPatientModel();
 
@@ -268,12 +216,13 @@ public class StateServiceBean {
         
         contextHolder.setToday();
         
-        Map<String, FacilityContext> map = contextHolder.getFacilityContextMap();
+        Map<String, List<PatientVisitModel>> map = contextHolder.getPvtListMap();
+        
         for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
-            FacilityContext facilityContext = (FacilityContext) entry.getValue();
+            List<PatientVisitModel> pvtList = (List<PatientVisitModel>) entry.getValue();
+            
             List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();
-            List<PatientVisitModel> pvtList = facilityContext.getPvtList();
             for (PatientVisitModel pvt : pvtList) {
                 // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
                 if (pvt.getStateBit(PatientVisitModel.BIT_SAVE_CLAIM) 
@@ -282,9 +231,6 @@ public class StateServiceBean {
                 }
             }
             pvtList.removeAll(toRemove);
-            
-            // StateMsgListを初期化する
-            facilityContext.clearStateMsgList();
             
             // クライアントに伝える。サーバーで作るmsgはIssuerUUIDはnull
             String fid = (String) entry.getKey();

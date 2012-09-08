@@ -5,8 +5,10 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.inject.Singleton;
 import javax.servlet.AsyncContext;
+import open.dolphin.infomodel.PatientVisitModel;
 
 /**
  * サーブレットの諸情報を保持するクラス
@@ -22,9 +24,9 @@ public class ServletContextHolder {
     // AsyncContextのリスト
     private final List<AsyncContext> acList = new ArrayList<AsyncContext>();
     
-    // facilityIdとfaciltyContextのマップ
-    private Map<String, FacilityContext> facilityContextMap 
-            = new ConcurrentHashMap<String, FacilityContext>();
+    // facilityIdとpvtListのマップ
+    private Map<String, List<PatientVisitModel>> pvtListMap 
+            = new ConcurrentHashMap<String, List<PatientVisitModel>>();
     
 
     public List<AsyncContext> getAsyncContextList() {
@@ -43,17 +45,17 @@ public class ServletContextHolder {
         }
     }
 
-    public Map<String, FacilityContext> getFacilityContextMap() {
-        return facilityContextMap;
-    }    
+    public Map<String, List<PatientVisitModel>> getPvtListMap() {
+        return pvtListMap;
+    }
     
-    public FacilityContext getFacilityContext(String fid) {
-        FacilityContext context = facilityContextMap.get(fid);
-        if (context == null) {
-            context = new FacilityContext();
-            facilityContextMap.put(fid, context);
+    public List<PatientVisitModel> getPvtList(String fid) {
+        List<PatientVisitModel> pvtList = pvtListMap.get(fid);
+        if (pvtList == null) {
+            pvtList = new CopyOnWriteArrayList<PatientVisitModel>();
+            pvtListMap.put(fid, pvtList);
         }
-        return context;
+        return pvtList;
     }
 
     // 今日と明日を設定する

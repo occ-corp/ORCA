@@ -14,8 +14,8 @@ import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.StateServiceBean;
 
 /**
- *
- * @author masuda
+ * StateResource
+ * @author masuda, Masuda Naika
  */
 @Path("stateRes")
 public class StateResource extends AbstractResource {
@@ -35,10 +35,10 @@ public class StateResource extends AbstractResource {
     @Context
     private HttpServletRequest servletReq;
     
-
+    
     @GET
-    @Path("subscribe/{id}")
-    public void subscribe(@PathParam("id") String id) {
+    @Path("subscribe")
+    public void subscribe() {
 
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         String clientUUID = servletReq.getHeader(CLIENT_UUID);
@@ -48,7 +48,6 @@ public class StateResource extends AbstractResource {
         ac.setTimeout(asyncTimeout);
         // requestにfid, msgIdを記録しておく
         ac.getRequest().setAttribute("fid", fid);
-        ac.getRequest().setAttribute("id", Integer.valueOf(id));
         ac.getRequest().setAttribute(CLIENT_UUID, clientUUID);
         contextHolder.addAsyncContext(ac);
 
@@ -105,39 +104,15 @@ public class StateResource extends AbstractResource {
         return String.valueOf(cnt);
     }
     
-    @GET
-    @Path("msgList/{param}")
-    @Produces(MEDIATYPE_JSON_UTF8)
-    public String getStateMsgList(@PathParam("param") String param){
-        
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
-        int fromMsgId = Integer.valueOf(param);
-        
-        List<StateMsgModel> list = stateServiceBean.getStateMsgList(fid, fromMsgId);
-
-        String json = getConverter().toJson(list);
-        debug(json);
-        
-        return json;
-    }
-    
     // 参：きしだのはてな もっとJavaEE6っぽくcometチャットを実装する
     // http://d.hatena.ne.jp/nowokay/20110416/1302978207
     @GET
-    @Path("nextId")
+    @Path("dispatch")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String getNextId() {
-        String nextId = (String) servletReq.getAttribute("nextId");
-        return nextId;
-    }
-    
-    @GET
-    @Path("currentId")
-    @Produces(MEDIATYPE_TEXT_UTF8)
-    public String getCurrentId() {
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
-        int currentId = stateServiceBean.getCurrentMsgId(fid);
-        return String.valueOf(currentId);
+    public String getStateMsgModel() {
+        StateMsgModel msg = (StateMsgModel) servletReq.getAttribute("stateMsg");
+        String json = getConverter().toJson(msg);
+        return json;
     }
 
     @Override

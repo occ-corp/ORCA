@@ -17,7 +17,7 @@ import open.dolphin.util.BeanUtils;
 public class StateDelegater extends BusinessDelegater {
     
     private static final String RES_CS = "stateRes/";
-    private static final String POLLING_PATH = RES_CS + "subscribe/";
+    private static final String SUBSCRIBE_PATH = RES_CS + "subscribe/";
     
     private static final boolean debug = false;
     private static final StateDelegater instance;
@@ -65,71 +65,37 @@ public class StateDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public List<StateMsgModel> getStateMsgList(int fromMsgId) {
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(RES_CS);
-        sb.append("msgList/");
-        sb.append(String.valueOf(fromMsgId));
-        String path = sb.toString();
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_JSON_UTF8)
+    public StateMsgModel subscribe() {
+        
+        String path = SUBSCRIBE_PATH;
+        
+        ClientResponse response = JerseyClient.getInstance()
+                .getAsyncResource(path)
+                .accept(MEDIATYPE_TEXT_UTF8)
                 .get(ClientResponse.class);
-
+        
         int status = response.getStatus();
         String entityStr = response.getEntity(String.class);
+        
         debug(status, entityStr);
-
+        
         if (status != HTTP200) {
             return null;
         }
         
-        TypeReference typeRef = new TypeReference<List<StateMsgModel>>(){};
-        List<StateMsgModel> list = (List<StateMsgModel>)
-                getConverter().fromJson(entityStr, typeRef);
-
-        // pvtがのっかて来てるときは保険をデコード
-        if (list != null && !list.isEmpty()) {
-            for (StateMsgModel msg : list) {
-                PatientVisitModel pvt = msg.getPatientVisitModel();
-                if (pvt != null) {
-                    PatientModel pm = pvt.getPatientModel();
-                    decodeHealthInsurance(pm);
-                }
-            }
+        StateMsgModel msg = (StateMsgModel) 
+                getConverter().fromJson(entityStr, StateMsgModel.class);
+        
+        // PatientModelが乗っかってきている場合は保険をデコード
+        PatientModel pm = msg.getPatientModel();
+        if (pm != null) {
+            decodeHealthInsurance(pm);
         }
-        return list;
-    }
-    
-    public int getCurrentId() {
-        
-        String path = RES_CS + "currentId";
-        
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .get(ClientResponse.class);
-        
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-        debug(status, entityStr);
-
-        if (status != HTTP200) {
-            return 0;
+        PatientVisitModel pvt = msg.getPatientVisitModel();
+        if (pvt.getPatientModel() != null) {
+            decodeHealthInsurance(pvt.getPatientModel());
         }
-        
-        return Integer.valueOf(entityStr);
-    }
-    
-    public String subscribe(int currentId) {
-        
-        String path = POLLING_PATH + String.valueOf(currentId);
-        String ret = JerseyClient.getInstance()
-                .getAsyncResource(path)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .get(String.class);
-        
-        return ret;
+        return msg;
     }
     
     /**

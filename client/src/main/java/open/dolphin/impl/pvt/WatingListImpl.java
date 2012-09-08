@@ -156,12 +156,17 @@ public class WatingListImpl extends AbstractMainComponent {
     
     // pvt delegater
     private PVTDelegater pvtDelegater;
+    
+    private String clientUUID;
+    private String orcaId;
 
     /**
      * Creates new WatingList
      */
     public WatingListImpl() {
         setName(NAME);
+        clientUUID = Dolphin.getInstance().getClientUUID();
+        orcaId = Project.getUserModel().getOrcaId();
     }
     
     /**
@@ -391,7 +396,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 if (col == memoColumn) {
                     String memo = ((String) value).trim();
                     if (memo != null && (!memo.equals(""))) {
-                        putPvtStateChange(pvt);
+                        StateChangeListener.getInstance().publishPvtState(pvt);
                     }
 
                 } else if (col == stateColumn) {
@@ -432,7 +437,7 @@ public class WatingListImpl extends AbstractMainComponent {
                         pvt.setStateBit(theBit, true);
                     }
 
-                    putPvtStateChange(pvt);
+                    StateChangeListener.getInstance().publishPvtState(pvt);
                 }
             }
         };
@@ -583,7 +588,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getFullPvt();
-        StateChangeMediator.getInstance().addListener(this);
+        StateChangeListener.getInstance().addListener(this);
         timerTask = new UpdatePvtInfoTask();
         restartTimer();
         enter();
@@ -643,7 +648,7 @@ public class WatingListImpl extends AbstractMainComponent {
             Project.setString(COLUMN_SPEC_NAME, line);
         }
         // ChartStateListenerから除去する
-        StateChangeMediator.getInstance().removeListener(this);
+        StateChangeListener.getInstance().removeListener(this);
     }
 
 
@@ -987,14 +992,7 @@ public class WatingListImpl extends AbstractMainComponent {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stsel, stsel);
         }
     }
-    
-    private void putPvtStateChange(PatientVisitModel pvt) {
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
-        StateChangeMediator.getInstance().postStateMsg(msg);
-    }
-    
+
     /**
      * 選択した患者の受付キャンセルをundoする。masuda
      */
@@ -1011,7 +1009,7 @@ public class WatingListImpl extends AbstractMainComponent {
         
         // updateStateする。
         pvtModel.setStateBit(PatientVisitModel.BIT_CANCEL, false);
-        putPvtStateChange(pvtModel);
+        StateChangeListener.getInstance().publishPvtState(pvtModel);
     }
     
     /**
@@ -1033,7 +1031,7 @@ public class WatingListImpl extends AbstractMainComponent {
         msg.setParamFromPvt(pvtModel);
         msg.setIssuerUUID(clientUUID);
         msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
-        stateChanged(msg);
+        onMessage(msg);
         
         SwingWorker worker = new SwingWorker<Boolean, Void>() {
 
@@ -1389,7 +1387,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // ChartStateListener
     // 待合リストを更新する
     @Override
-    public void stateChanged(StateMsgModel msg) {
+    public void onMessage(StateMsgModel msg) {
 
         StateMsgModel.CMD command = msg.getCommand();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();

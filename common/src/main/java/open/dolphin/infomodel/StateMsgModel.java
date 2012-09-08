@@ -7,8 +7,6 @@ package open.dolphin.infomodel;
  */
 public class StateMsgModel {
     
-    private int id;
-    
     private String issuerUUID;
     private CMD command;
     
@@ -47,9 +45,6 @@ public class StateMsgModel {
         this.ptPk = pvt.getPatientModel().getId();
     }
     
-    public void setId(int id) {
-        this.id = id;
-    }
     public void setCommand(CMD command) {
         this.command = command;
     }
@@ -87,9 +82,6 @@ public class StateMsgModel {
         facilityId = fid;
     }
     
-    public int getId() {
-        return id;
-    }
     public CMD getCommand() {
         return command;
     }

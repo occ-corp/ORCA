@@ -563,7 +563,7 @@ public class Dolphin implements MainWindow {
         
 
         // ChartStateListenerを開始する
-        StateChangeMediator.getInstance().start();
+        StateChangeListener.getInstance().start();
         
         windowSupport.getFrame().setVisible(true);
     }
@@ -613,20 +613,6 @@ public class Dolphin implements MainWindow {
         this.providers = providers;
     }
 
-    // ChartImplを閉じたときのChartState状態変更処理
-    public void karteClosed(PatientVisitModel pvt) {
-        
-        // PatientVisitModel.BIT_OPENとownerUUIDをリセットする
-        pvt.setStateBit(PatientVisitModel.BIT_OPEN, false);
-        pvt.getPatientModel().setOwnerUUID(null);
-        
-        // ChartStateListenerに通知する
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
-        StateChangeMediator.getInstance().postStateMsg(msg);
-    }
-    
     /**
      * カルテをオープンする。
      * @param pvt 患者来院情報
@@ -699,13 +685,8 @@ public class Dolphin implements MainWindow {
         chart.setReadOnly(readOnly);
         chart.start();
         
-        // PatientVisitModel.BIT_OPENを立てる
-        pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
-        // ChartStateListenerに通知する
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
-        StateChangeMediator.getInstance().postStateMsg(msg);
+        // 
+        StateChangeListener.getInstance().publishKarteOpened(pvt);
 //masuda$        
     }
 
@@ -1123,7 +1104,7 @@ public class Dolphin implements MainWindow {
         FocusPropertyChangeListener.getInstance().dispose();
         
         // ChartStateListenerを中止する
-        StateChangeMediator.getInstance().stop();
+        StateChangeListener.getInstance().stop();
         
         // ORCA apiを破棄する
         OrcaApi.getInstance().dispose();

@@ -125,7 +125,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         
         // 来院情報を生成する
         PatientModel patient = selectedLabo.getPatient();
-        PatientVisitModel pvt = createFakePvt(patient);
+        PatientVisitModel pvt = StateChangeListener.getInstance().createFakePvt(patient);
 
         // カルテコンテナを生成する
         getContext().openKarte(pvt);
@@ -614,6 +614,6 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    public void stateChanged(StateMsgModel msg) {
+    public void onMessage(StateMsgModel msg) {
     }
 }

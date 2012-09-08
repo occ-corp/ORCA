@@ -78,7 +78,7 @@ public class PVTResource2 extends AbstractResource {
     @GET
     @Path("pvtList")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPvtListModel() {
+    public String getPvtList() {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
         List<PatientVisitModel> model = stateServiceBean.getPvtList(fid);
