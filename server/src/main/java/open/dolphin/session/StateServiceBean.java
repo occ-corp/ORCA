@@ -105,22 +105,26 @@ public class StateServiceBean {
      }
     
     /**
-     * Pvtの情報を更新する
-     * 所有者、state、病名数、メモ
+     * status情報を更新する
      */
     public int updateState(StateMsgModel msg) {
-        
-        int ret = 0;
 
+        // msgからパラメーターを取得
+        String fid = msg.getFacilityId();
         long pvtId = msg.getPvtPk();
         int state = msg.getState();
         int byomeiCount = msg.getByomeiCount();
         int byomeiCountToday = msg.getByomeiCountToday();
         String memo = msg.getMemo();
+        String ownerUUID = msg.getOwnerUUID();
+        long ptPk = msg.getPtPk();
+        
+        FacilityContext context = contextHolder.getFacilityContext(fid);
+        List<PatientVisitModel> pvtList = context.getPvtList();
 
-        // データベースから該当PVTを取得
+        // データベースを更新
         PatientVisitModel exist = em.find(PatientVisitModel.class, pvtId);
-        // WatingListから開いていないとexist = nullなので
+        // WatingListから開いていないとpvt.id = 0で、exist = nullなので更新されない
         if (exist != null) {
             // データベースのpvtStateを更新
             exist.setState(state);
@@ -129,27 +133,35 @@ public class StateServiceBean {
             exist.setMemo(memo);
         }
 
-        // pvtListのpvtStateとbyomei countとオーナーを更新
-        String fid = msg.getFacilityId();
-        FacilityContext context = contextHolder.getFacilityContext(fid);
-        List<PatientVisitModel> pvtList = context.getPvtList();
-
+        // WatingListから開いていないとpvt.id = 0なので更新されない。
+        // pvtListを更新
         for (PatientVisitModel model : pvtList) {
             if (model.getId() == pvtId) {
                 model.setState(state);
                 model.setByomeiCount(byomeiCount);
                 model.setByomeiCountToday(byomeiCountToday);
                 model.setMemo(memo);
-                model.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
-                // クライアントに通知
-                notifyEvent(msg);
-                ret = 1;
+                model.getPatientModel().setOwnerUUID(ownerUUID);
                 break;
             }
         }
-        
-        return ret;
+
+        // patientListを更新
+        PatientModel fake = new PatientModel();
+        fake.setId(ptPk);
+        if (ownerUUID == null) {
+            context.getPatientSet().remove(fake);
+        } else {
+            fake.setOwnerUUID(ownerUUID);
+            context.getPatientSet().add(fake);
+        }
+
+        // クライアントに通知
+        notifyEvent(msg);
+
+        return 1;
     }
+
     
     // 起動後最初のPvtListを作る
     public void initializePvtList() {

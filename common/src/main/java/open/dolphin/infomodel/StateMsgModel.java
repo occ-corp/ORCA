@@ -21,9 +21,11 @@ public class StateMsgModel {
     private String facilityId;
     
     private PatientVisitModel pvt;
+    
+    private long ptPk;
     private PatientModel patient;
     
-    public static enum CMD {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_OWNER, PM_MERGE};
+    public static enum CMD {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
     
     public StateMsgModel() {
     }
@@ -42,6 +44,7 @@ public class StateMsgModel {
         this.memo = pvt.getMemo();
         this.ownerUUID = pvt.getPatientModel().getOwnerUUID();
         this.facilityId = pvt.getFacilityId();
+        this.ptPk = pvt.getPatientModel().getId();
     }
     
     public void setId(int id) {
@@ -70,6 +73,9 @@ public class StateMsgModel {
     }
     public void setPatientVisitModel(PatientVisitModel pvt) {
         this.pvt = pvt;
+    }
+    public void setPtPk(long ptPk) {
+        this.ptPk = ptPk;
     }
     public void setPatientModel(PatientModel patient) {
         this.patient = patient;
@@ -107,6 +113,9 @@ public class StateMsgModel {
     }
     public PatientVisitModel getPatientVisitModel() {
         return pvt;
+    }
+    public long getPtPk() {
+        return ptPk;
     }
     public PatientModel getPatientModel() {
         return patient;
