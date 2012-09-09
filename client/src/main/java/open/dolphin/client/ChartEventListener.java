@@ -6,7 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import open.dolphin.delegater.StateDelegater;
+import open.dolphin.delegater.ChartEventDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.util.BeanUtils;
@@ -155,7 +155,7 @@ public class ChartEventListener {
             
             while (isRunning) {
                 try {
-                    String json = StateDelegater.getInstance().subscribe();
+                    String json = ChartEventDelegater.getInstance().subscribe();
                     if (json != null) {
                         exec.execute(new RemoteOnEventTask(json));
                     }
@@ -182,7 +182,7 @@ public class ChartEventListener {
                 listener.onEvent(evt);
             }
             // サーバーに更新を通知
-            StateDelegater del = StateDelegater.getInstance();
+            ChartEventDelegater del = ChartEventDelegater.getInstance();
             del.putStateMsgModel(evt);
         }
         

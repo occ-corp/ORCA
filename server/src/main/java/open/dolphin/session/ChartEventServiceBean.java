@@ -10,15 +10,16 @@ import javax.persistence.PersistenceContext;
 import javax.servlet.AsyncContext;
 import open.dolphin.infomodel.*;
 import open.dolphin.mbean.ServletContextHolder;
+import open.dolphin.rest.ChartEventResource;
 
 /**
  * StateServiceBean
  * @author masuda, Masuda Naika
  */
 @Stateless
-public class StateServiceBean {
- 
-    private static final Logger logger = Logger.getLogger(StateServiceBean.class.getSimpleName());
+public class ChartEventServiceBean {
+
+    private static final Logger logger = Logger.getLogger(ChartEventServiceBean.class.getSimpleName());
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -27,9 +28,9 @@ public class StateServiceBean {
     private EntityManager em;
     
 
-    public void notifyEvent(ChartEvent msg) {
+    public void notifyEvent(ChartEvent evt) {
 
-        String fid = msg.getFacilityId();
+        String fid = evt.getFacilityId();
         if (fid == null) {
             logger.warning("Facility id is null.");
             return;
@@ -40,16 +41,16 @@ public class StateServiceBean {
             for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
                 
                 AsyncContext ac = itr.next();
-                String acFid = (String) ac.getRequest().getAttribute("fid");
-                String acUUID = (String) ac.getRequest().getAttribute("clientUUID");
-                String issuerUUID = msg.getIssuerUUID();
+                String acFid = (String) ac.getRequest().getAttribute(ChartEventResource.FID);
+                String acUUID = (String) ac.getRequest().getAttribute(ChartEventResource.CLIENT_UUID);
+                String issuerUUID = evt.getIssuerUUID();
                 
                 // 同一施設かつStateMsgModelの発行者でないクライアントに通知する
                 if (fid.equals(acFid) && !acUUID.equals(issuerUUID)) {
                     itr.remove();
                     try {
-                        ac.getRequest().setAttribute("stateMsg", msg);
-                        ac.dispatch("/openSource/stateRes/dispatch");
+                        ac.getRequest().setAttribute(ChartEventResource.KEY_NAME, evt);
+                        ac.dispatch(ChartEventResource.DISPATCH_URL);
                     } catch (Exception ex) {
                         logger.warning("Exception in ac.dispatch.");
                     }

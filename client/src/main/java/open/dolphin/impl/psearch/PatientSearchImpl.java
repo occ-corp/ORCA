@@ -1213,9 +1213,9 @@ public class PatientSearchImpl extends AbstractMainComponent {
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();
-        ChartEvent.EVENT command = evt.getEventType();
+        ChartEvent.EVENT eventType = evt.getEventType();
         
-        switch (command) {
+        switch (eventType) {
             case PVT_STATE:
                 for (int row = 0; row < list.size(); ++row) {
                     PatientModel pm = list.get(row);

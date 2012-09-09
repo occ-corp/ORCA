@@ -1390,10 +1390,10 @@ public class WatingListImpl extends AbstractMainComponent {
     @Override
     public void onEvent(ChartEvent evt) {
 
-        ChartEvent.EVENT command = evt.getEventType();
+        ChartEvent.EVENT eventType = evt.getEventType();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();
 
-        switch (command) {
+        switch (eventType) {
             case PVT_ADD:
                 PatientVisitModel model = evt.getPatientVisitModel();
                 // pvtListに追加

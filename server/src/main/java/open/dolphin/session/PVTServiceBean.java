@@ -38,7 +38,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
     private EntityManager em;
     
     @Inject
-    private StateServiceBean stateServiceBean;
+    private ChartEventServiceBean eventServiceBean;
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -174,7 +174,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         }
 
         // 受付嬢にORCAの受付ボタンを連打されたとき用ｗ 復活！！
-        List<PatientVisitModel> pvtList = stateServiceBean.getPvtList(fid);
+        List<PatientVisitModel> pvtList = eventServiceBean.getPvtList(fid);
         for (int i = 0; i < pvtList.size(); ++i) {
             PatientVisitModel test = pvtList.get(i);
             // pvt時刻が同じでキャンセルでないものは更新(merge)する
@@ -195,12 +195,12 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 msg.setParamFromPvt(pvt);
                 msg.setPatientVisitModel(pvt);
                 msg.setEventType(ChartEvent.EVENT.PVT_MERGE);
-                stateServiceBean.notifyEvent(msg);
+                eventServiceBean.notifyEvent(msg);
                 return 0;   // 追加０個
             }
         }
         // 同じ時刻のPVTがないならばPVTをデータベースに登録(persist)する
-        stateServiceBean.setByomeiCount(karteId, pvt);   // 病名数をカウントする
+        eventServiceBean.setByomeiCount(karteId, pvt);   // 病名数をカウントする
         em.persist(pvt);
         // pvtListに追加
         pvtList.add(pvt);
@@ -210,7 +210,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         msg.setParamFromPvt(pvt);
         msg.setPatientVisitModel(pvt);
         msg.setEventType(ChartEvent.EVENT.PVT_ADD);
-        stateServiceBean.notifyEvent(msg);
+        eventServiceBean.notifyEvent(msg);
         
         return 1;   // 追加１個
     }
@@ -230,7 +230,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 em.remove(exist);
             }
             // pvtListから削除
-            List<PatientVisitModel> pvtList = stateServiceBean.getPvtList(fid);
+            List<PatientVisitModel> pvtList = eventServiceBean.getPvtList(fid);
             for (PatientVisitModel model : pvtList) {
                 if (model.getId() == id) {
                     pvtList.remove(model);

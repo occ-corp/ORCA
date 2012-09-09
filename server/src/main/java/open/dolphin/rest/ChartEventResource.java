@@ -1,7 +1,6 @@
 package open.dolphin.rest;
 
 import java.io.IOException;
-import java.util.List;
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -11,23 +10,26 @@ import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.ChartEvent;
 import open.dolphin.mbean.ServletContextHolder;
-import open.dolphin.session.StateServiceBean;
+import open.dolphin.session.ChartEventServiceBean;
 
 /**
  * StateResource
  * @author masuda, Masuda Naika
  */
-@Path("stateRes")
-public class StateResource extends AbstractResource {
+@Path("chartEvent")
+public class ChartEventResource extends AbstractResource {
     
     private static final boolean debug = false;
     
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
     
-    private static final String CLIENT_UUID = "clientUUID";
+    public static final String CLIENT_UUID = "clientUUID";
+    public static final String FID = "fid";
+    public static final String DISPATCH_URL = "/openSource/chartEvent/dispatch";
+    public static final String KEY_NAME = "chartEvent";
     
     @Inject
-    private StateServiceBean stateServiceBean;
+    private ChartEventServiceBean eventServiceBean;
     
     @Inject
     private ServletContextHolder contextHolder;
@@ -46,8 +48,8 @@ public class StateResource extends AbstractResource {
         final AsyncContext ac = servletReq.startAsync();
         // timeoutを設定
         ac.setTimeout(asyncTimeout);
-        // requestにfid, msgIdを記録しておく
-        ac.getRequest().setAttribute("fid", fid);
+        // requestにfid, clientUUIDを記録しておく
+        ac.getRequest().setAttribute(FID, fid);
         ac.getRequest().setAttribute(CLIENT_UUID, clientUUID);
         contextHolder.addAsyncContext(ac);
 
@@ -95,11 +97,8 @@ public class StateResource extends AbstractResource {
 
         ChartEvent msg = (ChartEvent)
                 getConverter().fromJson(json, ChartEvent.class);
-        
-        // クライアントから送られてきたmsgにfidを設定
-        msg.setFacilityId(fid);
-        
-        int cnt = stateServiceBean.updateState(msg);
+
+        int cnt = eventServiceBean.updateState(msg);
 
         return String.valueOf(cnt);
     }
@@ -110,7 +109,8 @@ public class StateResource extends AbstractResource {
     @Path("dispatch")
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String getStateMsgModel() {
-        ChartEvent msg = (ChartEvent) servletReq.getAttribute("stateMsg");
+        
+        ChartEvent msg = (ChartEvent) servletReq.getAttribute(KEY_NAME);
         String json = getConverter().toJson(msg);
         return json;
     }

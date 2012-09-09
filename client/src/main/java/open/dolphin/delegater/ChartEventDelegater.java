@@ -8,25 +8,25 @@ import open.dolphin.project.Project;
  * State変化関連のデレゲータ
  * @author masuda, Masuda Naika
  */
-public class StateDelegater extends BusinessDelegater {
+public class ChartEventDelegater extends BusinessDelegater {
     
     private static final String RES_CS = "stateRes/";
     private static final String SUBSCRIBE_PATH = RES_CS + "subscribe/";
     
     private static final boolean debug = false;
-    private static final StateDelegater instance;
+    private static final ChartEventDelegater instance;
     
     private String fid;
 
     static {
-        instance = new StateDelegater();
+        instance = new ChartEventDelegater();
     }
     
-    private StateDelegater() {
+    private ChartEventDelegater() {
         fid = Project.getFacilityId();
     }
     
-    public static StateDelegater getInstance() {
+    public static ChartEventDelegater getInstance() {
         return instance;
     }
     

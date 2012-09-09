@@ -9,7 +9,7 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timeout;
 import javax.inject.Inject;
-import open.dolphin.session.StateServiceBean;
+import open.dolphin.session.ChartEventServiceBean;
 import open.dolphin.updater.Updater;
 
 /**
@@ -23,7 +23,7 @@ public class ServletStartup {
 private static final Logger logger = Logger.getLogger(ServletStartup.class.getSimpleName());
 
     @Inject
-    private StateServiceBean stateServiceBean;
+    private ChartEventServiceBean eventServiceBean;
     
     @Inject
     private Updater updater;
@@ -31,7 +31,7 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     @PostConstruct
     public void init() {
         updater.start();
-        stateServiceBean.start();
+        eventServiceBean.start();
     }
 
     @PreDestroy
@@ -41,7 +41,7 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     // 日付が変わったらpvtListをクリアしクライアントに伝える
     @Schedule(hour="0", minute="0", persistent=false)
     public void dayChange() {
-        stateServiceBean.renewPvtList();
+        eventServiceBean.renewPvtList();
     }
     @Timeout
     public void timeout(Timer timer) {

@@ -9,7 +9,7 @@ import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.session.PVTServiceBean;
-import open.dolphin.session.StateServiceBean;
+import open.dolphin.session.ChartEventServiceBean;
 
 /**
  * PVTResource2
@@ -26,7 +26,7 @@ public class PVTResource2 extends AbstractResource {
     private PVTServiceBean pvtServiceBean;
     
     @Inject
-    private StateServiceBean stateServiceBean;
+    private ChartEventServiceBean eventServiceBean;
     
     @Context
     private HttpServletRequest servletReq;
@@ -81,7 +81,7 @@ public class PVTResource2 extends AbstractResource {
     public String getPvtList() {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
-        List<PatientVisitModel> model = stateServiceBean.getPvtList(fid);
+        List<PatientVisitModel> model = eventServiceBean.getPvtList(fid);
         
         String json = getConverter().toJson(model);
         debug(json);

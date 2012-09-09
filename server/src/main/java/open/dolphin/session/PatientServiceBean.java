@@ -48,7 +48,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
     
 //masuda^
     @Inject
-    private StateServiceBean stateServiceBean;
+    private ChartEventServiceBean eventServiceBean;
 //masuda$
 
     @SuppressWarnings("unchecked")
@@ -264,17 +264,17 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
     // pvtListのPatientModelを更新し、クライアントにも通知する
     private void updatePvtList(PatientModel pm) {
         String fid = pm.getFacilityId();
-        List<PatientVisitModel> pvtList = stateServiceBean.getPvtList(fid);
+        List<PatientVisitModel> pvtList = eventServiceBean.getPvtList(fid);
         for (PatientVisitModel pvt : pvtList) {
             if (pvt.getPatientModel().getId() == pm.getId()) {
                 pvt.setPatientModel(pm);
                  // クライアントに通知
-                String uuid = stateServiceBean.getServerUUID();
+                String uuid = eventServiceBean.getServerUUID();
                 ChartEvent msg = new ChartEvent(uuid);
                 msg.setPatientModel(pm);
                 msg.setFacilityId(fid);
                 msg.setEventType(ChartEvent.EVENT.PM_MERGE);
-                stateServiceBean.notifyEvent(msg);
+                eventServiceBean.notifyEvent(msg);
             }
         }
     }
