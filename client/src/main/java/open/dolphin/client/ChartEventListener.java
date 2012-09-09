@@ -70,24 +70,24 @@ public class ChartEventListener {
     }
     
     // 状態変更処理の共通入り口
-    private void publish(ChartEvent evt) {
+    private void publish(ChartEventModel evt) {
         exec.execute(new LocalOnEventTask(evt));
     }
     
     public void publishPvtDelete(PatientVisitModel pvt) {
         
-        ChartEvent evt = new ChartEvent(clientUUID);
+        ChartEventModel evt = new ChartEventModel(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setEventType(ChartEvent.EVENT.PVT_DELETE);
+        evt.setEventType(ChartEventModel.EVENT.PVT_DELETE);
         
         publish(evt);
     }
     
     public void publishPvtState(PatientVisitModel pvt) {
         
-        ChartEvent evt = new ChartEvent(clientUUID);
+        ChartEventModel evt = new ChartEventModel(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setEventType(ChartEvent.EVENT.PVT_STATE);
+        evt.setEventType(ChartEventModel.EVENT.PVT_STATE);
         
         publish(evt);
     }
@@ -97,9 +97,9 @@ public class ChartEventListener {
         // PatientVisitModel.BIT_OPENを立てる
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
         // ChartStateListenerに通知する
-        ChartEvent evt = new ChartEvent(clientUUID);
+        ChartEventModel evt = new ChartEventModel(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setEventType(ChartEvent.EVENT.PVT_STATE);
+        evt.setEventType(ChartEventModel.EVENT.PVT_STATE);
         
         publish(evt);
     }
@@ -111,9 +111,9 @@ public class ChartEventListener {
         pvt.getPatientModel().setOwnerUUID(null);
         
         // ChartStateListenerに通知する
-        ChartEvent evt = new ChartEvent(clientUUID);
+        ChartEventModel evt = new ChartEventModel(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setEventType(ChartEvent.EVENT.PVT_STATE);
+        evt.setEventType(ChartEventModel.EVENT.PVT_STATE);
         
         publish(evt);
     }
@@ -153,14 +153,19 @@ public class ChartEventListener {
         @Override
         public void run() {
             
+            //long t1 = System.currentTimeMillis();
+            
             while (isRunning) {
                 try {
+                    //System.out.println("time = " + String.valueOf(System.currentTimeMillis() - t1));
                     String json = ChartEventDelegater.getInstance().subscribe();
                     if (json != null) {
                         exec.execute(new RemoteOnEventTask(json));
                     }
+                    //System.out.println("ChartEvent= " + json);
+                    //t1 = System.currentTimeMillis();
                 } catch (Exception e) {
-                    //System.out.println(e.toString());
+                    System.out.println(e.toString());
                 }
             }
         }
@@ -169,9 +174,9 @@ public class ChartEventListener {
     // 自クライアントの状態変更後、サーバーに通知するタスク
     private class LocalOnEventTask implements Runnable {
         
-        private ChartEvent evt;
+        private ChartEventModel evt;
         
-        private LocalOnEventTask(ChartEvent evt) {
+        private LocalOnEventTask(ChartEventModel evt) {
             this.evt = evt;
         }
 
@@ -183,7 +188,7 @@ public class ChartEventListener {
             }
             // サーバーに更新を通知
             ChartEventDelegater del = ChartEventDelegater.getInstance();
-            del.putStateMsgModel(evt);
+            del.putChartEvent(evt);
         }
         
     }
@@ -200,8 +205,8 @@ public class ChartEventListener {
         @Override
         public void run() {
         
-            ChartEvent evt = (ChartEvent) 
-                    JsonConverter.getInstance().fromJson(json, ChartEvent.class);
+            ChartEventModel evt = (ChartEventModel) 
+                    JsonConverter.getInstance().fromJson(json, ChartEventModel.class);
             
             if (evt == null) {
                 return;
@@ -213,7 +218,7 @@ public class ChartEventListener {
                 decodeHealthInsurance(pm);
             }
             PatientVisitModel pvt = evt.getPatientVisitModel();
-            if (pvt.getPatientModel() != null) {
+            if (pvt != null) {
                 decodeHealthInsurance(pvt.getPatientModel());
             }
             

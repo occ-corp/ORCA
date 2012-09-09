@@ -191,10 +191,10 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 pvtList.set(i, pvt);
                 // クライアントに通知
                 String uuid = contextHolder.getServerUUID();
-                ChartEvent msg = new ChartEvent(uuid);
+                ChartEventModel msg = new ChartEventModel(uuid);
                 msg.setParamFromPvt(pvt);
                 msg.setPatientVisitModel(pvt);
-                msg.setEventType(ChartEvent.EVENT.PVT_MERGE);
+                msg.setEventType(ChartEventModel.EVENT.PVT_MERGE);
                 eventServiceBean.notifyEvent(msg);
                 return 0;   // 追加０個
             }
@@ -206,10 +206,10 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         pvtList.add(pvt);
         // クライアントに通知
         String uuid = contextHolder.getServerUUID();
-        ChartEvent msg = new ChartEvent(uuid);
+        ChartEventModel msg = new ChartEventModel(uuid);
         msg.setParamFromPvt(pvt);
         msg.setPatientVisitModel(pvt);
-        msg.setEventType(ChartEvent.EVENT.PVT_ADD);
+        msg.setEventType(ChartEventModel.EVENT.PVT_ADD);
         eventServiceBean.notifyEvent(msg);
         
         return 1;   // 追加１個

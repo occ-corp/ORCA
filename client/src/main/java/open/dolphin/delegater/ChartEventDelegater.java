@@ -1,7 +1,7 @@
 package open.dolphin.delegater;
 
 import com.sun.jersey.api.client.ClientResponse;
-import open.dolphin.infomodel.ChartEvent;
+import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.project.Project;
 
 /**
@@ -10,8 +10,9 @@ import open.dolphin.project.Project;
  */
 public class ChartEventDelegater extends BusinessDelegater {
     
-    private static final String RES_CS = "stateRes/";
-    private static final String SUBSCRIBE_PATH = RES_CS + "subscribe/";
+    private static final String RES_CE = "chartEvent/";
+    private static final String SUBSCRIBE_PATH = RES_CE + "subscribe";
+    private static final String PUT_EVENT_PATH = RES_CE + "event";
     
     private static final boolean debug = false;
     private static final ChartEventDelegater instance;
@@ -30,18 +31,11 @@ public class ChartEventDelegater extends BusinessDelegater {
         return instance;
     }
     
-    public int putStateMsgModel(ChartEvent evt) {
-        
-        evt.setFacilityId(fid);
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append(RES_CS);
-        sb.append("state");
-        String path = sb.toString();
+    public int putChartEvent(ChartEventModel evt) {
 
         String json = getConverter().toJson(evt);
 
-        ClientResponse response = getResource(path, null)
+        ClientResponse response = getResource(PUT_EVENT_PATH, null)
                 .type(MEDIATYPE_JSON_UTF8)
                 .put(ClientResponse.class, json);
 
@@ -62,7 +56,7 @@ public class ChartEventDelegater extends BusinessDelegater {
         // 処理もれが心配
         String json = JerseyClient.getInstance()
                 .getAsyncResource(SUBSCRIBE_PATH)
-                .accept(MEDIATYPE_TEXT_UTF8)
+                .accept(MEDIATYPE_JSON_UTF8)
                 .get(String.class);
         
         return json;

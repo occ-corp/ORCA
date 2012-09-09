@@ -618,12 +618,12 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEvent evt) {
+    public void onEvent(ChartEventModel evt) {
 
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<NLaboImportSummary> list = tableModel.getDataProvider();
-        ChartEvent.EVENT eventType = evt.getEventType();
+        ChartEventModel.EVENT eventType = evt.getEventType();
 
         switch (eventType) {
             case PVT_STATE:

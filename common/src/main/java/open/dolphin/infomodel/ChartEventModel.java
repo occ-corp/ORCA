@@ -5,7 +5,7 @@ package open.dolphin.infomodel;
  *
  * @author masuda, Masuda Naika
  */
-public class ChartEvent {
+public class ChartEventModel {
     
     private String issuerUUID;
     private EVENT eventType;
@@ -25,7 +25,11 @@ public class ChartEvent {
     
     public static enum EVENT {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
     
-    public ChartEvent(String issuerUUID) {
+    
+    public ChartEventModel() {
+    }
+    
+    public ChartEventModel(String issuerUUID) {
         this.issuerUUID = issuerUUID;
     }
 

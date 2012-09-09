@@ -28,7 +28,7 @@ public class ChartEventServiceBean {
     private EntityManager em;
     
 
-    public void notifyEvent(ChartEvent evt) {
+    public void notifyEvent(ChartEventModel evt) {
 
         String fid = evt.getFacilityId();
         if (fid == null) {
@@ -69,7 +69,7 @@ public class ChartEventServiceBean {
     /**
      * status情報を更新する
      */
-    public int updateState(ChartEvent msg) {
+    public int updateState(ChartEventModel msg) {
 
         // msgからパラメーターを取得
         String fid = msg.getFacilityId();
@@ -252,9 +252,9 @@ public class ChartEventServiceBean {
             // クライアントに伝える。
             String fid = (String) entry.getKey();
             String uuid = contextHolder.getServerUUID();
-            ChartEvent msg = new ChartEvent(uuid);
+            ChartEventModel msg = new ChartEventModel(uuid);
             msg.setFacilityId(fid);
-            msg.setEventType(ChartEvent.EVENT.PVT_RENEW);
+            msg.setEventType(ChartEventModel.EVENT.PVT_RENEW);
             notifyEvent(msg);
         }
         logger.info("StateService: renew pvtList");

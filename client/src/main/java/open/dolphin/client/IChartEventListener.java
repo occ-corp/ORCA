@@ -1,6 +1,6 @@
 package open.dolphin.client;
 
-import open.dolphin.infomodel.ChartEvent;
+import open.dolphin.infomodel.ChartEventModel;
 
 /**
  * IChartEventListener
@@ -9,5 +9,5 @@ import open.dolphin.infomodel.ChartEvent;
 public interface IChartEventListener {
 
     // 変更処理
-    public void onEvent(ChartEvent evt);
+    public void onEvent(ChartEventModel evt);
 }

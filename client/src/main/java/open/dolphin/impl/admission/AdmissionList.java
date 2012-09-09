@@ -21,7 +21,7 @@ import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.AdmissionModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.ChartEvent;
+import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.project.Project;
 import open.dolphin.table.ColumnSpec;
 import open.dolphin.table.ListTableModel;
@@ -638,12 +638,12 @@ public class AdmissionList extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEvent evt) {
+    public void onEvent(ChartEventModel evt) {
         
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();
-        ChartEvent.EVENT eventType = evt.getEventType();
+        ChartEventModel.EVENT eventType = evt.getEventType();
         
         switch (eventType) {
             case PVT_STATE:

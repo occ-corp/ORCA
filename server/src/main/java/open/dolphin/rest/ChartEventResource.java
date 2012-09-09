@@ -8,7 +8,7 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import open.dolphin.infomodel.ChartEvent;
+import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.ChartEventServiceBean;
 
@@ -88,15 +88,13 @@ public class ChartEventResource extends AbstractResource {
     }
     
     @PUT
-    @Path("state")
+    @Path("event")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String updateState(String json) {
+    public String putEvent(String json) {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
-
-        ChartEvent msg = (ChartEvent)
-                getConverter().fromJson(json, ChartEvent.class);
+        ChartEventModel msg = (ChartEventModel)
+                getConverter().fromJson(json, ChartEventModel.class);
 
         int cnt = eventServiceBean.updateState(msg);
 
@@ -107,10 +105,10 @@ public class ChartEventResource extends AbstractResource {
     // http://d.hatena.ne.jp/nowokay/20110416/1302978207
     @GET
     @Path("dispatch")
-    @Produces(MEDIATYPE_TEXT_UTF8)
-    public String getStateMsgModel() {
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public String deliverChartEvent() {
         
-        ChartEvent msg = (ChartEvent) servletReq.getAttribute(KEY_NAME);
+        ChartEventModel msg = (ChartEventModel) servletReq.getAttribute(KEY_NAME);
         String json = getConverter().toJson(msg);
         return json;
     }

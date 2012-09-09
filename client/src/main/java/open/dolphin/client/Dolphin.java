@@ -165,7 +165,6 @@ public class Dolphin implements MainWindow {
 
         // 排他処理用のUUIDを決める
         clientUUID = UUID.randomUUID().toString();
-        scl = ChartEventListener.getInstance();
 //masuda$
 
         //------------------------------
@@ -253,6 +252,7 @@ public class Dolphin implements MainWindow {
         if (remoteHost != null) {
             saveEnv.put(GUIConst.KEY_PACS_SETTING, getPacsSettingString());
         }
+        scl = ChartEventListener.getInstance();
 //masuda$
         
         //ClientContext.getBootLogger().debug("services did start");
