@@ -165,7 +165,7 @@ public class ChartEventListener {
                     //System.out.println("ChartEvent= " + json);
                     //t1 = System.currentTimeMillis();
                 } catch (Exception e) {
-                    System.out.println(e.toString());
+                    //System.out.println(e.toString());
                 }
             }
         }
