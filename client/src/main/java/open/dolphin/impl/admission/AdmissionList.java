@@ -601,6 +601,7 @@ public class AdmissionList extends AbstractMainComponent {
             PatientModel pm = (PatientModel) sorter.getObject(row);
             
             if (pm != null && col == stateColumn) {
+                setHorizontalAlignment(JLabel.CENTER);
                 if (pm.isOpened()) {
                     if (clientUUID.equals(pm.getOwnerUUID())) {
                         setIcon(OPEN_ICON);
