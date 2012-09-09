@@ -636,7 +636,7 @@ public class AdmissionList extends AbstractMainComponent {
         }
     }
 
-    // ChartStateListener
+    // ChartEventListener
     @Override
     public void onEvent(ChartEvent evt) {
         

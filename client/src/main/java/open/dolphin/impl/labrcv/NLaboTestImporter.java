@@ -616,7 +616,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         }
     }
 
-    // ChartStateListener
+    // ChartEventListener
     @Override
     public void onEvent(ChartEvent evt) {
 

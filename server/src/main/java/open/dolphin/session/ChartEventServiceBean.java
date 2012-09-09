@@ -13,7 +13,7 @@ import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.rest.ChartEventResource;
 
 /**
- * StateServiceBean
+ * ChartEventServiceBean
  * @author masuda, Masuda Naika
  */
 @Stateless

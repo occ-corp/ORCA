@@ -13,7 +13,7 @@ import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.ChartEventServiceBean;
 
 /**
- * StateResource
+ * ChartEventResource
  * @author masuda, Masuda Naika
  */
 @Path("chartEvent")

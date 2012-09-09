@@ -1206,7 +1206,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
     }
 //masuda$
 
-    // ChartStateListener
+    // ChartEventListener
     @Override
     public void onEvent(ChartEvent evt) {
 

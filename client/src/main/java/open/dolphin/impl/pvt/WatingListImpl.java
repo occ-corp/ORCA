@@ -1385,7 +1385,7 @@ public class WatingListImpl extends AbstractMainComponent {
         return Project.getBoolean(ASSIGNED_ONLY, false);
     }
 
-    // ChartStateListener
+    // ChartEventListener
     // 待合リストを更新する
     @Override
     public void onEvent(ChartEvent evt) {
