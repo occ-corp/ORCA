@@ -79,7 +79,7 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     @Override
     public void start() {
         initComponents();
-        executor = Executors.newCachedThreadPool();
+        executor = Executors.newSingleThreadExecutor();
         pacsService = (PacsService) ((ChartImpl) getContext()).getContext().getPlugin("pacsService");
         pacsService.addPropertyChangeListener(this);
         enter();
