@@ -17,7 +17,7 @@ import open.dolphin.util.BeanUtils;
  */
 public class ChartEventListener {
     
-     // このクライアントのUUID
+     // このクライアントのパラメーター類
     private String clientUUID;
     private String orcaId;
     private String deptCode;

@@ -147,21 +147,10 @@ public class Dolphin implements MainWindow {
     public void start(boolean pro) {
 
 //masuda^
-        // ClientContext を生成する
-        //ClientContext.setClientContextStub(new ClientContextStub(pro));
-        
-        // プロジェクトスタブを生成する
-        //Project.setProjectStub(new ProjectStub());
-        // ここでUIをセットする
-        //ClientContext.getClientContextStub().setUI();
-        
         // Mac Application Menu
         if (ClientContext.isMac()){
             enableMacApplicationMenu();
         }
-
-        // FocusPropertyChangeListenerを登録する
-        FocusPropertyChangeListener.getInstance().register();
 
         // 排他処理用のUUIDを決める
         clientUUID = UUID.randomUUID().toString();
@@ -252,7 +241,6 @@ public class Dolphin implements MainWindow {
         if (remoteHost != null) {
             saveEnv.put(GUIConst.KEY_PACS_SETTING, getPacsSettingString());
         }
-        scl = ChartEventListener.getInstance();
 //masuda$
         
         //ClientContext.getBootLogger().debug("services did start");
@@ -453,6 +441,15 @@ public class Dolphin implements MainWindow {
         view.setOpaque(true);
         myFrame.setContentPane(view);
 
+//masuda^
+        // FocusPropertyChangeListenerを登録する
+        FocusPropertyChangeListener.getInstance().register();
+
+        // ChartStateListenerを開始する
+        scl = ChartEventListener.getInstance();
+        scl.start();
+//masuda$
+        
         //----------------------------------------
         // タブペインに格納する Plugin をロードする
         //----------------------------------------
@@ -529,45 +526,6 @@ public class Dolphin implements MainWindow {
         stampBox.start();
         stampBox.getFrame().setVisible(true);
         providers.put("stampBox", stampBox);
-
-//        //------------------------------
-//        // Mac Application Menu
-//        //------------------------------
-//        if (ClientContext.isMac()) {
-//
-//            com.apple.eawt.Application fApplication = com.apple.eawt.Application.getApplication();
-//
-//            // About
-//            fApplication.setAboutHandler(new com.apple.eawt.AboutHandler() {
-//
-//                @Override
-//                public void handleAbout(com.apple.eawt.AppEvent.AboutEvent ae) {
-//                    showAbout();
-//                }
-//            });
-//
-//            // Preference
-//            fApplication.setPreferencesHandler(new com.apple.eawt.PreferencesHandler() {
-//
-//                @Override
-//                public void handlePreferences(com.apple.eawt.AppEvent.PreferencesEvent pe) {
-//                    doPreference();
-//                }
-//            });
-//
-//            // Quit
-//            fApplication.setQuitHandler(new com.apple.eawt.QuitHandler() {
-//
-//                @Override
-//                public void handleQuitRequestWith(com.apple.eawt.AppEvent.QuitEvent qe, com.apple.eawt.QuitResponse qr) {
-//                    processExit();
-//                }
-//            });
-//        }
-        
-
-        // ChartStateListenerを開始する
-        scl.start();
         
         windowSupport.getFrame().setVisible(true);
     }
