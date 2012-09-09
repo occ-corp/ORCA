@@ -4,10 +4,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.UnsupportedEncodingException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.*;
 
@@ -25,6 +22,8 @@ public class StampDelegater extends BusinessDelegater {
     
     private static final boolean debug = false;
     private static final StampDelegater instance;
+    
+    private Map<String, StampModel> stampCache;
 
     static {
         instance = new StampDelegater();
@@ -35,6 +34,7 @@ public class StampDelegater extends BusinessDelegater {
     }
 
     private StampDelegater() {
+        stampCache = new HashMap<String, StampModel>();
     }
     
     /**
@@ -332,6 +332,11 @@ public class StampDelegater extends BusinessDelegater {
      */
     public List<String> putStamp(List<StampModel> list) {
         
+        // キャッシュに登録する
+        for (StampModel model : list) {
+            stampCache.put(model.getId(), model);
+        }
+        
         String json = getConverter().toJson(list);
         String path = RES_STAMP + "list";
 
@@ -357,6 +362,9 @@ public class StampDelegater extends BusinessDelegater {
      * @return 保存件数
      */
     public String putStamp(StampModel model) {
+        
+        // キャッシュに登録する
+        stampCache.put(model.getId(), model);
 
         String json = getConverter().toJson(model);
         String path = RES_STAMP + "id";
@@ -382,6 +390,9 @@ public class StampDelegater extends BusinessDelegater {
      */
     public String replaceStamp(StampModel model) {
         
+        // キャッシュを更新する
+        stampCache.put(model.getId(), model);
+        
         return putStamp(model);
     }
     
@@ -391,6 +402,12 @@ public class StampDelegater extends BusinessDelegater {
      * @return StampModel
      */
     public StampModel getStamp(String stampId) {
+        
+        // StampModelのキャッシュを参照する
+        StampModel ret = stampCache.get(stampId);
+        if (ret != null) {
+            return ret;
+        }
         
         String path = RES_STAMP + "id/" +  stampId;
 
@@ -407,8 +424,11 @@ public class StampDelegater extends BusinessDelegater {
             return null;
         }
         
-        StampModel ret = (StampModel)
+        ret = (StampModel)
                 getConverter().fromJson(entityStr, StampModel.class);
+        
+        // キャッシュに登録する
+        stampCache.put(stampId, ret);
 
         return ret;
     }
@@ -419,11 +439,19 @@ public class StampDelegater extends BusinessDelegater {
      * @return StampModel
      */
     public List<StampModel> getStamps(List<ModuleInfoBean> list) {
+        
+        // キャッシュにあるか調べる
+        List<ModuleInfoBean> infosToGet = new ArrayList<ModuleInfoBean>();
+        for (ModuleInfoBean info : list) {
+            if (!stampCache.containsKey(info.getStampId())) {
+                infosToGet.add(info);
+            }
+        }
 
         String path = RES_STAMP + "list";
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (ModuleInfoBean info : list) {
+        for (ModuleInfoBean info : infosToGet) {
             if (!first) {
                 sb.append(CAMMA);
             } else {
@@ -448,8 +476,19 @@ public class StampDelegater extends BusinessDelegater {
         }
         
        TypeReference typeRef = new TypeReference<List<StampModel>>(){};
-        List<StampModel> ret = (List<StampModel>)
+       List<StampModel> smList = (List<StampModel>)
                 getConverter().fromJson(entityStr, typeRef);
+        
+        // キャッシュに登録する
+        for (StampModel sm : smList) {
+            stampCache.put(sm.getId(), sm);
+        }
+        
+        // キャッシュを参照してStampModel Listを返す
+        List<StampModel> ret = new ArrayList<StampModel>();
+        for (ModuleInfoBean info : list) {
+            ret.add(stampCache.get(info.getStampId()));
+        }
         
         return ret;
     }
@@ -460,6 +499,9 @@ public class StampDelegater extends BusinessDelegater {
      * @return 削除件数
      */
     public int removeStamp(String stampId) {
+        
+        // キャッシュから削除する
+        stampCache.remove(stampId);
         
         String path = RES_STAMP + "id/" + stampId;
 
@@ -479,7 +521,12 @@ public class StampDelegater extends BusinessDelegater {
      * @return 削除件数
      */
     public int removeStamps(List<String> ids) {
-
+        
+        // キャッシュから削除する
+        for (String stampId : ids) {
+            stampCache.remove(stampId);
+        }
+        
         String path = RES_STAMP + "list";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("ids", getConverter().fromList(ids));
