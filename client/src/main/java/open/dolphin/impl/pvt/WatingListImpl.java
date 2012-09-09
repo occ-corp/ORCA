@@ -158,7 +158,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private PVTDelegater pvtDelegater;
     
     private String clientUUID;
-    private StateChangeListener scl;
+    private ChartEventListener scl;
     private String orcaId;
 
     /**
@@ -167,7 +167,7 @@ public class WatingListImpl extends AbstractMainComponent {
     public WatingListImpl() {
         setName(NAME);
         clientUUID = Dolphin.getInstance().getClientUUID();
-        scl = StateChangeListener.getInstance();
+        scl = ChartEventListener.getInstance();
         orcaId = Project.getUserModel().getOrcaId();
     }
     
@@ -1388,14 +1388,14 @@ public class WatingListImpl extends AbstractMainComponent {
     // ChartStateListener
     // 待合リストを更新する
     @Override
-    public void onMessage(StateMsgModel msg) {
+    public void onEvent(ChartEvent evt) {
 
-        StateMsgModel.CMD command = msg.getCommand();
+        ChartEvent.CMD command = evt.getCommand();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();
 
         switch (command) {
             case PVT_ADD:
-                PatientVisitModel model = msg.getPatientVisitModel();
+                PatientVisitModel model = evt.getPatientVisitModel();
                 // pvtListに追加
                 pvtList.add(model);
                 // 担当でないならばテーブルに追加しない
@@ -1420,7 +1420,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 // pvtListを検索
                 PatientVisitModel toUpdate = null;
                 for (PatientVisitModel pvt : pvtList) {
-                    if (msg.getPvtPk() == pvt.getId()) {
+                    if (evt.getPvtPk() == pvt.getId()) {
                         toUpdate =pvt;
                         break;
                     }
@@ -1429,17 +1429,17 @@ public class WatingListImpl extends AbstractMainComponent {
                 sRow = -1;
                 for (int row = 0; row < tableDataList.size(); ++row) {
                     PatientVisitModel pvt = tableDataList.get(row);
-                    if (pvt.getId() == msg.getPvtPk()) {
+                    if (pvt.getId() == evt.getPvtPk()) {
                         sRow = row;
                         break;
                     }
                 }
                 // 更新する
-                toUpdate.setState(msg.getState());
-                toUpdate.setByomeiCount(msg.getByomeiCount());
-                toUpdate.setByomeiCountToday(msg.getByomeiCountToday());
-                toUpdate.setMemo(msg.getMemo());
-                toUpdate.getPatientModel().setOwnerUUID(msg.getOwnerUUID());
+                toUpdate.setState(evt.getState());
+                toUpdate.setByomeiCount(evt.getByomeiCount());
+                toUpdate.setByomeiCountToday(evt.getByomeiCountToday());
+                toUpdate.setMemo(evt.getMemo());
+                toUpdate.getPatientModel().setOwnerUUID(evt.getOwnerUUID());
 
                 // テーブルのアイコンを更新する
                 if (sRow != -1) {
@@ -1451,7 +1451,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 // pvtListから削除
                 PatientVisitModel toRemove = null;
                 for (PatientVisitModel pvt : pvtList) {
-                    if (msg.getPvtPk() == pvt.getId()) {
+                    if (evt.getPvtPk() == pvt.getId()) {
                         toRemove = pvt;
                         break;
                     }
@@ -1464,7 +1464,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 int counter = 0;
                 toRemove = null;
                 for (PatientVisitModel pm : tableDataList) {
-                    if (pm.getId() == msg.getPvtPk()) {
+                    if (pm.getId() == evt.getPvtPk()) {
                         toRemove = pm;
                     } else {
                         pm.setNumber(++counter);
@@ -1483,10 +1483,10 @@ public class WatingListImpl extends AbstractMainComponent {
             case PVT_MERGE:
                 // 同じ時刻のPVTで、PVTには追加されず、患者情報や保険情報の更新のみの場合
                 // pvtListに変更
-                PatientVisitModel toMerge = msg.getPatientVisitModel();
+                PatientVisitModel toMerge = evt.getPatientVisitModel();
                 for (int i = 0; i < pvtList.size(); ++i) {
                     PatientVisitModel pvt = pvtList.get(i);
-                    if (pvt.getId() == msg.getPvtPk()) {
+                    if (pvt.getId() == evt.getPvtPk()) {
                         // 受付番号を継承
                         int num = pvt.getNumber();
                         toMerge.setNumber(num);
@@ -1496,7 +1496,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 // tableModelに変更
                 for (int row = 0; row < tableDataList.size(); ++row) {
                     PatientVisitModel pvt = tableDataList.get(row);
-                    if (pvt.getId() == msg.getPvtPk()) {
+                    if (pvt.getId() == evt.getPvtPk()) {
                         // 選択中の行を保存
                         sRow = selectedRow;
                         pvtTableModel.setObject(row, toMerge);
@@ -1510,7 +1510,7 @@ public class WatingListImpl extends AbstractMainComponent {
             case PM_MERGE:
                 // 患者モデルに変更があった場合
                 // pvtListに変更
-                PatientModel pm = msg.getPatientModel();
+                PatientModel pm = evt.getPatientModel();
                 long pk = pm.getId();
                 for (PatientVisitModel pvt : pvtList) {
                     if (pvt.getPatientModel().getId() == pk) {

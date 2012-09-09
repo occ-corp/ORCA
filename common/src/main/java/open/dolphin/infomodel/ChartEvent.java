@@ -1,11 +1,11 @@
 package open.dolphin.infomodel;
 
 /**
- * State変更通知用のモデル
+ * Chart event通知用のモデル
  *
  * @author masuda, Masuda Naika
  */
-public class StateMsgModel {
+public class ChartEvent {
     
     private String issuerUUID;
     private CMD command;
@@ -25,10 +25,10 @@ public class StateMsgModel {
     
     public static enum CMD {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
     
-    public StateMsgModel() {
+    public ChartEvent(String issuerUUID) {
+        this.issuerUUID = issuerUUID;
     }
-    
-    
+
     public void setParamFromPvt(PatientVisitModel pvt) {
         
         if (pvt == null) {
@@ -61,7 +61,7 @@ public class StateMsgModel {
         byomeiCountToday = count;
     }
     public void setIssuerUUID(String issuer) {
-        issuerUUID = issuer;
+        issuerUUID= issuer;
     }
     public void setOwnerUUID(String owner) {
         ownerUUID = owner;

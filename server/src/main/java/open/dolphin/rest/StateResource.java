@@ -9,7 +9,7 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
-import open.dolphin.infomodel.StateMsgModel;
+import open.dolphin.infomodel.ChartEvent;
 import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.StateServiceBean;
 
@@ -93,8 +93,8 @@ public class StateResource extends AbstractResource {
         
         String fid = getRemoteFacility(servletReq.getRemoteUser());
 
-        StateMsgModel msg = (StateMsgModel)
-                getConverter().fromJson(json, StateMsgModel.class);
+        ChartEvent msg = (ChartEvent)
+                getConverter().fromJson(json, ChartEvent.class);
         
         // クライアントから送られてきたmsgにfidを設定
         msg.setFacilityId(fid);
@@ -110,7 +110,7 @@ public class StateResource extends AbstractResource {
     @Path("dispatch")
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String getStateMsgModel() {
-        StateMsgModel msg = (StateMsgModel) servletReq.getAttribute("stateMsg");
+        ChartEvent msg = (ChartEvent) servletReq.getAttribute("stateMsg");
         String json = getConverter().toJson(msg);
         return json;
     }

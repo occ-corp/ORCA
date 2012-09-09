@@ -10,7 +10,7 @@ import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.StateMsgModel;
+import open.dolphin.infomodel.ChartEvent;
 
 /**
  *
@@ -269,11 +269,11 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
             if (pvt.getPatientModel().getId() == pm.getId()) {
                 pvt.setPatientModel(pm);
                  // クライアントに通知
-                StateMsgModel msg = new StateMsgModel();
+                String uuid = stateServiceBean.getServerUUID();
+                ChartEvent msg = new ChartEvent(uuid);
                 msg.setPatientModel(pm);
                 msg.setFacilityId(fid);
-                msg.setIssuerUUID(null);
-                msg.setCommand(StateMsgModel.CMD.PM_MERGE);
+                msg.setCommand(ChartEvent.CMD.PM_MERGE);
                 stateServiceBean.notifyEvent(msg);
             }
         }

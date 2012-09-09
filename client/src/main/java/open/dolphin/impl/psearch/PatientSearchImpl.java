@@ -73,14 +73,14 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private AbstractAction copyAction;
     
     private String clientUUID;
-    private StateChangeListener scl;
+    private ChartEventListener scl;
 
     
     /** Creates new PatientSearch */
     public PatientSearchImpl() {
         setName(NAME);
         clientUUID = Dolphin.getInstance().getClientUUID();
-        scl = StateChangeListener.getInstance();
+        scl = ChartEventListener.getInstance();
     }
 
     @Override
@@ -1208,12 +1208,12 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    public void onMessage(StateMsgModel msg) {
+    public void onEvent(ChartEvent evt) {
 
         int sRow = -1;
-        long ptPk = msg.getPtPk();
+        long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();
-        StateMsgModel.CMD command = msg.getCommand();
+        ChartEvent.CMD command = evt.getCommand();
         
         switch (command) {
             case PVT_STATE:
@@ -1221,7 +1221,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
                     PatientModel pm = list.get(row);
                     if (ptPk == pm.getId()) {
                         sRow = row;
-                        pm.setOwnerUUID(msg.getOwnerUUID());
+                        pm.setOwnerUUID(evt.getOwnerUUID());
                         break;
                     }
                 }
@@ -1232,7 +1232,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
                     if (ptPk == pm.getId()) {
                         sRow = row;
                         //pm = msg.getPatientVisitModel().getPatientModel();
-                        list.set(row, msg.getPatientVisitModel().getPatientModel());
+                        list.set(row, evt.getPatientVisitModel().getPatientModel());
                         break;
                     }
                 }
@@ -1243,7 +1243,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
                     if (ptPk == pm.getId()) {
                         sRow = row;
                         //pm = msg.getPatientModel();
-                        list.set(row, msg.getPatientModel());
+                        list.set(row, evt.getPatientModel());
                         break;
                     }
                 }

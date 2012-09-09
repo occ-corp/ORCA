@@ -1,14 +1,8 @@
 package open.dolphin.delegater;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import open.dolphin.client.Dolphin;
-import open.dolphin.infomodel.*;
+import open.dolphin.infomodel.ChartEvent;
 import open.dolphin.project.Project;
-import open.dolphin.util.BeanUtils;
 
 /**
  * State変化関連のデレゲータ
@@ -23,7 +17,6 @@ public class StateDelegater extends BusinessDelegater {
     private static final StateDelegater instance;
     
     private String fid;
-    private String clientUUID;
 
     static {
         instance = new StateDelegater();
@@ -31,24 +24,22 @@ public class StateDelegater extends BusinessDelegater {
     
     private StateDelegater() {
         fid = Project.getFacilityId();
-        clientUUID = Dolphin.getInstance().getClientUUID();
     }
     
     public static StateDelegater getInstance() {
         return instance;
     }
     
-    public int putStateMsgModel(StateMsgModel msg) {
+    public int putStateMsgModel(ChartEvent evt) {
         
-        msg.setFacilityId(fid);
-        msg.setIssuerUUID(clientUUID);
+        evt.setFacilityId(fid);
         
         StringBuilder sb = new StringBuilder();
         sb.append(RES_CS);
         sb.append("state");
         String path = sb.toString();
 
-        String json = getConverter().toJson(msg);
+        String json = getConverter().toJson(evt);
 
         ClientResponse response = getResource(path, null)
                 .type(MEDIATYPE_JSON_UTF8)
@@ -68,6 +59,7 @@ public class StateDelegater extends BusinessDelegater {
     public String subscribe() throws Exception {
         
         // できるだけ時間をとらないようにデシリアライズは後回しにする
+        // 処理もれが心配
         String json = JerseyClient.getInstance()
                 .getAsyncResource(SUBSCRIBE_PATH)
                 .accept(MEDIATYPE_TEXT_UTF8)

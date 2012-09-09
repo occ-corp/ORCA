@@ -15,7 +15,7 @@ import open.dolphin.util.BeanUtils;
  * カルテオープンなどの状態の変化をまとめて管理する
  * @author masuda, Masuda Naika
  */
-public class StateChangeListener {
+public class ChartEventListener {
     
      // このクライアントのUUID
     private String clientUUID;
@@ -26,26 +26,26 @@ public class StateChangeListener {
     private String userId;
     private String jmariCode;
 
-    private List<IStateChangeListener> listeners;
+    private List<IChartEventListener> listeners;
     
     // スレッド
-    private StateListenTask listenTask;
+    private EventListenTask listenTask;
     private Thread thread;
     
     // 状態変化を各listenerに通知するタスク
     private Executor exec;
     
-    private static final StateChangeListener instance;
+    private static final ChartEventListener instance;
 
     static {
-        instance = new StateChangeListener();
+        instance = new ChartEventListener();
     }
 
-    private StateChangeListener() {
+    private ChartEventListener() {
         init();
      }
 
-    public static StateChangeListener getInstance() {
+    public static ChartEventListener getInstance() {
         return instance;
     }
     
@@ -57,41 +57,39 @@ public class StateChangeListener {
         doctorName = Project.getUserModel().getCommonName();
         userId = Project.getUserModel().getUserId();
         jmariCode = Project.getString(Project.JMARI_CODE);
-        listeners = new ArrayList<IStateChangeListener>(); 
+        listeners = new ArrayList<IChartEventListener>(); 
     }
     
    
-    public void addListener(IStateChangeListener listener) {
+    public void addListener(IChartEventListener listener) {
         listeners.add(listener);
     }
 
-    public void removeListener(IStateChangeListener listener) {
+    public void removeListener(IChartEventListener listener) {
         listeners.remove(listener);
     }
     
     // 状態変更処理の共通入り口
-    private void publish(StateMsgModel msg) {
-        msg.setIssuerUUID(clientUUID);
-        exec.execute(new UpdateStateTask(msg));
+    private void publish(ChartEvent evt) {
+        exec.execute(new LocalOnEventTask(evt));
     }
     
     public void publishPvtDelete(PatientVisitModel pvt) {
         
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setIssuerUUID(clientUUID);
-        msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
+        ChartEvent evt = new ChartEvent(clientUUID);
+        evt.setParamFromPvt(pvt);
+        evt.setCommand(ChartEvent.CMD.PVT_DELETE);
         
-        publish(msg);
+        publish(evt);
     }
     
     public void publishPvtState(PatientVisitModel pvt) {
         
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
+        ChartEvent evt = new ChartEvent(clientUUID);
+        evt.setParamFromPvt(pvt);
+        evt.setCommand(ChartEvent.CMD.PVT_STATE);
         
-        publish(msg);
+        publish(evt);
     }
     
     public void publishKarteOpened(PatientVisitModel pvt) {
@@ -99,11 +97,11 @@ public class StateChangeListener {
         // PatientVisitModel.BIT_OPENを立てる
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
         // ChartStateListenerに通知する
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
+        ChartEvent evt = new ChartEvent(clientUUID);
+        evt.setParamFromPvt(pvt);
+        evt.setCommand(ChartEvent.CMD.PVT_STATE);
         
-        publish(msg);
+        publish(evt);
     }
     
     public void publishKarteClosed(PatientVisitModel pvt) {
@@ -113,18 +111,18 @@ public class StateChangeListener {
         pvt.getPatientModel().setOwnerUUID(null);
         
         // ChartStateListenerに通知する
-        StateMsgModel msg = new StateMsgModel();
-        msg.setParamFromPvt(pvt);
-        msg.setCommand(StateMsgModel.CMD.PVT_STATE);
+        ChartEvent evt = new ChartEvent(clientUUID);
+        evt.setParamFromPvt(pvt);
+        evt.setCommand(ChartEvent.CMD.PVT_STATE);
         
-        publish(msg);
+        publish(evt);
     }
 
     public void start() {
 
         exec = Executors.newSingleThreadExecutor();
-        listenTask = new StateListenTask();
-        thread = new Thread(listenTask, "ChartState Listen Task");
+        listenTask = new EventListenTask();
+        thread = new Thread(listenTask, "ChartEvent Listen Task");
         thread.start();
     }
 
@@ -140,11 +138,11 @@ public class StateChangeListener {
     }
 
     // Commetでサーバーと同期するスレッド
-    private class StateListenTask implements Runnable {
+    private class EventListenTask implements Runnable {
         
         private boolean isRunning;
         
-        private StateListenTask() {
+        private EventListenTask() {
             isRunning = true;
         }
 
@@ -159,7 +157,7 @@ public class StateChangeListener {
                 try {
                     String json = StateDelegater.getInstance().subscribe();
                     if (json != null) {
-                        exec.execute(new OnMessageTask(json));
+                        exec.execute(new RemoteOnEventTask(json));
                     }
                 } catch (Exception e) {
                     //System.out.println(e.toString());
@@ -169,59 +167,59 @@ public class StateChangeListener {
     }
     
     // 自クライアントの状態変更後、サーバーに通知するタスク
-    private class UpdateStateTask implements Runnable {
+    private class LocalOnEventTask implements Runnable {
         
-        private StateMsgModel msg;
+        private ChartEvent evt;
         
-        private UpdateStateTask(StateMsgModel msg) {
-            this.msg = msg;
+        private LocalOnEventTask(ChartEvent evt) {
+            this.evt = evt;
         }
 
         @Override
         public void run() {
             // まずは自クライアントを更新
-            for (IStateChangeListener listener : listeners) {
-                listener.onMessage(msg);
+            for (IChartEventListener listener : listeners) {
+                listener.onEvent(evt);
             }
             // サーバーに更新を通知
             StateDelegater del = StateDelegater.getInstance();
-            del.putStateMsgModel(msg);
+            del.putStateMsgModel(evt);
         }
         
     }
     
     // 状態変化通知メッセージをデシリアライズし各リスナに処理を分配する
-    private class OnMessageTask implements Runnable {
+    private class RemoteOnEventTask implements Runnable {
         
         private String json;
         
-        private OnMessageTask(String json) {
+        private RemoteOnEventTask(String json) {
             this.json = json;
         }
 
         @Override
         public void run() {
         
-            StateMsgModel msg = (StateMsgModel) 
-                    JsonConverter.getInstance().fromJson(json, StateMsgModel.class);
+            ChartEvent evt = (ChartEvent) 
+                    JsonConverter.getInstance().fromJson(json, ChartEvent.class);
             
-            if (msg == null) {
+            if (evt == null) {
                 return;
             }
             
             // PatientModelが乗っかってきている場合は保険をデコード
-            PatientModel pm = msg.getPatientModel();
+            PatientModel pm = evt.getPatientModel();
             if (pm != null) {
                 decodeHealthInsurance(pm);
             }
-            PatientVisitModel pvt = msg.getPatientVisitModel();
+            PatientVisitModel pvt = evt.getPatientVisitModel();
             if (pvt.getPatientModel() != null) {
                 decodeHealthInsurance(pvt.getPatientModel());
             }
             
             // 各リスナーで更新処理をする
-            for (IStateChangeListener listener : listeners) {
-                listener.onMessage(msg);
+            for (IChartEventListener listener : listeners) {
+                listener.onEvent(evt);
             }
         }
     }

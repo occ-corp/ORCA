@@ -31,7 +31,7 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     @PostConstruct
     public void init() {
         updater.start();
-        stateServiceBean.initializePvtList();
+        stateServiceBean.start();
     }
 
     @PreDestroy

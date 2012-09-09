@@ -8,7 +8,7 @@ import javax.swing.JPanel;
  * 来院リスト、患者検索、ラボレシーバ等
  * 具象クラスは start()、stop() を実装する。
  */
-public abstract class AbstractMainComponent implements MainComponent, IStateChangeListener {
+public abstract class AbstractMainComponent implements MainComponent, IChartEventListener {
     
     private String name;
     

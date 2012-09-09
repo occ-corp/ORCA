@@ -28,6 +28,8 @@ public class ServletContextHolder {
     private Map<String, List<PatientVisitModel>> pvtListMap 
             = new ConcurrentHashMap<String, List<PatientVisitModel>>();
     
+    // サーバーのUUID
+    private String serverUUID;
 
     public List<AsyncContext> getAsyncContextList() {
         return acList;
@@ -43,6 +45,14 @@ public class ServletContextHolder {
         synchronized (acList) {
             acList.remove(ac);
         }
+    }
+    
+    public String getServerUUID() {
+        return serverUUID;
+    }
+    
+    public void setServerUUID(String uuid) {
+        serverUUID = uuid;
     }
 
     public Map<String, List<PatientVisitModel>> getPvtListMap() {

@@ -15,13 +15,13 @@ import javax.swing.table.TableColumn;
 import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.Dolphin;
-import open.dolphin.client.StateChangeListener;
+import open.dolphin.client.ChartEventListener;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.AdmissionModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.StateMsgModel;
+import open.dolphin.infomodel.ChartEvent;
 import open.dolphin.project.Project;
 import open.dolphin.table.ColumnSpec;
 import open.dolphin.table.ListTableModel;
@@ -84,13 +84,13 @@ public class AdmissionList extends AbstractMainComponent {
     private Action copyAction;
     
     private String clientUUID;
-    private StateChangeListener scl;
+    private ChartEventListener scl;
     
     
     public AdmissionList() {
         setName(NAME);
         clientUUID = Dolphin.getInstance().getClientUUID();
-        scl = StateChangeListener.getInstance();
+        scl = ChartEventListener.getInstance();
     }
 
     @Override
@@ -638,12 +638,12 @@ public class AdmissionList extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    public void onMessage(StateMsgModel msg) {
+    public void onEvent(ChartEvent evt) {
         
         int sRow = -1;
-        long ptPk = msg.getPtPk();
+        long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();
-        StateMsgModel.CMD command = msg.getCommand();
+        ChartEvent.CMD command = evt.getCommand();
         
         switch (command) {
             case PVT_STATE:
@@ -651,7 +651,7 @@ public class AdmissionList extends AbstractMainComponent {
                     PatientModel pm = list.get(row);
                     if (ptPk == pm.getId()) {
                         sRow = row;
-                        pm.setOwnerUUID(msg.getOwnerUUID());
+                        pm.setOwnerUUID(evt.getOwnerUUID());
                         break;
                     }
                 }
@@ -662,7 +662,7 @@ public class AdmissionList extends AbstractMainComponent {
                     if (ptPk == pm.getId()) {
                         sRow = row;
                         //pm = msg.getPatientVisitModel().getPatientModel();
-                        list.set(row, msg.getPatientVisitModel().getPatientModel());
+                        list.set(row, evt.getPatientVisitModel().getPatientModel());
                         break;
                     }
                 }
@@ -673,7 +673,7 @@ public class AdmissionList extends AbstractMainComponent {
                     if (ptPk == pm.getId()) {
                         sRow = row;
                         //pm = msg.getPatientModel();
-                        list.set(row, msg.getPatientModel());
+                        list.set(row, evt.getPatientModel());
                         break;
                     }
                 }

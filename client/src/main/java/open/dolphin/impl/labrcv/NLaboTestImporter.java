@@ -44,14 +44,14 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private NLabTestImportView view;
     
     private String clientUUID;
-    private StateChangeListener scl;
+    private ChartEventListener scl;
     
     
     /** Creates new NLaboTestImporter */
     public NLaboTestImporter() {
         setName(NAME);
         clientUUID = Dolphin.getInstance().getClientUUID();
-        scl = StateChangeListener.getInstance();
+        scl = ChartEventListener.getInstance();
     }
     
     @Override
@@ -618,12 +618,12 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
     // ChartStateListener
     @Override
-    public void onMessage(StateMsgModel msg) {
+    public void onEvent(ChartEvent evt) {
 
         int sRow = -1;
-        long ptPk = msg.getPtPk();
+        long ptPk = evt.getPtPk();
         List<NLaboImportSummary> list = tableModel.getDataProvider();
-        StateMsgModel.CMD command = msg.getCommand();
+        ChartEvent.CMD command = evt.getCommand();
 
         switch (command) {
             case PVT_STATE:
@@ -632,7 +632,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                     PatientModel pm = nlab.getPatient();
                     if (ptPk == pm.getId()) {
                         sRow = row;
-                        pm.setOwnerUUID(msg.getOwnerUUID());
+                        pm.setOwnerUUID(evt.getOwnerUUID());
                         break;
                     }
                 }
@@ -643,7 +643,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                     PatientModel pm = nlab.getPatient();
                     if (ptPk == pm.getId()) {
                         sRow = row;
-                        nlab.setPatient(msg.getPatientVisitModel().getPatientModel());
+                        nlab.setPatient(evt.getPatientVisitModel().getPatientModel());
                         break;
                     }
                 }
@@ -654,7 +654,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                     PatientModel pm = nlab.getPatient();
                     if (ptPk == pm.getId()) {
                         sRow = row;
-                        nlab.setPatient(msg.getPatientModel());
+                        nlab.setPatient(evt.getPatientModel());
                         break;
                     }
                 }

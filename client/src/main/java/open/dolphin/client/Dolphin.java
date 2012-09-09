@@ -101,7 +101,7 @@ public class Dolphin implements MainWindow {
     private PacsService pacsService;
 
     // 状態変化リスナー
-    private StateChangeListener scl;
+    private ChartEventListener scl;
     
     // clientのUUID
     private String clientUUID;
@@ -165,7 +165,7 @@ public class Dolphin implements MainWindow {
 
         // 排他処理用のUUIDを決める
         clientUUID = UUID.randomUUID().toString();
-        scl = StateChangeListener.getInstance();
+        scl = ChartEventListener.getInstance();
 //masuda$
 
         //------------------------------

@@ -190,11 +190,11 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 // 新しいもので置き換える
                 pvtList.set(i, pvt);
                 // クライアントに通知
-                StateMsgModel msg = new StateMsgModel();
+                String uuid = contextHolder.getServerUUID();
+                ChartEvent msg = new ChartEvent(uuid);
                 msg.setParamFromPvt(pvt);
                 msg.setPatientVisitModel(pvt);
-                msg.setIssuerUUID(null);
-                msg.setCommand(StateMsgModel.CMD.PVT_MERGE);
+                msg.setCommand(ChartEvent.CMD.PVT_MERGE);
                 stateServiceBean.notifyEvent(msg);
                 return 0;   // 追加０個
             }
@@ -205,11 +205,11 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         // pvtListに追加
         pvtList.add(pvt);
         // クライアントに通知
-        StateMsgModel msg = new StateMsgModel();
+        String uuid = contextHolder.getServerUUID();
+        ChartEvent msg = new ChartEvent(uuid);
         msg.setParamFromPvt(pvt);
         msg.setPatientVisitModel(pvt);
-        msg.setIssuerUUID(null);
-        msg.setCommand(StateMsgModel.CMD.PVT_ADD);
+        msg.setCommand(ChartEvent.CMD.PVT_ADD);
         stateServiceBean.notifyEvent(msg);
         
         return 1;   // 追加１個

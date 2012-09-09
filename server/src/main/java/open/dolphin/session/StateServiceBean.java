@@ -27,7 +27,7 @@ public class StateServiceBean {
     private EntityManager em;
     
 
-    public void notifyEvent(StateMsgModel msg) {
+    public void notifyEvent(ChartEvent msg) {
 
         String fid = msg.getFacilityId();
         if (fid == null) {
@@ -57,6 +57,10 @@ public class StateServiceBean {
             }
         }
     }
+    
+    public String getServerUUID() {
+        return contextHolder.getServerUUID();
+    }
 
     public List<PatientVisitModel> getPvtList(String fid) {
         return contextHolder.getPvtList(fid);
@@ -64,7 +68,7 @@ public class StateServiceBean {
     /**
      * status情報を更新する
      */
-    public int updateState(StateMsgModel msg) {
+    public int updateState(ChartEvent msg) {
 
         // msgからパラメーターを取得
         String fid = msg.getFacilityId();
@@ -110,9 +114,19 @@ public class StateServiceBean {
         return 1;
     }
 
+    public void start() {
+        setupServerUUID();
+        initializePvtList();
+    }
+    
+    // serverUUIDを設定する
+    private void setupServerUUID() {
+        String uuid = UUID.randomUUID().toString();
+        contextHolder.setServerUUID(uuid);
+    }
     
     // 起動後最初のPvtListを作る
-    public void initializePvtList() {
+    private void initializePvtList() {
 
         contextHolder.setToday();
         
@@ -234,12 +248,12 @@ public class StateServiceBean {
             }
             pvtList.removeAll(toRemove);
             
-            // クライアントに伝える。サーバーで作るmsgはIssuerUUIDはnull
+            // クライアントに伝える。
             String fid = (String) entry.getKey();
-            StateMsgModel msg = new StateMsgModel();
+            String uuid = contextHolder.getServerUUID();
+            ChartEvent msg = new ChartEvent(uuid);
             msg.setFacilityId(fid);
-            msg.setIssuerUUID(null);
-            msg.setCommand(StateMsgModel.CMD.PVT_RENEW);
+            msg.setCommand(ChartEvent.CMD.PVT_RENEW);
             notifyEvent(msg);
         }
         logger.info("StateService: renew pvtList");
