@@ -253,7 +253,7 @@ public class StateServiceBean {
             String uuid = contextHolder.getServerUUID();
             ChartEvent msg = new ChartEvent(uuid);
             msg.setFacilityId(fid);
-            msg.setCommand(ChartEvent.CMD.PVT_RENEW);
+            msg.setEventType(ChartEvent.EVENT.PVT_RENEW);
             notifyEvent(msg);
         }
         logger.info("StateService: renew pvtList");

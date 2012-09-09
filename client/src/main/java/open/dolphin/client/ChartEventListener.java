@@ -78,7 +78,7 @@ public class ChartEventListener {
         
         ChartEvent evt = new ChartEvent(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setCommand(ChartEvent.CMD.PVT_DELETE);
+        evt.setEventType(ChartEvent.EVENT.PVT_DELETE);
         
         publish(evt);
     }
@@ -87,7 +87,7 @@ public class ChartEventListener {
         
         ChartEvent evt = new ChartEvent(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setCommand(ChartEvent.CMD.PVT_STATE);
+        evt.setEventType(ChartEvent.EVENT.PVT_STATE);
         
         publish(evt);
     }
@@ -99,7 +99,7 @@ public class ChartEventListener {
         // ChartStateListenerに通知する
         ChartEvent evt = new ChartEvent(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setCommand(ChartEvent.CMD.PVT_STATE);
+        evt.setEventType(ChartEvent.EVENT.PVT_STATE);
         
         publish(evt);
     }
@@ -113,7 +113,7 @@ public class ChartEventListener {
         // ChartStateListenerに通知する
         ChartEvent evt = new ChartEvent(clientUUID);
         evt.setParamFromPvt(pvt);
-        evt.setCommand(ChartEvent.CMD.PVT_STATE);
+        evt.setEventType(ChartEvent.EVENT.PVT_STATE);
         
         publish(evt);
     }

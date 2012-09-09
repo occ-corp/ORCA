@@ -1213,7 +1213,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();
-        ChartEvent.CMD command = evt.getCommand();
+        ChartEvent.EVENT command = evt.getEventType();
         
         switch (command) {
             case PVT_STATE:

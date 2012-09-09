@@ -273,7 +273,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
                 ChartEvent msg = new ChartEvent(uuid);
                 msg.setPatientModel(pm);
                 msg.setFacilityId(fid);
-                msg.setCommand(ChartEvent.CMD.PM_MERGE);
+                msg.setEventType(ChartEvent.EVENT.PM_MERGE);
                 stateServiceBean.notifyEvent(msg);
             }
         }

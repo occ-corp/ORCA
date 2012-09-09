@@ -8,7 +8,7 @@ package open.dolphin.infomodel;
 public class ChartEvent {
     
     private String issuerUUID;
-    private CMD command;
+    private EVENT eventType;
     
     private long pvtPk;
     private int state;
@@ -23,7 +23,7 @@ public class ChartEvent {
     private long ptPk;
     private PatientModel patient;
     
-    public static enum CMD {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
+    public static enum EVENT {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
     
     public ChartEvent(String issuerUUID) {
         this.issuerUUID = issuerUUID;
@@ -45,8 +45,8 @@ public class ChartEvent {
         this.ptPk = pvt.getPatientModel().getId();
     }
     
-    public void setCommand(CMD command) {
-        this.command = command;
+    public void setEventType(EVENT eventType) {
+        this.eventType = eventType;
     }
     public void setPvtPk(long pk) {
         pvtPk = pk;        
@@ -82,8 +82,8 @@ public class ChartEvent {
         facilityId = fid;
     }
     
-    public CMD getCommand() {
-        return command;
+    public EVENT getEventType() {
+        return eventType;
     }
     public long getPvtPk() {
         return pvtPk;

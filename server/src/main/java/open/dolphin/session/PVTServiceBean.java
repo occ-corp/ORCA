@@ -194,7 +194,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
                 ChartEvent msg = new ChartEvent(uuid);
                 msg.setParamFromPvt(pvt);
                 msg.setPatientVisitModel(pvt);
-                msg.setCommand(ChartEvent.CMD.PVT_MERGE);
+                msg.setEventType(ChartEvent.EVENT.PVT_MERGE);
                 stateServiceBean.notifyEvent(msg);
                 return 0;   // 追加０個
             }
@@ -209,7 +209,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
         ChartEvent msg = new ChartEvent(uuid);
         msg.setParamFromPvt(pvt);
         msg.setPatientVisitModel(pvt);
-        msg.setCommand(ChartEvent.CMD.PVT_ADD);
+        msg.setEventType(ChartEvent.EVENT.PVT_ADD);
         stateServiceBean.notifyEvent(msg);
         
         return 1;   // 追加１個
