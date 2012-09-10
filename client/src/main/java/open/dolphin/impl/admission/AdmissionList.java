@@ -5,25 +5,23 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.TableColumn;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractMainComponent;
+import open.dolphin.client.ChartEventListener;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.Dolphin;
-import open.dolphin.client.ChartEventListener;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.AdmissionModel;
+import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.ChartEventModel;
-import open.dolphin.project.Project;
-import open.dolphin.table.ColumnSpec;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.ListTableSorter;
 import open.dolphin.table.StripeTableCellRenderer;
@@ -63,8 +61,8 @@ public class AdmissionList extends AbstractMainComponent {
     
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "admissionTable.column.spec";
-    // カラム仕様リスト
-    private List<ColumnSpec> columnSpecs;
+    // カラム仕様ヘルパー
+    private ColumnSpecHelper columnHelper;
     
     // View panel
     private AdmissionListView view;
@@ -104,20 +102,8 @@ public class AdmissionList extends AbstractMainComponent {
     @Override
     public void stop() {
         
-        if (columnSpecs != null) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < columnSpecs.size(); i++) {
-                ColumnSpec cs = columnSpecs.get(i);
-                cs.setWidth(table.getColumnModel().getColumn(i).getPreferredWidth());
-                sb.append(cs.getName()).append(",");
-                sb.append(cs.getMethod()).append(",");
-                sb.append(cs.getCls()).append(",");
-                sb.append(cs.getWidth()).append(",");
-            }
-            sb.setLength(sb.length() - 1);
-            String line = sb.toString();
-            Project.setString(COLUMN_SPEC_NAME, line);
-        }
+        // ColumnSpecsを保存する
+        columnHelper.saveProperty();
         // ChartStateListenerから除去する
         scl.removeListener(this);
     }
@@ -140,109 +126,37 @@ public class AdmissionList extends AbstractMainComponent {
     
     private void setup() {
         
-        // Table deafult
-        String defaultLine;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < COLUMN_NAMES.length; i++) {
-            String name = COLUMN_NAMES[i];
-            String method = PROPERTY_NAMES[i];
-            String cls = COLUMN_CLASSES[i].getName();
-            String width = String.valueOf(COLUMN_WIDTH[i]);
-            sb.append(name).append(",");
-            sb.append(method).append(",");
-            sb.append(cls).append(",");
-            sb.append(width).append(",");
-        }
-        sb.setLength(sb.length() - 1);
-        defaultLine = sb.toString();
-        
-        // preference から
-        String line = Project.getString(COLUMN_SPEC_NAME, defaultLine);
-
-        // 仕様を保存
-        columnSpecs = new ArrayList<ColumnSpec>();
-        String[] params = line.split(",");
-        
-        // 保存していた名称・メソッド・クラスが同じか調べる
-        int len = params.length / 4;
-        // 項目数が同じか？
-        boolean same = len == COLUMN_NAMES.length;
-        // 各項目は同じか
-        if (same) {
-            List<String> savedColumns = new ArrayList<String>();
-            List<String> savedProps = new ArrayList<String>();
-            List<String> savedClasses = new ArrayList<String>();
-            for (int i = 0; i < len; ++i) {
-                int k = 4 * i;
-                savedColumns.add(params[k]);
-                savedProps.add(params[k + 1]);
-                savedClasses.add(params[k + 2]);
-            }
-            for (int i = 0; i < len; ++i) {
-                savedColumns.remove(COLUMN_NAMES[i]);
-                savedProps.remove(PROPERTY_NAMES[i]);
-                savedClasses.remove(COLUMN_CLASSES[i].getName());
-            }
-            // 同じならば空のはず
-            same &= savedColumns.isEmpty() && savedProps.isEmpty() && savedClasses.isEmpty();
-        }
-        // 保存していた情報数が現在と違う場合は破棄
-        if (!same) {
-            params = defaultLine.split(",");
-            len = params.length / 4;
-        }
-
-        for (int i = 0; i < len; i++) {
-            int k = 4 * i;
-            String name = params[k];
-            String method = params[k + 1];
-            String cls = params[k + 2];
-            int width = Integer.parseInt(params[k + 3]);
-            ColumnSpec cp = new ColumnSpec(name, method, cls, width);
-            columnSpecs.add(cp);
-        }
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
 
         // Scan して state カラムを設定する
-        for (int i = 0; i < columnSpecs.size(); i++) {
-            ColumnSpec cs = columnSpecs.get(i);
-            String test = cs.getMethod();
-            if (test.equals("isOpened")) {
-                stateColumn = i;
-            }
-        }
+        stateColumn = columnHelper.getColumnPosition("isOpened", false);
     }
     
     /**
      * GUI コンポーネントを初期化しレアイアウトする。
      */
     private void initComponents() {
+        
         // View クラスを生成しこのプラグインの UI とする
         view = new AdmissionListView();
         setUI(view);
 
         view.getInfoLbl().setText("");
+        table = view.getTable();
         
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(table);
+
         //------------------------------------------
         // View のテーブルモデルを置き換える
         //------------------------------------------
-        int len = columnSpecs.size();
-        String[] columnNames = new String[len];
-        String[] methods = new String[len];
-        Class[] cls = new Class[len];
-        int[] width = new int[len];
-        try {
-            for (int i = 0; i < len; i++) {
-                ColumnSpec cp = columnSpecs.get(i);
-                columnNames[i] = cp.getName();
-                methods[i] = cp.getMethod();
-                cls[i] = Class.forName(cp.getCls());
-                width[i] = cp.getWidth();
-            }
-        } catch (Throwable e) {
-            e.printStackTrace(System.err);
-        }
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
         
-        table = view.getTable();
         tableModel = new ListTableModel<PatientModel>(columnNames, 1, methods, cls) {
 
             @Override
@@ -263,63 +177,16 @@ public class AdmissionList extends AbstractMainComponent {
         renderer.setTable(table);
         renderer.setDefaultRenderer();
 
-        // カラム幅
-        changeColumnWidth();
-        
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
     }
-    
-    private void changeColumnWidth() {
 
-        for (int i = 0; i < columnSpecs.size(); ++i) {
-            ColumnSpec cs = columnSpecs.get(i);
-            int width = cs.getWidth();
-            TableColumn tc = table.getColumnModel().getColumn(i);
-            if (width != 0) {
-                tc.setMaxWidth(Integer.MAX_VALUE);
-                tc.setPreferredWidth(width);
-                tc.setWidth(width);
-            } else {
-                tc.setMaxWidth(0);
-                tc.setMinWidth(0);
-                tc.setPreferredWidth(0);
-                tc.setWidth(0);
-
-            }
-        }
-        table.repaint();
-    }
     
     private void connect() {
         
-        // tableModel のカラム変更関連イベント
-        table.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
-
-            @Override
-            public void columnAdded(TableColumnModelEvent tcme) {
-            }
-
-            @Override
-            public void columnRemoved(TableColumnModelEvent tcme) {
-            }
-
-            @Override
-            public void columnMoved(TableColumnModelEvent tcme) {
-                int from = tcme.getFromIndex();
-                int to = tcme.getToIndex();
-                ColumnSpec moved = columnSpecs.remove(from);
-                columnSpecs.add(to, moved);
-            }
-
-            @Override
-            public void columnMarginChanged(ChangeEvent ce) {
-            }
-
-            @Override
-            public void columnSelectionChanged(ListSelectionEvent lse) {
-            }
-        });
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
         
-
         // 来院リストテーブル 選択
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -426,22 +293,8 @@ public class AdmissionList extends AbstractMainComponent {
     private void openKarte() {
         
         PatientModel patient = getSelectedPatient();
-        PatientVisitModel pvt = new PatientVisitModel();
-        pvt.setPatientModel(patient);
-        
-        // 受け付けを通していないので診療科はユーザ登録してあるものを使用する
-        // 診療科名、診療科コード、医師名、医師コード、JMARI
-        // 2.0
-        pvt.setDeptName(Project.getUserModel().getDepartmentModel().getDepartmentDesc());
-        pvt.setDeptCode(Project.getUserModel().getDepartmentModel().getDepartment());
-        pvt.setDoctorName(Project.getUserModel().getCommonName());
-        if (Project.getUserModel().getOrcaId() != null) {
-            pvt.setDoctorId(Project.getUserModel().getOrcaId());
-        } else {
-            pvt.setDoctorId(Project.getUserModel().getUserId());
-        }
-        pvt.setJmariNumber(Project.getString(Project.JMARI_CODE));
-        
+        PatientVisitModel pvt = ChartEventListener.getInstance().createFakePvt(patient);
+
         // カルテコンテナを生成する
         getContext().openKarte(pvt);
     }
@@ -555,28 +408,8 @@ public class AdmissionList extends AbstractMainComponent {
                 }
 
                 // 表示カラム設定
-                JMenu menu = new JMenu("表示カラム");
+                JMenu menu = columnHelper.createMenuItem();
                 contextMenu.add(menu);
-                for (ColumnSpec cs : columnSpecs) {
-                    final MyCheckBoxMenuItem cbm = new MyCheckBoxMenuItem(cs.getName());
-                    cbm.setColumnSpec(cs);
-                    if (cs.getWidth() != 0) {
-                        cbm.setSelected(true);
-                    }
-                    cbm.addActionListener(new ActionListener() {
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            if (cbm.isSelected()) {
-                                cbm.getColumnSpec().setWidth(50);
-                            } else {
-                                cbm.getColumnSpec().setWidth(0);
-                            }
-                            changeColumnWidth();
-                        }
-                    });
-                    menu.add(cbm);
-                }
 
                 contextMenu.show(e.getComponent(), e.getX(), e.getY());
             }
@@ -618,22 +451,6 @@ public class AdmissionList extends AbstractMainComponent {
             }
 
             return this;
-        }
-    }
-    
-    private class MyCheckBoxMenuItem extends JCheckBoxMenuItem {
-        
-        private ColumnSpec cs;
-        
-        private MyCheckBoxMenuItem(String name) {
-            super(name);
-        }
-        
-        private void setColumnSpec(ColumnSpec cs) {
-            this.cs = cs;
-        }
-        private ColumnSpec getColumnSpec() {
-            return cs;
         }
     }
 

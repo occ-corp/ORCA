@@ -14,16 +14,13 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import java.util.concurrent.*;
 import javax.swing.*;
-import javax.swing.event.*;
-import javax.swing.table.TableColumn;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.*;
 import open.dolphin.delegater.PVTDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
-import open.dolphin.table.ColumnSpec;
-import open.dolphin.table.ListTableModel;
-import open.dolphin.table.ListTableSorter;
-import open.dolphin.table.StripeTableCellRenderer;
+import open.dolphin.table.*;
 import open.dolphin.util.AgeCalculator;
 import org.apache.commons.lang.time.DurationFormatUtils;
 
@@ -75,8 +72,9 @@ public class WatingListImpl extends AbstractMainComponent {
     private final String[] AGE_METHOD = {"getPatientAgeBirthday", "getPatientBirthday"};
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "pvtTable.column.spec";
-    // カラム仕様リスト
-    private List<ColumnSpec> columnSpecs;
+    // カラム仕様ヘルパー
+    private ColumnSpecHelper columnHelper;
+
     // 受付時間カラム
     private int visitedTimeColumn;
     // 性別カラム
@@ -183,90 +181,20 @@ public class WatingListImpl extends AbstractMainComponent {
     }
     
     private void setup() {
-
-        // pvtTable deafult
-        String defaultLine;
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < COLUMN_NAMES.length; i++) {
-            String name = COLUMN_NAMES[i];
-            String method = PROPERTY_NAMES[i];
-            String cls = COLUMN_CLASSES[i].getName();
-            String width = String.valueOf(COLUMN_WIDTH[i]);
-            sb.append(name).append(",");
-            sb.append(method).append(",");
-            sb.append(cls).append(",");
-            sb.append(width).append(",");
-        }
-        sb.setLength(sb.length() - 1);
-        defaultLine = sb.toString();
-
-        // preference から
-        String line = Project.getString(COLUMN_SPEC_NAME, defaultLine);
-
-        // 仕様を保存
-        columnSpecs = new ArrayList<ColumnSpec>();
-        String[] params = line.split(",");
-
-        // 保存していた名称・メソッド・クラスが同じか調べる
-        int len = params.length / 4;
-        // 項目数が同じか？
-        boolean same = len == COLUMN_NAMES.length;
-        // 各項目は同じか
-        if (same) {
-            List<String> savedColumns = new ArrayList<String>();
-            List<String> savedProps = new ArrayList<String>();
-            List<String> savedClasses = new ArrayList<String>();
-            for (int i = 0; i < len; ++i) {
-                int k = 4 * i;
-                savedColumns.add(params[k]);
-                savedProps.add(params[k + 1]);
-                savedClasses.add(params[k + 2]);
-            }
-            for (int i = 0; i < len; ++i) {
-                savedColumns.remove(COLUMN_NAMES[i]);
-                savedProps.remove(PROPERTY_NAMES[i]);
-                savedClasses.remove(COLUMN_CLASSES[i].getName());
-            }
-            // 同じならば空のはず
-            same &= savedColumns.isEmpty() && savedProps.isEmpty() && savedClasses.isEmpty();
-        }
-        // 保存していた情報数が現在と違う場合は破棄
-        if (!same) {
-            params = defaultLine.split(",");
-        }
         
-        for (int i = 0; i < len; i++) {
-            int k = 4 * i;
-            String name = params[k];
-            String method = params[k + 1];
-            String cls = params[k + 2];
-            int width = Integer.parseInt(params[k + 3]);
-            ColumnSpec cp = new ColumnSpec(name, method, cls, width);
-            columnSpecs.add(cp);
-        }
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
 
         // Scan して age, memo, state カラムを設定する
-        for (int i = 0; i < columnSpecs.size(); i++) {
-            ColumnSpec cs = columnSpecs.get(i);
-            String test = cs.getMethod();
+        visitedTimeColumn = columnHelper.getColumnPosition("getPvtDateTrimDate", false);
+        sexColumn = columnHelper.getColumnPosition("getPatientGenderDesc", false);
+        ageColumn = columnHelper.getColumnPosition("Birthday", true);
+        memoColumn = columnHelper.getColumnPosition("getMemo", false);
+        stateColumn = columnHelper.getColumnPosition("getStateInteger", false);
 
-            if (test.equals("getPvtDateTrimDate")) {
-                visitedTimeColumn = i;
-
-            } else if (test.equals("getPatientGenderDesc")) {
-                sexColumn = i;
-
-            } else if (test.endsWith("Birthday")) {
-                ageColumn = i;
-
-            } else if (test.equals("getMemo")) {
-                memoColumn = i;
-
-            } else if (test.equals("getStateInteger")) {
-                stateColumn = i;
-            }
-        }
-
+        
         // 修正送信アイコンを決める
         if (Project.getBoolean("change.icon.modify.send", true)) {
             modifySendIcon = ClientContext.getImageIcon("sinfo_16.gif");
@@ -304,27 +232,18 @@ public class WatingListImpl extends AbstractMainComponent {
         setUI(view);
 
         view.getPvtInfoLbl().setText("");
-
+        pvtTable = view.getTable();
+        
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(pvtTable);
+        
         //------------------------------------------
         // View のテーブルモデルを置き換える
         //------------------------------------------
-        int len = columnSpecs.size();
-        String[] columnNames = new String[len];
-        String[] methods = new String[len];
-        Class[] cls = new Class[len];
-        int[] width = new int[len];
-        try {
-            for (int i = 0; i < len; i++) {
-                ColumnSpec cp = columnSpecs.get(i);
-                columnNames[i] = cp.getName();
-                methods[i] = cp.getMethod();
-                cls[i] = Class.forName(cp.getCls());
-                width[i] = cp.getWidth();
-            }
-        } catch (Throwable e) {
-            e.printStackTrace(System.err);
-        }
-        pvtTable = view.getTable();
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
+
         pvtTableModel = new ListTableModel<PatientVisitModel>(columnNames, 1, methods, cls) {
 
             @Override
@@ -452,20 +371,6 @@ public class WatingListImpl extends AbstractMainComponent {
         // 選択モード
         pvtTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // 行高
-        //if (ClientContext.isWin()) {
-        //    pvtTable.setRowHeight(ClientContext.getMoreHigherRowHeight());
-        //} else {
-        //    pvtTable.setRowHeight(ClientContext.getHigherRowHeight());
-        //}
-
-        // カラム幅
-        //for (int i = 0; i < width.length; i++) {
-        //    pvtTable.getColumnModel().getColumn(i).setPreferredWidth(width[i]);
-        //}
-        //pvtTable.setAutoResizeMode(JTable.AUTO_RESIZE_SUBSEQUENT_COLUMNS);
-        changeColumnWidth();
-
         // Memo 欄 clickCountToStart=1
         JTextField tf = new JTextField();
         tf.addFocusListener(AutoKanjiListener.getInstance());
@@ -480,6 +385,7 @@ public class WatingListImpl extends AbstractMainComponent {
         CenterRenderer centerRenderer = new CenterRenderer();
         centerRenderer.setTable(pvtTable);
 
+        List<ColumnSpec> columnSpecs = columnHelper.getColumnSpecs();
         for (int i = 0; i < columnSpecs.size(); i++) {
 
             if (i == visitedTimeColumn || i == sexColumn) {
@@ -500,6 +406,8 @@ public class WatingListImpl extends AbstractMainComponent {
         // PVT状態設定エディタ
         pvtTable.getColumnModel().getColumn(stateColumn).setCellEditor(new DefaultCellEditor(stateCmb));
 
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
     }
 
     /**
@@ -507,34 +415,9 @@ public class WatingListImpl extends AbstractMainComponent {
      */
     private void connect() {
 
-        // pvtTableModel のカラム変更関連イベント
-        pvtTable.getColumnModel().addColumnModelListener(new TableColumnModelListener() {
-
-            @Override
-            public void columnAdded(TableColumnModelEvent tcme) {
-            }
-
-            @Override
-            public void columnRemoved(TableColumnModelEvent tcme) {
-            }
-
-            @Override
-            public void columnMoved(TableColumnModelEvent tcme) {
-                int from = tcme.getFromIndex();
-                int to = tcme.getToIndex();
-                ColumnSpec moved = columnSpecs.remove(from);
-                columnSpecs.add(to, moved);
-            }
-
-            @Override
-            public void columnMarginChanged(ChangeEvent ce) {
-            }
-
-            @Override
-            public void columnSelectionChanged(ListSelectionEvent lse) {
-            }
-        });
-
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
+        
         // 来院リストテーブル 選択
         pvtTable.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
 
@@ -635,20 +518,8 @@ public class WatingListImpl extends AbstractMainComponent {
     @Override
     public void stop() {
         
-        if (columnSpecs != null) {
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < columnSpecs.size(); i++) {
-                ColumnSpec cs = columnSpecs.get(i);
-                cs.setWidth(pvtTable.getColumnModel().getColumn(i).getPreferredWidth());
-                sb.append(cs.getName()).append(",");
-                sb.append(cs.getMethod()).append(",");
-                sb.append(cs.getCls()).append(",");
-                sb.append(cs.getWidth()).append(",");
-            }
-            sb.setLength(sb.length() - 1);
-            String line = sb.toString();
-            Project.setString(COLUMN_SPEC_NAME, line);
-        }
+        // ColumnSpecsを保存する
+        columnHelper.saveProperty();
         // ChartStateListenerから除去する
         scl.removeListener(this);
     }
@@ -683,6 +554,7 @@ public class WatingListImpl extends AbstractMainComponent {
             Project.setBoolean("ageDisplay", ageDisplay);
             String method = ageDisplay ? AGE_METHOD[0] : AGE_METHOD[1];
             pvtTableModel.setProperty(method, ageColumn);
+            List<ColumnSpec> columnSpecs = columnHelper.getColumnSpecs();
             for (int i = 0; i < columnSpecs.size(); i++) {
                 ColumnSpec cs = columnSpecs.get(i);
                 String test = cs.getMethod();
@@ -879,69 +751,12 @@ public class WatingListImpl extends AbstractMainComponent {
                     }
                 });
                 
-                JMenu menu = new JMenu("表示カラム");
+                JMenu menu = columnHelper.createMenuItem();
                 contextMenu.add(menu);
-                for (ColumnSpec cs : columnSpecs) {
-                    final MyCheckBoxMenuItem cbm = new MyCheckBoxMenuItem(cs.getName());
-                    cbm.setColumnSpec(cs);
-                    if (cs.getWidth() != 0) {
-                        cbm.setSelected(true);
-                    }
-                    cbm.addActionListener(new ActionListener(){
-
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            if (cbm.isSelected()) {
-                                cbm.getColumnSpec().setWidth(50);
-                            } else {
-                                cbm.getColumnSpec().setWidth(0);
-                            }
-                            changeColumnWidth();
-                        }
-                    });
-                    menu.add(cbm);
-                }
 
                 contextMenu.show(e.getComponent(), e.getX(), e.getY());
             }
         }
-    }
-    
-    private class MyCheckBoxMenuItem extends JCheckBoxMenuItem {
-        
-        private ColumnSpec cs;
-        
-        private MyCheckBoxMenuItem(String name) {
-            super(name);
-        }
-        
-        private void setColumnSpec(ColumnSpec cs) {
-            this.cs = cs;
-        }
-        private ColumnSpec getColumnSpec() {
-            return cs;
-        }
-    }
-    
-    private void changeColumnWidth() {
- 
-        for (int i = 0; i < columnSpecs.size(); ++i) {
-            ColumnSpec cs = columnSpecs.get(i);
-            int width = cs.getWidth();
-            TableColumn tc = pvtTable.getColumnModel().getColumn(i);
-            if (width != 0) {
-                tc.setMaxWidth(Integer.MAX_VALUE);
-                tc.setPreferredWidth(width);
-                tc.setWidth(width);
-            } else {
-                tc.setMaxWidth(0);
-                tc.setMinWidth(0);
-                tc.setPreferredWidth(0);
-                tc.setWidth(0);
-                
-            }
-        }
-        pvtTable.repaint();
     }
 
     /**
