@@ -79,8 +79,8 @@ public class PatientSearchImpl extends AbstractMainComponent {
     /** Creates new PatientSearch */
     public PatientSearchImpl() {
         setName(NAME);
-        clientUUID = Dolphin.getInstance().getClientUUID();
         scl = ChartEventListener.getInstance();
+        clientUUID = scl.getClientUUID();
     }
 
     @Override

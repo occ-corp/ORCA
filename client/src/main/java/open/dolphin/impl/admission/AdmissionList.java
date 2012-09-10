@@ -14,7 +14,7 @@ import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ChartEventListener;
 import open.dolphin.client.ClientContext;
-import open.dolphin.client.Dolphin;
+import open.dolphin.client.GUIConst;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.AdmissionModel;
@@ -87,8 +87,8 @@ public class AdmissionList extends AbstractMainComponent {
     
     public AdmissionList() {
         setName(NAME);
-        clientUUID = Dolphin.getInstance().getClientUUID();
         scl = ChartEventListener.getInstance();
+        clientUUID = scl.getClientUUID();
     }
 
     @Override
@@ -115,13 +115,12 @@ public class AdmissionList extends AbstractMainComponent {
     @Override
     public void enter() {
         controlMenu();
-        getContext().getStatusLabel().setText(statusInfo);
+        getContext().getStatusLabel().setText("");
     }
     
     // comet long polling機能を設定する
     private void startSyncMode() {
-        setStatusInfo();
-        getAdmittedPatients();
+        renewList();
         scl.addListener(this);
         enter();
     }
@@ -181,6 +180,8 @@ public class AdmissionList extends AbstractMainComponent {
 
         // カラム幅更新
         columnHelper.updateColumnWidth();
+        
+        view.getInfoLbl().setText("未取得");
     }
 
     
@@ -279,17 +280,11 @@ public class AdmissionList extends AbstractMainComponent {
             Toolkit.getDefaultToolkit().getSystemClipboard().setContents(stsel, stsel);
         }
     }
-    
-    private void setStatusInfo() {
-        
-    }
-    
-    private void getAdmittedPatients() {
-        
-    }
-    
+
     private void controlMenu() {
-        
+        PatientModel pm = getSelectedPatient();
+        boolean enabled = !pm.isOpened();
+        getContext().enabledAction(GUIConst.ACTION_OPEN_KARTE, enabled);
     }
     
     private void openKarte() {
@@ -331,6 +326,7 @@ public class AdmissionList extends AbstractMainComponent {
     }
 
     private void updateInfo() {
+        
         SimpleDateFormat frmt = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         int num = (tableModel.getDataProvider() != null)
                 ? tableModel.getDataProvider().size()

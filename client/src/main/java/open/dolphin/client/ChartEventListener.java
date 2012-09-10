@@ -62,6 +62,9 @@ public class ChartEventListener {
         listeners = new ArrayList<IChartEventListener>(); 
     }
     
+    public String getClientUUID() {
+        return clientUUID;
+    }
    
     public void addListener(IChartEventListener listener) {
         listeners.add(listener);

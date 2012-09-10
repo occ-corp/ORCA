@@ -164,8 +164,8 @@ public class WatingListImpl extends AbstractMainComponent {
      */
     public WatingListImpl() {
         setName(NAME);
-        clientUUID = Dolphin.getInstance().getClientUUID();
         scl = ChartEventListener.getInstance();
+        clientUUID = scl.getClientUUID();
         orcaId = Project.getUserModel().getOrcaId();
     }
     

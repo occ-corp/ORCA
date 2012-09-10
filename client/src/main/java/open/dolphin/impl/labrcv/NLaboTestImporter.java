@@ -50,8 +50,8 @@ public class NLaboTestImporter extends AbstractMainComponent {
     /** Creates new NLaboTestImporter */
     public NLaboTestImporter() {
         setName(NAME);
-        clientUUID = Dolphin.getInstance().getClientUUID();
         scl = ChartEventListener.getInstance();
+        clientUUID = scl.getClientUUID();
     }
     
     @Override

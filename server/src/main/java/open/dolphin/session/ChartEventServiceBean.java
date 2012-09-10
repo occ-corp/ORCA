@@ -45,7 +45,7 @@ public class ChartEventServiceBean {
                 String acUUID = (String) ac.getRequest().getAttribute(ChartEventResource.CLIENT_UUID);
                 String issuerUUID = evt.getIssuerUUID();
                 
-                // 同一施設かつStateMsgModelの発行者でないクライアントに通知する
+                // 同一施設かつChartEventModelの発行者でないクライアントに通知する
                 if (fid.equals(acFid) && !acUUID.equals(issuerUUID)) {
                     itr.remove();
                     try {
