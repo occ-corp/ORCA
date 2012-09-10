@@ -37,11 +37,11 @@ public class AdmissionList extends AbstractMainComponent {
 
     // 来院テーブルのカラム名
     private static final String[] COLUMN_NAMES = {
-        "部屋", "患者ID",  "氏   名", "性別",  "生年月日", 
+        "部屋", "患者ID",  "氏   名", "性別",  "年齢", 
         "担当医", "診療科", "入院日", "状態"};
     // 来院テーブルのカラムメソッド
     private static final String[] PROPERTY_NAMES = {
-        "getRoom", "getPatientId", "getFullName", "getGenderDesc", "getAgeBirthday", 
+        "getRoom", "getPatientId", "getFullName", "getGenderDesc", "getAge", 
         "getDoctorName", "getDeptName", "getAdmissionDate", "isOpened"};
     // 来院テーブルのクラス名
     private static final Class[] COLUMN_CLASSES = {
@@ -120,7 +120,6 @@ public class AdmissionList extends AbstractMainComponent {
     
     // comet long polling機能を設定する
     private void startSyncMode() {
-        renewList();
         scl.addListener(this);
         enter();
     }
@@ -283,7 +282,7 @@ public class AdmissionList extends AbstractMainComponent {
 
     private void controlMenu() {
         PatientModel pm = getSelectedPatient();
-        boolean enabled = !pm.isOpened();
+        boolean enabled = pm != null ? !pm.isOpened() : false;
         getContext().enabledAction(GUIConst.ACTION_OPEN_KARTE, enabled);
     }
     

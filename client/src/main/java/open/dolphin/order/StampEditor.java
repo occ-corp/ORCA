@@ -38,7 +38,8 @@ public class StampEditor implements PropertyChangeListener {
 
         if (entity.equals(IInfoModel.ENTITY_MED_ORDER)) {
             // RP
-            editor = new RpEditor(entity);
+            boolean inHospital = chart.getPatientVisit().getPatientModel().getAdmissionModel() != null;
+            editor = new RpEditor(entity, true, inHospital);
 
         } else if (entity.equals(IInfoModel.ENTITY_RADIOLOGY_ORDER)) {
             // Injection

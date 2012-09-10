@@ -21,6 +21,7 @@ import open.dolphin.helper.DBTask;
 import open.dolphin.infomodel.DocInfoModel;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.project.Project;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 
@@ -94,6 +95,14 @@ public class DocumentHistory {
     private BlockKeyListener blockKeyListener;
     
 //masuda^
+    // カラム仕様ヘルパー
+    private static final String COLUMN_SPEC_NAME = "docHistoryTable.column.spec";
+    private static final String[] COLUMN_NAMES = {"確定日", "内容"};
+    private static final String[] PROPERTY_NAMES = {"getFirstConfirmDateWithMark", "getTitle"};
+    private static final Class[] COLUMN_CLASSES = {String.class, String.class};
+    private static final int[] COLUMN_WIDTH = {115, 180};
+    private ColumnSpecHelper columnHelper;
+    
     // SearchResultを記録
     private SearchResultInspector searchResult;
     public void setSearchResult(SearchResultInspector sr){
@@ -178,6 +187,10 @@ public class DocumentHistory {
     public void clear() {
         if (tableModel != null && tableModel.getDataProvider() != null) {
             tableModel.getDataProvider().clear();
+        }
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
         }
     }
 
@@ -507,28 +520,28 @@ public class DocumentHistory {
 
         view = new DocumentHistoryView();
 
-        // 履歴テーブルのパラメータを取得する
-        String[] columnNames = ClientContext.getStringArray("docHistory.columnNames"); // {"確定日", "内容"};
-        //String[] methodNames = ClientContext.getStringArray("docHistory.methodNames"); // {"getFirstConfirmDateTrimTime",// "getTitle"};
-//masuda    薬マークを付ける
-        String[] methodNames = new String[]{"getFirstConfirmDateWithMark", "getTitle"};
-        Class[] columnClasses = {String.class, String.class};
-
-//masuda^
-/*
-        extractionObjects = new NameValuePair[7];
-        extractionObjects[0] = new NameValuePair(YEAR_1, MONTH_12);
-        extractionObjects[1] = new NameValuePair(YEAR_2, MONTH_24);
-        extractionObjects[2] = new NameValuePair(YEAR_3, MONTH_36);
-        extractionObjects[3] = new NameValuePair(YEAR_4, MONTH_48);
-        extractionObjects[4] = new NameValuePair(YEAR_5, MONTH_60);
-        extractionObjects[5] = new NameValuePair(YEAR_ALL, MONTH_120);
-*/
         extractionObjects = EXTRACTION_OBJECTS;
-//masuda$
+        
+        //列の入れ替えを禁止
+        view.getTable().getTableHeader().setReorderingAllowed(false);
+
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
+        
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(view.getTable());
+
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
         
         // 文書履歴テーブルを生成する
-        tableModel = new ListTableModel<DocInfoModel>(columnNames, 20, methodNames, columnClasses) {
+        tableModel = new ListTableModel<DocInfoModel>(columnNames, 1, methods, cls) {
 
             @Override
             public boolean isCellEditable(int row, int col) {
@@ -564,22 +577,9 @@ public class DocumentHistory {
             }
         };
         view.getTable().setModel(tableModel);
-//masuda^
-        // 行の高さ
-        //view.getTable().setRowHeight(ClientContext.getMoreHigherRowHeight());
 
-        // カラム幅を調整する
-        //view.getTable().getColumnModel().getColumn(0).setPreferredWidth(90);
-        //view.getTable().getColumnModel().getColumn(1).setPreferredWidth(190);
-
-        if (ClientContext.isMac()) {
-            view.getTable().getColumnModel().getColumn(0).setPreferredWidth(120);
-        } else {
-            view.getTable().getColumnModel().getColumn(0).setPreferredWidth(115);
-        }
-        view.getTable().getColumnModel().getColumn(1).setPreferredWidth(180);
-        view.getTable().setFocusable(false);
-//masuda$
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
 
         //-----------------------------------------------
         // Copy 機能を実装する
@@ -658,19 +658,11 @@ public class DocumentHistory {
 //masuda$
 
         // 文書種別(コンテントタイプ) ComboBox を生成する
-//masuda^
-        //contentObject = new NameValuePair[2];
-        //contentObject[0] = new NameValuePair(CMB_KARTE, IInfoModel.DOCTYPE_KARTE);
-        //contentObject[1] = new NameValuePair(CMB_LETTER, IInfoModel.DOCTYPE_LETTER);
-        //contentObject[2] = new NameValuePair(CMB_REPLY, IInfoModel.DOCTYPE_LETTER_REPLY);
-        //contentObject[3] = new NameValuePair(CMB_REPLY2, IInfoModel.DOCTYPE_LETTER_REPLY2);
         contentObject = CONTENT_OBJECTS;
-//masdua$
         contentCombo = view.getDocTypeCombo();
 
         // 抽出機関 ComboBox を生成する
         extractionCombo = view.getExtractCombo();
-//masuda^
         // extractionComboはextractionObjectsから再構成
         extractionCombo.removeAllItems();
         for (NameValuePair nvp : EXTRACTION_OBJECTS) {
@@ -681,7 +673,7 @@ public class DocumentHistory {
         for (NameValuePair nvp : contentObject) {
             contentCombo.addItem(nvp.getName());
         }
-//masuda$
+
         // 件数フィールドを生成する
         countField = view.getCntLbl();
         
@@ -754,6 +746,9 @@ public class DocumentHistory {
      */
     private void connect() {
 
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
+        
         // 履歴テーブルで選択された行の文書を表示する
         ListSelectionModel slm = view.getTable().getSelectionModel();
         slm.addListSelectionListener(new ListSelectionListener() {

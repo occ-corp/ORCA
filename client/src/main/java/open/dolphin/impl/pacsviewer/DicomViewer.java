@@ -37,7 +37,7 @@ import org.dcm4che2.data.Tag;
 public class DicomViewer {
 
     private JFrame frame;
-    private ViewerPanel viewerPanel;
+    private DicomViewerPanel viewerPanel;
     private JTable thumbnailTable;
     private JScrollPane thumbnailScrollPane;
     private JButton resetBtn;
@@ -121,7 +121,7 @@ public class DicomViewer {
         String title = ClientContext.getFrameTitle("Dicom Viewer, Masuda Naika");
         frame.setTitle(title);
         frame.setPreferredSize(new Dimension(640, 480));
-        viewerPanel = new ViewerPanel(DicomViewer.this);
+        viewerPanel = new DicomViewerPanel(DicomViewer.this);
         thumbnailTable = new JTable();
         frame.setLayout(new BorderLayout());
 

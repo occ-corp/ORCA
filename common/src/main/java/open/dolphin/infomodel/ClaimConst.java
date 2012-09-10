@@ -126,9 +126,14 @@ public final class ClaimConst {
     public static final String RECEIPT_CODE_RINJI_EXT = "292";
     // 院内処方（包括）
     //public static final String RECEIPT_CODE_NAIYO_HOKATSU = "213";
-    public static final String RECEIPT_CODE_RINJI_HOKATSU = "293";  // 未定義！
+    public static final String RECEIPT_CODE_RINJI_HOKATSU = "293";  // 未定義！ don't use!
     //public static final String RECEIPT_CODE_TONYO_HOKATSU = "223";
     //public static final String RECEIPT_CODE_GAIYO_HOKATSU = "233";
+    // 入院　調剤料なし
+    public static final String RECEIPT_CODE_NAIYO_NYUIN_NC = "214";
+    public static final String RECEIPT_CODE_TONYO_NYUIN_NC = "224";
+    public static final String RECEIPT_CODE_GAIYO_NYUIN_NC = "234";
+
     // 在宅
     public static final String RECEIPT_CODE_ZAITAKU = "140";
     public static final String RECEIPT_CODE_ZAITAKU_YAKUZAI_IN = "141";

@@ -75,7 +75,8 @@ public class PatientInspector {
         allergyInspector.clear();
         physicalInspector.clear();
         memoInspector.save();
-//masuda^   検査履歴、検索結果
+//masuda^
+        // 検査履歴、検索結果
         examHistory.clear();
         searchResult.clear();
 //masuda$

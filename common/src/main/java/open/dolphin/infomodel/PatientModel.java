@@ -878,6 +878,9 @@ public class PatientModel extends InfoModel {
         return ModelUtils.getAgeBirthday2(birthday);
     }
     
+    public String getAge() {
+        return ModelUtils.getAge(birthday);
+    }
     public String getRoom() {
         return (admission != null) ? admission.getRoom() : null;
     }

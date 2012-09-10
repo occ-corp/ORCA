@@ -20,7 +20,7 @@ import open.dolphin.util.ImageTool;
  *
  * @author masuda, Masauda Naika
  */
-public class ViewerPanel extends JPanel {
+public class DicomViewerPanel extends JPanel {
 
     private AffineTransform af;
     private BufferedImage image;
@@ -56,7 +56,7 @@ public class ViewerPanel extends JPanel {
     
     private DicomViewer viewer;
 
-    public ViewerPanel(DicomViewer viewer) {
+    public DicomViewerPanel(DicomViewer viewer) {
         this.viewer = viewer;
         measure = new ArrayList<PointPair>();
         af = new AffineTransform();

@@ -19,10 +19,12 @@ public class RpView extends AbstractOrderView {
     private JComboBox usageCombo;
     private JRadioButton inRadio;
     private JRadioButton outRadio;
+    private JRadioButton admRadio;
     private JRadioButton rb_teiki;
     private JRadioButton rb_rinji;
     private JButton btn_yakka;
     private JCheckBox cbHoukatsu;
+    private JCheckBox cbNoCharge;
 
     public RpView() {
         super();
@@ -51,11 +53,16 @@ public class RpView extends AbstractOrderView {
         rb_teiki.setToolTipText("定期処方の時選択します。");
         rb_rinji = new JRadioButton("臨時");
         rb_rinji.setToolTipText("臨時処方の時選択します。");
+        admRadio = new JRadioButton("入院");
+        admRadio.setToolTipText("入院処方のとき選択します。");
         ButtonGroup bg = new ButtonGroup();
         bg.add(rb_teiki);
         bg.add(rb_rinji);
+        bg.add(admRadio);
         cmdPanel1.add(rb_teiki);
-        cmdPanel1.add(rb_rinji);        
+        cmdPanel1.add(rb_rinji);  
+        cmdPanel1.add(admRadio);
+        
         inRadio = new JRadioButton("院内");
         inRadio.setToolTipText("院内処方の時選択します。");
         outRadio = new JRadioButton("院外");
@@ -65,8 +72,12 @@ public class RpView extends AbstractOrderView {
         bg.add(outRadio);
         cmdPanel1.add(inRadio);
         cmdPanel1.add(outRadio);
+
         cbHoukatsu = new JCheckBox("包括");
         cmdPanel1.add(cbHoukatsu);
+        cbNoCharge = new JCheckBox("調無");
+        cbNoCharge.setToolTipText("入院処方で調剤料を算定しない場合に選択します。");
+        cmdPanel1.add(cbNoCharge);
         cmdPanel1.add(Box.createHorizontalGlue());
         btn_yakka = new JButton(yakkaIcon);
         btn_yakka.setToolTipText("剤の薬価計算/ORCA処方参照");
@@ -119,5 +130,11 @@ public class RpView extends AbstractOrderView {
     }
     public JCheckBox getCbHoukatsu() {
         return cbHoukatsu;
+    }
+    public JRadioButton getRbAdmission() {
+        return admRadio;
+    }
+    public JCheckBox getCbNoCharge() {
+        return cbNoCharge;
     }
 }

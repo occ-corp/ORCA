@@ -29,6 +29,7 @@ import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.stampbox.StampBoxPlugin;
 import open.dolphin.stampbox.StampTree;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.ListTableSorter;
 import open.dolphin.table.StripeTableCellRenderer;
@@ -75,14 +76,17 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
     // diagTable
     private static final int clickCountToStartEdit = 2;
     private static final int startNumRows = 1;
+    // カラム仕様ヘルパー
+    private static final String COLUMN_SPEC_NAME = "diagTable.column.spec";
+    private static final String[] COLUMN_NAMES 
+            = {"疾患名/修飾語", "分 類", "転 帰", "疾患開始日", "疾患終了日", "特定疾患"};
+    private static final String[] PROPERTY_NAMES 
+            = {"getAliasOrName", "getCategoryDesc", "getOutcomeDesc", "getStartDate", "getEndDate", "getByoKanrenKbnStr"};
+    private static final Class[] COLUMN_CLASSES 
+            = {String.class, String.class, String.class, String.class, String.class, String.class};
+    private static final int[] COLUMN_WIDTH = {180, 80, 80, 80, 80, 40};
+    private ColumnSpecHelper columnHelper;
 
-    private static final String[] columnNames = 
-            new String[]{"疾患名/修飾語", "分 類", "転 帰", "疾患開始日", "疾患終了日", "特定疾患"};
-    private static final String[] methodNames = 
-            new String[]{"getAliasOrName", "getCategoryDesc", "getOutcomeDesc", "getStartDate", "getEndDate", "getByoKanrenKbnStr"};
-    private static final Class[] columnClasses = 
-            new Class[]{String.class, String.class, String.class, String.class, String.class, String.class};
-    private static final int[] columnWidth = {180, 80, 80, 80, 80, 40};
     private static final String[] COLUMN_TOOLTIPS = new String[]{null,
         "クリックするとコンボボックスが立ち上がります。", "クリックするとコンボボックスが立ち上がります。",
         "右クリックでカレンダがポップアップします。", "右クリックでカレンダがポップアップします。", null};
@@ -315,9 +319,6 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
      */
     private JPanel createDignosisPanel() {
 
-        // Diagnosis テーブルモデルを生成する
-        setupTableModel();
-
         // 傷病歴テーブルを生成する
         diagTable = new JTable() {
             @Override
@@ -334,6 +335,11 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 };
             }
         };
+        //列の入れ替えを禁止
+        diagTable.getTableHeader().setReorderingAllowed(false);
+        
+        // Diagnosis テーブルモデルを生成する
+        setupTableModel();
 
 //pns^
         diagTable.setShowGrid(false);
@@ -356,13 +362,12 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         sorter = new ListTableSorter(tableModel);
         diagTable.setModel(sorter);
         sorter.setTableHeader(diagTable.getTableHeader());
-
-        // コラム幅設定
-        for (int i = 0; i < columnWidth.length; i++) {
-            TableColumn column = diagTable.getColumnModel().getColumn(i);
-            column.setPreferredWidth(columnWidth[i]);
-        }
-
+        
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
+        
         // Category comboBox 入力を設定する
         String[] values = ClientContext.getStringArray("diagnosis.category");
         String[] descs = ClientContext.getStringArray("diagnosis.categoryDesc");
@@ -482,8 +487,23 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
      * tableModelを設定する。
      */
     private void setupTableModel() {
+        
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
+        
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(diagTable);
 
-        tableModel = new ListTableModel<RegisteredDiagnosisModel>(columnNames, startNumRows, methodNames, columnClasses) {
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
+        
+        tableModel = new ListTableModel<RegisteredDiagnosisModel>(columnNames, startNumRows, methods, cls) {
 
             // Diagnosisは編集不可
             @Override
@@ -746,6 +766,10 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
     public void stop() {
         if (tableModel != null) {
             tableModel.clear();
+        }
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
         }
     }
 

@@ -1,4 +1,3 @@
-
 package open.dolphin.impl.pacsviewer;
 
 import java.awt.BorderLayout;
@@ -24,6 +23,7 @@ import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.*;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.ListTableSorter;
 import open.dolphin.table.StripeTableCellRenderer;
@@ -55,6 +55,9 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
 
     private ListTableModel<ListDicomObject> listTableModel;
     private List<DicomImageEntry> entryList;
+    
+    // カラム仕様ヘルパー
+    private static final String COLUMN_SPEC_NAME = "pacsTable.column.spec";
     private final String[] COLUMN_NAMES = new String[]{"患者ID","検査日","氏名","性別","生年月日","Modality","Images","Description"};
     private static final String[] PROPERTY_NAMES = new String[]{
         "getPtId","getStudyDate","getPtName","getPtSex","getPtBirthDate","getModalities", "getNumberOfImage","getDescription"};
@@ -63,6 +66,8 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     };
     private static final int[] COLUMN_WIDTH = new int[]{30,30,80,10,30,10,10,50};
     private static final int START_NUM_ROWS = 1;
+    private ColumnSpecHelper columnHelper;
+    
     private ListTableSorter sorter;
 
     private static final int MARGIN = 12;
@@ -70,6 +75,7 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
 
     private PacsService pacsService;
     private ExecutorService executor;
+    
 
     public PacsDicomDocImpl() {
         setTitle(TITLE);
@@ -93,6 +99,10 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         
         if (pacsService != null) {
             pacsService.removePropertyChangeListener(this);
+        }
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
         }
     }
     
@@ -178,16 +188,33 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
                 openViewer();
             }
         });
+        
+        //列の入れ替えを禁止
+        listTable.getTableHeader().setReorderingAllowed(false);
+        
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
+        
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(listTable);
 
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
+        
         // listTableの設定
-        listTableModel = new ListTableModel<ListDicomObject>(COLUMN_NAMES, START_NUM_ROWS, PROPERTY_NAMES, COLUMN_CLASSES);
+        listTableModel = new ListTableModel<ListDicomObject>(columnNames, 1, methods, cls);
         sorter = new ListTableSorter(listTableModel);
         listTable.setModel(sorter);
         sorter.setTableHeader(listTable.getTableHeader());
-        // カラム幅設定
-        for (int i = 0; i < COLUMN_WIDTH.length; i++) {
-            listTable.getColumnModel().getColumn(i).setPreferredWidth(COLUMN_WIDTH[i]);
-        }
+        
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
         // ストライプテーブル
         StripeTableCellRenderer renderer = new StripeTableCellRenderer(listTable);
         renderer.setDefaultRenderer();
@@ -415,70 +442,4 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         statusLabel.setText(sb.toString());
     }
 
-    // listTableに保存するobject
-    public static class ListDicomObject implements Comparable {
-
-        private DicomObject object;
-        private String ptId;
-        private String ptName;
-        private String ptSex;
-        private String ptBirthDate;
-        private String modalities;
-        private String description;
-        private String studyDate;
-        private String numberOfImage;
-
-        public ListDicomObject(DicomObject obj){
-            object = obj;
-            ptId = object.getString(Tag.PatientID);
-            ptName = object.getString(Tag.PatientName).replace("^", " ");
-            ptSex = object.getString(Tag.PatientSex);
-            ptBirthDate = object.getString(Tag.PatientBirthDate);
-            modalities = object.getString(Tag.ModalitiesInStudy);
-            description = object.getString(Tag.StudyDescription);
-            studyDate = object.getString(Tag.StudyDate);
-            numberOfImage = object.getString(Tag.NumberOfStudyRelatedInstances);
-        }
-        public DicomObject getDicomObject() {
-            return object;
-        }
-        public String getPtId() {
-            return ptId;
-        }
-        public String getPtName() {
-            return ptName;
-        }
-        public String getPtSex() {
-            return ptSex;
-        }
-        public String getPtBirthDate() {
-            return ptBirthDate;
-        }
-        public String getModalities() {
-            return modalities;
-        }
-        public String getDescription() {
-            return description;
-        }
-        public String getStudyDate() {
-            return studyDate;
-        }
-        public String getNumberOfImage() {
-            return numberOfImage;
-        }
-
-        @Override
-        public int compareTo(Object o) {
-            int sDate = Integer.parseInt(studyDate);
-            ListDicomObject test = (ListDicomObject) o;
-            int tDate = Integer.parseInt(test.getStudyDate());
-            if (sDate == tDate) {
-                return 0;
-            } else if (sDate > tDate) {
-                return 1;
-            } else {
-                return -1;
-            }
-        }
-    }
 }

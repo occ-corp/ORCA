@@ -45,7 +45,7 @@ public final class CheckTonyo {
         codeSet.add(Integer.valueOf("001000983"));	//胸痛時に
     }
 
-    public static boolean checkTonyo(String code) {
+    public static boolean isTonyo(String code) {
         return codeSet.contains(Integer.valueOf(code));
     }
 }

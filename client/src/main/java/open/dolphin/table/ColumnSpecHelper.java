@@ -7,7 +7,6 @@ import java.util.List;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JMenu;
 import javax.swing.JTable;
-import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
@@ -87,29 +86,23 @@ public class ColumnSpecHelper {
     
     public void updateColumnWidth() {
 
-        SwingUtilities.invokeLater(new Runnable() {
+        for (int i = 0; i < columnSpecs.size(); ++i) {
+            ColumnSpec cs = columnSpecs.get(i);
+            int width = cs.getWidth();
+            TableColumn tc = table.getColumnModel().getColumn(i);
+            if (width != 0) {
+                tc.setMaxWidth(Integer.MAX_VALUE);
+                tc.setPreferredWidth(width);
+                tc.setWidth(width);
+            } else {
+                tc.setMaxWidth(0);
+                tc.setMinWidth(0);
+                tc.setPreferredWidth(0);
+                tc.setWidth(0);
 
-            @Override
-            public void run() {
-                for (int i = 0; i < columnSpecs.size(); ++i) {
-                    ColumnSpec cs = columnSpecs.get(i);
-                    int width = cs.getWidth();
-                    TableColumn tc = table.getColumnModel().getColumn(i);
-                    if (width != 0) {
-                        tc.setMaxWidth(Integer.MAX_VALUE);
-                        tc.setPreferredWidth(width);
-                        tc.setWidth(width);
-                    } else {
-                        tc.setMaxWidth(0);
-                        tc.setMinWidth(0);
-                        tc.setPreferredWidth(0);
-                        tc.setWidth(0);
-
-                    }
-                }
-                table.repaint();
             }
-        });
+        }
+        table.repaint();
     }
     
     public int getColumnPosition(String propName, boolean endsWith) {
@@ -247,13 +240,12 @@ public class ColumnSpecHelper {
                 first = false;
             }
             ColumnSpec cs = columnSpecs.get(i);
-            cs.setWidth(table.getColumnModel().getColumn(i).getPreferredWidth());
+            cs.setWidth(table.getColumnModel().getColumn(i).getWidth());
             sb.append(cs.getName()).append(CAMMA);
             sb.append(cs.getMethod()).append(CAMMA);
             sb.append(cs.getCls()).append(CAMMA);
             sb.append(cs.getWidth());
         }
-        sb.setLength(sb.length() - 1);
         String line = sb.toString();
         Project.setString(specName, line);
 

@@ -26,6 +26,7 @@ public class StampHolderFunction {
     private static final String MED_TEIKI = "定期";
     private static final String MED_RINJI = "臨時";
     private static final String IN_MED_HOUKATSU = "院内包括";
+    private static final String NYUIN_MEDICINE  = "入院処方";
     
     private static StampHolderFunction instance;
     
@@ -39,6 +40,7 @@ public class StampHolderFunction {
     private AbstractAction labelPrintAction;
     private AbstractAction registRoutineMedAction;
     private AbstractAction deleteAction;
+    private AbstractAction changeToAdmissionMedAction;
     
     private StampHolder selectedStampHolder;
     
@@ -126,6 +128,13 @@ public class StampHolderFunction {
                 changeToHokatsu();
             }
         };
+        
+        changeToAdmissionMedAction = new AbstractAction("入院処方にする") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                changeToAdmissionMed();
+            }
+        };
 
         labelPrintAction = new AbstractAction("ラベル印刷") {
 
@@ -189,6 +198,10 @@ public class StampHolderFunction {
 
             // 包括にする
             item = new JMenuItem(changeHokatsuAction);
+            popup.add(item);
+            
+            // 入院処方にする
+            item = new JMenuItem(changeToAdmissionMedAction);
             popup.add(item);
         }
 
@@ -316,6 +329,25 @@ public class StampHolderFunction {
                 if (ClaimConst.RECEIPT_CODE_RINJI_HOKATSU.equals(clsCode)) {
                     clsCode = ClaimConst.RECEIPT_CODE_NAIYO_HOKATSU;
                 }
+                bundle.setClassCode(clsCode);
+                setMyTextLater(sh);
+                sh.getKartePane().setDirty(true);
+            }
+        }
+    }
+    
+    // 選択している薬剤を入院処方にする changeToAdmissionMedAction
+    private void changeToAdmissionMed() {
+
+        List<StampHolder> stampHolderList = getSelectedStampHolder();
+        for (StampHolder sh : stampHolderList) {
+            ModuleModel mm = sh.getStamp();
+            boolean editable = sh.getKartePane().getTextPane().isEditable();
+            if (mm.getModel() instanceof BundleMed && editable) {
+                BundleMed bundle = (BundleMed) mm.getModel();
+                bundle.setMemo(NYUIN_MEDICINE);
+                String clsCode = bundle.getClassCode();
+                clsCode = clsCode.substring(0, 2) + "0";
                 bundle.setClassCode(clsCode);
                 setMyTextLater(sh);
                 sh.getKartePane().setDirty(true);

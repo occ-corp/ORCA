@@ -70,6 +70,8 @@ public final class PhysicalInspector {
     private void initComponents() {
         
         view = new PhysicalView();  
+        //列の入れ替えを禁止
+        view.getTable().getTableHeader().setReorderingAllowed(false);
         
          // カラム名
         String[] columnNames = ClientContext.getStringArray("patientInspector.physicalInspector.columnNames"); // {"身長","体重","BMI","測定日"};

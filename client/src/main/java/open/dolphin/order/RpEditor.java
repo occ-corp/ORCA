@@ -52,7 +52,7 @@ public final class RpEditor extends AbstractStampEditor {
 
     private static final String IN_MEDICINE     = "院内処方";
     private static final String EXT_MEDICINE    = "院外処方";
-    
+
     private RpView view;
 
     private ListTableModel<MasterItem> tableModel;
@@ -60,11 +60,17 @@ public final class RpEditor extends AbstractStampEditor {
     private ListTableModel<TensuMaster> searchResultModel;
 
 //masuda^
+    private static final String NYUIN_MEDICINE  = "入院処方";
+    private static final String NYUIN_MED_NC    = "入院調無";
     private static final String IN_MED_HOUKATSU = "院内包括";
     private static final String TEIKI = "定期";
     private static final String RINJI = "臨時";
+    private static final String NYUIN = "入院";
     // 用法のキャッシュ
     private static HashMap<String, List<TensuMaster>> adminCache = new HashMap<String, List<TensuMaster>>();
+    // 入院か否か
+    private boolean inHospital;
+    
 //masuda$
 
     public RpEditor() {
@@ -77,6 +83,12 @@ public final class RpEditor extends AbstractStampEditor {
 
     public RpEditor(String entity, boolean mode) {
         super(entity, mode);
+        initComponents();
+    }
+    
+    public RpEditor(String entity, boolean mode, boolean inHospital) {
+        super(entity, mode);
+        this.inHospital = inHospital;
         initComponents();
     }
     
@@ -159,7 +171,7 @@ public final class RpEditor extends AbstractStampEditor {
 
         ModuleModel mm = createModuleModel();
         BundleMed bundle = (BundleMed) mm.getModel();
-
+        
         String ykzKbn = null;
         for (MasterItem mItem : items) {
 
@@ -185,35 +197,20 @@ public final class RpEditor extends AbstractStampEditor {
                         bNum = ZenkakuUtils.toHalfNumber(bNum);
                         bundle.setBundleNumber(bNum);
                     }
-                    boolean inMed = view.getInRadio().isSelected();
-                    String memo = inMed ? IN_MEDICINE : EXT_MEDICINE;
+
+                    // メモ　院内処方、院外処方など
+                    String memo = getMemo();
                     bundle.setMemo(memo);
 
-                    // 院内／院外など
-                    String rCode;
-
-                    if (ykzKbn.equals(ClaimConst.YKZ_KBN_NAIYO)) {
-                        if (CheckTonyo.checkTonyo(adminCode)) {
-                            // 頓用
-                            rCode = inMed ? ClaimConst.RECEIPT_CODE_TONYO_IN : ClaimConst.RECEIPT_CODE_TONYO_EXT;
-                        } else if (view.getRbRinji().isSelected()) {
-                            // 臨時
-                            rCode = inMed ? ClaimConst.RECEIPT_CODE_RINJI_IN : ClaimConst.RECEIPT_CODE_RINJI_EXT;
-                        } else {
-                            // 内服
-                            rCode = inMed ? ClaimConst.RECEIPT_CODE_NAIYO_IN : ClaimConst.RECEIPT_CODE_NAIYO_EXT;
-                        }
-                        bundle.setClassCode(rCode);
-
-                    } else if (ykzKbn.equals(ClaimConst.YKZ_KBN_GAIYO)) {
-                        // 外用
-                        rCode = inMed ? ClaimConst.RECEIPT_CODE_GAIYO_IN : ClaimConst.RECEIPT_CODE_GAIYO_EXT;
-                        bundle.setClassCode(rCode);
-                    }
+                    // classCode
+                    String rCode = getClassCode(ykzKbn, adminCode);
+                    bundle.setClassCode(rCode);
+                    
                     if (bundle.getClassCode() == null) {
                         // 保険適用外の医薬品と用法でOKとするため
                         bundle.setClassCode(ClaimConst.RECEIPT_CODE_NAIYO);
                     }
+                    
                     bundle.setClassCodeSystem(ClaimConst.CLASS_CODE_ID);
                     bundle.setClassName(MMLTable.getClaimClassCodeName(bundle.getClassCode()));
                     retList.add(mm);
@@ -228,33 +225,121 @@ public final class RpEditor extends AbstractStampEditor {
         }
 
         int i = 1;  //処方番号カウンタ
-        boolean houkatsu = view.getInRadio().isSelected() && view.getCbHoukatsu().isSelected();
-
         for (ModuleModel stamp : retList){
-            // ループのついでに包括の場合はclassCodeを変更する
-            if (houkatsu) {
-                bundle = (BundleMed) stamp.getModel();
-                String clsCode = bundle.getClassCode();
-                clsCode = clsCode.substring(0, 2) + "3";
-                if (ClaimConst.RECEIPT_CODE_RINJI_HOKATSU.equals(clsCode)) {
-                    clsCode = ClaimConst.RECEIPT_CODE_NAIYO_HOKATSU;
-                }
-                bundle.setClassCode(clsCode);
-                bundle.setMemo(IN_MED_HOUKATSU);
-
-            }
             // スタンプ名に連番を打つ
             String stampName = stamp.getModuleInfoBean().getStampName();
-            if (TEIKI.equals(stampName)){
+            if (TEIKI.equals(stampName)) {
                 stamp.getModuleInfoBean().setStampName(TEIKI + " - " + intToZenkaku(i));
-            }
-            if (RINJI.equals(stampName)){
-                stamp.getModuleInfoBean().setStampName(RINJI +" - " + intToZenkaku(i));
+            } else if (RINJI.equals(stampName)) {
+                stamp.getModuleInfoBean().setStampName(RINJI + " - " + intToZenkaku(i));
+            } else if (NYUIN.equals(stampName)) {
+                stamp.getModuleInfoBean().setStampName(NYUIN + " - " + intToZenkaku(i));
             }
             ++i;
         }
 
         return retList.toArray(new ModuleModel[0]);
+    }
+    
+    // バンドルメモを作成する
+    private String getMemo() {
+
+        boolean inMed = view.getInRadio().isSelected();
+        boolean nyuin = view.getRbAdmission().isSelected();
+        boolean houkatsu = view.getInRadio().isSelected() && view.getCbHoukatsu().isSelected();
+        boolean noCharge = view.getCbNoCharge().isSelected();
+        
+        String memo;
+        
+        if (nyuin) {
+            if (noCharge) {
+                memo = NYUIN_MED_NC;    // 入院調無
+            } else {
+                memo = NYUIN_MEDICINE;  // 入院処方
+            }
+        } else {
+            if (houkatsu) {
+                memo = IN_MED_HOUKATSU; // 院内包括
+            } else {
+                memo = inMed ? IN_MEDICINE : EXT_MEDICINE;  // 院内処方・院外処方
+            }
+        }
+        return memo;
+    }
+    
+    // ClassCodeを作成する
+    private String getClassCode(String ykzKbn, String adminCode) {
+        
+        boolean inMed = view.getInRadio().isSelected();
+        boolean rinji = view.getRbRinji().isSelected();
+        boolean nyuin = view.getRbAdmission().isSelected();
+        boolean houkatsu = view.getInRadio().isSelected() && view.getCbHoukatsu().isSelected();
+        boolean noCharge = view.getCbNoCharge().isSelected();
+        boolean tonyo = CheckTonyo.isTonyo(adminCode);
+        
+        String rCode = null;
+        
+        if (ykzKbn.equals(ClaimConst.YKZ_KBN_NAIYO)) {
+            if (tonyo) {
+                // 頓用
+                if (nyuin) {
+                    if (noCharge) {
+                        rCode = ClaimConst.RECEIPT_CODE_TONYO_NYUIN_NC;
+                    } else {
+                        rCode = ClaimConst.RECEIPT_CODE_TONYO;
+                    }
+                } else {
+                    if (houkatsu) {
+                        rCode = ClaimConst.RECEIPT_CODE_TONYO_HOKATSU;
+                    } else {
+                        rCode = inMed ? ClaimConst.RECEIPT_CODE_TONYO_IN : ClaimConst.RECEIPT_CODE_TONYO_EXT;
+                    }
+                }
+            } else if (rinji) {
+                // 臨時
+                if (nyuin) {
+                    rCode = ClaimConst.RECEIPT_CODE_RINJI;
+                } else {
+                    if (houkatsu) {
+                        rCode = ClaimConst.RECEIPT_CODE_RINJI;
+                    } else {
+                        rCode = inMed ? ClaimConst.RECEIPT_CODE_RINJI_IN : ClaimConst.RECEIPT_CODE_RINJI_EXT;
+                    }
+                }
+            } else {
+                // 内服
+                if (nyuin) {
+                    if (noCharge) {
+                        rCode = ClaimConst.RECEIPT_CODE_NAIYO_NYUIN_NC;
+                    } else {
+                        rCode = ClaimConst.RECEIPT_CODE_NAIYO;
+                    }
+                } else {
+                    if (houkatsu) {
+                        rCode = ClaimConst.RECEIPT_CODE_NAIYO_HOKATSU;
+                    } else {
+                        rCode = inMed ? ClaimConst.RECEIPT_CODE_NAIYO_IN : ClaimConst.RECEIPT_CODE_NAIYO_EXT;
+                    }
+                }
+            }
+
+        } else if (ykzKbn.equals(ClaimConst.YKZ_KBN_GAIYO)) {
+            // 外用
+            if (nyuin) {
+                if (noCharge) {
+                    rCode = ClaimConst.RECEIPT_CODE_GAIYO_NYUIN_NC;
+                } else {
+                    rCode = ClaimConst.RECEIPT_CODE_GAIYO;
+                }
+            } else {
+                if (houkatsu) {
+                    rCode = ClaimConst.RECEIPT_CODE_GAIYO_HOKATSU;
+                } else {
+                    rCode = inMed ? ClaimConst.RECEIPT_CODE_GAIYO_IN : ClaimConst.RECEIPT_CODE_GAIYO_EXT;
+                }
+            }
+        }
+        return rCode;
     }
    
     @Override
@@ -308,6 +393,13 @@ public final class RpEditor extends AbstractStampEditor {
         // 最初のスタンプが包括ならば包括チェックボックスを設定する
         if (med.getClassCode().endsWith("3")) {
             view.getCbHoukatsu().setSelected(true);
+        }
+        // 最初のスタンプが入院ならば入院ラジオをセットする
+        if (NYUIN_MEDICINE.equals(med.getMemo())) {
+            view.getRbAdmission().setSelected(true);
+        } else if (NYUIN_MED_NC.equals(med.getMemo())) {
+            view.getRbAdmission().setSelected(true);
+            view.getCbNoCharge().setSelected(true);
         }
 
         for (ModuleModel mm : stamps) {
@@ -728,63 +820,52 @@ public final class RpEditor extends AbstractStampEditor {
             }
         });
         
-//        usage.addItemListener(new ItemListener() {
-//            @Override
-//            public void itemStateChanged(ItemEvent e) {
-//                if (e.getStateChange() == ItemEvent.SELECTED) {
-//                    int index = view.getUsageCombo().getSelectedIndex();
-//                    String regExp = ADMIN_CODE_REGEXP[index];
-//                    if (!regExp.equals("")) {
-//                        getUsage(regExp);
-//                    }
-//                }
-//            }
-//        });
+        // スタンプ名フィールド
+        view.getStampNameField().addFocusListener(AutoKanjiListener.getInstance());
 
+        // 定期・臨時・入院ボタン
+        final JRadioButton rb_teiki = view.getRbTeiki();
+        final JRadioButton rb_rinji = view.getRbRinji();
+        final JRadioButton rb_nyuin = view.getRbAdmission();
+        
+        ActionListener al1 = new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String text = view.getStampNameField().getText();
+                if (rb_teiki.isSelected() && !text.startsWith(TEIKI)) {
+                    view.getStampNameField().setText(TEIKI);
+                } else if (rb_rinji.isSelected() && !text.startsWith(RINJI)) {
+                    view.getStampNameField().setText(RINJI);
+                } else if (rb_nyuin.isSelected() && !text.startsWith(NYUIN)) {
+                    view.getStampNameField().setText(NYUIN);
+                }
+            }
+        };
+        rb_teiki.addActionListener(al1);
+        rb_rinji.addActionListener(al1);
+        rb_nyuin.addActionListener(al1);
+
+        // 入院か外来か
+        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
+        if (inHospital) {
+            bOut = false;
+            rb_nyuin.setSelected(true);
+            view.getCbHoukatsu().setEnabled(false);
+        } else {
+            rb_teiki.setSelected(true);
+            rb_nyuin.setEnabled(false);
+            view.getCbNoCharge().setEnabled(false);
+        }        
+        
         // 院内、院外ボタン
         JRadioButton inBtn = view.getInRadio();
         JRadioButton outBtn = view.getOutRadio();
         ButtonGroup g = new ButtonGroup();
         g.add(inBtn);
         g.add(outBtn);
-        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
         outBtn.setSelected(bOut);
         inBtn.setSelected(!bOut);
-//masuda^   院内院外を変更してもデフォルトは変更しない
-        /*
-        ActionListener al = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean b = view.getOutRadio().isSelected();
-                Project.setBoolean(Project.RP_OUT, b);
-            }
-        };
-        inBtn.addActionListener(al);
-        outBtn.addActionListener(al);
-        */
-//masuda$
-        // スタンプ名フィールド
-        view.getStampNameField().addFocusListener(AutoKanjiListener.getInstance());
-        
-//masuda^
-        // 定期・臨時ボタン
-        JRadioButton rb_teiki = view.getRbTeiki();
-        JRadioButton rb_rinji = view.getRbRinji();
-
-        ActionListener al1 = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                boolean b = view.getRbTeiki().isSelected();
-                if (b && !view.getStampNameField().getText().startsWith(TEIKI)) {
-                    view.getStampNameField().setText(TEIKI);
-                } else if (!b && !view.getStampNameField().getText().startsWith(RINJI)) {
-                    view.getStampNameField().setText(RINJI);
-                }
-            }
-        };
-        rb_teiki.addActionListener(al1);
-        rb_rinji.addActionListener(al1);
-        rb_teiki.setSelected(true);
         
         // 包括チェックボックス
         view.getInRadio().addItemListener(new ItemListener() {

@@ -17,6 +17,7 @@ import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.DocInfoModel;
 import open.dolphin.infomodel.ExamHistoryModel;
 import open.dolphin.infomodel.ModelUtils;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 
@@ -36,6 +37,14 @@ public class ExamHistory {
     private PatientInspector patientInspector;
     private List<DocInfoModel> docInfoList;
     public static final String ExamHistoryTitle = "検査";
+    
+    // カラム仕様ヘルパー
+    private static final String COLUMN_SPEC_NAME = "examHistoryTable.column.spec";
+    private static final String[] COLUMN_NAMES = {"検査日", "内容"};
+    private static final String[] PROPERTY_NAMES = {"getMmlExamDate", "getExamTitle"};
+    private static final Class[] COLUMN_CLASSES = {String.class, String.class};
+    private static final int[] COLUMN_WIDTH = {115, 180};
+    private ColumnSpecHelper columnHelper;
 
     public ExamHistory(PatientInspector pi) {
 
@@ -66,13 +75,27 @@ public class ExamHistory {
         view = new InspectorTablePanel();
         table = view.getTable();
         table.setFocusable(false);
+        
+        //列の入れ替えを禁止
+        table.getTableHeader().setReorderingAllowed(false);
+        
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
+        
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(view.getTable());
 
-        String[] columnNames = {"検査日", "内容"};
-        String[] methodNames = {"getMmlExamDate", "getExamTitle"};
-        Class[] columnClasses = {String.class, String.class};
-
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
+        
         // 検査履歴テーブルを生成する
-        tableModel = new ListTableModel<ExamHistoryModel>(columnNames, 1, methodNames, columnClasses) {
+        tableModel = new ListTableModel<ExamHistoryModel>(columnNames, 1, methods, cls) {
             // テーブルは編集不可
             @Override
             public boolean isCellEditable(int row, int col) {
@@ -81,9 +104,8 @@ public class ExamHistory {
         };
 
         table.setModel(tableModel);
-        // カラム幅を調整する
-        table.getColumnModel().getColumn(0).setPreferredWidth(100);
-        table.getColumnModel().getColumn(1).setPreferredWidth(180);
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
         // ストライプテーブル
         StripeTableCellRenderer renderer = new StripeTableCellRenderer(table);
         renderer.setDefaultRenderer();
@@ -98,10 +120,19 @@ public class ExamHistory {
 
     // 履歴テーブルのコレクションを clear する。
     public void clear() {
-        tableModel.clear();
+        if (tableModel != null && tableModel.getDataProvider() != null) {
+            tableModel.clear();
+        }
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
+        }
     }
 
     private void connect() {
+        
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
 
         // 履歴テーブルで選択された行の文書を表示する
         ListSelectionModel slm = table.getSelectionModel();

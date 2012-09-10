@@ -18,6 +18,7 @@ import open.dolphin.helper.DBTask;
 import open.dolphin.infomodel.DocInfoModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.project.Project;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 
@@ -56,8 +57,15 @@ public class SearchResultInspector {
     // 自動的に取得する文書数
     //private int autoFetchCount;
 
-
     public static final String SearchResultTitle = "検索";
+
+    // カラム仕様ヘルパー
+    private static final String COLUMN_SPEC_NAME = "searchResultTable.column.spec";
+    private static final String[] COLUMN_NAMES = {"確定日","内容"};
+    private static final String[] PROPERTY_NAMES = {"getFirstConfirmDateWithMark", "getTitle"};
+    private static final Class[] COLUMN_CLASSES = {String.class, String.class};
+    private static final int[] COLUMN_WIDTH = {115, 180};
+    private ColumnSpecHelper columnHelper;
 
     /**
      * 検索結果オブジェクトを生成する。
@@ -89,6 +97,10 @@ public class SearchResultInspector {
     public void clear() {
         if (tableModel != null && tableModel.getDataProvider() != null) {
             tableModel.clear();
+        }
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
         }
     }
 
@@ -185,29 +197,42 @@ public class SearchResultInspector {
      */
     private void initComponent() {
 
-        // 履歴テーブルのパラメータを取得する
+        resultTable = new JTable();
+        resultTable.setFocusable(false);
+        //列の入れ替えを禁止
+        resultTable.getTableHeader().setReorderingAllowed(false);
+        
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
+        
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(resultTable);
 
-        String[] columnNames = new String[]{"確定日","内容"};
-        String[] methodNames = new String[]{"getFirstConfirmDateWithRp", "getTitle"};
-        Class[] columnClasses = {String.class, String.class};
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
 
         // 文書履歴テーブルを生成する
-        tableModel = new ListTableModel<DocInfoModel>(columnNames, 1, methodNames, columnClasses) {
+        tableModel = new ListTableModel<DocInfoModel>(columnNames, 1, methods, cls) {
 
             @Override
             public boolean isCellEditable(int row, int col) {
                 return false;
             }
 
-        };
-        resultTable = new JTable();
-        resultTable.setFocusable(false);
+        };        
+        
         resultTable.setModel(tableModel);
+        
         JScrollPane center = new JScrollPane(resultTable);
 
-        // カラム幅を調整する
-        resultTable.getColumnModel().getColumn(0).setPreferredWidth(100);
-        resultTable.getColumnModel().getColumn(1).setPreferredWidth(180);
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
 
         // ストライプテーブル
         StripeTableCellRenderer renderer = new StripeTableCellRenderer(resultTable);
@@ -269,7 +294,10 @@ public class SearchResultInspector {
      * Event 接続を行う
      */
     private void connect() {
-
+        
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
+        
         // 履歴テーブルで選択された行の文書を表示する
         ListSelectionModel slm = resultTable.getSelectionModel();
         slm.addListSelectionListener(new ListSelectionListener() {
