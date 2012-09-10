@@ -1,5 +1,6 @@
 package open.dolphin.impl.psearch;
 
+import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
@@ -16,7 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
-import javax.swing.event.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.*;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.delegater.PVTDelegater;
@@ -27,10 +29,7 @@ import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
-import open.dolphin.table.ColumnSpec;
-import open.dolphin.table.ListTableModel;
-import open.dolphin.table.ListTableSorter;
-import open.dolphin.table.StripeTableCellRenderer;
+import open.dolphin.table.*;
 import open.dolphin.util.AgeCalculator;
 import open.dolphin.util.StringTool;
 
@@ -43,11 +42,23 @@ import open.dolphin.util.StringTool;
 public class PatientSearchImpl extends AbstractMainComponent {
 
     private final String NAME = "患者検索";
-    private static final String[] COLUMN_NAMES = {"ID", "氏名", "カナ", "性別", "生年月日", "受診日"};
-    private final String[] METHOD_NAMES = {"patientId", "fullName", "kanaName", "genderDesc", "ageBirthday", "pvtDateTrimTime"};
-    private final int[] COLUMN_WIDTH = {50, 100, 120, 30, 100, 80};
+    private static final String[] COLUMN_NAMES 
+            = {"ID", "氏名", "カナ", "性別", "生年月日", "受診日", "状態"};
+    private final String[] PROPERTY_NAMES 
+            = {"patientId", "fullName", "kanaName", "genderDesc", "ageBirthday", "pvtDateTrimTime", "isOpened"};
+    private static final Class[] COLUMN_CLASSES = {
+        String.class, String.class, String.class, String.class, String.class, 
+        String.class, String.class};
+    private final int[] COLUMN_WIDTH = {50, 100, 120, 30, 100, 80, 20};
     private final int START_NUM_ROWS = 1;
-
+   
+    // カラム仕様名
+    private static final String COLUMN_SPEC_NAME = "patientSearchTable.withoutAddress.column.spec";
+    // カラム仕様ヘルパー
+    private ColumnSpecHelper columnHelper;
+    
+    private static final String KEY_AGE_DISPLAY = "patientSearchTable.withoutAddress.ageDisplay";
+    
     // 選択されている患者情報
     private PatientModel selectedPatient;
     // 年齢表示
@@ -64,27 +75,28 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private KeyBlocker keyBlocker;
 
     // カラム仕様リスト
-    private List<ColumnSpec> columnSpecs;
     private int ageColumn;
     private int pvtDateColumn;
+    private int stateColumn;
     
     private ListTableModel<PatientModel> tableModel;
     private ListTableSorter sorter;
     private AbstractAction copyAction;
     
     private String clientUUID;
-    private ChartEventListener scl;
+    private ChartEventListener cel;
 
     
     /** Creates new PatientSearch */
     public PatientSearchImpl() {
         setName(NAME);
-        scl = ChartEventListener.getInstance();
-        clientUUID = scl.getClientUUID();
+        cel = ChartEventListener.getInstance();
+        clientUUID = cel.getClientUUID();
     }
 
     @Override
     public void start() {
+        setup();
         initComponents();
         connect();
         enter();
@@ -108,21 +120,12 @@ public class PatientSearchImpl extends AbstractMainComponent {
     @Override
     public void stop() {
         
-        if (columnSpecs != null) {
-            
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < columnSpecs.size(); i++) {
-                ColumnSpec cs = columnSpecs.get(i);
-                cs.setWidth(view.getTable().getColumnModel().getColumn(i).getPreferredWidth());
-                sb.append(cs.getName()).append(",");
-                sb.append(cs.getMethod()).append(",");
-                sb.append(cs.getCls()).append(",");
-                sb.append(cs.getWidth()).append(",");
-            }
-            sb.setLength(sb.length() - 1);
-            String line = sb.toString();
-            Project.setString("patientSearchTable.withoutAddress.column.spec", line);
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
         }
+        // ChartStateListenerから除去する
+        cel.removeListener(this);
     }
 
     public PatientModel getSelectedPatient() {
@@ -149,11 +152,12 @@ public class PatientSearchImpl extends AbstractMainComponent {
         }
 
         ageDisplay = !ageDisplay;
-        Project.setBoolean("patientSearchTable.withoutAddress.ageDisplay", ageDisplay);
+        Project.setBoolean(KEY_AGE_DISPLAY, ageDisplay);
         String method = ageDisplay ? AGE_METHOD[0] : AGE_METHOD[1];
         ListTableModel tModel = getTableModel();
         tModel.setProperty(method, ageColumn);
 
+        List<ColumnSpec> columnSpecs = columnHelper.getColumnSpecs();
         for (int i = 0; i < columnSpecs.size(); i++) {
             ColumnSpec cs = columnSpecs.get(i);
             String test = cs.getMethod();
@@ -256,73 +260,43 @@ public class PatientSearchImpl extends AbstractMainComponent {
             }
         }
     }
+    private void setup() {
+        
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
 
+        // Scan して age / pvtDate カラムを設定する
+        ageColumn = columnHelper.getColumnPositionEndsWith("birthday");
+        pvtDateColumn = columnHelper.getColumnPositionStartWith("pvtdate");
+        stateColumn = columnHelper.getColumnPosition("isOpened");
+        
+        ageDisplay = Project.getBoolean(KEY_AGE_DISPLAY, true);
+    }
+    
     /**
      * GUI コンポーネントを初期化する。
      *
      */
     private void initComponents() {
         
-        // Scan して age / pvtDate カラムを設定する
-        for (int i = 0; i < METHOD_NAMES.length; i++) {
-            if (METHOD_NAMES[i].toLowerCase().endsWith("birthday")) {
-                ageColumn = i;
-            }
-            if (METHOD_NAMES[i].toLowerCase().startsWith("pvtdate")) {
-                pvtDateColumn = i;
-            }
-        }
-        
-        // Table deafult
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < COLUMN_NAMES.length; i++) {
-            String name = COLUMN_NAMES[i];
-            String method = METHOD_NAMES[i];
-            String cls = String.class.getName();
-            String width = String.valueOf(COLUMN_WIDTH[i]);
-            sb.append(name).append(",");
-            sb.append(method).append(",");
-            sb.append(cls).append(",");
-            sb.append(width).append(",");
-        }
-        sb.setLength(sb.length()-1);
-        String defaultLine = sb.toString();
-
-        // preference から
-        String line = Project.getString("patientSearchTable.withoutAddress.column.spec", defaultLine);
-
-        // 仕様を決定。保存されてていたスペックのカラム数が違えばデフォルトを使用する
-        List<ColumnSpec> defaultSpec = createColumnSpec(defaultLine);
-        columnSpecs = createColumnSpec(line);
-        if (defaultSpec.size() != columnSpecs.size()) {
-            columnSpecs = defaultSpec;
-        }
-
         // View
         view = new PatientSearchView();
         setUI(view);
 
-        ageDisplay = Project.getBoolean("patientSearchTable.withoutAddress.ageDisplay", true);
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(view.getTable());
 
-        int len = columnSpecs.size();
-        String[] colunNames = new String[len];
-        String[] methods = new String[len];
-        Class[] cls = new Class[len];
-        int[] width = new int[len];
-        try {
-            for (int i = 0; i < len; i++) {
-                ColumnSpec cp = columnSpecs.get(i);
-                colunNames[i] = cp.getName();
-                methods[i] = cp.getMethod();
-                cls[i] = Class.forName(cp.getCls());
-                width[i] = cp.getWidth();
-            }
-        } catch (Throwable e) {
-            e.printStackTrace(System.err);
-        }
-        
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
+
         // テーブルモデルを設定
-        tableModel = new ListTableModel<PatientModel>(colunNames, START_NUM_ROWS, methods, cls) {
+        tableModel = new ListTableModel<PatientModel>(columnNames, START_NUM_ROWS, methods, cls) {
 
             @Override
             public Object getValueAt(int row, int col) {
@@ -351,13 +325,12 @@ public class PatientSearchImpl extends AbstractMainComponent {
         view.getTable().setModel(sorter);
         sorter.setTableHeader(view.getTable().getTableHeader());
 //masuda$
-        // カラム幅を変更する
-        for (int i = 0; i < view.getTable().getColumnCount(); i++) {
-            view.getTable().getColumnModel().getColumn(i).setPreferredWidth(width[i]);
-        }
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
 
-        // レンダラを設定する
-        StripeTableCellRenderer renderer = new StripeTableCellRenderer(view.getTable());
+        // 連ドラ
+        PatientListTableRenderer renderer = new PatientListTableRenderer();
+        renderer.setTable(view.getTable());
         renderer.setDefaultRenderer();
 
         // HibernateSearchを使用するかなど
@@ -449,60 +422,18 @@ public class PatientSearchImpl extends AbstractMainComponent {
         // 件数を0件にする
         updateStatusLabel();
     }
-    
-    // 文字列からColumnSpec List を作成
-    private List<ColumnSpec> createColumnSpec(String line) {
-
-        List<ColumnSpec> ret = new ArrayList<ColumnSpec>();
-        String[] params = line.split(",");
-        int len = params.length / 4;
-        for (int i = 0; i < len; i++) {
-            int k = 4 * i;
-            String name = params[k];
-            String method = params[k + 1];
-            String cls = params[k + 2];
-            int width = Integer.parseInt(params[k + 3]);
-            ColumnSpec cp = new ColumnSpec(name, method, cls, width);
-            ret.add(cp);
-        }
-        return ret;
-    }
 
     /**
      * コンポーンントにリスナを登録し接続する。
      */
     private void connect() {
 
-        // Table のカラム変更関連イベント
-        view.getTable().getColumnModel().addColumnModelListener(new TableColumnModelListener() {
-
-            @Override
-            public void columnAdded(TableColumnModelEvent tcme) {
-            }
-
-            @Override
-            public void columnRemoved(TableColumnModelEvent tcme) {
-            }
-
-            @Override
-            public void columnMoved(TableColumnModelEvent tcme) {
-                int from = tcme.getFromIndex();
-                int to = tcme.getToIndex();
-                ColumnSpec moved = columnSpecs.remove(from);
-                columnSpecs.add(to, moved);
-            }
-
-            @Override
-            public void columnMarginChanged(ChangeEvent ce) {
-            }
-
-            @Override
-            public void columnSelectionChanged(ListSelectionEvent lse) {
-            }
-        });
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
+        // ChartEventListenerに登録する
+        cel.addListener(this);
 
         EventAdapter adp = new EventAdapter(view.getKeywordFld(), view.getTable());
-
 
         // カレンダによる日付検索を設定する
         PopupListener pl = new PopupListener(view.getKeywordFld());
@@ -619,7 +550,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
             // 来院情報を生成する
             PatientModel pm = getSelectedPatient();
-            PatientVisitModel pvt = scl.createFakePvt(pm);
+            PatientVisitModel pvt = cel.createFakePvt(pm);
             // カルテコンテナを生成する
             getContext().openKarte(pvt);
         }
@@ -651,7 +582,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             @Override
             protected Void doInBackground() {
                 PatientModel pm = getSelectedPatient();
-                PatientVisitModel pvt = scl.createFakePvt(pm);
+                PatientVisitModel pvt = cel.createFakePvt(pm);
                 PVTDelegater pdl = PVTDelegater.getInstance();
                 pdl.addPvt(pvt);
                 return null;
@@ -1254,6 +1185,44 @@ public class PatientSearchImpl extends AbstractMainComponent {
         
         if (sRow != -1) {
             tableModel.fireTableRowsUpdated(sRow, sRow);
+        }
+    }
+    
+    private class PatientListTableRenderer extends StripeTableCellRenderer {
+
+        public PatientListTableRenderer() {
+            super();
+        }
+
+        @Override
+        public Component getTableCellRendererComponent(JTable table,
+                Object value,
+                boolean isSelected,
+                boolean isFocused,
+                int row, int col) {
+
+            super.getTableCellRendererComponent(table, value, isSelected, isFocused, row, col);
+            
+            PatientModel pm = (PatientModel) sorter.getObject(row);
+            
+            if (pm != null && col == stateColumn) {
+                setHorizontalAlignment(JLabel.CENTER);
+                if (pm.isOpened()) {
+                    if (clientUUID.equals(pm.getOwnerUUID())) {
+                        setIcon(OPEN_ICON);
+                    } else {
+                        setIcon(NETWORK_ICON);
+                    }
+                } else {
+                    setIcon(null);
+                }
+                setText("");
+            } else {
+                setIcon(null);
+                setText(value == null ? "" : value.toString());
+            }
+
+            return this;
         }
     }
 }

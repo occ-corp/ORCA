@@ -1,4 +1,3 @@
-
 package open.dolphin.order;
 
 import java.awt.Dimension;
@@ -59,9 +58,13 @@ public class RpView extends AbstractOrderView {
         bg.add(rb_teiki);
         bg.add(rb_rinji);
         bg.add(admRadio);
-        cmdPanel1.add(rb_teiki);
-        cmdPanel1.add(rb_rinji);  
-        cmdPanel1.add(admRadio);
+        JPanel pnl = new JPanel();
+        //pnl.setLayout(new FlowLayout(FlowLayout.LEFT));
+        pnl.setBorder(BorderFactory.createEtchedBorder());
+        pnl.add(rb_teiki);
+        pnl.add(rb_rinji);  
+        pnl.add(admRadio);
+        cmdPanel1.add(pnl);
         
         inRadio = new JRadioButton("院内");
         inRadio.setToolTipText("院内処方の時選択します。");
@@ -70,8 +73,12 @@ public class RpView extends AbstractOrderView {
         bg = new ButtonGroup();
         bg.add(inRadio);
         bg.add(outRadio);
-        cmdPanel1.add(inRadio);
-        cmdPanel1.add(outRadio);
+        pnl = new JPanel();
+        //pnl.setLayout(new FlowLayout(FlowLayout.LEFT));
+        pnl.setBorder(BorderFactory.createEtchedBorder());
+        pnl.add(inRadio);
+        pnl.add(outRadio);
+        cmdPanel1.add(pnl);
 
         cbHoukatsu = new JCheckBox("包括");
         cmdPanel1.add(cbHoukatsu);

@@ -105,18 +105,34 @@ public class ColumnSpecHelper {
         table.repaint();
     }
     
-    public int getColumnPosition(String propName, boolean endsWith) {
-        
+    public int getColumnPosition(String propName) {
+
         for (int i = 0; i < columnSpecs.size(); ++i) {
             String name = columnSpecs.get(i).getMethod();
-            if (endsWith) {
-                if (name.endsWith(propName)) {
-                    return i;
-                }
-            } else {
-                if (name.equals(propName)) {
-                    return i;
-                }
+            if (name.equals(propName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public int getColumnPositionEndsWith(String propName) {
+
+        for (int i = 0; i < columnSpecs.size(); ++i) {
+            String name = columnSpecs.get(i).getMethod();
+            if (name.endsWith(propName)) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public int getColumnPositionStartWith(String propName) {
+
+        for (int i = 0; i < columnSpecs.size(); ++i) {
+            String name = columnSpecs.get(i).getMethod();
+            if (name.startsWith(propName)) {
+                return i;
             }
         }
         return -1;
@@ -207,6 +223,7 @@ public class ColumnSpecHelper {
         // 保存していた情報数が現在と違う場合は破棄
         if (!same) {
             params = defaultLine.split(",");
+            len = columnNames.length;
         }
         
         // columnSpecリストを作成する

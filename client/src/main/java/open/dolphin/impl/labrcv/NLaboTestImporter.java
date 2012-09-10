@@ -19,6 +19,7 @@ import open.dolphin.client.*;
 import open.dolphin.delegater.LaboDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
+import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 
@@ -32,10 +33,29 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private static final String NAME = "ラボレシーバ";
     private static final String SUCCESS = "成功";
     private static final String ERROR = "エラー";
-    //private static final Color ODD_COLOR = ClientContext.getColor("color.odd");
-    //private static final Color EVEN_COLOR = ClientContext.getColor("color.even");
     private static final Color UNCONSTRAINED_COLOR = new Color(255,102,102);
+
+    private static final String[] COLUMN_NAMES = {
+        "型", "ラボ", "患者ID", "データ氏名", "デ性別", 
+        "カルテ氏名", "カ性別", "検体採取日", "項目数", "登録", "状態"};
+    private static final String[] PROPERTY_NAMES = {
+        "reportFormat", "laboCode", "patientId", "patientName", "patientSexKanji", 
+                    "karteName", "karteSex", "sampleDate", "numOfTestItems", "result", "isOpened"};
+    private static final Class[] COLUMN_CLASSES = {
+        String.class, String.class, String.class, String.class, String.class, 
+        String.class, String.class, String.class, String.class, String.class, String.class};
+    // 来院テーブルのカラム幅
+    private static final int[] COLUMN_WIDTH = {
+        50, 50, 80, 100, 50, 100, 50, 80, 50, 50, 20};
     
+    // カラム仕様名
+    private static final String COLUMN_SPEC_NAME = "nlaboImport.column.spec";
+    // カラム仕様ヘルパー
+    private ColumnSpecHelper columnHelper;
+    
+    private int idColumn;
+    private int stateColumn;
+        
     // 選択されている患者情報
     private NLaboImportSummary selectedLabo;
    
@@ -44,18 +64,19 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private NLabTestImportView view;
     
     private String clientUUID;
-    private ChartEventListener scl;
+    private ChartEventListener cel;
     
     
     /** Creates new NLaboTestImporter */
     public NLaboTestImporter() {
         setName(NAME);
-        scl = ChartEventListener.getInstance();
-        clientUUID = scl.getClientUUID();
+        cel = ChartEventListener.getInstance();
+        clientUUID = cel.getClientUUID();
     }
     
     @Override
     public void start() {
+        setup();
         initComponents();
         connect();
         enter();
@@ -68,8 +89,25 @@ public class NLaboTestImporter extends AbstractMainComponent {
     
     @Override
     public void stop() {
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
+        }
+        // ChartStateListenerから除去する
+        cel.removeListener(this);
     }
 
+    private void setup() {
+        
+        // ColumnSpecHelperを準備する
+        columnHelper = new ColumnSpecHelper(COLUMN_SPEC_NAME,
+                COLUMN_NAMES, PROPERTY_NAMES, COLUMN_CLASSES, COLUMN_WIDTH);
+        columnHelper.loadProperty();
+
+        // Scan して state カラムを設定する
+        stateColumn = columnHelper.getColumnPosition("isOpened");
+        idColumn = columnHelper.getColumnPosition("patientId");
+    }
     
     public JProgressBar getProgressBar() {
         return getContext().getProgressBar();
@@ -130,7 +168,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         
         // 来院情報を生成する
         PatientModel patient = selectedLabo.getPatient();
-        PatientVisitModel pvt = scl.createFakePvt(patient);
+        PatientVisitModel pvt = cel.createFakePvt(patient);
 
         // カルテコンテナを生成する
         getContext().openKarte(pvt);
@@ -380,7 +418,12 @@ public class NLaboTestImporter extends AbstractMainComponent {
      * コンポーンントにリスナを登録し接続する。
      */
     private void connect() {
-
+        
+        // ColumnHelperでカラム変更関連イベントを設定する
+        columnHelper.connect();
+        // ChartEventListenerに登録する
+        cel.addListener(this);
+        
         // ファイル選択ボタン
         view.getFileBtn().addActionListener(new ActionListener() {
 
@@ -517,21 +560,27 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
         view = new NLabTestImportView();
         setUI(view);
+        
+        //列の入れ替えを禁止
+        view.getTable().getTableHeader().setReorderingAllowed(false);
 
-//masuda^
-        //String[] columnNames = new String[]{"ラボ", "患者ID", "カナ", "カルテ・カナ", "性別", "カルテ・性別", "検体採取日", "項目数", "登録"};
-        //String[] propNames = new String[]{"laboCode", "patientId", "patientName", "karteKanaName", "patientSex", "karteSex", "sampleDate", "numOfTestItems", "result"};
-        //int[] columnWidth = new int[]{50, 120, 120, 120, 50, 70, 120, 50, 80};
-        String[] columnNames = new String[]{"型", "ラボ", "患者ID", "データ氏名", "デ性別", "カルテ氏名", "カ性別", "検体採取日", "項目数", "登録"};
-        String[] propNames = new String[]{"reportFormat", "laboCode", "patientId", "patientName", "patientSexKanji", "karteName", "karteSex", "sampleDate", "numOfTestItems", "result"};
-        int[] columnWidth = new int[]{50, 50, 80, 100, 50, 100, 50, 80, 50, 50};
-        final int idColumn = 2;
+        // ColumnSpecHelperにテーブルを設定する
+        columnHelper.setTable(view.getTable());
 
-        tableModel = new ListTableModel<NLaboImportSummary>(columnNames, 30, propNames, null) {
+        //------------------------------------------
+        // View のテーブルモデルを置き換える
+        //------------------------------------------
+        String[] columnNames = columnHelper.getTableModelColumnNames();
+        String[] methods = columnHelper.getTableModelColumnMethods();
+        Class[] cls = columnHelper.getTableModelColumnClasses();
+
+        tableModel = new ListTableModel<NLaboImportSummary>(columnNames, 1, methods, cls) {
             @Override
             public boolean isCellEditable(int row, int col) {
 //masuda^   未登録の場合のみID編集可能
-                if (col == idColumn && getObject(row) != null && getObject(row).getPatient() == null) {
+                if (col == idColumn 
+                        && getObject(row) != null 
+                        && getObject(row).getPatient() == null) {
                     return true;
                 }
 //masuda$
@@ -560,14 +609,10 @@ public class NLaboTestImporter extends AbstractMainComponent {
         view.getTable().setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         view.getTable().setTransferHandler(new NLaboTestFileTransferHandler(this));
 
-        // カラム幅を変更する
-        for (int i = 0; i < columnWidth.length; i++) {
-            view.getTable().getColumnModel().getColumn(i).setPreferredWidth(columnWidth[i]);
-        }
+        // カラム幅更新
+        columnHelper.updateColumnWidth();
 
-        // レンダラを設定する
-//masuda^    ストライプテーブル
-        //view.getTable().setDefaultRenderer(Object.class, new NLaboTestImporter.LabTestRenderer());
+        // ストライプテーブル
         LabTestRenderer renderer = new LabTestRenderer();
         renderer.setTable(view.getTable());
         renderer.setDefaultRenderer();
@@ -577,7 +622,6 @@ public class NLaboTestImporter extends AbstractMainComponent {
         tf.addFocusListener(AutoRomanListener.getInstance());
         TableColumn column = view.getTable().getColumnModel().getColumn(idColumn);
         column.setCellEditor(new DefaultCellEditor2(tf));
-//masuda$
         
         // カウント値０を設定する
         updateCount();
@@ -596,7 +640,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
     }
     
     // ストライプテーブル
-    protected class LabTestRenderer extends StripeTableCellRenderer {
+    private class LabTestRenderer extends StripeTableCellRenderer {
 
         @Override
         public Component getTableCellRendererComponent(JTable table,
@@ -610,6 +654,24 @@ public class NLaboTestImporter extends AbstractMainComponent {
             NLaboImportSummary summary = tableModel.getObject(row);
             if (summary != null && summary.getKarteId() == null) {
                 this.setBackground(UNCONSTRAINED_COLOR);
+            }
+            
+            PatientModel pm = summary.getPatient();
+            if (pm != null && col == stateColumn) {
+                setHorizontalAlignment(JLabel.CENTER);
+                if (pm.isOpened()) {
+                    if (clientUUID.equals(pm.getOwnerUUID())) {
+                        setIcon(OPEN_ICON);
+                    } else {
+                        setIcon(NETWORK_ICON);
+                    }
+                } else {
+                    setIcon(null);
+                }
+                setText("");
+            } else {
+                setIcon(null);
+                setText(value == null ? "" : value.toString());
             }
 
             return this;

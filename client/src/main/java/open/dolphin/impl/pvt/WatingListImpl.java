@@ -111,7 +111,7 @@ public class WatingListImpl extends AbstractMainComponent {
         new Integer(PatientVisitModel.BIT_SAVE_CLAIM)};
     // Chart State を表示するアイコン
     private ImageIcon[] chartIconArray = {
-        ClientContext.getImageIcon("open_16.gif"), 
+        OPEN_ICON, 
         ClientContext.getImageIcon("sinfo_16.gif"), 
         ClientContext.getImageIcon("flag_16.gif")};
     // State ComboBox
@@ -126,9 +126,6 @@ public class WatingListImpl extends AbstractMainComponent {
     
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
-    
-    // ネットワークアイコン
-    private static final ImageIcon NETWORK_ICON = ClientContext.getImageIcon("ntwrk_16.gif");
 
     // State 設定用のcombobox model
     private BitAndIconPair[] stateComboArray;
@@ -156,7 +153,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private PVTDelegater pvtDelegater;
     
     private String clientUUID;
-    private ChartEventListener scl;
+    private ChartEventListener cel;
     private String orcaId;
 
     /**
@@ -164,8 +161,8 @@ public class WatingListImpl extends AbstractMainComponent {
      */
     public WatingListImpl() {
         setName(NAME);
-        scl = ChartEventListener.getInstance();
-        clientUUID = scl.getClientUUID();
+        cel = ChartEventListener.getInstance();
+        clientUUID = cel.getClientUUID();
         orcaId = Project.getUserModel().getOrcaId();
     }
     
@@ -188,11 +185,11 @@ public class WatingListImpl extends AbstractMainComponent {
         columnHelper.loadProperty();
 
         // Scan して age, memo, state カラムを設定する
-        visitedTimeColumn = columnHelper.getColumnPosition("getPvtDateTrimDate", false);
-        sexColumn = columnHelper.getColumnPosition("getPatientGenderDesc", false);
-        ageColumn = columnHelper.getColumnPosition("Birthday", true);
-        memoColumn = columnHelper.getColumnPosition("getMemo", false);
-        stateColumn = columnHelper.getColumnPosition("getStateInteger", false);
+        visitedTimeColumn = columnHelper.getColumnPosition("getPvtDateTrimDate");
+        sexColumn = columnHelper.getColumnPosition("getPatientGenderDesc");
+        ageColumn = columnHelper.getColumnPositionEndsWith("Birthday");
+        memoColumn = columnHelper.getColumnPosition("getMemo");
+        stateColumn = columnHelper.getColumnPosition("getStateInteger");
 
         
         // 修正送信アイコンを決める
@@ -317,7 +314,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 if (col == memoColumn) {
                     String memo = ((String) value).trim();
                     if (memo != null && (!memo.equals(""))) {
-                        scl.publishPvtState(pvt);
+                        cel.publishPvtState(pvt);
                     }
 
                 } else if (col == stateColumn) {
@@ -358,7 +355,7 @@ public class WatingListImpl extends AbstractMainComponent {
                         pvt.setStateBit(theBit, true);
                     }
 
-                    scl.publishPvtState(pvt);
+                    cel.publishPvtState(pvt);
                 }
             }
         };
@@ -473,7 +470,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getFullPvt();
-        scl.addListener(this);
+        cel.addListener(this);
         timerTask = new UpdatePvtInfoTask();
         restartTimer();
         enter();
@@ -523,7 +520,7 @@ public class WatingListImpl extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        scl.removeListener(this);
+        cel.removeListener(this);
     }
 
 
@@ -828,7 +825,7 @@ public class WatingListImpl extends AbstractMainComponent {
         
         // updateStateする。
         pvtModel.setStateBit(PatientVisitModel.BIT_CANCEL, false);
-        scl.publishPvtState(pvtModel);
+        cel.publishPvtState(pvtModel);
     }
     
     /**
@@ -846,7 +843,7 @@ public class WatingListImpl extends AbstractMainComponent {
         }
 
         // publish
-        scl.publishPvtDelete(pvtModel);
+        cel.publishPvtDelete(pvtModel);
         
         SwingWorker worker = new SwingWorker<Boolean, Void>() {
 

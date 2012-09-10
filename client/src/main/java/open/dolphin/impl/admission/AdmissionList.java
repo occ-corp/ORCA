@@ -13,7 +13,6 @@ import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ChartEventListener;
-import open.dolphin.client.ClientContext;
 import open.dolphin.client.GUIConst;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.MasudaDelegater;
@@ -49,15 +48,11 @@ public class AdmissionList extends AbstractMainComponent {
         String.class, String.class, String.class, String.class};
     // 来院テーブルのカラム幅
     private static final int[] COLUMN_WIDTH = {
-        20, 80, 130, 40, 100, 100, 50, 80, 30};
+        30, 40, 130, 20, 40, 100, 50, 80, 20};
     
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
-    
-    // オープンアイコン
-    private static final ImageIcon OPEN_ICON = ClientContext.getImageIcon("open_16.gif");
-    // ネットワークアイコン
-    private static final ImageIcon NETWORK_ICON = ClientContext.getImageIcon("ntwrk_16.gif");
+    private String INFO_MSG = "入院カルテはここから作成してください";
     
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "admissionTable.column.spec";
@@ -82,13 +77,14 @@ public class AdmissionList extends AbstractMainComponent {
     private Action copyAction;
     
     private String clientUUID;
-    private ChartEventListener scl;
+    private ChartEventListener cel;
     
     
     public AdmissionList() {
         setName(NAME);
-        scl = ChartEventListener.getInstance();
-        clientUUID = scl.getClientUUID();
+        cel = ChartEventListener.getInstance();
+        clientUUID = cel.getClientUUID();
+        statusInfo = INFO_MSG;
     }
 
     @Override
@@ -96,7 +92,7 @@ public class AdmissionList extends AbstractMainComponent {
         setup();
         initComponents();
         connect();
-        startSyncMode();
+        enter();
     }
 
     @Override
@@ -107,7 +103,7 @@ public class AdmissionList extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        scl.removeListener(this);
+        cel.removeListener(this);
     }
     /**
      * メインウインドウのタブで受付リストに切り替わった時 コールされる。
@@ -115,13 +111,7 @@ public class AdmissionList extends AbstractMainComponent {
     @Override
     public void enter() {
         controlMenu();
-        getContext().getStatusLabel().setText("");
-    }
-    
-    // comet long polling機能を設定する
-    private void startSyncMode() {
-        scl.addListener(this);
-        enter();
+        getContext().getStatusLabel().setText(statusInfo);
     }
     
     private void setup() {
@@ -132,7 +122,7 @@ public class AdmissionList extends AbstractMainComponent {
         columnHelper.loadProperty();
 
         // Scan して state カラムを設定する
-        stateColumn = columnHelper.getColumnPosition("isOpened", false);
+        stateColumn = columnHelper.getColumnPosition("isOpened");
     }
     
     /**
@@ -188,6 +178,8 @@ public class AdmissionList extends AbstractMainComponent {
         
         // ColumnHelperでカラム変更関連イベントを設定する
         columnHelper.connect();
+        // ChartEventListenerに登録する
+        cel.addListener(this);
         
         // 来院リストテーブル 選択
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
