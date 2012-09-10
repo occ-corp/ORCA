@@ -1226,17 +1226,6 @@ public class PatientSearchImpl extends AbstractMainComponent {
                     }
                 }
                 break;
-            case PVT_MERGE:
-                for (int row = 0; row < list.size(); ++row) {
-                    PatientModel pm = list.get(row);
-                    if (ptPk == pm.getId()) {
-                        sRow = row;
-                        //pm = msg.getPatientVisitModel().getPatientModel();
-                        list.set(row, evt.getPatientVisitModel().getPatientModel());
-                        break;
-                    }
-                }
-                break;
             case PM_MERGE:
                 for (int row = 0; row < list.size(); ++row) {
                     PatientModel pm = list.get(row);
@@ -1244,6 +1233,17 @@ public class PatientSearchImpl extends AbstractMainComponent {
                         sRow = row;
                         //pm = msg.getPatientModel();
                         list.set(row, evt.getPatientModel());
+                        break;
+                    }
+                }
+                break;            
+            case PVT_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    PatientModel pm = list.get(row);
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        //pm = msg.getPatientVisitModel().getPatientModel();
+                        list.set(row, evt.getPatientVisitModel().getPatientModel());
                         break;
                     }
                 }

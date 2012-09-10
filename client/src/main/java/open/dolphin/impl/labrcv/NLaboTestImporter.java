@@ -637,17 +637,6 @@ public class NLaboTestImporter extends AbstractMainComponent {
                     }
                 }
                 break;
-            case PVT_MERGE:
-                for (int row = 0; row < list.size(); ++row) {
-                    NLaboImportSummary nlab = list.get(row);
-                    PatientModel pm = nlab.getPatient();
-                    if (ptPk == pm.getId()) {
-                        sRow = row;
-                        nlab.setPatient(evt.getPatientVisitModel().getPatientModel());
-                        break;
-                    }
-                }
-                break;
             case PM_MERGE:
                 for (int row = 0; row < list.size(); ++row) {
                     NLaboImportSummary nlab = list.get(row);
@@ -655,6 +644,17 @@ public class NLaboTestImporter extends AbstractMainComponent {
                     if (ptPk == pm.getId()) {
                         sRow = row;
                         nlab.setPatient(evt.getPatientModel());
+                        break;
+                    }
+                }
+                break;                
+            case PVT_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    NLaboImportSummary nlab = list.get(row);
+                    PatientModel pm = nlab.getPatient();
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        nlab.setPatient(evt.getPatientVisitModel().getPatientModel());
                         break;
                     }
                 }

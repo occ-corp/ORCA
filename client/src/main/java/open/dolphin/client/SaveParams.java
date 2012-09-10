@@ -55,6 +55,22 @@ public final class SaveParams {
     public void setOldTitle(String title) {
         oldTitle = title;
     }
+    // 入院か否か
+    private boolean inHospital;
+    public boolean isInHospital() {
+        return inHospital;
+    }
+    public void setInHospital(boolean b) {
+        inHospital = b;
+    }
+    // 退院日登録するか
+    private boolean registEndDate;
+    public boolean isRegistEndDate() {
+        return registEndDate;
+    }
+    public void setRegistEndDate(boolean b) {
+        registEndDate = b;
+    }
 //masuda$
     
     /** 

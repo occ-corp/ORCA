@@ -133,6 +133,12 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             boundSupport.removePropertyChangeListener(listener);
         }
     }
+    
+    private boolean isInHospital() {
+        // AdmissionModelはPVTのPatientModelにTransientで設定されている。
+        // getContext().getPatient().getAdmissionModel()はだめ。
+        return getContext().getPatientVisit().getPatientModel().getAdmissionModel() != null;
+    }
 //masuda$
     
     /** 
@@ -176,30 +182,6 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
 
     private boolean isSendLabtest() {
         return sendLabtest;
-    }
-
-    public int getActualHeight() {
-        try {
-            JTextPane pane = soaPane.getTextPane();
-            int pos = pane.getDocument().getLength();
-            Rectangle r = pane.modelToView(pos);
-            int hsoa = r.y;
-
-            if (pPane == null) {
-                return hsoa;
-            }
-
-            pane = pPane.getTextPane();
-            pos = pane.getDocument().getLength();
-            r = pane.modelToView(pos);
-            int hp = r.y;
-
-            return Math.max(hsoa, hp);
-
-        } catch (Exception ex) {
-            ex.printStackTrace(System.err);
-        }
-        return 0;
     }
 
     public void printPanel2(final PageFormat format) {
@@ -485,19 +467,25 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         // Timestamp を表示する
         //Date now = new Date();
         started = new Date();
-        timeStamp = ModelUtils.getDateAsFormatString(started, IInfoModel.KARTE_DATE_FORMAT);
-
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(ModelUtils.getDateAsFormatString(started, IInfoModel.KARTE_DATE_FORMAT));
+        if (isInHospital()) {
+            sb.append(" <入院中> ");
+        }
+        timeStamp = sb.toString();
+        
         // 修正の場合
         if (modify) {
             // 更新: YYYY-MM-DDTHH:MM:SS (firstConfirmDate)
-            StringBuilder buf = new StringBuilder();
-            buf.append(UPDATE_TAB_TITLE);
-            buf.append(": ");
-            buf.append(timeStamp);
-            buf.append(" [");
-            buf.append(ModelUtils.getDateAsFormatString(model.getDocInfoModel().getFirstConfirmDate(), IInfoModel.KARTE_DATE_FORMAT));
-            buf.append(" ]");
-            timeStamp = buf.toString();
+            sb = new StringBuilder();
+            sb.append(UPDATE_TAB_TITLE);
+            sb.append(": ");
+            sb.append(timeStamp);
+            sb.append(" [");
+            sb.append(ModelUtils.getDateAsFormatString(model.getDocInfoModel().getFirstConfirmDate(), IInfoModel.KARTE_DATE_FORMAT));
+            sb.append(" ]");
+            timeStamp = sb.toString();
         }
 
         // 内容を表示する
@@ -550,7 +538,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             ClientContext.getBootLogger().debug("insGUID is null");
         }
 
-        StringBuilder sb = new StringBuilder();
+        sb = new StringBuilder();
         sb.append(timeStamp);
         if ( (getMode()==DOUBLE_MODE) && (selecteIns!=null) ) {
             sb.append(" (");
@@ -712,13 +700,17 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             params.setTitle(text);
             params.setDepartment(model.getDocInfoModel().getDepartmentDesc());
             
-//masuda^   旧タイトルを設定
+//masuda^
+            // 旧タイトルを設定
             params.setOldTitle(oldTitle);
             // 新規カルテの場合は保存日を設定する
             if (!modify && docInfo.getStatus().equals(IInfoModel.STATUS_NONE)) {
                 SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
                 params.setKarteDate(sdf.format(new Date()));
             }
+            
+            // 入院中か
+            params.setInHospital(isInHospital());
 //masuda$
             
             // 印刷枚数をPreferenceから取得する
@@ -770,7 +762,6 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             params.setOldTitle(oldTitle);
 //masuda$
             
-
             // 仮保存が指定されている端末の場合
             int sMode = Project.getInt(Project.KARTE_SAVE_ACTION);
             boolean tmpSave = (sMode == 1);
@@ -1033,7 +1024,17 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                 model.addSchema(schema);
             }
         }
-
+        
+//masuda^   入院モデルをセット
+        if (isInHospital()) {
+            AdmissionModel admission = getContext().getPatient().getAdmissionModel();
+            if (params.isRegistEndDate()) {
+                admission.setEnded(docInfo.getConfirmDate());
+            }
+            docInfo.setAdmissionModel(admission);
+        }
+//masuda$
+        
         // FLAGを設定する
         // image があるかどうか
         boolean flag = (model.getSchema() != null);
@@ -1450,7 +1451,17 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     // LaboTest があるかどうか
                     flag = (model.getModule(ENTITY_LABO_TEST) != null);
                     docInfo.setHasLaboTest(flag);
-
+                    
+//masuda^   入院モデルをセット
+                    if (isInHospital()) {
+                        AdmissionModel admission = getContext().getPatient().getAdmissionModel();
+                        if (params.isRegistEndDate()) {
+                            admission.setEnded(docInfo.getConfirmDate());
+                        }
+                        docInfo.setAdmissionModel(admission);
+                    }
+//masuda$
+        
                     //-------------------------------------
                     // EJB3.0 Model の関係を構築する
                     // confirmed, firstConfirmed は設定済み
@@ -1576,11 +1587,11 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     //DocumentDelegater ddl = new DocumentDelegater();
                     DocumentDelegater ddl = DocumentDelegater.getInstance();
 
+                    // 外来待合リスト以外から開いた場合はpvt.id = 0である
                     PatientVisitModel pvt = chart.getPatientVisit();
-                    if (sendClaim) {
+                    if (sendClaim && pvt.getId() != 0) {
                         // CLAIMビットをセット
                         if (modify) {
-                            pvt.setStateBit(PatientVisitModel.BIT_SAVE_CLAIM, false);
                             pvt.setStateBit(PatientVisitModel.BIT_MODIFY_CLAIM, true);
                         } else {
                             pvt.setStateBit(PatientVisitModel.BIT_SAVE_CLAIM, true);

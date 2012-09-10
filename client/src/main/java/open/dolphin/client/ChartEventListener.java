@@ -25,6 +25,7 @@ public class ChartEventListener {
     private String doctorName;
     private String userId;
     private String jmariCode;
+    private String facilityId;
 
     private List<IChartEventListener> listeners;
     
@@ -57,6 +58,7 @@ public class ChartEventListener {
         doctorName = Project.getUserModel().getCommonName();
         userId = Project.getUserModel().getUserId();
         jmariCode = Project.getString(Project.JMARI_CODE);
+        facilityId = Project.getFacilityId();
         listeners = new ArrayList<IChartEventListener>(); 
     }
     
@@ -93,7 +95,7 @@ public class ChartEventListener {
     }
     
     public void publishKarteOpened(PatientVisitModel pvt) {
-        
+
         // PatientVisitModel.BIT_OPENを立てる
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
         // ChartStateListenerに通知する
@@ -267,6 +269,7 @@ public class ChartEventListener {
         PatientVisitModel pvt = new PatientVisitModel();
         pvt.setId(0L);
         pvt.setPatientModel(pm);
+        pvt.setFacilityId(facilityId);
 
         //--------------------------------------------------------
         // 受け付けを通していないのでログイン情報及び設定ファイルを使用する

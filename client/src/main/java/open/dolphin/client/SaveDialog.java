@@ -57,11 +57,14 @@ public final class SaveDialog {
     // ダイアログ
     private JDialog dialog;
     
-//masuda^   保存日変更関連
-    private JTextField dateField = new JTextField();
-    private JCheckBox cb_dateEnable = new JCheckBox();
+//masuda^
+    // 保存日変更関連
+    private JTextField dateField;
+    private JCheckBox cb_dateEnable;
     private Window parent;
     private SaveParams saveParams;
+    // 退院日登録
+    private JCheckBox cb_registEndDate;
 //masuda$
     
     /** 
@@ -190,7 +193,8 @@ public final class SaveDialog {
         sendLabtest.setSelected(params.isSendLabtest() && params.isHasLabtest());
         sendLabtest.setEnabled((send && params.isHasLabtest()));
         
-//masuda^   デフォルトの保存日（現在）をセット
+//masuda^
+        // デフォルトの保存日（現在）をセット
         if (dateField != null) {
             dateField.setText(params.getKarteDate());
         }
@@ -255,7 +259,8 @@ public final class SaveDialog {
         
         content.add(p1);
         
-//masuda^   新規カルテの場合は保存日変更パネルを追加
+//masuda^
+        // 新規カルテの場合は保存日変更パネルを追加
         if (saveParams.getKarteDate() != null) {
             dateField = new JTextField(12);
 
@@ -273,6 +278,13 @@ public final class SaveDialog {
             dateField.setEnabled(false);
             p2.add(dateField);
             content.add(p2);
+        }
+        // 退院日登録するか
+        if (saveParams.isInHospital()) {
+            cb_registEndDate = new JCheckBox("退院日登録する");
+            JPanel p3 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            p3.add(cb_registEndDate);
+            content.add(p3);
         }
 //masuda$
         
@@ -370,9 +382,14 @@ public final class SaveDialog {
         //-------------------
         value.setSendLabtest(sendLabtest.isSelected());
         
-//masuda^   保存日を保存
+//masuda^
+        // 保存日を保存
         if (dateField != null) {
             value.setKarteDate(dateField.getText());
+        }
+        // 退院日登録フラッグを設定
+        if (cb_registEndDate != null && cb_registEndDate.isSelected()) {
+            value.setRegistEndDate(cb_registEndDate.isSelected());
         }
 //masuda$
         

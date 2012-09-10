@@ -66,10 +66,11 @@ public class ChartEventServiceBean {
     public List<PatientVisitModel> getPvtList(String fid) {
         return contextHolder.getPvtList(fid);
     }
+    
     /**
-     * status情報を更新する
+     * ChartEventModelを処理する
      */
-    public int updateState(ChartEventModel msg) {
+    public int processChartEvent(ChartEventModel msg) {
 
         // msgからパラメーターを取得
         String fid = msg.getFacilityId();
@@ -80,7 +81,7 @@ public class ChartEventServiceBean {
         String memo = msg.getMemo();
         String ownerUUID = msg.getOwnerUUID();
         long ptPk = msg.getPtPk();
-        
+
         List<PatientVisitModel> pvtList = contextHolder.getPvtList(fid);
 
         // データベースのPatientVisitModelを更新

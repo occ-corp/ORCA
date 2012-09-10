@@ -519,7 +519,9 @@ public class WatingListImpl extends AbstractMainComponent {
     public void stop() {
         
         // ColumnSpecsを保存する
-        columnHelper.saveProperty();
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
+        }
         // ChartStateListenerから除去する
         scl.removeListener(this);
     }
@@ -1232,36 +1234,29 @@ public class WatingListImpl extends AbstractMainComponent {
                 break;
                 
             case PVT_STATE:
-                // pvtListを検索
-                PatientVisitModel toUpdate = null;
+                // pvtListを更新
                 for (PatientVisitModel pvt : pvtList) {
-                    if (evt.getPvtPk() == pvt.getId()) {
-                        toUpdate =pvt;
-                        break;
+                    if (pvt.getId() == evt.getPvtPk()) {
+                        // 更新する
+                        pvt.setState(evt.getState());
+                        pvt.setByomeiCount(evt.getByomeiCount());
+                        pvt.setByomeiCountToday(evt.getByomeiCountToday());
+                        pvt.setMemo(evt.getMemo());
+                    }
+                    if (pvt.getPatientModel().getId() == evt.getPtPk()) {
+                        String ownerUUID = evt.getOwnerUUID();
+                        pvt.setStateBit(PatientVisitModel.BIT_OPEN, ownerUUID != null);
+                        pvt.getPatientModel().setOwnerUUID(evt.getOwnerUUID());
                     }
                 }
-                // テーブルの対応する行を検索
-                sRow = -1;
                 for (int row = 0; row < tableDataList.size(); ++row) {
                     PatientVisitModel pvt = tableDataList.get(row);
-                    if (pvt.getId() == evt.getPvtPk()) {
-                        sRow = row;
-                        break;
+                    if (pvt.getId() == evt.getPvtPk() 
+                            || pvt.getPatientModel().getId() == evt.getPtPk()) {
+                        pvtTableModel.fireTableRowsUpdated(row, row);
                     }
                 }
-                // 更新する
-                toUpdate.setState(evt.getState());
-                toUpdate.setByomeiCount(evt.getByomeiCount());
-                toUpdate.setByomeiCountToday(evt.getByomeiCountToday());
-                toUpdate.setMemo(evt.getMemo());
-                toUpdate.getPatientModel().setOwnerUUID(evt.getOwnerUUID());
-
-                // テーブルのアイコンを更新する
-                if (sRow != -1) {
-                    pvtTableModel.fireTableRowsUpdated(sRow, sRow);
-                }
                 break;
-                
             case PVT_DELETE:
                 // pvtListから削除
                 PatientVisitModel toRemove = null;

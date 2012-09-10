@@ -103,7 +103,9 @@ public class AdmissionList extends AbstractMainComponent {
     public void stop() {
         
         // ColumnSpecsを保存する
-        columnHelper.saveProperty();
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
+        }
         // ChartStateListenerから除去する
         scl.removeListener(this);
     }
@@ -294,7 +296,7 @@ public class AdmissionList extends AbstractMainComponent {
         
         PatientModel patient = getSelectedPatient();
         PatientVisitModel pvt = ChartEventListener.getInstance().createFakePvt(patient);
-
+        
         // カルテコンテナを生成する
         getContext().openKarte(pvt);
     }
@@ -474,17 +476,6 @@ public class AdmissionList extends AbstractMainComponent {
                     }
                 }
                 break;
-            case PVT_MERGE:
-                for (int row = 0; row < list.size(); ++row) {
-                    PatientModel pm = list.get(row);
-                    if (ptPk == pm.getId()) {
-                        sRow = row;
-                        //pm = msg.getPatientVisitModel().getPatientModel();
-                        list.set(row, evt.getPatientVisitModel().getPatientModel());
-                        break;
-                    }
-                }
-                break;
             case PM_MERGE:
                 for (int row = 0; row < list.size(); ++row) {
                     PatientModel pm = list.get(row);
@@ -492,6 +483,17 @@ public class AdmissionList extends AbstractMainComponent {
                         sRow = row;
                         //pm = msg.getPatientModel();
                         list.set(row, evt.getPatientModel());
+                        break;
+                    }
+                }
+                break;            
+            case PVT_MERGE:
+                for (int row = 0; row < list.size(); ++row) {
+                    PatientModel pm = list.get(row);
+                    if (ptPk == pm.getId()) {
+                        sRow = row;
+                        //pm = msg.getPatientVisitModel().getPatientModel();
+                        list.set(row, evt.getPatientVisitModel().getPatientModel());
                         break;
                     }
                 }
