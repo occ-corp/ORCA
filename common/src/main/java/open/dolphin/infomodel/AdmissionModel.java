@@ -28,10 +28,6 @@ public class AdmissionModel implements IInfoModel {
     
     private String doctor;
     
-    @ManyToOne
-    @JoinColumn(name="patient_id")
-    private PatientModel patient;
-    
     @Transient
     private String patientId;
 
@@ -70,15 +66,7 @@ public class AdmissionModel implements IInfoModel {
     public String getDepartment() {
         return dept;
     }
-    
-    public void setPatientModel(PatientModel pm) {
-        patient = pm;
-        patientId = (pm != null) ? pm.getPatientId() : null;
-     }
-    public PatientModel getPatientModel() {
-        return patient;
-    }
-    
+
     public void setPatientId(String patientId) {
         this.patientId = patientId;
     }
