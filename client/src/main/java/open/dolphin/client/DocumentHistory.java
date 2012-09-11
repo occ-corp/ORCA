@@ -314,12 +314,17 @@ public class DocumentHistory {
         
         for (Iterator<DocInfoModel> itr = list.iterator(); itr.hasNext();) {
             DocInfoModel docInfo = itr.next();
-            boolean pass = true;
-            pass &= filterByInsurance(docInfo);
-            pass &= filterByDepartment(docInfo);
-            pass &= filterByKarteType(docInfo);
-            if (!pass) {
+            if (!filterByInsurance(docInfo)) {
                 itr.remove();
+                continue;
+            }
+            if (!filterByDepartment(docInfo)) {
+                itr.remove();
+                continue;
+            }
+            if (!filterByKarteType(docInfo)) {
+                itr.remove();
+                continue;
             }
         }
     }
