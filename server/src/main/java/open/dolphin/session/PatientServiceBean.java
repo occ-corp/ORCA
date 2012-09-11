@@ -311,6 +311,17 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
                 .setParameter("ids", idList)
                 .getResultList();
         
+        // 患者の健康保険を取得する。忘れがちｗ
+        if (!list.isEmpty()) {
+            for (PatientModel patient : list) {
+                List<HealthInsuranceModel> insurances =
+                        em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
+                        .setParameter(PK, patient.getId())
+                        .getResultList();
+                patient.setHealthInsurances(insurances);
+            }
+        }
+        
         return list;
     }
 //masuda$

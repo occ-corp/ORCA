@@ -141,7 +141,7 @@ public class  PatientDelegater extends BusinessDelegater {
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
         
-        if (list != null && list.size() > 0) {
+        if (list != null && !list.isEmpty()) {
             for (PatientModel pm : list) {
                 decodeHealthInsurance(pm);
             }
@@ -196,6 +196,13 @@ public class  PatientDelegater extends BusinessDelegater {
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
+        
+        // 忘れがちｗ
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                decodeHealthInsurance(pm);
+            }
+        }
         
         return list;
     }

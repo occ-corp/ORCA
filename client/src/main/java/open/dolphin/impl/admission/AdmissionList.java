@@ -161,7 +161,7 @@ public class AdmissionList extends AbstractMainComponent {
         // 選択モード
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         
-        // 連ドラ
+        // 連ドラ、梅ちゃん先生
         PatientListTableRenderer renderer = new PatientListTableRenderer();
         renderer.setTable(table);
         renderer.setDefaultRenderer();

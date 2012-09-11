@@ -328,7 +328,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         // カラム幅更新
         columnHelper.updateColumnWidth();
 
-        // 連ドラ
+        // 連ドラ、梅ちゃん先生
         PatientListTableRenderer renderer = new PatientListTableRenderer();
         renderer.setTable(view.getTable());
         renderer.setDefaultRenderer();
