@@ -120,7 +120,7 @@ public class DocInfoModel extends InfoModel implements Comparable {
     
 //masuda^   入院モデル
     @OneToOne
-    @JoinColumn(name="admission_id")
+    @JoinColumn(name="admission_id", nullable=true)
     private AdmissionModel admission;
     
     public AdmissionModel getAdmissionModel() {
