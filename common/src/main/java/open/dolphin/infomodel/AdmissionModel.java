@@ -73,7 +73,7 @@ public class AdmissionModel implements IInfoModel {
     
     public void setPatientModel(PatientModel pm) {
         patient = pm;
-        patientId = (patientId != null) ? pm.getPatientId() : null;
+        patientId = (pm != null) ? pm.getPatientId() : null;
      }
     public PatientModel getPatientModel() {
         return patient;

@@ -5,8 +5,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -15,7 +14,7 @@ import open.dolphin.client.AbstractMainComponent;
 import open.dolphin.client.ChartEventListener;
 import open.dolphin.client.GUIConst;
 import open.dolphin.dao.SqlMiscDao;
-import open.dolphin.delegater.MasudaDelegater;
+import open.dolphin.delegater.PatientDelegater;
 import open.dolphin.infomodel.AdmissionModel;
 import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.infomodel.PatientModel;
@@ -293,11 +292,32 @@ public class AdmissionList extends AbstractMainComponent {
 
             @Override
             protected List<PatientModel> doInBackground() throws Exception {
+                
                 setBusy(true);
+                
+                // ORCAに入院患者を問い合わせる
                 Date today = new Date();
-                List<AdmissionModel> list = SqlMiscDao.getInstance().getInHospitalPatients(today);
-                List<PatientModel> ret = MasudaDelegater.getInstance().getAdmittedPatients(list);
-                return ret;
+                List<AdmissionModel> amList = SqlMiscDao.getInstance().getInHospitalPatients(today);
+                
+                // いったんHashMapに登録
+                Map<String, AdmissionModel> amMap = new HashMap<String, AdmissionModel>();
+                for (AdmissionModel am : amList) {
+                    amMap.put(am.getPatientId(), am);
+                }
+                
+                // 対応するPatientModelを取得する
+                Set<String> ids = amMap.keySet();
+                List<PatientModel> pmList = PatientDelegater.getInstance().getPatientList(ids);
+                
+                // AdmissionModelをセットする
+                for (PatientModel pm : pmList) {
+                    AdmissionModel am = amMap.get(pm.getPatientId());
+                    pm.setAdmissionModel(am);
+                }
+                // 部屋番号でソート
+                Collections.sort(pmList, new RoomNumberComparator());
+                
+                return pmList;
             }
 
             @Override
@@ -314,6 +334,17 @@ public class AdmissionList extends AbstractMainComponent {
             }
         };
         worker.execute();
+    }
+    
+    private class RoomNumberComparator implements Comparator {
+
+        @Override
+        public int compare(Object o1, Object o2) {
+            PatientModel p1 = (PatientModel) o1;
+            PatientModel p2 = (PatientModel) o2;
+            return p1.getRoom().compareTo(p2.getRoom());
+        }
+        
     }
 
     private void updateInfo() {

@@ -497,24 +497,7 @@ public class MasudaResource extends AbstractResource {
         
         return json;
     }
-    
-    @PUT
-    @Path("admission/patients")
-    @Consumes(MEDIATYPE_JSON_UTF8)
-    @Produces(MEDIATYPE_TEXT_UTF8)
-    public String getAdmittedPatients(String json) {
-        
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
-        
-        TypeReference typeRef = new TypeReference<List<AdmissionModel>>(){};
-        List<AdmissionModel> list = (List<AdmissionModel>) 
-                getConverter().fromJson(json, typeRef);
-        
-        List<PatientModel> pmList = masudaServiceBean.getAdmittedPatients(fid, list);
 
-        String jsonRet = getConverter().toJson(pmList);
-        return jsonRet;
-    }
     
     @PUT
     @Path("admission")

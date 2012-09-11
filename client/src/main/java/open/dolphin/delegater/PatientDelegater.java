@@ -2,8 +2,10 @@ package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.util.Collection;
 import java.util.List;
+import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.dto.PatientSearchSpec;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PVTHealthInsuranceModel;
@@ -168,6 +170,34 @@ public class  PatientDelegater extends BusinessDelegater {
         debug(status, entityStr);
 
         return Integer.parseInt(entityStr);
+    }
+    
+    // patientIDリストからPatienteModelのリストを取得する
+    public List<PatientModel> getPatientList(Collection patientIdList) {
+        
+        String path = BASE_RESOURCE + "list";
+        String ids = getConverter().fromList(patientIdList);
+        
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("ids", ids);
+        
+        ClientResponse response = getResource(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+        
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return null;
+        }
+
+        TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
+        List<PatientModel> list = (List<PatientModel>)
+                getConverter().fromJson(entityStr, typeRef);
+        
+        return list;
     }
 
 

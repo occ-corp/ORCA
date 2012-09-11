@@ -7,10 +7,10 @@ import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.infomodel.ChartEventModel;
 
 /**
  *
@@ -298,6 +298,20 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
             } catch (NoResultException e) {
             }
         }
+    }
+    
+    public List<PatientModel> getPatientList(String fid, List<String> idList) {
+        
+        final String sql 
+                = "from PatientModel p where p.facilityId = :fid and p.patientId in (:ids)";
+        
+        List<PatientModel> list = (List<PatientModel>)
+                em.createQuery(sql)
+                .setParameter("fid", fid)
+                .setParameter("ids", idList)
+                .getResultList();
+        
+        return list;
     }
 //masuda$
 }

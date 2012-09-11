@@ -31,7 +31,7 @@ public final class SqlMiscDao extends SqlDaoBean {
     private SqlMiscDao() {
     }
 
-    // 入院中の患者を検索する
+    // 入院中の患者を検索し入院モデルを作成する
     public List<AdmissionModel> getInHospitalPatients(Date date) {
         
         final String sql = "select TP.ptnum, TN.brmnum, TN.nyuinka, TN.nyuinymd , TN.drcd1 "
@@ -61,7 +61,10 @@ public final class SqlMiscDao extends SqlDaoBean {
                 String dept = getDepartmentDesc(rs.getString(3).trim());
                 Date aDate = frmt.parse(rs.getString(4).trim());
                 String doctor = getOrcaStaffName(rs.getString(5).trim());
+                
+                // 新たに作成
                 AdmissionModel model = new AdmissionModel();
+                model.setId(0L);
                 model.setPatientId(patientId);
                 model.setRoom(room);
                 model.setDepartment(dept);

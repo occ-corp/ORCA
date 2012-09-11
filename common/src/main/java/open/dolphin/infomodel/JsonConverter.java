@@ -11,10 +11,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 /**
  * Jackson関連
@@ -123,7 +120,7 @@ public class JsonConverter {
         return Arrays.asList(strArray);
     }
     
-    public String fromList(List list) {
+    public String fromList(Collection list) {
         
         StringBuilder sb = new StringBuilder();
         boolean first = true;

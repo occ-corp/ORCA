@@ -152,6 +152,21 @@ public class PatientResource extends AbstractResource {
 
         return pkStr;
     }
+    
+    @GET
+    @Path("list")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public String getPatientList(@QueryParam("ids") String ids) {
+        
+        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        List<String> idList = getConverter().toStrList(ids);
+        
+        List<PatientModel> list = patientServiceBean.getPatientList(fid, idList);
+        
+        String json = getConverter().toJson(list);
+        
+        return json;
+    }
 
 
     @Override
