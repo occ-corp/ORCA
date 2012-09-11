@@ -287,6 +287,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         this.docInfoArray = selectedHistories;
 
         if (selectedHistories == null || selectedHistories.length == 0) {
+//masuda^   文書がないならパネルをクリアする。フィルタリングで該当なしの場合にわかりにくいので
+            scrollerPanel.removeAll();
+            scroller.setViewportView(scrollerPanel);
+//masuda$
             return;
         }
 

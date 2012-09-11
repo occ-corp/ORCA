@@ -113,6 +113,12 @@ public class DocumentBridgeImpl extends AbstractChartDocument
             if (curViwer != null) {
                 curViwer.showDocuments(docs, scroller);
             }
+        } else {
+//masuda^   文書がない場合パネルをクリアするため
+            if (curViwer != null) {
+                curViwer.showDocuments(null, scroller);
+            }
+//masuda$
         }
     }
 

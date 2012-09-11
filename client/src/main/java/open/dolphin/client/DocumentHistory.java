@@ -44,9 +44,8 @@ public class DocumentHistory {
     private static final String CMB_KARTE_OUT_PATIENT = "外来";
     private static final String CMB_LETTER = "文書";
     
-    private static final Color SELF_INSURANCE_COLOR = new Color(255,255,102);
-    private static final Color ADMISSION_COLOR = new Color(200, 235, 100);
-
+    private static final Color SELF_INSURANCE_COLOR = new Color(255, 236, 103);
+    private static final Color ADMISSION_COLOR = new Color(253, 202, 138);
 
     // 文書履歴テーブル
     private ListTableModel<DocInfoModel> tableModel;
@@ -71,8 +70,8 @@ public class DocumentHistory {
     // 選択された文書情報(DocInfo)の配列
     private DocInfoModel[] selectedHistories;
     
-    // 抽出コンテント(文書種別)
-    private String extractionContent;
+    // 抽出コンテント(文書種別)     docType,filterの複合キー
+    private String extractionComposite;
     
     // 抽出開始日 
     private Date extractionPeriod;
@@ -116,11 +115,19 @@ public class DocumentHistory {
     public int getAutoFetchCount() {
         return defaultAutoFetchCount;
     }
-    
+
     // デフォルトのextractionPeriodから変更されたかどうか
     private boolean extractionIndexUpdated;
-    private static final String ALL_KARTE = "ALL";
-    private static final String ADMISSION_KARTE = "ADMISSION";
+    
+    // 定数類
+    private static final String ALL = "ALL";
+    private static final String ADMISSION = "ADMISSION";
+    private static final String OUT_PATIENT = "OUT_PATIENT";
+    private static final String KARTE = IInfoModel.DOCTYPE_KARTE;
+    private static final String LETTER = IInfoModel.DOCTYPE_LETTER;
+    private static final String CAMMA = ",";
+    private static final String SELF_PREFIX = IInfoModel.INSURANCE_SELF_PREFIX;
+    
     public static final NameValuePair[] EXTRACTION_OBJECTS;
     public static final NameValuePair[] CONTENT_OBJECTS;
     
@@ -139,10 +146,10 @@ public class DocumentHistory {
             new NameValuePair("全て", "0")
         };
         CONTENT_OBJECTS = new NameValuePair[]{
-            new NameValuePair(CMB_KARTE, ALL_KARTE),
-            new NameValuePair(CMB_KARTE_OUT_PATIENT, IInfoModel.DOCTYPE_KARTE),
-            new NameValuePair(CMB_KARTE_ADMISSION, ADMISSION_KARTE),
-            new NameValuePair(CMB_LETTER, IInfoModel.DOCTYPE_LETTER)
+            new NameValuePair(CMB_KARTE, KARTE + CAMMA + ALL),
+            new NameValuePair(CMB_KARTE_OUT_PATIENT, KARTE + CAMMA + OUT_PATIENT),
+            new NameValuePair(CMB_KARTE_ADMISSION, KARTE + CAMMA + ADMISSION),
+            new NameValuePair(CMB_LETTER, LETTER + CAMMA + ALL)
         };
     }
     
@@ -241,9 +248,11 @@ public class DocumentHistory {
         //
         // リスナへ通知を行う
         //
-        if (selectedHistories != null) {
+//masuda^    文書がないならパネルをクリアする。フィルタリングで該当なしの場合にわかりにくいので
+        //if (selectedHistories != null) {
             boundSupport.firePropertyChange(SELECTED_HISTORIES, old, selectedHistories);
-        }
+        //}
+//masuda$  
     }
 
     /**
@@ -281,12 +290,14 @@ public class DocumentHistory {
      */
     public void getDocumentHistory() {
 
-        if (start && extractionPeriod != null && extractionContent != null) {
+        if (start && extractionPeriod != null && extractionComposite != null) {
+            
+            String docType = getExtractionDocType();
 
             // 検索パラメータセットのDTOを生成する
             DocumentSearchSpec spec = new DocumentSearchSpec();
             spec.setKarteId(context.getKarte().getId());	// カルテID
-            spec.setDocType(extractionContent);			// 文書タイプ
+            spec.setDocType(docType);   			// 文書タイプ
             spec.setFromDate(extractionPeriod);			// 抽出期間開始
             spec.setIncludeModifid(showModified);		// 修正履歴
             spec.setCode(DocumentSearchSpec.DOCTYPE_SEARCH);	// 検索タイプ
@@ -298,71 +309,79 @@ public class DocumentHistory {
             task.execute();
         }
     }
+    
+    private void filterDocInfo(List<DocInfoModel> list) {
+        
+        for (Iterator<DocInfoModel> itr = list.iterator(); itr.hasNext();) {
+            DocInfoModel docInfo = itr.next();
+            boolean pass = true;
+            pass &= filterByInsurance(docInfo);
+            pass &= filterByDepartment(docInfo);
+            pass &= filterByKarteType(docInfo);
+            if (!pass) {
+                itr.remove();
+            }
+        }
+    }
 
     // 保険でフィルタリング
-    private void filterByInsurance(List<DocInfoModel> list) {
+    private boolean filterByInsurance(DocInfoModel docInfo) {
+        
+        if (LETTER.equals(docInfo.getDocType())) {
+            return true;
+        }
 
-        List<DocInfoModel> filtered = new ArrayList<DocInfoModel>();
         switch (ins) {
             case PUBLIC:
-                for (DocInfoModel model : list) {
-                    if (!model.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-                        filtered.add(model);
-                    }
+                if (!docInfo.getHealthInsurance().startsWith(SELF_PREFIX)) {
+                    return true;
                 }
-                list.clear();
-                list.addAll(filtered);
                 break;
             case SELF:
-                list.clear();
-                for (DocInfoModel model : list) {
-                    if (model.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-                        filtered.add(model);
-                    }
+                if (docInfo.getHealthInsurance().startsWith(SELF_PREFIX)) {
+                    return true;
                 }
-                list.clear();
-                list.addAll(filtered);
                 break;
             case ALL:
-            default:
-                break;
+                return true;
         }
+        return false;
     }
     
     // 診療科でフィルタリング
-    private void filterByDepartment(List<DocInfoModel> list) {
+    private boolean filterByDepartment(DocInfoModel docInfo) {
         
         if (!view.getDeptChk().isSelected()) {
-            return ;
+            return true;
+        }
+        
+        if (LETTER.equals(docInfo.getDocType())) {
+            return true;
         }
         
         String deptCode = Project.getUserModel().getDepartmentModel().getDepartment();
-        List<DocInfoModel> filtered = new ArrayList<DocInfoModel>();
-        
-        for (DocInfoModel model : list) {
-            if (deptCode != null && deptCode.equals(model.getDepartmentCode())) {
-                filtered.add(model);
-            }
+        if (deptCode != null && deptCode.equals(docInfo.getDepartmentCode())) {
+            return true;
         }
-        list.clear();
-        list.addAll(filtered);
+        return false;
     }
     
     // 入院・外来カルテでフィルタリング
-    private void filterByKarteType(List<DocInfoModel> list) {
+    private boolean filterByKarteType(DocInfoModel docInfo) {
+        
+        String fiterStr = getExtractionFilter();
 
-        if (ALL_KARTE.equals(extractionContent) || extractionContent == null) {
-            return;
+        if (ALL.equals(fiterStr)) {
+            return true;
         }
 
-        List<DocInfoModel> filtered = new ArrayList<DocInfoModel>();
-        for (DocInfoModel model : list) {
-            if (extractionContent.equals(model.getDocType())) {
-                filtered.add(model);
-            }
+        boolean filter = ADMISSION.equals(fiterStr);
+        boolean admission = docInfo.getAdmissionModel() != null;
+        if (admission == filter) {
+            return true;
         }
-        list.clear();
-        list.addAll(filtered);
+
+        return false;
     }
     
     /**
@@ -375,14 +394,8 @@ public class DocumentHistory {
             // データベースから取得したDocInfoを保存
             docInfoList = new ArrayList<DocInfoModel>(newHistory);
 
-            // 保険でフィルタリング
-            filterByInsurance(newHistory);
-            
-            // 診療科でフィルタリング
-            filterByDepartment(newHistory);
-            
-            // 入院カルテ・外来カルテでフィルタリング
-            filterByKarteType(newHistory);
+            // フィルタリング
+            filterDocInfo(newHistory);
         }
 
         // ソーティングする
@@ -443,6 +456,8 @@ public class DocumentHistory {
 
         } else {
             sb.append("0 件");
+            setSelectedHistories((DocInfoModel[]) null);
+            
         }
         countField.setText(sb.toString());
 //masuda$
@@ -491,20 +506,22 @@ public class DocumentHistory {
      * 文書種別を変更し再検索する。
      */
     public void contentChanged(int state) {
+        
         if (state == ItemEvent.SELECTED) {
             int index = contentCombo.getSelectedIndex();
             NameValuePair pair = contentObject[index];
 //masuda^   紹介状ならautoFetchCountは1にする
-            String content = pair.getValue();
-            if (IInfoModel.DOCTYPE_LETTER.equals(content)) {
+            String[] str = pair.getValue().split(CAMMA);
+            String newType = str[0];
+            
+            if (LETTER.equals(newType)) {
                 autoFetchCount = 1;
             } else {
                 autoFetchCount = defaultAutoFetchCount;
             }
-            // viewerが変化していない場合はフィルタリングするのみ
-            if (!IInfoModel.DOCTYPE_LETTER.equals(extractionContent)
-                    && !IInfoModel.DOCTYPE_LETTER.equals(content)) {
-                this.extractionContent = content;
+            // typeが変化していない場合はフィルタリングするのみ
+            if (newType.equals(getExtractionDocType())) {
+                extractionComposite = pair.getValue();
                 updateHistory(docInfoList);
                 return;
             }
@@ -619,7 +636,7 @@ public class DocumentHistory {
                     pop.add(item2);
 
                     if (Project.getBoolean("allow.delete.letter", false) &&
-                            extractionContent.equals(IInfoModel.DOCTYPE_LETTER)) {
+                            LETTER.equals(getExtractionDocType())) {
                         pop.addSeparator();
                         JMenuItem item3 = new JMenuItem(deleteAction);
                         pop.add(item3);
@@ -784,7 +801,7 @@ public class DocumentHistory {
         extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
 
         // Preference から文書種別を設定する
-        extractionContent = IInfoModel.DOCTYPE_KARTE;
+        extractionComposite = KARTE + CAMMA + ALL;
 
         // Preference から抽出期間を設定する
         int past = Project.getInt(Project.DOC_HISTORY_PERIOD, -12);
@@ -934,17 +951,29 @@ public class DocumentHistory {
             e.consume();
         }
     }
+    
+    // 複合キーからDocTypeを返す
+    private String getExtractionDocType() {
+        String[] str = extractionComposite.split(CAMMA);
+        return str[0];
+    }
+    // 複合キーからFilterTypeを返す
+    private String getExtractionFilter() {
+        String[] str = extractionComposite.split(CAMMA);
+        return str[1];
+    }
 
     /**
      * 検索パラメータの文書タイプを設定する。。
      * @param extractionContent 文書タイプ
      */
-    public void setExtractionContent(String extractionContent) {
-        String old = this.extractionContent;
-        this.extractionContent = extractionContent;
+    public void setExtractionContent(String extractionComposite) {
+        String old = this.extractionComposite;
+        this.extractionComposite = extractionComposite;
         // 束縛プロパティの通知を行う
         if (boundSupport != null) {
-            boundSupport.firePropertyChange(DOCUMENT_TYPE, old, this.extractionContent);
+            String docType = getExtractionDocType();
+            boundSupport.firePropertyChange(DOCUMENT_TYPE, old, docType);
         }
         getDocumentHistory();
     }
@@ -954,7 +983,8 @@ public class DocumentHistory {
      * @return 文書タイプ
      */
     public String getExtractionContent() {
-        return extractionContent;
+        //return extractionComposite;
+        return getExtractionDocType();
     }
 
     /**
@@ -1018,7 +1048,7 @@ public class DocumentHistory {
     /**
      * 検索タスク。
      */
-    class DocInfoTask extends DBTask<List<DocInfoModel>, Void> {
+    private class DocInfoTask extends DBTask<List<DocInfoModel>, Void> {
 
         // Delegator
         private DocumentDelegater ddl;
@@ -1045,7 +1075,7 @@ public class DocumentHistory {
         }
     }
 
-    class DeleteTask extends DBTask<Void, Void> {
+    private class DeleteTask extends DBTask<Void, Void> {
 
         // 検索パラメータを保持するオブジェクト
         private long spec;
@@ -1074,7 +1104,7 @@ public class DocumentHistory {
     /**
      * タイトル変更タスククラス。
      */
-    class ChangeTitleTask extends DBTask<Boolean, Void> {
+    private class ChangeTitleTask extends DBTask<Boolean, Void> {
 
         // DocInfo
         private DocInfoModel docInfo;
@@ -1120,7 +1150,7 @@ public class DocumentHistory {
                 if (info.getAdmissionModel() == null) {
                     if (info.isKarte()
                             && info.getHealthInsurance() != null
-                            && info.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+                            && info.getHealthInsurance().startsWith(SELF_PREFIX)) {
                         setBackground(SELF_INSURANCE_COLOR);
                     }
                 } else {

@@ -16,11 +16,11 @@ public abstract class KartePanel extends Panel2 {
 
     public static enum MODE {SINGLE_VIEWER, DOUBLE_VIEWER, SINGLE_EDITOR, DOUBLE_EDITOR};
     
-    public static enum DOC_TYPE {OUT_PATIENT, IN_HOSPITAL, SELF_INS};
+    public static enum DOC_TYPE {OUT_PATIENT, ADMISSION, SELF_INSURANCE};
     
-    private static final Color COLOR_OUT_PATIENT = new Color(0, 0, 0, 0);
-    private static final Color COLOR_IN_HOSPITAL = new Color(253, 202, 138);
-    private static final Color COLOR_SELF_INS = new Color(255, 236, 103);
+    private static final Color OUT_PATIENT_COLOR = new Color(0, 0, 0, 0);
+    private static final Color SELF_INSURANCE_COLOR = new Color(255, 236, 103);
+    private static final Color ADMISSION_COLOR = new Color(253, 202, 138);
 
     // タイムスタンプの foreground カラー
     private static final Color TIMESTAMP_FORE = Color.BLUE;
@@ -128,15 +128,15 @@ public abstract class KartePanel extends Panel2 {
     public void setTitleColor(DOC_TYPE type) {
         
         switch (type) {
-            case IN_HOSPITAL:
-                timeStampPanel.setBackground(COLOR_IN_HOSPITAL);
+            case ADMISSION:
+                timeStampPanel.setBackground(ADMISSION_COLOR);
                 break;
-            case SELF_INS:
-                timeStampPanel.setBackground(COLOR_SELF_INS);
+            case SELF_INSURANCE:
+                timeStampPanel.setBackground(SELF_INSURANCE_COLOR);
                 break;
             case OUT_PATIENT:    
             default:
-                timeStampPanel.setBackground(COLOR_OUT_PATIENT);
+                timeStampPanel.setBackground(OUT_PATIENT_COLOR);
                 break;
         }
     }
