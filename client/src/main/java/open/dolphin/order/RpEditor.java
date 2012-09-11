@@ -892,15 +892,25 @@ public final class RpEditor extends AbstractStampEditor {
     // 外来か入院かに応じてボタンを制御する
     private void controlBtn() {
         
-        JRadioButton rb_teiki = view.getRbTeiki();
-        JRadioButton rb_nyuin = view.getRbAdmission();
         JRadioButton inBtn = view.getInRadio();
         JRadioButton outBtn = view.getOutRadio();
-        
-        boolean inHospital = getContext().getAdmissionModel() != null;
         boolean bOut = Project.getBoolean(Project.RP_OUT, true);
         
-        if (inHospital) {
+        // KarteEditorを取得する
+        KarteEditor editor = getContext().getKarteEditor();
+        if (editor == null) {
+            outBtn.setSelected(bOut);
+            inBtn.setSelected(!bOut);
+            return;
+        }
+
+        JRadioButton rb_teiki = view.getRbTeiki();
+        JRadioButton rb_nyuin = view.getRbAdmission();
+        
+        // KarteEditorのDocumentModel.docInfoからAdmissionModelを取得する
+        AdmissionModel admission = editor.getModel().getDocInfoModel().getAdmissionModel();
+        
+        if (admission != null) {
             bOut = false;
             rb_nyuin.setSelected(true);
             view.getCbHoukatsu().setEnabled(false);

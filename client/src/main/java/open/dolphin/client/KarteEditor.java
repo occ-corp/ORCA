@@ -465,9 +465,13 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         StringBuilder sb = new StringBuilder();
         sb.append(ModelUtils.getDateAsFormatString(started, IInfoModel.KARTE_DATE_FORMAT));
         
-        AdmissionModel admission = getContext().getAdmissionModel();
+        // 入院の場合は病室・入院科を表示する
+        AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
         if (admission != null) {
-            sb.append(" <入院中> ");
+            sb.append("<");
+            sb.append(admission.getRoom()).append("号室:");
+            sb.append(admission.getDepartment());
+            sb.append(">");
         }
         timeStamp = sb.toString();
         
@@ -706,7 +710,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             }
             
             // 入院中か
-            AdmissionModel admission = getContext().getAdmissionModel();
+            AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
             params.setInHospital(admission != null);
 //masuda$
             
@@ -796,8 +800,10 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             if (ci.checkStart(pPane)) {
                 return;
             }
-            // 算定チェック
-            if (Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true)) {
+            // 算定チェック　入院の場合は算定チェックしない
+            AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+            boolean check = Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true);
+            if (check && admission != null) {
                 CheckSantei cs = new CheckSantei();
                 cs.init(pPane, model.getDocInfoModel().getFirstConfirmDate());
                 if (cs.checkOnSave()) {
@@ -1022,13 +1028,10 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             }
         }
         
-//masuda^   入院モデルをセット
-        AdmissionModel admission = getContext().getAdmissionModel();
-        if (admission != null) {
-            if (params.isRegistEndDate()) {
-                admission.setEnded(docInfo.getConfirmDate());
-            }
-            docInfo.setAdmissionModel(admission);
+//masuda^   入院モデルに退院日をセット
+        AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+        if (admission != null && params.isRegistEndDate()) {
+            admission.setEnded(docInfo.getConfirmDate());
         }
 //masuda$
         
@@ -1449,13 +1452,10 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     flag = (model.getModule(ENTITY_LABO_TEST) != null);
                     docInfo.setHasLaboTest(flag);
                     
-//masuda^   入院モデルをセット
-                    AdmissionModel admission = getContext().getAdmissionModel();
-                    if (admission != null) {
-                        if (params.isRegistEndDate()) {
-                            admission.setEnded(docInfo.getConfirmDate());
-                        }
-                        docInfo.setAdmissionModel(admission);
+//masuda^   入院モデルに退院日をセット
+                    AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+                    if (admission != null && params.isRegistEndDate()) {
+                        admission.setEnded(docInfo.getConfirmDate());
                     }
 //masuda$
         

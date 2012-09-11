@@ -1,5 +1,6 @@
 package open.dolphin.infomodel;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.*;
 
@@ -9,7 +10,7 @@ import javax.persistence.*;
  */
 @Entity
 @Table(name = "msd_admission")
-public class AdmissionModel implements IInfoModel {
+public class AdmissionModel implements Serializable {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -79,5 +80,19 @@ public class AdmissionModel implements IInfoModel {
     }
     public String getDoctorName() {
         return doctor;
+    }
+    
+    
+    @Override
+    public AdmissionModel clone() {
+        
+        AdmissionModel ret = new AdmissionModel();
+        ret.setStarted(started);
+        ret.setEnded(ended);
+        ret.setRoom(room);
+        ret.setDepartment(dept);
+        ret.setDoctorName(doctor);
+        
+        return ret;
     }
 }

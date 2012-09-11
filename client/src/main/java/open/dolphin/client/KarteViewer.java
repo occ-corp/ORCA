@@ -6,6 +6,7 @@ import java.awt.print.PageFormat;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
+import open.dolphin.infomodel.AdmissionModel;
 import open.dolphin.infomodel.DocumentModel;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.ModelUtils;
@@ -102,6 +103,15 @@ public abstract class KarteViewer extends AbstractChartDocument {
 
         if (model.getDocInfoModel().getStatus().equals(IInfoModel.STATUS_TMP)) {
             sb.append(UNDER_TMP_SAVE);
+        }
+        
+        // 入院の場合は病室・入院科を表示する
+        AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+        if (admission != null) {
+            sb.append("<");
+            sb.append(admission.getRoom()).append("号室:");
+            sb.append(admission.getDepartment());
+            sb.append(">");
         }
         
         // 保険　公費が見えるのは気分良くないだろうから、表示しない

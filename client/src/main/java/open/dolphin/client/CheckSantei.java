@@ -357,6 +357,7 @@ public class CheckSantei extends CheckSanteiConst {
 
     // KarteEditorで保存するときに呼ばれる
     public boolean checkOnSave() {
+        
         StringBuilder sb = new StringBuilder();
         
         // 基本料スタンプがあるかどうか

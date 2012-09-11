@@ -8,6 +8,9 @@ import open.dolphin.client.ClientContext;
 /**
  * 入院リストのGUI
  * @author masuda, Masuda Naika
+ * 
+ * "hospital_red_2_24.png" was obtained from
+ * http://www.gettyicons.com/free-icon/108/point-of-interest-icon-set/free-clinic-icon-png/
  */
 public class AdmissionListView extends JPanel {
     
@@ -21,13 +24,14 @@ public class AdmissionListView extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
         updateBtn = new JButton();
-        updateBtn.setIcon(ClientContext.getImageIcon("ref_24.gif"));
+        updateBtn.setIcon(ClientContext.getImageIcon("hospital_red_2_24.png"));
         updateBtn.setAlignmentY(BOTTOM_ALIGNMENT);
         panel.add(updateBtn);
 
         infoLbl = new JLabel();
         infoLbl.setFont(new Font("Lucida Grande", 0, 10));
         infoLbl.setAlignmentY(BOTTOM_ALIGNMENT);
+        panel.add(Box.createHorizontalStrut(10));
         panel.add(infoLbl);
         panel.add(Box.createHorizontalGlue());
 

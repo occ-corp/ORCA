@@ -1100,7 +1100,14 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         // DocumentType
         docInfo.setDocType(params.getDocType());
-
+        
+//masuda^   入院の場合はAdmissionModelをセットする
+        AdmissionModel admission = getAdmissionModel();
+        if (admission != null) {
+            docInfo.setAdmissionModel(admission);
+        }
+//masuda$
+        
         //-------------------------------------------------------------------
         // 2.0
         // 1. UserModel に ORCAID が設定してあればそれを使用する
@@ -1177,7 +1184,14 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         // DocumentType
         docInfo.setDocType(params.getDocType());
-
+        
+//masuda^   入院の場合はAdmissionModelをセットする
+        AdmissionModel admission = getAdmissionModel();
+        if (admission != null) {
+            docInfo.setAdmissionModel(admission);
+        }
+//masuda$
+        
         //---------------------------
         // 2.0
         // 受付情報から deptCode,deptName,doctorId,doctorName,JMARI
@@ -1259,7 +1273,15 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         // 検体検査オーダー番号
         newInfo.setLabtestOrderNumber(oldDocInfo.getLabtestOrderNumber());
-
+        
+//masuda^   入院の場合はAdmissionModelをセットする
+        AdmissionModel oldAdmission = oldDocInfo.getAdmissionModel();
+        if (oldAdmission != null) {
+            AdmissionModel admission = oldAdmission.clone();
+            newInfo.setAdmissionModel(admission);
+        }
+//masuda$
+        
         //-------------------------------------
         // 診療科を設定する 
         // 元になる版の情報を利用する
@@ -2151,8 +2173,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             super(title);
         }
     }
-    
-    @Override
+
     public AdmissionModel getAdmissionModel() {
         PatientModel pm = getPatientVisit().getPatientModel();
         return pm.getAdmissionModel();
@@ -2161,7 +2182,11 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     // 現在選択されているカルテエディタを取得する
     @Override
     public KarteEditor getKarteEditor() {
-
+        
+        if (tabbedPane == null) {
+            return null;
+        }
+        
         int index = tabbedPane.getSelectedIndex();
         String key = String.valueOf(index);
         ChartDocument plugin = providers.get(key);

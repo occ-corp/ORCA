@@ -51,7 +51,8 @@ public class AdmissionList extends AbstractMainComponent {
     
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
-    private String INFO_MSG = "入院カルテはここから作成してください";
+    private String INFO_MSG = "入院カルテはここから開いてください";
+    private String CLICK_BTN_MSG = "左のボタンをクリックして入院患者リストを取得してください。";
     
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "admissionTable.column.spec";
@@ -169,7 +170,7 @@ public class AdmissionList extends AbstractMainComponent {
         // カラム幅更新
         columnHelper.updateColumnWidth();
         
-        view.getInfoLbl().setText("未取得");
+        view.getInfoLbl().setText(CLICK_BTN_MSG);
     }
 
     

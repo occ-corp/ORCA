@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.event.ActionEvent;
@@ -10,6 +9,7 @@ import java.util.concurrent.TimeUnit;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
 import javax.swing.JToolBar;
+import open.dolphin.infomodel.AdmissionModel;
 import open.dolphin.infomodel.ModuleModel;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
@@ -45,18 +45,18 @@ public abstract class AbstractChartExtensions {
     protected void addCommonBtn(JToolBar myToolBar) {
 
         // toolBarに基本料入力ボタンと処方ラベル印刷ボタンを追加
-        baseChargeBtn = new JButton();
-        baseChargeBtn.setEnabled(false);
-        baseChargeBtn.setIcon(ICON_WIZ);
-        baseChargeBtn.setToolTipText("基本料スタンプを挿入します。");
-        myToolBar.add(baseChargeBtn);
-        baseChargeBtn.addActionListener(new ActionListener() {
+            baseChargeBtn = new JButton();
+            baseChargeBtn.setEnabled(false);
+            baseChargeBtn.setIcon(ICON_WIZ);
+            baseChargeBtn.setToolTipText("基本料スタンプを挿入します。");
+            myToolBar.add(baseChargeBtn);
+            baseChargeBtn.addActionListener(new ActionListener() {
 
-            @Override
-            public void actionPerformed(ActionEvent evt) {
-                insertBaseChargeStamp();
-            }
-        });
+                @Override
+                public void actionPerformed(ActionEvent evt) {
+                    insertBaseChargeStamp();
+                }
+            });
         // toolBarにラベルプリンタのアドレスが設定されていればラベルプリンタのボタンを追加。
         // 空白なら不使用として非表示
         String lblPrtAddress = Project.getString(MiscSettingPanel.LBLPRT_ADDRESS, null);
@@ -140,8 +140,19 @@ public abstract class AbstractChartExtensions {
     // 基本料・ラベル印刷ボタンをenableする。
     public void enableExtBtn(boolean b) {
 
-        baseChargeBtn.setEnabled(b);
-        baseChargeBtn.setVisible(b);
+        KarteEditor editor = getContext().getKarteEditor();
+        AdmissionModel admission = (editor == null)
+                ? null 
+                : editor.getModel().getDocInfoModel().getAdmissionModel();
+        
+        // 入院ならば基本料スタンプボタンは無効
+        if (admission != null) {
+            baseChargeBtn.setEnabled(false);
+            baseChargeBtn.setVisible(false);
+        } else {
+            baseChargeBtn.setEnabled(b);
+            baseChargeBtn.setVisible(b);
+        }
         if (rpLabelBtn != null) {
             rpLabelBtn.setEnabled(b);
             rpLabelBtn.setVisible(b);

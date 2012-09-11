@@ -9,7 +9,7 @@
         </tstamp>
         <replaceregexp file="${src.dir}/open/dolphin/resources/Dolphin_ja.properties"
                        match="version=(.*)"
-                       replace="version=2.3.1m" />
+                       replace="version=2.3.8m" />
         <replaceregexp file="${src.dir}/open/dolphin/resources/Dolphin_ja.properties"
                        match="buildDate=(.*)"
                        replace="buildDate=${today}" />

@@ -71,7 +71,6 @@ public interface Chart extends MainTool {
     
 //masuda^
     public KarteEditor getKarteEditor();
-    public AdmissionModel getAdmissionModel();
 //masuda$
     
 }

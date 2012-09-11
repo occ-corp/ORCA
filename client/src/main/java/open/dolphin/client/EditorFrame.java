@@ -915,12 +915,6 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         return editor;
     }
     
-    @Override
-    public AdmissionModel getAdmissionModel() {
-        PatientModel pm = getPatientVisit().getPatientModel();
-        return pm.getAdmissionModel();
-    }
-
     //同じようなカルテが開いていないかチェックするため
     public String getDocInfoStatus() {
         DocumentModel docModel = getDocumentModel();

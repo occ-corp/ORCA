@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.*;
