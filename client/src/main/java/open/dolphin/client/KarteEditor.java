@@ -816,7 +816,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             }
             // 算定チェック　入院の場合は算定チェックしない
             boolean check = Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true);
-            if (check && inHospital) {
+            if (check && !inHospital) {
                 CheckSantei cs = new CheckSantei();
                 cs.init(pPane, model.getDocInfoModel().getFirstConfirmDate());
                 if (cs.checkOnSave()) {

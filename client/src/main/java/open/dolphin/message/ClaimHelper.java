@@ -2,7 +2,6 @@ package open.dolphin.message;
 
 import open.dolphin.infomodel.ClaimBundle;
 import open.dolphin.infomodel.PVTHealthInsuranceModel;
-import open.dolphin.project.Project;
 
 /**
  * ClaimHelper
@@ -71,6 +70,26 @@ public final class ClaimHelper {
 
     /** 選択された健康保険 2010-11-10 */
     private PVTHealthInsuranceModel selectedInsurance;
+    
+//masuda^   入院CLAIMフラグ
+    private boolean admitFlag = false;
+    
+    public void setAdmitFlag(boolean b) {
+        admitFlag = b;
+    }
+    public String getAdmitFlag() {
+        return String.valueOf(admitFlag);
+    }
+
+    private boolean useDefaultDept;
+    
+    public void setUseDefalutDept(boolean b) {
+        useDefaultDept = b;
+    }
+    public boolean isUseDefaultDept() {
+        return useDefaultDept;
+    }
+//masuda$
     
     
     public void setConfirmDate(String confirmDate) {
@@ -257,9 +276,4 @@ public final class ClaimHelper {
         this.selectedInsurance = selectedInsurance;
     }
     
-//masuda^
-    public boolean useDefaultDept() {
-        return Project.getBoolean(Project.CLAIM_01);
-    }
-//masuda$
 }

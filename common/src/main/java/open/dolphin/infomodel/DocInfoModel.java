@@ -119,7 +119,7 @@ public class DocInfoModel extends InfoModel implements Comparable {
     //----------------------------------
     
 //masuda^   入院モデル
-    @OneToOne
+    @OneToOne(cascade = {CascadeType.ALL})
     @JoinColumn(name="admission_id", nullable=true)
     private AdmissionModel admission;
     

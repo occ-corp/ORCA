@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.Component;
@@ -347,7 +346,12 @@ public class StampHolderFunction {
                 BundleMed bundle = (BundleMed) mm.getModel();
                 bundle.setMemo(NYUIN_MEDICINE);
                 String clsCode = bundle.getClassCode();
-                clsCode = clsCode.substring(0, 2) + "0";
+                // 入院処方には臨時はない
+                if (clsCode.startsWith("29")) {
+                    clsCode = ClaimConst.RECEIPT_CODE_NAIYO;
+                } else {
+                    clsCode = clsCode.substring(0, 2) + "0";
+                }
                 bundle.setClassCode(clsCode);
                 setMyTextLater(sh);
                 sh.getKartePane().setDirty(true);

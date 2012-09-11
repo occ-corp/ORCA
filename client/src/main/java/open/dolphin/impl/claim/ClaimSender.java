@@ -78,7 +78,16 @@ public class ClaimSender implements IKarteSender {
 
         // ヘルパークラスを生成しVelocityが使用するためのパラメータを設定する
         ClaimHelper helper = new ClaimHelper();
-
+        
+//masuda^   入院カルテの場合はadmitFlagを立てる
+        AdmissionModel admission = sendModel.getDocInfoModel().getAdmissionModel();
+        if (admission != null) {
+            helper.setAdmitFlag(true);
+        }
+        boolean b = Project.getBoolean(Project.CLAIM_01);
+        helper.setUseDefalutDept(b);
+//masuda$
+        
         //DG ------
         //DocInfoModel docInfo = sendModel.getDocInfo();
         DocInfoModel docInfo = sendModel.getDocInfoModel();
