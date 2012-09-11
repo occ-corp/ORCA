@@ -68,9 +68,6 @@ public final class RpEditor extends AbstractStampEditor {
     private static final String NYUIN = "入院";
     // 用法のキャッシュ
     private static HashMap<String, List<TensuMaster>> adminCache = new HashMap<String, List<TensuMaster>>();
-    // 入院か否か
-    private boolean inHospital;
-    
 //masuda$
 
     public RpEditor() {
@@ -83,12 +80,6 @@ public final class RpEditor extends AbstractStampEditor {
 
     public RpEditor(String entity, boolean mode) {
         super(entity, mode);
-        initComponents();
-    }
-    
-    public RpEditor(String entity, boolean mode, boolean inHospital) {
-        super(entity, mode);
-        this.inHospital = inHospital;
         initComponents();
     }
     
@@ -846,26 +837,12 @@ public final class RpEditor extends AbstractStampEditor {
         rb_rinji.addActionListener(al1);
         rb_nyuin.addActionListener(al1);
 
-        // 入院か外来か
-        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
-        if (inHospital) {
-            bOut = false;
-            rb_nyuin.setSelected(true);
-            view.getCbHoukatsu().setEnabled(false);
-        } else {
-            rb_teiki.setSelected(true);
-            rb_nyuin.setEnabled(false);
-            view.getCbNoCharge().setEnabled(false);
-        }        
-        
         // 院内、院外ボタン
         JRadioButton inBtn = view.getInRadio();
         JRadioButton outBtn = view.getOutRadio();
         ButtonGroup g = new ButtonGroup();
         g.add(inBtn);
         g.add(outBtn);
-        outBtn.setSelected(bOut);
-        inBtn.setSelected(!bOut);
         
         // 包括チェックボックス
         view.getInRadio().addItemListener(new ItemListener() {
@@ -904,9 +881,39 @@ public final class RpEditor extends AbstractStampEditor {
         setFocusOnSearchTextFld();
 //masuda$
     }
-
     
-//masuda^   マスターで薬剤を選択したらScreenTenKeyから必ず入力させる
+//masuda^    
+    @Override
+    public void setContext(Chart chart) {
+        super.setContext(chart);
+        controlBtn();
+    }
+    
+    // 外来か入院かに応じてボタンを制御する
+    private void controlBtn() {
+        
+        JRadioButton rb_teiki = view.getRbTeiki();
+        JRadioButton rb_nyuin = view.getRbAdmission();
+        JRadioButton inBtn = view.getInRadio();
+        JRadioButton outBtn = view.getOutRadio();
+        
+        boolean inHospital = getContext().getAdmissionModel() != null;
+        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
+        
+        if (inHospital) {
+            bOut = false;
+            rb_nyuin.setSelected(true);
+            view.getCbHoukatsu().setEnabled(false);
+        } else {
+            rb_teiki.setSelected(true);
+            rb_nyuin.setEnabled(false);
+            view.getCbNoCharge().setEnabled(false);
+        }
+        outBtn.setSelected(bOut);
+        inBtn.setSelected(!bOut);
+    }
+
+    // マスターで薬剤を選択したらScreenTenKeyから必ず入力させる
     private String inputFromSTK(boolean showInfo, String usualDose, String maxDose, String admin, String unit){
 
         if ("カプセル".equals(unit)) {

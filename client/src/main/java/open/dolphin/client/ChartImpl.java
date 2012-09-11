@@ -2151,6 +2151,12 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             super(title);
         }
     }
+    
+    @Override
+    public AdmissionModel getAdmissionModel() {
+        PatientModel pm = getPatientVisit().getPatientModel();
+        return pm.getAdmissionModel();
+    }
 
     // 現在選択されているカルテエディタを取得する
     @Override

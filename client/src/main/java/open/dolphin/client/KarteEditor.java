@@ -133,12 +133,6 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             boundSupport.removePropertyChangeListener(listener);
         }
     }
-    
-    private boolean isInHospital() {
-        // AdmissionModelはPVTのPatientModelにTransientで設定されている。
-        // getContext().getPatient().getAdmissionModel()はだめ。
-        return getContext().getPatientVisit().getPatientModel().getAdmissionModel() != null;
-    }
 //masuda$
     
     /** 
@@ -470,7 +464,9 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         
         StringBuilder sb = new StringBuilder();
         sb.append(ModelUtils.getDateAsFormatString(started, IInfoModel.KARTE_DATE_FORMAT));
-        if (isInHospital()) {
+        
+        AdmissionModel admission = getContext().getAdmissionModel();
+        if (admission != null) {
             sb.append(" <入院中> ");
         }
         timeStamp = sb.toString();
@@ -710,7 +706,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             }
             
             // 入院中か
-            params.setInHospital(isInHospital());
+            AdmissionModel admission = getContext().getAdmissionModel();
+            params.setInHospital(admission != null);
 //masuda$
             
             // 印刷枚数をPreferenceから取得する
@@ -1026,8 +1023,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         }
         
 //masuda^   入院モデルをセット
-        if (isInHospital()) {
-            AdmissionModel admission = getContext().getPatient().getAdmissionModel();
+        AdmissionModel admission = getContext().getAdmissionModel();
+        if (admission != null) {
             if (params.isRegistEndDate()) {
                 admission.setEnded(docInfo.getConfirmDate());
             }
@@ -1453,8 +1450,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     docInfo.setHasLaboTest(flag);
                     
 //masuda^   入院モデルをセット
-                    if (isInHospital()) {
-                        AdmissionModel admission = getContext().getPatient().getAdmissionModel();
+                    AdmissionModel admission = getContext().getAdmissionModel();
+                    if (admission != null) {
                         if (params.isRegistEndDate()) {
                             admission.setEnded(docInfo.getConfirmDate());
                         }

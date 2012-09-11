@@ -846,7 +846,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
     }
 
     // 検査エディタから検査パネルを開くとき＆ORCA処方参照時に使用
-    public final void setContext(Chart chart){
+    public void setContext(Chart chart){
         this.chart = chart;
     }
     
