@@ -462,11 +462,13 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         //Date now = new Date();
         started = new Date();
         
+        DocInfoModel docInfo = model.getDocInfoModel();
+        
         StringBuilder sb = new StringBuilder();
         sb.append(ModelUtils.getDateAsFormatString(started, IInfoModel.KARTE_DATE_FORMAT));
         
         // 入院の場合は病室・入院科を表示する
-        AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+        AdmissionModel admission = docInfo.getAdmissionModel();
         if (admission != null) {
             sb.append("<");
             sb.append(admission.getRoom()).append("号室:");
@@ -483,7 +485,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             sb.append(": ");
             sb.append(timeStamp);
             sb.append(" [");
-            sb.append(ModelUtils.getDateAsFormatString(model.getDocInfoModel().getFirstConfirmDate(), IInfoModel.KARTE_DATE_FORMAT));
+            sb.append(ModelUtils.getDateAsFormatString(docInfo.getFirstConfirmDate(), IInfoModel.KARTE_DATE_FORMAT));
             sb.append(" ]");
             timeStamp = sb.toString();
         }
@@ -523,7 +525,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         // 選択した保険のGUIDと一致するものを配列から見つけ、表示する
         //-------------------------------------------------
         String selecteIns = null;
-        String insGUID = getModel().getDocInfoModel().getHealthInsuranceGUID();
+        String insGUID = docInfo.getHealthInsuranceGUID();
         if (insGUID != null) {
             ClientContext.getBootLogger().debug("insGUID = " + insGUID);
             for (int i = 0; i < ins.length; i++) {
@@ -548,7 +550,17 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
 
         timeStampLabel.setText(sb.toString());
         timeStampLabel.addMouseListener(new PopupListener());
-
+        
+//masuda^   タイトルを文書種別によって色分けする
+        KartePanel.DOC_TYPE docType = KartePanel.DOC_TYPE.OUT_PATIENT;
+        if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+            docType = KartePanel.DOC_TYPE.SELF_INS;
+        } else if (admission != null) {
+            docType = KartePanel.DOC_TYPE.IN_HOSPITAL;
+        }
+        kartePanel.setTitleColor(docType);
+//masuda$
+        
         insuranceVisible = true;
     }
 
@@ -795,15 +807,16 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         
 //masuda^   薬剤相互作用チェック
         if (getMode() == DOUBLE_MODE) {
+            AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+            boolean inHospital = admission != null;
             CheckMedication ci = new CheckMedication();
             // 禁忌がないか、禁忌あるが無視のときはfalseが帰ってくる masuda
-            if (ci.checkStart(pPane)) {
+            if (ci.checkStart(pPane, inHospital)) {
                 return;
             }
             // 算定チェック　入院の場合は算定チェックしない
-            AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
             boolean check = Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true);
-            if (check && admission != null) {
+            if (check && inHospital) {
                 CheckSantei cs = new CheckSantei();
                 cs.init(pPane, model.getDocInfoModel().getFirstConfirmDate());
                 if (cs.checkOnSave()) {

@@ -20,23 +20,20 @@ import open.dolphin.util.ZenkakuUtils;
 
 public class CheckMedication {
 
-    private HashMap<String, String> drugCodeNameMap = new HashMap<String, String>();
-    private List<ModuleModel> moduleList = new ArrayList<ModuleModel>();
-    private List<BundleMed> medList = new ArrayList<BundleMed>();         // 内服薬
-    private List<BundleDolphin> bundleList = new ArrayList<BundleDolphin>();  // 注射も含む
+    private HashMap<String, String> drugCodeNameMap;
+    private List<ModuleModel> moduleList;
+    private List<BundleMed> medList;         // 内服薬
+    private List<BundleDolphin> bundleList;  // 注射も含む
     
     private static final int DAY_LIMIT = 14;
 
-    private KartePane kp = new KartePane();
-
-
-    public boolean checkStart(KartePane kp) {
-
-        this.kp = kp;
-        collectModules();
+    
+    public boolean checkStart(KartePane kp, boolean inHospital) {
+        
+        collectModules(kp);
         makeDrugList();
 
-        String msg = checkMedication();
+        String msg = checkMedication(inHospital);
         if (msg != null && msg.length() != 0) {
             Toolkit.getDefaultToolkit().beep();
             String[] options = {"取消", "無視"};
@@ -65,8 +62,10 @@ public class CheckMedication {
     }
 
 
-    private void collectModules() {
-
+    private void collectModules(KartePane kp) {
+        
+        moduleList = new ArrayList<ModuleModel>();
+        
         KarteStyledDocument doc = (KarteStyledDocument) kp.getTextPane().getDocument();
         List<StampHolder> list = doc.getStampHolders();
         for (StampHolder sh : list) {
@@ -75,6 +74,11 @@ public class CheckMedication {
     }
 
     private void makeDrugList() {
+        
+        drugCodeNameMap = new HashMap<String, String>();
+        bundleList = new ArrayList<BundleDolphin>();
+        medList = new ArrayList<BundleMed>();
+        
         for (ModuleModel stamp : moduleList) {
             String entity = stamp.getModuleInfoBean().getEntity();
             if (IInfoModel.ENTITY_MED_ORDER.equals(entity) || IInfoModel.ENTITY_INJECTION_ORDER.equals(entity)) {
@@ -133,11 +137,12 @@ public class CheckMedication {
 
     }
 
-    private String checkMedication() {
+    private String checkMedication(boolean inHospital) {
 
         if (medList.isEmpty()) {
             return null;
         }
+        
         StringBuilder sb = new StringBuilder();
         for (BundleMed bundle : medList){
             String classCode = bundle.getClassCode();
@@ -212,6 +217,9 @@ public class CheckMedication {
         if (hasInMed && hasExMed) {
             sb.append("院内処方と院外処方が混在しています。");
         }
+        
+        // 入院処方チェック
+        // TO-DO
         
         return formatMsg(sb.toString());
     }

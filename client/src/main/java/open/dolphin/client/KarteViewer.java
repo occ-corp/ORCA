@@ -6,10 +6,7 @@ import java.awt.print.PageFormat;
 import javax.swing.ActionMap;
 import javax.swing.BorderFactory;
 import javax.swing.border.Border;
-import open.dolphin.infomodel.AdmissionModel;
-import open.dolphin.infomodel.DocumentModel;
-import open.dolphin.infomodel.IInfoModel;
-import open.dolphin.infomodel.ModelUtils;
+import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.util.AgeCalculator;
 
@@ -81,32 +78,33 @@ public abstract class KarteViewer extends AbstractChartDocument {
     
     protected final void setTitle() {
 
+        DocInfoModel docInfo = model.getDocInfoModel();
+        
         StringBuilder sb = new StringBuilder();
 
-        if (IInfoModel.STATUS_DELETE.equals(model.getDocInfoModel().getStatus())) {
+        if (IInfoModel.STATUS_DELETE.equals(docInfo.getStatus())) {
             sb.append("削除済／");
-        } else if (IInfoModel.STATUS_MODIFIED.equals(model.getDocInfoModel().getStatus())) {
+        } else if (IInfoModel.STATUS_MODIFIED.equals(docInfo.getStatus())) {
             sb.append("修正:");
-            sb.append(model.getDocInfoModel().getVersionNumber().replace(".0", ""));
+            sb.append(docInfo.getVersionNumber().replace(".0", ""));
             sb.append("／");
         }
 
         // 確定日を分かりやすい表現に変える
         sb.append(ModelUtils.getDateAsFormatString(
-                model.getDocInfoModel().getFirstConfirmDate(),
-                IInfoModel.KARTE_DATE_FORMAT));
+                docInfo.getFirstConfirmDate(), IInfoModel.KARTE_DATE_FORMAT));
 
         // 当時の年齢を表示する
         String mmlBirthday = getContext().getPatient().getBirthday();
-        String mmlDate = ModelUtils.getDateAsString(model.getDocInfoModel().getFirstConfirmDate());
+        String mmlDate = ModelUtils.getDateAsString(docInfo.getFirstConfirmDate());
         sb.append("[").append(AgeCalculator.getAge2(mmlBirthday, mmlDate)).append("歳]");
 
-        if (model.getDocInfoModel().getStatus().equals(IInfoModel.STATUS_TMP)) {
+        if (docInfo.getStatus().equals(IInfoModel.STATUS_TMP)) {
             sb.append(UNDER_TMP_SAVE);
         }
         
         // 入院の場合は病室・入院科を表示する
-        AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+        AdmissionModel admission = docInfo.getAdmissionModel();
         if (admission != null) {
             sb.append("<");
             sb.append(admission.getRoom()).append("号室:");
@@ -117,14 +115,14 @@ public abstract class KarteViewer extends AbstractChartDocument {
         // 保険　公費が見えるのは気分良くないだろうから、表示しない
         // コロン区切りの保険者名称・公費のフォーマットである 
         // 旧カルテはSPC区切りの保険者番号・SPC・保険者名称・公費のフォーマット
-        String ins = model.getDocInfoModel().getHealthInsuranceDesc().trim();
+        String ins = docInfo.getHealthInsuranceDesc().trim();
         if (ins != null && !ins.isEmpty()) {
             if (ins.contains(":")) {
-                String items[] = model.getDocInfoModel().getHealthInsuranceDesc().split(":");
+                String items[] = docInfo.getHealthInsuranceDesc().split(":");
                 sb.append("／");
                 sb.append(items[0]);
             } else if (ins.contains(" ")) {
-                String items[] = model.getDocInfoModel().getHealthInsuranceDesc().split(" ");
+                String items[] = docInfo.getHealthInsuranceDesc().split(" ");
                 if (items.length > 2) {
                     sb.append("／");
                     sb.append(items[2]);
@@ -142,6 +140,16 @@ public abstract class KarteViewer extends AbstractChartDocument {
         sb.append("／");
         sb.append(model.getUserModel().getCommonName());
         kartePanel.getTimeStampLabel().setText(sb.toString());
+        
+//masuda^   タイトルを文書種別によって色分けする
+        KartePanel.DOC_TYPE docType = KartePanel.DOC_TYPE.OUT_PATIENT;
+        if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+            docType = KartePanel.DOC_TYPE.SELF_INS;
+        } else if (admission != null) {
+            docType = KartePanel.DOC_TYPE.IN_HOSPITAL;
+        }
+        kartePanel.setTitleColor(docType);
+//masuda$
     }
 
     protected final void setKartePanel(KartePanel kartePanel) {

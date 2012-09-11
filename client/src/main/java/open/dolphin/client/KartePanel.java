@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.*;
@@ -6,7 +5,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.JViewport;
-import javax.swing.text.*;
 
 /**
  * KartePanelの抽象クラス
@@ -14,9 +12,15 @@ import javax.swing.text.*;
  *
  * @author masuda, Masuda Naika
  */
-public abstract class KartePanel extends Panel2 {//implements Scrollable {
+public abstract class KartePanel extends Panel2 {
 
     public static enum MODE {SINGLE_VIEWER, DOUBLE_VIEWER, SINGLE_EDITOR, DOUBLE_EDITOR};
+    
+    public static enum DOC_TYPE {OUT_PATIENT, IN_HOSPITAL, SELF_INS};
+    
+    private static final Color COLOR_OUT_PATIENT = new Color(0, 0, 0, 0);
+    private static final Color COLOR_IN_HOSPITAL = new Color(253, 202, 138);
+    private static final Color COLOR_SELF_INS = new Color(255, 236, 103);
 
     // タイムスタンプの foreground カラー
     private static final Color TIMESTAMP_FORE = Color.BLUE;
@@ -120,143 +124,20 @@ public abstract class KartePanel extends Panel2 {//implements Scrollable {
     protected final JPanel getContentPanel() {
         return contentPanel;
     }
-
-    /**
-     * 改行文字を表示するEditorKit
-     * @author masuda, Masuda Naika
-     * http://terai.xrea.jp/Swing/ParagraphMark.html
-     * http://abebas.sub.jp/java/JavaPrograming/01_Editor/011.html
-     */
-    private static final class KartePanelEditorKit extends StyledEditorKit {
-
-        private static final Color COLOR = Color.GRAY;
-        private static final String CR = "↲";
-        private static final String EOF = "◀";
-        private static final int crMargin = 20;
-        private boolean showCr;
-
-        public KartePanelEditorKit(boolean showCr) {
-            this.showCr = showCr;
+    
+    public void setTitleColor(DOC_TYPE type) {
+        
+        switch (type) {
+            case IN_HOSPITAL:
+                timeStampPanel.setBackground(COLOR_IN_HOSPITAL);
+                break;
+            case SELF_INS:
+                timeStampPanel.setBackground(COLOR_SELF_INS);
+                break;
+            case OUT_PATIENT:    
+            default:
+                timeStampPanel.setBackground(COLOR_OUT_PATIENT);
+                break;
         }
-
-        @Override
-        public ViewFactory getViewFactory() {
-            if (showCr) {
-                return new VisibleCrViewFactory();
-            } else {
-                return new InvisibleCrViewFactory();
-            }
-        }
-
-        private static final class VisibleCrViewFactory implements ViewFactory {
-
-            @Override
-            public View create(Element elem) {
-                String kind = elem.getName();
-                if (kind != null) {
-                    if (kind.equals(AbstractDocument.ContentElementName)) {
-                        return new LabelView(elem);
-                    } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
-                        return new MyParagraphView(elem);
-                    } else if (kind.equals(AbstractDocument.SectionElementName)) {
-                        return new BoxView(elem, View.Y_AXIS);
-                    } else if (kind.equals(StyleConstants.ComponentElementName)) {
-                        return new MyComponentView(elem);
-                    } else if (kind.equals(StyleConstants.IconElementName)) {
-                        return new IconView(elem);
-                    }
-                }
-                return new LabelView(elem);
-            }
-        }
-
-       private static final class InvisibleCrViewFactory implements ViewFactory {
-
-            @Override
-            public View create(Element elem) {
-                String kind = elem.getName();
-                if (kind != null) {
-                    if (kind.equals(AbstractDocument.ContentElementName)) {
-                        return new LabelView(elem);
-                    } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
-                        return new ParagraphView(elem);
-                    } else if (kind.equals(AbstractDocument.SectionElementName)) {
-                        return new BoxView(elem, View.Y_AXIS);
-                    } else if (kind.equals(StyleConstants.ComponentElementName)) {
-                        return new MyComponentView(elem);
-                    } else if (kind.equals(StyleConstants.IconElementName)) {
-                        return new IconView(elem);
-                    }
-                }
-                return new LabelView(elem);
-            }
-        }
-
-        private static final class MyComponentView extends ComponentView {
-
-            public MyComponentView(Element elem) {
-                super(elem);
-            }
-
-
-            // KartePane幅より広いスタンプの場合に直後の改行文字がwrapされないように
-            // 厳密には正しくない
-            @Override
-            public float getPreferredSpan(int axis) {
-                if (axis == View.X_AXIS && getComponent() instanceof StampHolder) {
-                    return getStampHolderSpanX();
-                    //return 0;
-                }
-                return super.getPreferredSpan(axis);
-            }
-
-            @Override
-            public float getMaximumSpan(int axis) {
-
-                if (axis == View.X_AXIS && getComponent() instanceof StampHolder) {
-                    return getStampHolderSpanX();
-                }
-                return super.getMaximumSpan(axis);
-            }
-
-            private float getStampHolderSpanX() {
-
-                float span = super.getPreferredSpan(View.X_AXIS);
-                int width = getComponent().getParent().getParent().getWidth() - crMargin;
-                if (span > width && width > 0) {
-                    return width;
-                }
-                return span;
-            }
-
-        }
-
-        private static final class MyParagraphView extends ParagraphView {
-
-            public MyParagraphView(Element elem) {
-                super(elem);
-            }
-
-            @Override
-            public void paint(Graphics g, Shape a) {
-                super.paint(g, a);
-                try {
-                    Shape paragraph = modelToView(getEndOffset(), a, Position.Bias.Backward);
-                    Rectangle r = (paragraph == null) ? a.getBounds() : paragraph.getBounds();
-                    int fontHeight = g.getFontMetrics().getHeight();
-                    Color old = g.getColor();
-                    g.setColor(COLOR);
-                    if (getEndOffset() != getDocument().getEndPosition().getOffset()) {
-                        g.drawString(CR, r.x + 1, r.y + (r.height + fontHeight) / 2 - 2);
-                    } else {
-                        g.drawString(EOF, r.x + 1, r.y + (r.height + fontHeight) / 2 - 2);
-                    }
-                    g.setColor(old);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-            }
-        }
-
     }
 }

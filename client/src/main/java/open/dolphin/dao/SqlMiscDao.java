@@ -36,7 +36,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         
         final String sql = "select TP.ptnum, TN.brmnum, TN.nyuinka, TN.nyuinymd , TN.drcd1 "
                 + "from tbl_ptnyuinrrk TN inner join tbl_ptnum TP on TP.ptid = TN.ptid "
-                + "where TN.tennyuymd <= ? and TN.tenstuymd <= ? and TN.hospnum = ?";
+                + "where TN.tennyuymd <= ? and ? <= TN.tenstuymd and TN.hospnum = ?";
         
         SimpleDateFormat frmt = new SimpleDateFormat("yyyyMMdd");
         String dateStr = frmt.format(date);
