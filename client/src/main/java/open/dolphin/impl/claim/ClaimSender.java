@@ -64,10 +64,10 @@ public class ClaimSender implements IKarteSender {
     @Override
     public void send(DocumentModel sendModel) {
 
-        if (sendModel==null ||
-            sendModel.getDocInfoModel().isSendClaim()==false ||
-            insuranceToApply==null ||
-            claimListener==null) {
+        if (sendModel == null
+                || sendModel.getDocInfoModel().isSendClaim() == false
+                || insuranceToApply == null
+                || claimListener == null) {
             return;
         }
         

@@ -1,15 +1,14 @@
 package open.dolphin.message;
 
 import java.util.List;
-import open.dolphin.project.Project;
 
 /**
  * DiseaseHelper
  *
  * @author Kazushi Minagawa
- *
+ * @author modified by masuda, Masuda Naika
  */
-public final class DiseaseHelper {
+public final class DiseaseHelper implements IMessageHelper {
         
     private String patientId;
     private String confirmDate;
@@ -21,9 +20,26 @@ public final class DiseaseHelper {
     private String creatorLicense;
     private String facilityName;
     private String jmariCode;
-    private List diagnosisModuleItems;
+    private List<DiagnosisModuleItem> diagnosisModuleItems;
     
-
+//masuda^
+    private boolean useDefaultDept;
+    
+    public void setUseDefalutDept(boolean b) {
+        useDefaultDept = b;
+    }
+    public boolean isUseDefaultDept() {
+        return useDefaultDept;
+    }
+    
+    private static final String TEMPLATE = "diseaseHelper";
+    
+    @Override
+    public String getTemplateName() {
+        return TEMPLATE;
+    }
+//masuda$
+    
     public String getPatientId() {
         return patientId;
     }
@@ -104,17 +120,11 @@ public final class DiseaseHelper {
         this.jmariCode = jmariCode;
     }
 
-    public List getDiagnosisModuleItems() {
+    public List<DiagnosisModuleItem> getDiagnosisModuleItems() {
         return diagnosisModuleItems;
     }
 
-    public void setDiagnosisModuleItems(List diagnosisModuleItems) {
+    public void setDiagnosisModuleItems(List<DiagnosisModuleItem> diagnosisModuleItems) {
         this.diagnosisModuleItems = diagnosisModuleItems;
     }
-    
-//masuda^
-    public boolean useDefaultDept() {
-        return Project.getBoolean(Project.CLAIM_01);
-    }
-//masuda$
 }

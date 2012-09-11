@@ -79,18 +79,12 @@ public final class MessageBuilder {
 //        return ret;
 //    }
     
-    public String build(Object helper) {
+    public String build(IMessageHelper helper) {
         
         logger.debug("MessageBuilder build");
         
         String ret = null;
-        String name = helper.getClass().getName();
-        int index = name.lastIndexOf('.');
-        name = name.substring(index + 1);
-        StringBuilder sb = new StringBuilder();
-        sb.append(name.substring(0, 1).toLowerCase());
-        sb.append(name.substring(1));
-        name = sb.toString();
+        String name = helper.getTemplateName();
 
         try {
             logger.debug("MessageBuilder try");
@@ -98,17 +92,8 @@ public final class MessageBuilder {
             context.put(name, helper);
             
             // このスタンプのテンプレートファイルを得る
-//masuda^   デフォルト診療科を使うかはhelper側で処理する
             String tFile = name + ".vm";
-/*
-            String tFile;
-            if (Project.getBoolean(Project.CLAIM_01)) {
-                tFile = name + "_01.vm";
-            } else {
-                tFile = name + ".vm";
-            }
-*/
-//masuda$
+
             logger.debug("template file = " + tFile);
             
             // Merge する

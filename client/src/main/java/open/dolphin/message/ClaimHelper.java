@@ -7,9 +7,9 @@ import open.dolphin.infomodel.PVTHealthInsuranceModel;
  * ClaimHelper
  *
  * @author Minagawa,Kazushi
- *
+ * @author modified by masuda, Masuda Naika
  */
-public final class ClaimHelper {
+public final class ClaimHelper implements IMessageHelper {
     
     /** 確定日 */
     private String confirmDate;
@@ -88,6 +88,13 @@ public final class ClaimHelper {
     }
     public boolean isUseDefaultDept() {
         return useDefaultDept;
+    }
+    
+    private static final String TEMPLATE = "claimHelper";
+    
+    @Override
+    public String getTemplateName() {
+        return TEMPLATE;
     }
 //masuda$
     

@@ -97,7 +97,10 @@ public class DiagnosisSender implements IDiagnosisSender {
         dhl.setConfirmDate(confirmDate);
         dhl.setDiagnosisModuleItems(moduleItems);
         dhl.setGroupId(GUIDGenerator.generate(dhl));
-
+//masuda^
+        boolean b = Project.getBoolean(Project.CLAIM_01);
+        dhl.setUseDefalutDept(b);
+//masuda$
         // DG ------------------------------------
         //dhl.setDepartment(pvt.getDepartmentCode());
         //dhl.setDepartmentDesc(pvt.getDepartment());
