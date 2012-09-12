@@ -105,11 +105,7 @@ public class SendClaimImpl implements ClaimMessageListener {
         logDump();
         
         sendQueueTask.stop();
-        // thread終了を待つ
-        try {
-            thread.join(100);
-        } catch (InterruptedException ex) {
-        }
+
         thread.interrupt();
         thread = null;
     }

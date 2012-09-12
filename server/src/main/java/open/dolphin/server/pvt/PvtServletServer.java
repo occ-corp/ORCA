@@ -72,24 +72,19 @@ public class PvtServletServer implements ServletContextListener {
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        
-        try {
-            // ServerThreadを中止させる
-            serverThread.stop();
-            
-            // thread終了を待つ
-            thread.join(100);
-            
-            // ServerSocketのThread破棄する
-            thread.interrupt();
-            thread = null;
 
-            // SocketReadTaskをシャットダウンする
-            shutdownExecutor();
+        // ServerThreadを中止させる
+        serverThread.stop();
 
-            logger.info("PVT Server stopped.");
-        } catch (Exception ex) {
-        }
+        // ServerSocketのThread破棄する
+        thread.interrupt();
+        thread = null;
+
+        // SocketReadTaskをシャットダウンする
+        shutdownExecutor();
+
+        logger.info("PVT Server stopped.");
+
     }
 
     private void shutdownExecutor() {

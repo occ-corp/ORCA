@@ -1,5 +1,6 @@
 package open.dolphin.delegater;
 
+import com.sun.jersey.api.client.AsyncWebResource;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.MultivaluedMap;
@@ -25,7 +26,7 @@ public class JerseyClient {
     private String password;
     
     private WebResource webResource;
-    private WebResource webResource2;
+    private AsyncWebResource asyncResource;
     
     static {
         instance = new JerseyClient();
@@ -69,19 +70,26 @@ public class JerseyClient {
 
         // pvt同期用のクライアントを別に用意する
         Client client2 = Client.create();
-        webResource2 = client2.resource(baseURI);
+        asyncResource = client2.asyncResource(baseURI);
     }
 
     // QueryParam付のWebResource
     public WebResource.Builder getResource(String path, MultivaluedMap<String, String> qmap) {
+
         if (qmap != null) {
-            return webResource.path(path).queryParams(qmap).header(USER_NAME, userName).header(PASSWORD, password);
+            return webResource.path(path).queryParams(qmap)
+                    .header(USER_NAME, userName).header(PASSWORD, password);
+        } else {
+            return webResource.path(path)
+                    .header(USER_NAME, userName).header(PASSWORD, password);
         }
-        return webResource.path(path).header(USER_NAME, userName).header(PASSWORD, password);
     }
     
     // pvt同期用のクライアント
-    public WebResource.Builder getAsyncResource(String path) {
-        return webResource2.path(path).header(USER_NAME, userName).header(PASSWORD, password).header(CLIENT_UUID, clientUUID);
+    public AsyncWebResource.Builder getAsyncResource(String path) {
+        return asyncResource.path(path)
+                .header(USER_NAME, userName)
+                .header(PASSWORD, password)
+                .header(CLIENT_UUID, clientUUID);
     }
 }

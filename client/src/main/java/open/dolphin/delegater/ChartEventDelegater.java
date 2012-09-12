@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.sun.jersey.api.client.ClientResponse;
+import java.util.concurrent.Future;
 import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.project.Project;
 
@@ -50,16 +51,15 @@ public class ChartEventDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
     
-    public String subscribe() throws Exception {
+    public Future<String> subscribe() throws Exception {
         
         // できるだけ時間をとらないようにデシリアライズは後回しにする
         // 処理もれが心配
-        String json = JerseyClient.getInstance()
+        Future<String> future = JerseyClient.getInstance()
                 .getAsyncResource(SUBSCRIBE_PATH)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(String.class);
-        
-        return json;
+        return future;
     }
     
     @Override
