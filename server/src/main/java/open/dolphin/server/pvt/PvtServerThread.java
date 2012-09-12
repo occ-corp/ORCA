@@ -68,12 +68,12 @@ public class PvtServerThread implements Runnable {
         } catch (IOException ex) {
             logger.warning("I/O error occured.");
         } finally {
-            try {
-                for (SelectionKey key : selector.keys()) {
+              for (SelectionKey key : selector.keys()) {
+                try {
                     key.channel().close();
+                } catch (IOException ex) {
+                    ex.printStackTrace(System.err);
                 }
-            } catch (IOException ex) {
-                ex.printStackTrace(System.err);
             }
         }
     }
