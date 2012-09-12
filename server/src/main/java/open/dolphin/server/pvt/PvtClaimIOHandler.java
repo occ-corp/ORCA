@@ -71,6 +71,10 @@ public class PvtClaimIOHandler implements IHandler {
 
         } catch (IOException ex) {
             debug("IOException while reading streams:" + ex);
+            try {
+                channel.close();
+            } catch (IOException ex1) {
+            }
         }
     }
 

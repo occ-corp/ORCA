@@ -72,7 +72,7 @@ public class PvtServerThread implements Runnable {
                 try {
                     key.channel().close();
                 } catch (IOException ex) {
-                    ex.printStackTrace(System.err);
+                    //ex.printStackTrace(System.err);
                 }
             }
         }
