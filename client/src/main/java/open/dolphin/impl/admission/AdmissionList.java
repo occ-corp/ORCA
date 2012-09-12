@@ -51,7 +51,7 @@ public class AdmissionList extends AbstractMainComponent {
     
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
-    private String INFO_MSG = "入院カルテはここから開いてください";
+    private String INFO_MSG = "入院カルテはここから作成";
     private String CLICK_BTN_MSG = "左のボタンをクリックして入院患者リストを取得してください。";
     
     // カラム仕様名
