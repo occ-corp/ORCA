@@ -194,7 +194,7 @@ public class ChartEventServiceBean {
             //pvt.setNumber(++counter);
         }
         
-        logger.info("PvtServiceMediator: pvtList initialized");
+        logger.info("StateService: pvtList initialized");
     }
     
     // データベースを調べてpvtに病名数を設定する

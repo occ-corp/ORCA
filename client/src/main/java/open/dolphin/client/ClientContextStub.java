@@ -50,6 +50,8 @@ public final class ClientContextStub {
     private String pathToDolphin;
 
     private boolean dolphinPro;
+    
+    private boolean debug;
 
     //private URLClassLoader pluginClassLoader;
 
@@ -57,8 +59,13 @@ public final class ClientContextStub {
      * ClientContextStub オブジェクトを生成する。
      */
     public ClientContextStub(boolean pro) {
+        this(pro, false);
+    }    
+    
+    public ClientContextStub(boolean pro, boolean debug) {
 
         dolphinPro = pro;
+        this.debug = debug;
 
         try {
             //----------------------------------------
@@ -232,31 +239,59 @@ public final class ClientContextStub {
     //---------------------------------------------------------
 
     public Logger getBootLogger() {
-        return Logger.getLogger("boot.logger");
+        Logger logger = Logger.getLogger("boot.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     public Logger getPart11Logger() {
-        return Logger.getLogger("part11.logger");
+        Logger logger = Logger.getLogger("part11.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     public Logger getClaimLogger() {
-        return Logger.getLogger("claim.logger");
+        Logger logger = Logger.getLogger("claim.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     public Logger getMmlLogger() {
-        return Logger.getLogger("mml.logger");
+        Logger logger = Logger.getLogger("mml.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     public Logger getPvtLogger() {
-        return Logger.getLogger("pvt.logger");
+        Logger logger = Logger.getLogger("pvt.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     public Logger getDelegaterLogger() {
-        return Logger.getLogger("delegater.logger");
+        Logger logger =Logger.getLogger("delegater.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     public Logger getLaboTestLogger() {
-        return Logger.getLogger("labTest.logger");
+        Logger logger =Logger.getLogger("labTest.logger");
+        if (debug) {
+            logger.setLevel(Level.DEBUG);
+        }
+        return logger;
     }
 
     //-----------------------------------------------------------

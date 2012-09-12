@@ -1491,6 +1491,8 @@ public class Dolphin implements MainWindow {
 //masuda^
         boolean pro = false;
         boolean server = false;
+        boolean debug = false;
+        
         String userId = null;
         String userPassword = null;
         for (String arg : args) {
@@ -1506,6 +1508,9 @@ public class Dolphin implements MainWindow {
             if (arg.startsWith("-S")) {
                 server = true;
             }
+            if (arg.equals("-debug")) {
+                debug = true;
+            }
         }
         
         if (server) {
@@ -1519,7 +1524,7 @@ public class Dolphin implements MainWindow {
         final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
         final String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
         
-        ClientContext.setClientContextStub(new ClientContextStub(pro));
+        ClientContext.setClientContextStub(new ClientContextStub(pro, debug));
         Project.setProjectStub(new ProjectStub());
         String userLaf = Project.getString("lookAndFeel", nimbusCls);
         boolean isWin = ClientContext.isWin();
