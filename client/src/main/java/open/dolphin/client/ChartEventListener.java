@@ -164,14 +164,14 @@ public class ChartEventListener {
             
             while (isRunning) {
                 try {
-                    //System.out.println("time = " + String.valueOf(System.currentTimeMillis() - t1));
                     future = ChartEventDelegater.getInstance().subscribe();
+                    //System.out.println("time = " + String.valueOf(System.currentTimeMillis() - t1));
                     String json = future.get();
+                    //t1 = System.currentTimeMillis();
                     if (json != null) {
                         exec.execute(new RemoteOnEventTask(json));
                     }
-                     //System.out.println("ChartEvent= " + json);
-                    //t1 = System.currentTimeMillis();
+                    //System.out.println("ChartEvent= " + json);
                 } catch (Exception e) {
                     //System.out.println(e.toString());
                 }
