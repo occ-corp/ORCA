@@ -70,8 +70,7 @@ public class SyskanriInfo extends SqlDaoBean {
         return ORCA46.equals(orcaVer);
     }
     
-    @Override
-    public final int getHospNum() {
+    public final int getHospNumFromSysKanriInfo() {
         return hospNum;
     }
     

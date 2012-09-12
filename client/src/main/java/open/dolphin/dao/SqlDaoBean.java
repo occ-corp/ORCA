@@ -105,8 +105,8 @@ public class SqlDaoBean extends DaoBean {
         return tm;
     }
     
-    protected int getHospNum() {
-        return SyskanriInfo.getInstance().getHospNum();
+    protected final int getHospNum() {
+        return SyskanriInfo.getInstance().getHospNumFromSysKanriInfo();
     }
     
     // ひらがなをカタカナに変換
