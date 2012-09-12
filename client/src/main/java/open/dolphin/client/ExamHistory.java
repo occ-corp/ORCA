@@ -35,7 +35,7 @@ public class ExamHistory {
     private DocumentHistory docHistory;     // 文書履歴
     private ChartImpl context;
     private PatientInspector patientInspector;
-    private List<DocInfoModel> docInfoList;
+
     public static final String ExamHistoryTitle = "検査";
     
     // カラム仕様ヘルパー
@@ -148,7 +148,7 @@ public class ExamHistory {
                     }
                     ExamHistoryModel eh = (ExamHistoryModel) tableModel.getObject(selectedRow);
                     long docPk = eh.getDocPk();
-
+                    List<DocInfoModel> docInfoList = getDocInfoList();
                     for (DocInfoModel dim : docInfoList) {
                         if (dim.getDocPk() == docPk) {
                             int index = docInfoList.indexOf(dim);
@@ -212,6 +212,13 @@ public class ExamHistory {
         // Scroll the area into view.
         viewport.scrollRectToVisible(rect);
     }
+    
+    // DocumentHistoryのテーブルからDocInfoのリストを取得する
+    private List<DocInfoModel> getDocInfoList() {
+        DocumentHistoryView dhView = (DocumentHistoryView) docHistory.getPanel();
+        ListTableModel<DocInfoModel> tblModel = (ListTableModel<DocInfoModel>) dhView.getTable().getModel();
+        return  tblModel.getDataProvider();
+    }
 
     @SuppressWarnings("unchecked")
     private void updateHistory() {
@@ -220,9 +227,6 @@ public class ExamHistory {
         final long karteId = context.getKarte().getId();
         final Date fromDate = docHistory.getExtractionPeriod();
         final Date toDate = new Date();
-
-        DocumentHistoryView dhView = (DocumentHistoryView) docHistory.getPanel();
-        docInfoList = ((ListTableModel<DocInfoModel>) dhView.getTable().getModel()).getDataProvider();
 
         final SimpleWorker worker = new SimpleWorker<List<ExamHistoryModel>, Void>() {
 
