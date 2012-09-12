@@ -8,7 +8,7 @@ import javax.swing.JTextPane;
 
 /**
  * ２号カルテパネル
- * @author masuda
+ * @author masuda, Masuda Naika
  */
 public final class KartePanel2 extends KartePanel {
 

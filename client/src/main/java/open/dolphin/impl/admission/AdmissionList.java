@@ -47,7 +47,7 @@ public class AdmissionList extends AbstractMainComponent {
         String.class, String.class, String.class, String.class};
     // 来院テーブルのカラム幅
     private static final int[] COLUMN_WIDTH = {
-        30, 40, 130, 20, 40, 100, 50, 80, 20};
+        30, 40, 100, 20, 40, 80, 50, 80, 20};
     
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;

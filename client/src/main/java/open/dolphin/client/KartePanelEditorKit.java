@@ -28,9 +28,9 @@ public class KartePanelEditorKit extends StyledEditorKit {
     @Override
     public ViewFactory getViewFactory() {
         if (showCr) {
-            return new KartePanelEditorKit.VisibleCrViewFactory();
+            return new VisibleCrViewFactory();
         } else {
-            return new KartePanelEditorKit.InvisibleCrViewFactory();
+            return new InvisibleCrViewFactory();
         }
     }
 
@@ -43,11 +43,11 @@ public class KartePanelEditorKit extends StyledEditorKit {
                 if (kind.equals(AbstractDocument.ContentElementName)) {
                     return new LabelView(elem);
                 } else if (kind.equals(AbstractDocument.ParagraphElementName)) {
-                    return new KartePanelEditorKit.MyParagraphView(elem);
+                    return new MyParagraphView(elem);
                 } else if (kind.equals(AbstractDocument.SectionElementName)) {
                     return new BoxView(elem, View.Y_AXIS);
                 } else if (kind.equals(StyleConstants.ComponentElementName)) {
-                    return new KartePanelEditorKit.MyComponentView(elem);
+                    return new MyComponentView(elem);
                 } else if (kind.equals(StyleConstants.IconElementName)) {
                     return new IconView(elem);
                 }
@@ -69,7 +69,7 @@ public class KartePanelEditorKit extends StyledEditorKit {
                 } else if (kind.equals(AbstractDocument.SectionElementName)) {
                     return new BoxView(elem, View.Y_AXIS);
                 } else if (kind.equals(StyleConstants.ComponentElementName)) {
-                    return new KartePanelEditorKit.MyComponentView(elem);
+                    return new MyComponentView(elem);
                 } else if (kind.equals(StyleConstants.IconElementName)) {
                     return new IconView(elem);
                 }
