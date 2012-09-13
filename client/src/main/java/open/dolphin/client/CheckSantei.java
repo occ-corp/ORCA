@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.Toolkit;
@@ -24,7 +23,7 @@ import open.dolphin.util.MMLDate;
 public class CheckSantei extends CheckSanteiConst {
     
     protected Chart context;
-    private KartePane kp;
+
     private long karteId;
     private Date karteDate;
     private Date karteDateTrimTime;
@@ -35,7 +34,7 @@ public class CheckSantei extends CheckSanteiConst {
     private List<SanteiHistoryModel> pastSanteiListMonth;
     protected List<RegisteredDiagnosisModel> diagnosis;
 
-    protected StampHolder sourceStampHolder;   // MakeBaseChargeStampの編集元
+    private StampHolder sourceStampHolder;   // MakeBaseChargeStampの編集元
     
     protected boolean gairaiKanriAvailable;
     protected boolean tokuShidouAvailable;
@@ -85,13 +84,13 @@ public class CheckSantei extends CheckSanteiConst {
     private MasudaDelegater del;    
 
 
-    public void init(KartePane kartePane, Date date) {
+    public void init(Chart context, List<ModuleModel> stamps, Date date) {
         
         eTenDao = SqlETensuDao.getInstance();
         del = MasudaDelegater.getInstance();
         
-        kp = kartePane;
-        context = kartePane.getParent().getContext();
+        this.context = context;
+        this.stamps = stamps;
         karteId = context.getKarte().getId();
 
         // 未確定なら現在の日付
@@ -581,6 +580,10 @@ public class CheckSantei extends CheckSanteiConst {
         return sb.toString();
     }
     
+    protected void setSourceStampHolder(StampHolder sh) {
+        sourceStampHolder = sh;
+    }
+    
     private void setupVariables() {
         
         SyskanriInfo syskanri = SyskanriInfo.getInstance();
@@ -651,22 +654,16 @@ public class CheckSantei extends CheckSanteiConst {
     
     private void setupCurrentSanteiHistory() {
 
-        stamps = new ArrayList<ModuleModel>();
         allClaimItems = new ArrayList<ClaimItem>();
 
-        // KartePaneからStampHolderを取得する
-        KarteStyledDocument doc = (KarteStyledDocument) kp.getTextPane().getDocument();
-        List<StampHolder> list = doc.getStampHolders();
-        
         // 現在のカルテにある全てのsrycdをとりあえず列挙する
         Set<String> srycds = new HashSet<String>();
-        for (StampHolder sh : list) {
-            if (sh == sourceStampHolder) {
+        for (ModuleModel stamp : stamps) {
+            // 編集元は含めない
+            if (sourceStampHolder != null && stamp == sourceStampHolder.getStamp()) {
                 continue;
             }
-            ModuleModel mm = sh.getStamp();
-            stamps.add(mm);
-            ClaimBundle cb = (ClaimBundle) mm.getModel();
+            ClaimBundle cb = (ClaimBundle) stamp.getModel();
             for (ClaimItem ci : cb.getClaimItem()) {
                 String srycd = ci.getCode();
                 if (srycd != null) {

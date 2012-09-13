@@ -10,8 +10,8 @@ import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.Collection;
-import java.util.Date;
+import java.util.*;
+import java.util.List;
 import java.util.TooManyListenersException;
 import javax.swing.*;
 import open.dolphin.delegater.DocumentDelegater;
@@ -810,17 +810,30 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             DocInfoModel docInfo = model.getDocInfoModel();
             AdmissionModel admission = docInfo.getAdmissionModel();
             boolean inHospital = admission != null;
+            Chart context = getContext();
+            
+            // KartePaneからModuleModelを取得する
+            KarteStyledDocument doc = (KarteStyledDocument) pPane.getTextPane().getDocument();
+            List<ModuleModel> stamps = doc.getStamps();
+
             CheckMedication ci = new CheckMedication();
             // 禁忌がないか、禁忌あるが無視のときはfalseが帰ってくる masuda
-            if (ci.checkStart(pPane, inHospital)) {
+            if (ci.checkStart(context, stamps)) {
                 return;
+            }
+            // 入院の場合の追加チェック
+            if (inHospital) {
+                CheckAdmission ca = new CheckAdmission();
+                if (ca.checkStart(context, stamps)) {
+                    return;
+                }
             }
             // 算定チェック　自費・入院の場合は算定チェックしない
             boolean check = Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true);
             boolean selfIns = docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX);
             if (check && !inHospital && !selfIns) {
                 CheckSantei cs = new CheckSantei();
-                cs.init(pPane, docInfo.getFirstConfirmDate());
+                cs.init(context, stamps, docInfo.getFirstConfirmDate());
                 if (cs.checkOnSave()) {
                     // 算定チェックが問題なければfalseで返ってくる masuda
                     return;

@@ -59,14 +59,14 @@ public class StampEditor implements PropertyChangeListener {
             editor = new BaseEditor(entity);
         }
 
+        editor.addPropertyChangeListener(AbstractStampEditor.VALUE_PROP, listener);
+        editor.addPropertyChangeListener(AbstractStampEditor.EDIT_END_PROP, StampEditor.this);
+        editor.setValue(stamps);
+        
 //masuda^   editorにChartを設定する
         editor.setContext(chart);
 //masuda$
         
-        editor.addPropertyChangeListener(AbstractStampEditor.VALUE_PROP, listener);
-        editor.addPropertyChangeListener(AbstractStampEditor.EDIT_END_PROP, StampEditor.this);
-        editor.setValue(stamps);
-
         dialog = new JDialog(new JFrame(), true);
 //masuda^    アイコン設定
         ClientContext.setDolphinIcon(dialog);

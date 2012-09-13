@@ -25,19 +25,20 @@ public class CheckMedication {
     private List<BundleMed> medList;         // 内服薬
     private List<BundleDolphin> bundleList;  // 注射も含む
     
+    
     private static final int DAY_LIMIT = 14;
 
     
-    public boolean checkStart(KartePane kp, boolean inHospital) {
+    public boolean checkStart(Chart context, List<ModuleModel> stamps) {
         
-        collectModules(kp);
+        moduleList = stamps;
         makeDrugList();
 
-        String msg = checkMedication(inHospital);
+        String msg = checkMedication();
         if (msg != null && msg.length() != 0) {
             Toolkit.getDefaultToolkit().beep();
             String[] options = {"取消", "無視"};
-            int val = JOptionPane.showOptionDialog(kp.getParent().getContext().getFrame(), msg, "薬剤確認",
+            int val = JOptionPane.showOptionDialog(context.getFrame(), msg, "薬剤確認",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
             if (val != 1) {
                 // 取り消し
@@ -49,7 +50,7 @@ public class CheckMedication {
         if (msg != null && msg.length() != 0) {
             Toolkit.getDefaultToolkit().beep();
             String[] options = {"取消", "無視"};
-            int val = JOptionPane.showOptionDialog(kp.getParent().getContext().getFrame(), msg, "薬剤併用警告",
+            int val = JOptionPane.showOptionDialog(context.getFrame(), msg, "薬剤併用警告",
                     JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
             if (val != 1) {
                 // 取り消し
@@ -61,17 +62,6 @@ public class CheckMedication {
         return false;
     }
 
-
-    private void collectModules(KartePane kp) {
-        
-        moduleList = new ArrayList<ModuleModel>();
-        
-        KarteStyledDocument doc = (KarteStyledDocument) kp.getTextPane().getDocument();
-        List<StampHolder> list = doc.getStampHolders();
-        for (StampHolder sh : list) {
-            moduleList.add(sh.getStamp());
-        }
-    }
 
     private void makeDrugList() {
         
@@ -137,7 +127,7 @@ public class CheckMedication {
 
     }
 
-    private String checkMedication(boolean inHospital) {
+    private String checkMedication() {
 
         if (medList.isEmpty()) {
             return null;

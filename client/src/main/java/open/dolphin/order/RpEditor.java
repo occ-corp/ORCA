@@ -905,7 +905,10 @@ public final class RpEditor extends AbstractStampEditor {
         }
 
         JRadioButton rb_teiki = view.getRbTeiki();
+        JRadioButton rb_rinji = view.getRbRinji();
         JRadioButton rb_nyuin = view.getRbAdmission();
+        JCheckBox cbHoukatsu = view.getCbHoukatsu();
+        JCheckBox cbNoCharge = view.getCbNoCharge();
         
         // KarteEditorのDocumentModel.docInfoからAdmissionModelを取得する
         AdmissionModel admission = editor.getModel().getDocInfoModel().getAdmissionModel();
@@ -913,11 +916,15 @@ public final class RpEditor extends AbstractStampEditor {
         if (admission != null) {
             bOut = false;
             rb_nyuin.setSelected(true);
-            view.getCbHoukatsu().setEnabled(false);
+            rb_rinji.setSelected(false);
+            rb_rinji.setEnabled(false);
+            cbHoukatsu.setSelected(false);
+            cbHoukatsu.setEnabled(false);
         } else {
             rb_teiki.setSelected(true);
             rb_nyuin.setEnabled(false);
-            view.getCbNoCharge().setEnabled(false);
+            cbNoCharge.setSelected(false);
+            cbNoCharge.setEnabled(false);
         }
         outBtn.setSelected(bOut);
         inBtn.setSelected(!bOut);

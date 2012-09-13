@@ -6,9 +6,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
-import open.dolphin.client.AutoKanjiListener;
-import open.dolphin.client.AutoRomanListener;
-import open.dolphin.client.DefaultCellEditor2;
+import open.dolphin.client.*;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.ListTableModel;
@@ -254,6 +252,31 @@ public final class InjectionEditor extends AbstractStampEditor {
         checkValidation();
     }
 
+//masuda^
+    @Override
+    public void setContext(Chart chart) {
+        super.setContext(chart);
+        controlBtn();
+    }
+    
+    // 外来か入院かに応じてボタンを制御する
+    private void controlBtn() {
+        
+        // KarteEditorを取得する
+        KarteEditor editor = getContext().getKarteEditor();
+        if (editor == null) {
+            return;
+        }
+        // KarteEditorのDocumentModel.docInfoからAdmissionModelを取得する
+        AdmissionModel admission = editor.getModel().getDocInfoModel().getAdmissionModel();
+        // 入院の場合は手技料なしは無効
+        if (admission != null) {
+            view.getNoChargeChk().setSelected(false);
+            view.getNoChargeChk().setEnabled(false);
+        }
+    }
+//masuda$
+    
     @Override
     protected void checkValidation() {
 

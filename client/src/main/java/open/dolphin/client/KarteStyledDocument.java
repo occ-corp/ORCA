@@ -3,6 +3,7 @@ package open.dolphin.client;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.text.*;
+import open.dolphin.infomodel.ModuleModel;
 import open.dolphin.project.Project;
 
 /**
@@ -241,6 +242,20 @@ public class KarteStyledDocument extends DefaultStyledDocument {
             StampHolder sh = (StampHolder) StyleConstants.getComponent(getCharacterElement(i).getAttributes());
             if (sh != null) {
                 list.add(sh);
+            }
+        }
+        return list;
+    }
+    
+    // StampHolder内のModuleModelだけ返す
+    public List<ModuleModel> getStamps() {
+        
+        List<ModuleModel> list = new ArrayList<ModuleModel>();
+        int length = getLength();
+        for (int i = 0; i < length; ++i) {
+            StampHolder sh = (StampHolder) StyleConstants.getComponent(getCharacterElement(i).getAttributes());
+            if (sh != null) {
+                list.add(sh.getStamp());
             }
         }
         return list;

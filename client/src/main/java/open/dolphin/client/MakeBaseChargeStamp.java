@@ -84,9 +84,8 @@ public class MakeBaseChargeStamp extends CheckSantei {
 
     // KartePaneのStampHolderをクリックしたときはここから入る
     public final void enter2(StampHolder sh){
-        context = sh.getKartePane().getParent().getContext();
-        KarteEditor editor = context.getKarteEditor();
-        sourceStampHolder = sh;
+        Chart chart = sh.getKartePane().getParent().getContext();
+        KarteEditor editor = chart.getKarteEditor();
         start(editor, sh);
     }
 
@@ -195,8 +194,10 @@ public class MakeBaseChargeStamp extends CheckSantei {
 
     private void start(KarteEditor editor, StampHolder sh) {
 
+        // 編集元のスタンプホルダを設定する
+        setSourceStampHolder(sh);
+        
         KartePane kp = editor.getPPane();
-        context = editor.getContext();
 
         boolean failed = prepareClaimItemMap();
         if (!failed) {
@@ -206,8 +207,12 @@ public class MakeBaseChargeStamp extends CheckSantei {
             return;
         }
 
+        // KartePaneからModuleModelを取得する
+        KarteStyledDocument doc = (KarteStyledDocument) kp.getTextPane().getDocument();
+        List<ModuleModel> stamps = doc.getStamps();
+        
         // CheckSanteiの初期化
-        init(kp, editor.getModel().getDocInfoModel().getFirstConfirmDate());
+        init(editor.getContext(), stamps, editor.getModel().getDocInfoModel().getFirstConfirmDate());
 
         if (diagnosis == null || diagnosis.isEmpty()) {
             String title = ClientContext.getFrameTitle("基本料");

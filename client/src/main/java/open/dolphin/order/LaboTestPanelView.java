@@ -334,13 +334,16 @@ public class LaboTestPanelView extends JPanel{
         urine.add(new LaboCheckBox(160177150, "尿中肺炎球菌抗原"));
         fifth.add(urine);
 
-        // 外来迅速検体検査加算
-        fifth.add(Box.createVerticalStrut(10));
+        // 外来迅速検体検査加算など
+        fifth.add(Box.createVerticalStrut(5));
         JPanel rapid = createBoxYPanel();
         rapid.setBorder(BorderFactory.createEtchedBorder());
         rapid.add(new LaboCheckBox(160177770, "外来迅速検体検査加算"));
+        rapid.add(new LaboCheckBox(160095710, "静脈採血(B-V)"));
+        //rapid.add(new LaboCheckBox(160095810, "末梢採血(B-C)"));
+        //rapid.add(new LaboCheckBox(160101210, "動脈採血(B-A)"));
         fifth.add(rapid);
-        
+
         fourthAndFifth.add(fifth);
         columnPanel.add(fourthAndFifth);        
 
