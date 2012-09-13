@@ -58,13 +58,10 @@ public class RpView extends AbstractOrderView {
         bg.add(rb_teiki);
         bg.add(rb_rinji);
         bg.add(admRadio);
-        JPanel pnl = new JPanel();
-        //pnl.setLayout(new FlowLayout(FlowLayout.LEFT));
-        pnl.setBorder(BorderFactory.createEtchedBorder());
-        pnl.add(rb_teiki);
-        pnl.add(rb_rinji);  
-        pnl.add(admRadio);
-        cmdPanel1.add(pnl);
+        cmdPanel1.add(rb_teiki);
+        cmdPanel1.add(rb_rinji);  
+        cmdPanel1.add(admRadio);
+        cmdPanel1.add(new JSeparator(JSeparator.VERTICAL));
         
         inRadio = new JRadioButton("院内");
         inRadio.setToolTipText("院内処方の時選択します。");
@@ -73,18 +70,9 @@ public class RpView extends AbstractOrderView {
         bg = new ButtonGroup();
         bg.add(inRadio);
         bg.add(outRadio);
-        pnl = new JPanel();
-        //pnl.setLayout(new FlowLayout(FlowLayout.LEFT));
-        pnl.setBorder(BorderFactory.createEtchedBorder());
-        pnl.add(inRadio);
-        pnl.add(outRadio);
-        cmdPanel1.add(pnl);
+        cmdPanel1.add(inRadio);
+        cmdPanel1.add(outRadio);
 
-        cbHoukatsu = new JCheckBox("包括");
-        cmdPanel1.add(cbHoukatsu);
-        cbNoCharge = new JCheckBox("調無");
-        cbNoCharge.setToolTipText("入院処方で調剤料を算定しない場合に選択します。");
-        cmdPanel1.add(cbNoCharge);
         cmdPanel1.add(Box.createHorizontalGlue());
         btn_yakka = new JButton(yakkaIcon);
         btn_yakka.setToolTipText("剤の薬価計算/ORCA処方参照");
@@ -102,6 +90,12 @@ public class RpView extends AbstractOrderView {
         usageCombo = new JComboBox(new String[]{"用法選択"});
         fixComponentSize(usageCombo);
         cmdPanel2.add(usageCombo);
+        cmdPanel2.add(new JSeparator(JSeparator.VERTICAL));
+        cbHoukatsu = new JCheckBox("包括");
+        cmdPanel2.add(cbHoukatsu);
+        cbNoCharge = new JCheckBox("調無");
+        cbNoCharge.setToolTipText("入院処方で調剤料を算定しない場合に選択します。");
+        cmdPanel2.add(cbNoCharge);
         cmdPanel2.add(Box.createHorizontalGlue());
         cmdPanel2.add(countLabel);
         cmdPanel2.add(countField);
