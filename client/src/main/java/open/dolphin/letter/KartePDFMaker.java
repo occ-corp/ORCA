@@ -610,7 +610,10 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     table.addCell(createStampCell(model.getItemNames(), 3, false));
                     // bundleNumber
                     String number = model.getBundleNumber();
-                    if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
+                    if (number != null && number.startsWith("/")) {
+                        String str = "・施行日：" + number.substring(1) + "日";
+                        table.addCell(createStampCell(str, 3, false));
+                    } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));
                         table.addCell(createStampCell(number, 1, false));
                         table.addCell(createStampCell(" 回", 1, false));
@@ -674,7 +677,10 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     }
                     // bundleNumber
                     String number = model.getBundleNumber();
-                    if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
+                    if (number != null && number.startsWith("/")) {
+                        String str = "・施行日：" + number.substring(1) + "日";
+                        table.addCell(createStampCell(str, 3, false));
+                    } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));
                         table.addCell(createStampCell(number, 1, false));
                         table.addCell(createStampCell(" 回", 1, false));

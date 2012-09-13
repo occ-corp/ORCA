@@ -6,10 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import javax.swing.JOptionPane;
-import open.dolphin.infomodel.ClaimBundle;
-import open.dolphin.infomodel.ClaimItem;
-import open.dolphin.infomodel.IInfoModel;
-import open.dolphin.infomodel.ModuleModel;
+import open.dolphin.infomodel.*;
 
 /**
  * 入院患者の場合の保存時チェック
@@ -17,6 +14,8 @@ import open.dolphin.infomodel.ModuleModel;
  * @author masuda, Masuda Naika
  */
 public class CheckAdmission {
+    
+    private static final String SYUGI = String.valueOf(ClaimConst.SYUGI);
 
     private static final Map<Integer, String> laboNgMap;
 
@@ -119,11 +118,14 @@ public class CheckAdmission {
         StringBuilder sb = new StringBuilder();
 
         for (ModuleModel mm : injList) {
+            // 手技料があるとダメ
             ClaimBundle cb = (ClaimBundle) mm.getModel();
-            // 手技料なしはダメ
-            if (cb.getClassCode().endsWith("1")) {
-                sb.append("入院中は注射手技料なしを設定しないでください。\n");
-                break;
+            ClaimItem[] claimItems = cb.getClaimItem();
+            for (ClaimItem ci : claimItems) {
+                if (SYUGI.equals(ci.getClassCode())) {
+                    sb.append("入院中は注射手技を設定しないでください。\n");
+                    break;
+                }
             }
         }
         return sb.toString();

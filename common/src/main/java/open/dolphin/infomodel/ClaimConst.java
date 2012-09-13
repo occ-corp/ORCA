@@ -169,5 +169,12 @@ public final class ClaimConst {
     
     // その他材料
     public static final String ZAIRYO_OTHER_START = "059";
+    
+    // 中心静脈など
+    public static final String INJECTION_350 = "350";
+    public static final String INJECTION_352 = "352";
+    public static final String INJECTION_340 = "340";
+    public static final String INJECTION_332 = "332";
+    
 //masuda$
 }

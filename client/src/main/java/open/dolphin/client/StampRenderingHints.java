@@ -100,12 +100,12 @@ public class StampRenderingHints {
         // タイトル
         sb.append("<TR BGCOLOR=\"").append(getLabelColorAs16String()).append("\">");
         if (isNewStamp(stamp)) {
-            sb.append(TD_NOWRAP_COLSPAN3).append("RP) ").append(TD_E);
+            sb.append(TD_NOWRAP).append("RP) ").append(TD_E);
         } else {
             sb.append(TD_NOWRAP).append("RP) ").append(stamp.getModuleInfoBean().getStampName()).append(TD_E);
-            sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R);
-            sb.append(model.getMemo().replace("処方", "")).append("/").append(model.getClassCode()).append(TD_E);
         }
+        sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R);
+        sb.append(model.getMemo().replace("処方", "")).append("/").append(model.getClassCode()).append(TD_E);
         sb.append(TR_E);
         
         // 項目
@@ -113,13 +113,15 @@ public class StampRenderingHints {
             sb.append(TR_S);
             // コメントコードなら"・"と"x"は表示しない
             if (ci.getCode().matches(ClaimConst.REGEXP_COMMENT_MED)) {
-                sb.append(TD_S).append(ci.getName()).append(TD_E);
+                sb.append(TD_COLSPAN3).append(ci.getName()).append(TD_E);
             } else {
                 sb.append(TD_S).append("・").append(ci.getName()).append(TD_E);
                 sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(ci.getNumber()).append(TD_E);
                 String unit = ci.getUnit();
                 if (unit != null && !unit.isEmpty()) {
                     sb.append(TD_NOWRAP).append(" ").append(ci.getUnit().replace("カプセル", "Ｃ")).append(TD_E);
+                } else {
+                    sb.append(TD_NOWRAP).append(" ").append(TD_E);
                 }
             }
             sb.append(TR_E);
@@ -134,7 +136,7 @@ public class StampRenderingHints {
         String memo = model.getAdminMemo();
         if (memo != null && !memo.isEmpty()) {
             sb.append(TR_S);
-            sb.append(TD_S).append(memo).append(TD_E);
+            sb.append(TD_COLSPAN3).append(memo).append(TD_E);
             sb.append(TR_E);
         }
         
@@ -156,17 +158,17 @@ public class StampRenderingHints {
         // タイトル
         sb.append("<TR BGCOLOR=\"").append(getLabelColorAs16String()).append("\">");
         if (isNewStamp(stamp)) {
-            sb.append(TD_NOWRAP_COLSPAN2).append(model.getOrderName()).append(TD_E);
+            sb.append(TD_NOWRAP).append(model.getOrderName()).append(TD_E);
         } else {
             sb.append(TD_NOWRAP).append(model.getOrderName());
             sb.append("(").append(stamp.getModuleInfoBean().getStampName()).append(")").append(TD_E);
-            sb.append(TD_NOWRAP_ALIGN_R).append(model.getClassCode()).append(TD_E);
         }
+        sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R).append(model.getClassCode()).append(TD_E);
         sb.append(TR_E);
 
         // 項目
         sb.append(TR_S);
-        sb.append(TD_COLSPAN2).append("・").append(model.getItemNames()).append(TD_E);
+        sb.append(TD_COLSPAN3).append("・").append(model.getItemNames()).append(TD_E);
         sb.append(TR_E);
 
         // メモ
@@ -179,7 +181,14 @@ public class StampRenderingHints {
         
         // バンドル数量
         String bundleNum = model.getBundleNumber();
-        if (bundleNum != null && !"1".equals(bundleNum)) {
+        // 入院対応
+        if (bundleNum != null && bundleNum.startsWith("/")) {
+            sb.append(TR_S);
+            sb.append(TD_COLSPAN3);
+            sb.append("・施行日：").append(bundleNum.substring(1)).append("日");
+            sb.append(TD_E);
+            sb.append(TR_E);
+        } else if (bundleNum != null && !"1".equals(bundleNum)) {
             sb.append(TR_S);
             sb.append(TD_S).append("・回数").append(TD_E);
             sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(bundleNum).append(TD_E);
@@ -205,12 +214,12 @@ public class StampRenderingHints {
         // タイトル
         sb.append("<TR BGCOLOR=\"").append(getLabelColorAs16String()).append("\">");
         if (isNewStamp(stamp)) {
-            sb.append(TD_NOWRAP_COLSPAN3).append(model.getOrderName()).append(TD_E);
+            sb.append(TD_NOWRAP).append(model.getOrderName()).append(TD_E);
         } else {
             sb.append(TD_NOWRAP).append(model.getOrderName());
             sb.append("(").append(stamp.getModuleInfoBean().getStampName()).append(")").append(TD_E);
-            sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R).append(model.getClassCode()).append(TD_E);
         }
+        sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R).append(model.getClassCode()).append(TD_E);
         sb.append(TR_E);
         
         // 項目
@@ -223,6 +232,8 @@ public class StampRenderingHints {
                 String unit = ci.getUnit();
                 if (unit != null && !unit.isEmpty()) {
                     sb.append(TD_NOWRAP).append(" ").append(ci.getUnit()).append(TD_E);
+                } else {
+                    sb.append(TD_NOWRAP).append(" ").append(TD_E);
                 }
             } else {
                 sb.append(TD_COLSPAN3).append("・").append(ci.getName()).append(TD_E);
@@ -240,7 +251,13 @@ public class StampRenderingHints {
         
         // バンドル数量
         String bundleNum = model.getBundleNumber();
-        if (bundleNum != null && !"1".equals(bundleNum)) {
+        if (bundleNum != null && bundleNum.startsWith("/")) {
+            sb.append(TR_S);
+            sb.append(TD_COLSPAN3);
+            sb.append("・施行日：").append(bundleNum.substring(1)).append("日");
+            sb.append(TD_E);
+            sb.append(TR_E);
+        } else  if (bundleNum != null && !"1".equals(bundleNum)) {
             sb.append(TR_S);
             sb.append(TD_S).append("・回数").append(TD_E);
             sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(bundleNum).append(TD_E);

@@ -6,11 +6,13 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
-import open.dolphin.client.*;
+import open.dolphin.client.AutoKanjiListener;
+import open.dolphin.client.AutoRomanListener;
+import open.dolphin.client.Chart;
+import open.dolphin.client.DefaultCellEditor2;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.ListTableModel;
-import open.dolphin.util.ZenkakuUtils;
 
 /**
  * InjectionEditor
@@ -133,7 +135,11 @@ public final class InjectionEditor extends AbstractStampEditor {
         List<MasterItem> itemList = tableModel.getDataProvider();
 
         // 診療行為があるかどうかのフラグ
+        boolean admission = isAdmission();
         boolean found = false;
+        String bundleNum =  view.getNumberField().getText().trim();
+        
+        String c007 = null;
 
         for (MasterItem masterItem : itemList) {
 
@@ -142,69 +148,60 @@ public final class InjectionEditor extends AbstractStampEditor {
 
             // 診区を設定する
             // 最初に見つかった手技の診区をあとで ClaimBundle に設定する
-            if ((masterItem.getClassCode() == ClaimConst.SYUGI) && (!found)) {
-
+            if (!found && masterItem.getClassCode() == ClaimConst.SYUGI) {
                 // 集計先をマスタアイテム自体へ持たせている
-                String c007 = getClaim007Code(masterItem.getClaimClassCode());
-
+                c007 = getClaim007Code(masterItem.getClaimClassCode());
                 if (c007 != null) {
-                    setClassCode(c007);
                     found = true;
                 }
             }
-
             bundle.addClaimItem(item);
         }
         
-//masuda^   バンドルメモ復活
+        // バンドルメモ復活
         String memo = view.getCommentField().getText().trim();
         if (!memo.equals("")) {
             bundle.setMemo(memo);
         }
-//masuda$
+
+        // バンドル数を設定
+        bundle.setBundleNumber(bundleNum);
         
         // 診療行為区分
-        String c007 = getClassCode()!=null ? getClassCode() : getImplied007();
-
-        if (c007 != null) {
-
-            bundle.setClassCode(c007);
-
-            // Claim007 固定の値
-            bundle.setClassCodeSystem(getClassCodeId());
-
-            // 上記テーブルで定義されている診療行為の名称
-            bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
+        if (c007 == null) {
+            c007 = (getClassCode() != null) ? getClassCode() : getImplied007();
         }
+        bundle.setClassCode(c007);
 
-        // 手技料なしの場合、再設定する 2010-10-27
-        String test = bundle.getClassCode();
+        // Claim007 固定の値
+        bundle.setClassCodeSystem(getClassCodeId());
+        // 上記テーブルで定義されている診療行為の名称
+        bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
 
-//masuda^
-        // 手技料なしがチェックされている場合で皮下、静脈、点滴の場合
-        if (view.getNoChargeChk().isSelected() && isInjection(test)) {
+        if (!admission) {
+            // 手技料なしの場合、再設定する 2010-10-27
+            String test = bundle.getClassCode();
+            // 手技料なしがチェックされている場合で皮下、静脈、点滴の場合
+            if (view.getNoChargeChk().isSelected() && isInjection(test)) {
 
-            test = test.substring(0, 2) + "1"; // 手技なしコードにする
-            bundle.setClassCode(test);
-            // memoする
-            if (!text.contains(NO_CHARGE)) {
-                bundle.setMemo(memo + NO_CHARGE);
-            }
-        } else {
-            memo = memo.replace(NO_CHARGE, "").trim();
-            if ("".equals(memo)) {
-                bundle.setMemo(null);
+                test = test.substring(0, 2) + "1"; // 手技なしコードにする
+                bundle.setClassCode(test);
+                // memoする
+                if (!text.contains(NO_CHARGE)) {
+                    bundle.setMemo(memo + NO_CHARGE);
+                }
             } else {
-                bundle.setMemo(memo);
+                memo = memo.replace(NO_CHARGE, "").trim();
+                if ("".equals(memo)) {
+                    bundle.setMemo(null);
+                } else {
+                    bundle.setMemo(memo);
+                }
+                test = test.substring(0, 2) + "0";
+                bundle.setClassCode(test);
             }
-            test = test.substring(0, 2) + "0";
-            bundle.setClassCode(test);
         }
-//masuda$
         
-        // バンドル数
-        bundle.setBundleNumber((String) view.getNumberCombo().getSelectedItem());
-
         retModel.setModel((InfoModel) bundle);
 
         return new ModuleModel[]{retModel};
@@ -219,19 +216,19 @@ public final class InjectionEditor extends AbstractStampEditor {
         if (bundle == null) {
             return;
         }
-        
-        // バンドル数を数量コンボへ設定する
+
+//masuda^
+        // バンドル数を数量フィールドへ設定する
         String number = bundle.getBundleNumber();
-        if (number != null && (!number.trim().equals(""))) {
-            number = ZenkakuUtils.toHalfNumber(number.trim());
-            view.getNumberCombo().setSelectedItem(number);
-        }
-//masuda^   メモ復活
+        view.getNumberField().setText(number);
+        
+        // メモ復活
         String memo = bundle.getMemo();
         if (memo != null) {
             view.getCommentField().setText(memo);
         }
 //masuda$
+        
         
         //----------------------------
         // 手技料なしの場合
@@ -251,8 +248,8 @@ public final class InjectionEditor extends AbstractStampEditor {
         // Stateを変更する
         checkValidation();
     }
+    
 
-//masuda^
     @Override
     public void setContext(Chart chart) {
         super.setContext(chart);
@@ -261,21 +258,16 @@ public final class InjectionEditor extends AbstractStampEditor {
     
     // 外来か入院かに応じてボタンを制御する
     private void controlBtn() {
-        
-        // KarteEditorを取得する
-        KarteEditor editor = getContext().getKarteEditor();
-        if (editor == null) {
-            return;
-        }
-        // KarteEditorのDocumentModel.docInfoからAdmissionModelを取得する
-        AdmissionModel admission = editor.getModel().getDocInfoModel().getAdmissionModel();
-        // 入院の場合は手技料なしは無効
-        if (admission != null) {
-            view.getNoChargeChk().setSelected(false);
+ 
+        boolean admission = isAdmission();
+        if (!admission) {
+            view.getShugiCmb().setEnabled(false);
+            view.getNoChargeChk().setEnabled(true);
+        } else {
+            view.getNoChargeChk().setSelected(true);
             view.getNoChargeChk().setEnabled(false);
         }
     }
-//masuda$
     
     @Override
     protected void checkValidation() {
@@ -308,8 +300,8 @@ public final class InjectionEditor extends AbstractStampEditor {
                     }
                 }
 
-                // 何かあればOK
                 if (noTech) {
+                    setIsValid = setIsValid && (techCnt == 0);
                     setIsValid = setIsValid && (other > 0);
                 } else {
                     setIsValid = setIsValid && (techCnt > 0);
@@ -389,7 +381,24 @@ public final class InjectionEditor extends AbstractStampEditor {
         
         // Info Label
         view.getInfoLabel().setText(this.getInfo());
+        
+       // 入院診療行為
+        view.getShugiCmb().addActionListener(new ActionListener(){
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                setClassCode(view.getSelectedClassCode());
+                view.getNumberField().setText("/");
+                SwingUtilities.invokeLater(new Runnable() {
+
+                    @Override
+                    public void run() {
+                        view.getNumberField().requestFocusInWindow();
+                    }
+                });
+            }
+        });
+        
         //------------------------------------------
         // セットテーブルを生成する
         //------------------------------------------

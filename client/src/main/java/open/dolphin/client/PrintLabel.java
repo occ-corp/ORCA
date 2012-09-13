@@ -222,6 +222,12 @@ public class PrintLabel {
                     lineData.add(new LineModel(itemName, "", "　"));
                 }
             }
+            // 入院注射、施行日
+            String bundleNum = bundle.getBundleNumber();
+            if (bundleNum.startsWith("/")) {
+                String itemName = "施行日：" + bundleNum.substring(1) + "日";
+                lineData.add(new LineModel(itemName, "", "　"));
+            }
         } else {
             BundleDolphin bundle = (BundleDolphin) stamp.getModel();
             lineData.add(new LineModel("", "", "─"));

@@ -909,11 +909,9 @@ public final class RpEditor extends AbstractStampEditor {
         JRadioButton rb_nyuin = view.getRbAdmission();
         JCheckBox cbHoukatsu = view.getCbHoukatsu();
         JCheckBox cbNoCharge = view.getCbNoCharge();
-        
-        // KarteEditorのDocumentModel.docInfoからAdmissionModelを取得する
-        AdmissionModel admission = editor.getModel().getDocInfoModel().getAdmissionModel();
-        
-        if (admission != null) {
+
+        boolean admission = isAdmission();
+        if (admission) {
             bOut = false;
             rb_nyuin.setSelected(true);
             rb_rinji.setSelected(false);

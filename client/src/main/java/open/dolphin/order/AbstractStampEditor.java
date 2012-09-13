@@ -37,7 +37,7 @@ import open.dolphin.util.ZenkakuUtils;
  * @author modified by masuda, Masuda Naika
  */
 public abstract class AbstractStampEditor extends StampEditorConst {
-
+    
     // ドルフィンのオーダ履歴用の名前
     protected String orderName;
 
@@ -75,6 +75,8 @@ public abstract class AbstractStampEditor extends StampEditorConst {
     // StampEditor から起動された時 true
     // StampMaker から起動された時は false
     private boolean fromStampEditor;
+    
+    private boolean isAdmission;
     
     // 抽象メソッド
     public abstract JPanel getView();
@@ -848,10 +850,29 @@ public abstract class AbstractStampEditor extends StampEditorConst {
     // 検査エディタから検査パネルを開くとき＆ORCA処方参照時に使用
     public void setContext(Chart chart){
         this.chart = chart;
+        setAdmissionFlg();
+        
     }
     
     public final Chart getContext() {
         return chart;
+    }
+    
+    private void setAdmissionFlg() {
+
+        isAdmission = false;
+        KarteEditor editor = chart.getKarteEditor();
+        if (editor == null) {
+            return;
+        }
+        AdmissionModel admission = editor.getModel().getDocInfoModel().getAdmissionModel();
+        if (admission != null) {
+            isAdmission = true;
+        }
+    }
+    
+    protected boolean isAdmission() {
+        return isAdmission;
     }
     
     // 共通のコンポーネントをまとめて設定する
@@ -975,8 +996,8 @@ public abstract class AbstractStampEditor extends StampEditorConst {
             }
         });
         searchTextField.addFocusListener(AutoKanjiListener.getInstance());
-
-        // Real Time Search
+        
+       // Real Time Search
         boolean rt = Project.getBoolean(RT, true);
         view.getRtCheck().setSelected(rt);
         view.getRtCheck().addActionListener(new ActionListener() {
@@ -1292,10 +1313,11 @@ public abstract class AbstractStampEditor extends StampEditorConst {
         worker.execute();
     }
     
+    
     private AbstractOrderView getOrderView() {
         return (AbstractOrderView) getView();
     }
-    private ListTableModel<MasterItem> getSetTableModel() {
+    protected ListTableModel<MasterItem> getSetTableModel() {
         return (ListTableModel<MasterItem>) getOrderView().getSetTable().getModel();
     }
     
