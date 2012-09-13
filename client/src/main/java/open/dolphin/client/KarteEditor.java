@@ -807,18 +807,20 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         
 //masuda^   薬剤相互作用チェック
         if (getMode() == DOUBLE_MODE) {
-            AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
+            DocInfoModel docInfo = model.getDocInfoModel();
+            AdmissionModel admission = docInfo.getAdmissionModel();
             boolean inHospital = admission != null;
             CheckMedication ci = new CheckMedication();
             // 禁忌がないか、禁忌あるが無視のときはfalseが帰ってくる masuda
             if (ci.checkStart(pPane, inHospital)) {
                 return;
             }
-            // 算定チェック　入院の場合は算定チェックしない
+            // 算定チェック　自費・入院の場合は算定チェックしない
             boolean check = Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true);
-            if (check && !inHospital) {
+            boolean selfIns = docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX);
+            if (check && !inHospital && !selfIns) {
                 CheckSantei cs = new CheckSantei();
-                cs.init(pPane, model.getDocInfoModel().getFirstConfirmDate());
+                cs.init(pPane, docInfo.getFirstConfirmDate());
                 if (cs.checkOnSave()) {
                     // 算定チェックが問題なければfalseで返ってくる masuda
                     return;
