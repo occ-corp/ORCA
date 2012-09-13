@@ -844,7 +844,7 @@ public class WatingListImpl extends AbstractMainComponent {
 
         // publish
         cel.publishPvtDelete(pvtModel);
-        
+/*
         SwingWorker worker = new SwingWorker<Boolean, Void>() {
 
             @Override
@@ -856,6 +856,7 @@ public class WatingListImpl extends AbstractMainComponent {
             }
         };
         worker.execute();
+*/
     }
     
     private boolean showCancelDialog(String msg) {

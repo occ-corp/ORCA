@@ -23,7 +23,7 @@ public class ChartEventServiceBean {
     
     @Inject
     private ServletContextHolder contextHolder;
-    
+
     @PersistenceContext
     private EntityManager em;
     
@@ -70,19 +70,64 @@ public class ChartEventServiceBean {
     /**
      * ChartEventModelを処理する
      */
-    public int processChartEvent(ChartEventModel msg) {
+    public int processChartEvent(ChartEventModel evt) {
 
+        ChartEventModel.EVENT eventType = evt.getEventType();
+        
+        switch(eventType) {
+            case PVT_DELETE:
+                processPvtDeleteEvent(evt);
+                break;
+            case PVT_STATE:
+                processPvtStateEvent(evt);
+                break;
+            default:
+                return 0;
+        }
+        // クライアントに通知
+        notifyEvent(evt);
+
+        return 1;
+    }
+    
+    private void processPvtDeleteEvent(ChartEventModel evt) {
+        
+        long pvtPk = evt.getPvtPk();
+        String fid = evt.getFacilityId();
+
+        // データベースから削除
+        PatientVisitModel exist = em.find(PatientVisitModel.class, pvtPk);
+        // WatingListから開いていないとexist = nullなので。
+        if (exist != null) {
+            em.remove(exist);
+        }
+        // pvtListから削除
+        List<PatientVisitModel> pvtList = getPvtList(fid);
+        PatientVisitModel toRemove = null;
+        for (PatientVisitModel model : pvtList) {
+            if (model.getId() == pvtPk) {
+                toRemove = model;
+                break;
+            }
+        }
+        if (toRemove != null) {
+            pvtList.remove(toRemove);
+        }
+    }
+    
+    private void processPvtStateEvent(ChartEventModel evt) {
+        
         // msgからパラメーターを取得
-        String fid = msg.getFacilityId();
-        long pvtId = msg.getPvtPk();
-        int state = msg.getState();
-        int byomeiCount = msg.getByomeiCount();
-        int byomeiCountToday = msg.getByomeiCountToday();
-        String memo = msg.getMemo();
-        String ownerUUID = msg.getOwnerUUID();
-        long ptPk = msg.getPtPk();
+        String fid = evt.getFacilityId();
+        long pvtId = evt.getPvtPk();
+        int state = evt.getState();
+        int byomeiCount = evt.getByomeiCount();
+        int byomeiCountToday = evt.getByomeiCountToday();
+        String memo = evt.getMemo();
+        String ownerUUID = evt.getOwnerUUID();
+        long ptPk = evt.getPtPk();
 
-        List<PatientVisitModel> pvtList = contextHolder.getPvtList(fid);
+        List<PatientVisitModel> pvtList = getPvtList(fid);
 
         // データベースのPatientVisitModelを更新
         PatientVisitModel pvt = em.find(PatientVisitModel.class, pvtId);
@@ -110,21 +155,10 @@ public class ChartEventServiceBean {
             }
         }
 
-        // クライアントに通知
-        notifyEvent(msg);
-
-        return 1;
     }
 
     public void start() {
-        setupServerUUID();
         initializePvtList();
-    }
-    
-    // serverUUIDを設定する
-    private void setupServerUUID() {
-        String uuid = UUID.randomUUID().toString();
-        contextHolder.setServerUUID(uuid);
     }
     
     // 起動後最初のPvtListを作る

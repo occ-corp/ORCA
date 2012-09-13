@@ -229,26 +229,20 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             if (exist != null) {
                 em.remove(exist);
             }
+
             // pvtListから削除
             List<PatientVisitModel> pvtList = eventServiceBean.getPvtList(fid);
+            PatientVisitModel toRemove = null;
             for (PatientVisitModel model : pvtList) {
                 if (model.getId() == id) {
-                    pvtList.remove(model);
+                    toRemove = model;
                     break;
                 }
             }
-/*
-            // クライアントに通知
-            // msgを作成
-            StateMsgModel msg = new StateMsgModel();
-            msg.setPvtPk(id);
-            msg.setFacilityId(fid);
-            msg.setIssuerUUID(null);
-            msg.setCommand(StateMsgModel.CMD.PVT_DELETE);
-            stateServiceBean.notifyEvent(msg);
-*/
-            return 1;
-
+            if (toRemove != null) {
+                pvtList.remove(toRemove);
+                return 1;
+            }
         } catch (Exception e) {
         }
         return 0;
