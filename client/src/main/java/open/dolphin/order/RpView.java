@@ -92,6 +92,7 @@ public class RpView extends AbstractOrderView {
         cmdPanel2.add(usageCombo);
         cmdPanel2.add(new JSeparator(JSeparator.VERTICAL));
         cbHoukatsu = new JCheckBox("包括");
+        cbHoukatsu.setToolTipText("院内処方で包括にする場合に選択します。");
         cmdPanel2.add(cbHoukatsu);
         cbNoCharge = new JCheckBox("調無");
         cbNoCharge.setToolTipText("入院処方で調剤料を算定しない場合に選択します。");
