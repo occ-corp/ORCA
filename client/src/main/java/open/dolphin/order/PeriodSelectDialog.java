@@ -1,10 +1,13 @@
 package open.dolphin.order;
 
+import java.awt.Color;
+import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.GregorianCalendar;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -25,7 +28,7 @@ public class PeriodSelectDialog extends JDialog {
         connect();
     }
     
-    public String getValeu() {
+    public String getValue() {
         return value;
     }
     
@@ -45,6 +48,7 @@ public class PeriodSelectDialog extends JDialog {
         for (int i = 0; i < tblModel.getColumnCount(); ++i) {
             table.getColumnModel().getColumn(i).setPreferredWidth(30);
         }
+        table.setDefaultRenderer(Object.class, new PeriodTableRenderer());
         panel.add(table);
         
         JPanel btnPanel = new JPanel();
@@ -58,41 +62,50 @@ public class PeriodSelectDialog extends JDialog {
         setModal(true);
     }
     
+    // わけわかんねーｗ　/1-3,5,7のようなフォーマットにする。
     private void construct() {
         
         StringBuilder sb = new StringBuilder();
         sb.append("/");
         
         int[] columns = table.getSelectedColumns();
-
-        int topOfSeq=  -1;
         int len = table.getModel().getColumnCount();
+        int topOfSeq=  -1;
+        boolean first = true;
+        
         for (int i = 0; i < len; ++i) {
+            
             boolean found = false;
-            for(int j = 0; j < columns.length; ++j) {
+            for (int j = 0; j < columns.length; ++j) {
                 if (i == columns[j]) {
                     found = true;
                 }
             }
+
             if (found) {
-                if (topOfSeq == -1 || i == len - 1) {
-                    String str = (String) table.getModel().getValueAt(0, i);
-                    sb.append(str);
-                    topOfSeq = i;
-                }
-            } else {
-                if (topOfSeq != -1) {
-                    if (i - topOfSeq > 1) {
-                        sb.append("-");
-                        String str = (String) table.getModel().getValueAt(0, i -1);
-                        sb.append(str);
+                String str = (String) table.getModel().getValueAt(0, i);
+                if (topOfSeq == -1) {
+                    if (first) {
+                        first = false;
                     } else {
                         sb.append(",");
-                        topOfSeq = -1;
                     }
+                    sb.append(str);
+                    topOfSeq = i;
+                } else if (i == len - 1) {
+                    sb.append("-");
+                    sb.append(str);
                 }
+            } else {
+                if (topOfSeq != -1 && i - topOfSeq > 1) {
+                    String str = (String) table.getModel().getValueAt(0, i - 1);
+                    sb.append("-");
+                    sb.append(str);
+                }
+                topOfSeq = -1;
             }
         }
+        
         value = sb.toString();
     }
     
@@ -117,6 +130,7 @@ public class PeriodSelectDialog extends JDialog {
     }
     
     private DefaultTableModel createTableModel() {
+        
         GregorianCalendar gc = new GregorianCalendar();
         int today = gc.get(GregorianCalendar.DAY_OF_MONTH);
         int dayOfWeek = gc.get(GregorianCalendar.DAY_OF_WEEK);
@@ -130,6 +144,7 @@ public class PeriodSelectDialog extends JDialog {
             obj[1][i] = getDayOfWeek(i + dayOfWeek);
         }
         DefaultTableModel tblModel = new DefaultTableModel(obj, header);
+        
         return tblModel;
     }
     
@@ -154,4 +169,24 @@ public class PeriodSelectDialog extends JDialog {
         return null;
     }
     
+    private class PeriodTableRenderer extends DefaultTableCellRenderer {
+
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
+            String dayOfWeek = (String) table.getModel().getValueAt(1, column);
+            if ("土".equals(dayOfWeek)) {
+                setForeground(Color.BLUE);
+            } else if ("日".equals(dayOfWeek)) {
+                setForeground(Color.RED);
+            } else {
+                setForeground(Color.BLACK);
+            }
+
+            return this;
+        }
+    }
 }

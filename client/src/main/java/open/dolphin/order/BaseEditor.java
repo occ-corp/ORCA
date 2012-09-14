@@ -3,6 +3,8 @@ package open.dolphin.order;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -345,7 +347,7 @@ public final class BaseEditor extends AbstractStampEditor {
 
         // Info Label
         view.getInfoLabel().setText(this.getInfo());
-
+        
         //------------------------------------------
         // セットテーブルを生成する
         //------------------------------------------
@@ -514,6 +516,32 @@ public final class BaseEditor extends AbstractStampEditor {
                 doSearch(REGEXP_COMMENT_ALL, TT_CODE_SEARCH);
             }
 
+        });
+        
+        // 数量フィールドに期間入力ポップアップを付ける
+        view.getNumberField().addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            private void mabeShowPopup(MouseEvent e) {
+                if (isAdmission() && e.isPopupTrigger()) {
+                    PeriodSelectDialog dialog = new PeriodSelectDialog();
+                    dialog.setLocationRelativeTo(view);
+                    dialog.pack();
+                    dialog.setVisible(true);
+                    String value = dialog.getValue();
+                    dialog.dispose();
+                    view.getNumberField().setText(value);
+                }
+            }
         });
         
         // 共通の設定

@@ -401,30 +401,7 @@ public final class InjectionEditor extends AbstractStampEditor {
                 });
             }
         });
-        view.getNumberField().addMouseListener(new MouseAdapter() {
 
-            @Override
-            public void mousePressed(MouseEvent e) {
-                mabeShowPopup(e);
-            }
-
-            @Override
-            public void mouseReleased(MouseEvent e) {
-                mabeShowPopup(e);
-            }
-
-            private void mabeShowPopup(MouseEvent e) {
-                if (e.isPopupTrigger()) {
-                    PeriodSelectDialog dialog = new PeriodSelectDialog();
-                    dialog.setLocation(e.getPoint());
-                    dialog.setLocationRelativeTo(view);
-                    
-                    dialog.pack();
-                    dialog.setVisible(true);
-                }
-            }
-        });
-        
         //------------------------------------------
         // セットテーブルを生成する
         //------------------------------------------
@@ -575,6 +552,32 @@ public final class InjectionEditor extends AbstractStampEditor {
                 doSearch(REGEXP_COMMENT_ALL, TT_CODE_SEARCH);
             }
 
+        });
+        
+        // 数量フィールドに期間入力ポップアップを付ける
+        view.getNumberField().addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            private void mabeShowPopup(MouseEvent e) {
+                if (isAdmission() && e.isPopupTrigger()) {
+                    PeriodSelectDialog dialog = new PeriodSelectDialog();
+                    dialog.setLocationRelativeTo(view);
+                    dialog.pack();
+                    dialog.setVisible(true);
+                    String value = dialog.getValue();
+                    dialog.dispose();
+                    view.getNumberField().setText(value);
+                }
+            }
         });
 //masuda$
         

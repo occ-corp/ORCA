@@ -3,6 +3,8 @@ package open.dolphin.order;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
@@ -307,7 +309,7 @@ public final class RadEditor extends AbstractStampEditor {
 
         // Info Label
         view.getInfoLabel().setText(this.getInfo());
-
+        
         //------------------------------------------
         // セットテーブルを生成する
         //------------------------------------------
@@ -466,10 +468,36 @@ public final class RadEditor extends AbstractStampEditor {
         });
         // スタンプ名フィールド
         view.getStampNameField().addFocusListener(AutoKanjiListener.getInstance());
-        // コメントフィールド
         
+        // コメントフィールド
 //masuda^   復活
         view.getCommentField().addFocusListener(AutoKanjiListener.getInstance());
+        
+        // 数量フィールドに期間入力ポップアップを付ける
+        view.getNumberField().addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            private void mabeShowPopup(MouseEvent e) {
+                if (isAdmission() && e.isPopupTrigger()) {
+                    PeriodSelectDialog dialog = new PeriodSelectDialog();
+                    dialog.setLocationRelativeTo(view);
+                    dialog.pack();
+                    dialog.setVisible(true);
+                    String value = dialog.getValue();
+                    dialog.dispose();
+                    view.getNumberField().setText(value);
+                }
+            }
+        });
 //masuda$
         
         // 共通の設定

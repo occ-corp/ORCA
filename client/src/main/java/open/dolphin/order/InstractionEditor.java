@@ -383,7 +383,7 @@ public final class InstractionEditor extends AbstractStampEditor {
 
         // Info Label
         view.getInfoLabel().setText(this.getInfo());
-
+        
         //------------------------------------------
         // セットテーブルを生成する
         //------------------------------------------
@@ -533,6 +533,32 @@ public final class InstractionEditor extends AbstractStampEditor {
 //        // コメントフィールド
 //masuda^   ↓復活
         view.getCommentField().addFocusListener(AutoKanjiListener.getInstance());
+        
+        // 数量フィールドに期間入力ポップアップを付ける
+        view.getNumberField().addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            private void mabeShowPopup(MouseEvent e) {
+                if (isAdmission() && e.isPopupTrigger()) {
+                    PeriodSelectDialog dialog = new PeriodSelectDialog();
+                    dialog.setLocationRelativeTo(view);
+                    dialog.pack();
+                    dialog.setVisible(true);
+                    String value = dialog.getValue();
+                    dialog.dispose();
+                    view.getNumberField().setText(value);
+                }
+            }
+        });
 //masuda$
         
         // 共通の設定
