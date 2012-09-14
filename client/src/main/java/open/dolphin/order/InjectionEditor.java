@@ -575,7 +575,9 @@ public final class InjectionEditor extends AbstractStampEditor {
                     dialog.setVisible(true);
                     String value = dialog.getValue();
                     dialog.dispose();
-                    view.getNumberField().setText(value);
+                    if (value != null && !value.isEmpty()) {
+                        view.getNumberField().setText(value);
+                    }
                 }
             }
         });
