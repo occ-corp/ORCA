@@ -10,8 +10,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
 
 /**
- *
- * @author masuda
+ * 入院診療行為の回数と実施日を入力するダイアログ
+ * @author masuda, Masuda Naika
  */
 public class PeriodSelectDialog extends JDialog {
     
@@ -185,6 +185,8 @@ public class PeriodSelectDialog extends JDialog {
                 JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+            
+            this.setHorizontalAlignment(JLabel.CENTER);
             
             String dayOfWeek = (String) table.getModel().getValueAt(1, column);
             if ("土".equals(dayOfWeek)) {
