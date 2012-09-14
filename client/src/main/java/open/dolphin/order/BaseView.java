@@ -68,9 +68,10 @@ public class BaseView extends AbstractOrderView {
         btn_comment.setIcon(ClientContext.getImageIcon("sinfo_16.gif"));
         btn_comment.setToolTipText("コメントコードを検索します。");
         cmdPanel2.add(btn_comment);
+        cmdPanel2.add(new JSeparator(JSeparator.VERTICAL));
         btn_classCode = new JButton();
         btn_classCode.setIcon(ClientContext.getImageIcon("favs_16.gif"));
-        btn_classCode.setToolTipText("診療行為区分を設定します。");
+        btn_classCode.setToolTipText("診療行為区分を強制指定します。");
         cmdPanel2.add(btn_classCode);
         inRadio = new JRadioButton("院内");
         inRadio.setToolTipText("院内処方の時選択します。");
