@@ -2,7 +2,6 @@ package open.dolphin.order;
 
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.GregorianCalendar;
@@ -20,6 +19,7 @@ public class PeriodSelectDialog extends JDialog {
     private JPanel panel;
     private JButton okBtn;
     private JButton cancelBtn;
+    private JSpinner spinner;
     
     private String value;
     
@@ -52,9 +52,16 @@ public class PeriodSelectDialog extends JDialog {
         panel.add(table);
         
         JPanel btnPanel = new JPanel();
-        btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.X_AXIS));
+        JLabel lbl = new JLabel("数量");
+        spinner = new JSpinner();
+        SpinnerNumberModel snm = new SpinnerNumberModel(1, 1, 10, 1);
+        spinner.setModel(snm);
         cancelBtn = new JButton("取消");
         okBtn = new JButton("確定");
+        btnPanel.add(lbl);
+        btnPanel.add(spinner);
+        btnPanel.add(Box.createHorizontalGlue());
         btnPanel.add(cancelBtn);
         btnPanel.add(okBtn);
         panel.add(btnPanel);
@@ -62,10 +69,12 @@ public class PeriodSelectDialog extends JDialog {
         setModal(true);
     }
     
-    // わけわかんねーｗ　/1-3,5,7のようなフォーマットにする。
+    // わけわかんねーｗ　'*1/1-3,5,7'のようなフォーマットにする。
     private void construct() {
         
         StringBuilder sb = new StringBuilder();
+        sb.append("*");
+        sb.append(String.valueOf(spinner.getValue()));
         sb.append("/");
         
         int[] columns = table.getSelectedColumns();

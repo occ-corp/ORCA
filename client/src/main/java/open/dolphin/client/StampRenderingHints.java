@@ -182,10 +182,10 @@ public class StampRenderingHints {
         // バンドル数量
         String bundleNum = model.getBundleNumber();
         // 入院対応
-        if (bundleNum != null && bundleNum.startsWith("/")) {
+        if (bundleNum != null && bundleNum.startsWith("*")) {
             sb.append(TR_S);
             sb.append(TD_COLSPAN3);
-            sb.append("・施行日：").append(bundleNum.substring(1)).append("日");
+            sb.append(parseBundleNum(bundleNum));
             sb.append(TD_E);
             sb.append(TR_E);
         } else if (bundleNum != null && !"1".equals(bundleNum)) {
@@ -201,7 +201,7 @@ public class StampRenderingHints {
         
         return sb.toString();
     }
-    
+
     // その他スタンプのhtmlを取得する
     private String getBundleDolphinHtml(ModuleModel stamp) {
         
@@ -251,10 +251,10 @@ public class StampRenderingHints {
         
         // バンドル数量
         String bundleNum = model.getBundleNumber();
-        if (bundleNum != null && bundleNum.startsWith("/")) {
+        if (bundleNum != null && bundleNum.startsWith("*")) {
             sb.append(TR_S);
             sb.append(TD_COLSPAN3);
-            sb.append("・施行日：").append(bundleNum.substring(1)).append("日");
+            sb.append(parseBundleNum(bundleNum));
             sb.append(TD_E);
             sb.append(TR_E);
         } else  if (bundleNum != null && !"1".equals(bundleNum)) {
@@ -268,6 +268,21 @@ public class StampRenderingHints {
         // End of StampHolder
         sb.append(END_OF_HTML);
         
+        return sb.toString();
+    }
+
+    private String parseBundleNum(String str) {
+        
+        str = str.substring(1);
+        int len = str.length();
+        int pos = str.indexOf("/");
+        StringBuilder sb = new StringBuilder();
+        sb.append("回数：");
+        sb.append(str.substring(0, pos));
+        sb.append("　実施日：");
+        sb.append(str.substring(pos + 1, len));
+        sb.append("日");
+
         return sb.toString();
     }
 //masuda$

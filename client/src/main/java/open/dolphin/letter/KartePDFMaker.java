@@ -301,7 +301,21 @@ public class KartePDFMaker extends AbstractPDFMaker {
 
         return sb.toString();
     }
+    
+    private String parseBundleNum(String str) {
+        
+        int len = str.length();
+        int pos = str.indexOf("/");
+        StringBuilder sb = new StringBuilder();
+        sb.append("回数：");
+        sb.append(str.substring(0, pos));
+        sb.append(" 実施日：");
+        sb.append(str.substring(pos + 1, len));
+        sb.append("日");
 
+        return sb.toString();
+    }
+    
     private class KarteTable extends PdfPTable {
 
         private int col;    // カラム数
@@ -610,8 +624,8 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     table.addCell(createStampCell(model.getItemNames(), 3, false));
                     // bundleNumber
                     String number = model.getBundleNumber();
-                    if (number != null && number.startsWith("/")) {
-                        String str = "・施行日：" + number.substring(1) + "日";
+                    if (number != null && number.startsWith("*")) {
+                        String str = parseBundleNum(number);
                         table.addCell(createStampCell(str, 3, false));
                     } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));
@@ -677,8 +691,8 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     }
                     // bundleNumber
                     String number = model.getBundleNumber();
-                    if (number != null && number.startsWith("/")) {
-                        String str = "・施行日：" + number.substring(1) + "日";
+                    if (number != null && number.startsWith("*")) {
+                        String str = parseBundleNum(number);
                         table.addCell(createStampCell(str, 3, false));
                     } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));

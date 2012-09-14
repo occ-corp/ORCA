@@ -40,7 +40,7 @@ public class InstractionView extends AbstractOrderView {
         cmdPanel1.add(stampNameField);
         cmdPanel1.add(new JLabel("数量・施行日"));
         numberField = new JTextField("1", 10);
-        numberField.setToolTipText("入院手技の場合は施行日を'/1-3,5'の形式で入力します。");
+        numberField.setToolTipText("入院手技の場合は施行日を'*2/1-3,5'の形式で入力します。");
         cmdPanel1.add(numberField);
         cmdPanel1.add(new JLabel("メモ"));
         commentField = new JTextField(TEXTFIELD_WIDTH);

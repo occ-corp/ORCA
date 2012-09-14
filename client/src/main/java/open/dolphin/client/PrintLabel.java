@@ -224,8 +224,8 @@ public class PrintLabel {
             }
             // 入院注射、施行日
             String bundleNum = bundle.getBundleNumber();
-            if (bundleNum.startsWith("/")) {
-                String itemName = "施行日：" + bundleNum.substring(1) + "日";
+            if (bundleNum.startsWith("*")) {
+                String itemName =parseBundleNum(bundleNum);
                 lineData.add(new LineModel(itemName, "", "　"));
             }
         } else {
@@ -248,6 +248,20 @@ public class PrintLabel {
                 }
             }
         }
+    }
+    
+    private String parseBundleNum(String str) {
+        
+        int len = str.length();
+        int pos = str.indexOf("/");
+        StringBuilder sb = new StringBuilder();
+        sb.append("回数：");
+        sb.append(str.substring(0, pos));
+        sb.append(" 実施日：");
+        sb.append(str.substring(pos + 1, len));
+        sb.append("日");
+
+        return sb.toString();
     }
 
     private String buildPrintString() {

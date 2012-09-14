@@ -173,9 +173,12 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             Map.Entry entry = (Map.Entry) itr.next();
             KarteViewer viewer = (KarteViewer) entry.getValue();
             viewer.stop();
-            viewer = null;
         }
+        
+        karteViewerMap.clear();
         karteViewerMap = null;
+        viewerList.clear();
+        viewerList = null;
 
         // ScrollerPanelの後片付け
         scrollerPanel.dispose();
