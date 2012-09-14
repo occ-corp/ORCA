@@ -3,6 +3,8 @@ package open.dolphin.order;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
@@ -397,6 +399,29 @@ public final class InjectionEditor extends AbstractStampEditor {
                         view.getNumberField().requestFocusInWindow();
                     }
                 });
+            }
+        });
+        view.getNumberField().addMouseListener(new MouseAdapter() {
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                mabeShowPopup(e);
+            }
+
+            private void mabeShowPopup(MouseEvent e) {
+                if (e.isPopupTrigger()) {
+                    PeriodSelectDialog dialog = new PeriodSelectDialog();
+                    dialog.setLocation(e.getPoint());
+                    dialog.setLocationRelativeTo(view);
+                    
+                    dialog.pack();
+                    dialog.setVisible(true);
+                }
             }
         });
         
