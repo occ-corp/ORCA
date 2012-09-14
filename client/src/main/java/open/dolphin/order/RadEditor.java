@@ -13,10 +13,10 @@ import open.dolphin.client.DefaultCellEditor2;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.ListTableModel;
-import open.dolphin.util.ZenkakuUtils;
 
 /**
- *
+ * RadEditor
+ * 
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
@@ -156,13 +156,16 @@ public final class RadEditor extends AbstractStampEditor {
         bundle.setClassCodeSystem(getClassCodeId());
         // 上記テーブルで定義されている診療行為の名称
         bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
-        // バンドルメモ復活
+        
+        // バンドル数を設定
+        String bundleNum =  view.getNumberField().getText().trim();
+        bundle.setBundleNumber(bundleNum);
+        
+         // バンドルメモ復活
         String memo = view.getCommentField().getText();
         if (!memo.equals("")) {
             bundle.setMemo(memo);
-        }
-        // バンドル数
-        bundle.setBundleNumber((String) view.getNumberCombo().getSelectedItem());
+        }       
 
         retModel.setModel((InfoModel) bundle);
 
@@ -178,12 +181,9 @@ public final class RadEditor extends AbstractStampEditor {
             return;
         }
 
-        // 数量コンボでバンドル数を選択する
+        // バンドル数を数量フィールドへ設定する
         String number = bundle.getBundleNumber();
-        if (number != null && (!number.equals(""))) {
-            number = ZenkakuUtils.toHalfNumber(number);
-            view.getNumberCombo().setSelectedItem(number);
-        }
+        view.getNumberField().setText(number);
         
         // メモ復活
         String memo = bundle.getMemo();

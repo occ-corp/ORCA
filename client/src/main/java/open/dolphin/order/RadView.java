@@ -12,7 +12,7 @@ public class RadView extends AbstractOrderView {
     
     private JCheckBox techCheck;
     private JCheckBox partCheck;
-    private JComboBox numberCombo;
+    private JTextField numberField;
     private JButton partBtn;
     private JButton zairyoBtn;
     private JButton shugiBtn;
@@ -41,10 +41,10 @@ public class RadView extends AbstractOrderView {
         // コマンドパネル上部
         cmdPanel1.add(nameFieldLabel);
         cmdPanel1.add(stampNameField);
-        cmdPanel1.add(new JLabel("数量"));
-        numberCombo = new JComboBox(new String[]{"1", "2", "3","4", "5", "6","7", "8", "9","10"});
-        fixComponentSize(numberCombo);
-        cmdPanel1.add(numberCombo);
+        cmdPanel1.add(new JLabel("数量・施行日"));
+        numberField = new JTextField("1", 10);
+        numberField.setToolTipText("入院手技の場合は施行日を'/1-3,5'の形式で入力します。");
+        cmdPanel1.add(numberField);
         cmdPanel1.add(new JLabel("メモ"));
         commentField = new JTextField(TEXTFIELD_WIDTH);
         fixComponentSize(commentField);
@@ -79,8 +79,8 @@ public class RadView extends AbstractOrderView {
     public JCheckBox getTechCheck() {
         return techCheck;
     }
-    public JComboBox getNumberCombo() {
-        return numberCombo;
+    public JTextField getNumberField() {
+        return numberField;
     }
     public JTextField getCommentField() {
         return commentField;

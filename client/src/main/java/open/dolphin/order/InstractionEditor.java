@@ -14,7 +14,6 @@ import open.dolphin.client.DefaultCellEditor2;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.ListTableModel;
-import open.dolphin.util.ZenkakuUtils;
 
 /**
  *
@@ -168,89 +167,84 @@ public final class InstractionEditor extends AbstractStampEditor {
         // セットテーブルのマスターアイテムを取得する
         List<MasterItem> itemList = tableModel.getDataProvider();
 
+        // 診療行為区分
+        String c007 = null;
         // 診療行為があるかどうかのフラグ
         boolean found = false;
-
+        
         for (MasterItem masterItem : itemList) {
 
             ClaimItem item = masterToClaimItem(masterItem);
 
-            // 診区を設定する
-            // 最初に見つかった手技の診区をあとで ClaimBundle に設定する
+            // 在宅料の場合は薬剤・材料・加算料（院内・院外)に応じてClassCodeを設定
+            // 指導料でない場合が、在宅料
+            if (!found 
+                    && masterItem.getClaimClassCode() != null 
+                    && !masterItem.getClaimClassCode().startsWith(ClaimConst.RECEIPT_CODE_SHIDOU_START)) {
 
-            if (!found) {
-                // 在宅料の場合は薬剤・材料・加算料（院内・院外)に応じてClassCodeを設定
-                String claimClassCode = masterItem.getClaimClassCode();
-                // 指導料でない場合が、在宅料
-                if (claimClassCode != null && !claimClassCode.startsWith(ClaimConst.RECEIPT_CODE_SHIDOU_START)) {
-
-                    boolean bOut = view.getOutRadio().isSelected();
-                    int clsCode = masterItem.getClassCode();    //手技・材料・薬剤・用法・部位etc
-                    String c007 = null;
-                    if (clsCode == ClaimConst.YAKUZAI) {
-                        c007 = bOut 
-                                ? ClaimConst.RECEIPT_CODE_ZAITAKU_YAKUZAI_EXT 
-                                : ClaimConst.RECEIPT_CODE_ZAITAKU_YAKUZAI_IN;
+                boolean bOut = view.getOutRadio().isSelected();
+                int clsCode = masterItem.getClassCode();    //手技・材料・薬剤・用法・部位etc
+                if (clsCode == ClaimConst.YAKUZAI) {
+                    c007 = bOut
+                            ? ClaimConst.RECEIPT_CODE_ZAITAKU_YAKUZAI_EXT
+                            : ClaimConst.RECEIPT_CODE_ZAITAKU_YAKUZAI_IN;
+                    found = true;
+                } else if (clsCode == ClaimConst.ZAIRYO) {
+                    c007 = bOut
+                            ? ClaimConst.RECEIPT_CODE_ZAITAKU_ZAIRYO_EXT
+                            : ClaimConst.RECEIPT_CODE_ZAITAKU_ZAIRYO_IN;
+                    found = true;
+                } else if (clsCode == ClaimConst.OTHER || clsCode == ClaimConst.SYUGI) {
+                    if (ClaimConst.DATAKBN_KASAN_SHUGI.equals(masterItem.getDataKbn())) {
+                        c007 = ClaimConst.RECEIPT_CODE_ZAITAKU_KASAN;
                         found = true;
-                    } else if (clsCode == ClaimConst.ZAIRYO) {
-                        c007 = bOut 
-                                ? ClaimConst.RECEIPT_CODE_ZAITAKU_ZAIRYO_EXT 
-                                : ClaimConst.RECEIPT_CODE_ZAITAKU_ZAIRYO_IN;
+                    } else {
+                        c007 = ClaimConst.RECEIPT_CODE_ZAITAKU;
                         found = true;
-                    } else if (clsCode == ClaimConst.OTHER || clsCode == ClaimConst.SYUGI) {
-                        if (ClaimConst.DATAKBN_KASAN_SHUGI.equals(masterItem.getDataKbn())) {
-                            c007 = ClaimConst.RECEIPT_CODE_ZAITAKU_KASAN;
-                            found = true;
-                        } else {
-                            c007 = ClaimConst.RECEIPT_CODE_ZAITAKU;
-                            found = true;
-                        }
-                    }
-                    if (c007 != null) {
-                        setClassCode(c007);
-                        //bundle.setMemo(MMLTable.getClaimClassCodeName(c007));
-                        view.getCommentField().setText(MMLTable.getClaimClassCodeName(c007));
                     }
                 }
-
-            }
-
-            if ((masterItem.getClassCode() == ClaimConst.SYUGI) && (!found)) {
-
-                // 集計先をマスタアイテム自体へ持たせている
-                String c007 = getClaim007Code(masterItem.getClaimClassCode());
                 if (c007 != null) {
-                    setClassCode(c007);
+                    view.getCommentField().setText(MMLTable.getClaimClassCodeName(c007));
+                }
+            }
+            
+            // 最初に見つかった手技の診区をあとで ClaimBundle に設定する
+            if (!found && masterItem.getClassCode() == ClaimConst.SYUGI) {
+                // 集計先をマスタアイテム自体へ持たせている
+                c007 = getClaim007Code(masterItem.getClaimClassCode());
+                if (c007 != null) {
                     found = true;
                 }
             }
-
+            
             bundle.addClaimItem(item);
         }
+        
+        // 診療行為区分を設定する
+        if (c007 == null) {
+            c007 = (getClassCode() != null) ? getClassCode() : getImplied007();
+        }
+        if (c007 == null) {
+            c007 = ClaimConst.RECEIPT_CODE_OTHER;
+        }
+        if (c007 != null) {
+            bundle.setClassCode(c007);
+            // Claim007 固定の値
+            bundle.setClassCodeSystem(getClassCodeId());
+            // 上記テーブルで定義されている診療行為の名称
+            bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
+        }
+
+        // バンドル数を設定
+        String bundleNum =  view.getNumberField().getText().trim();
+        bundle.setBundleNumber(bundleNum);
 
         // バンドルメモ復活
         String memo = view.getCommentField().getText().trim();
         if (!memo.equals("")) {
             bundle.setMemo(memo);
         }
-
-        // 診療行為区分
-        String c007 = getClassCode()!=null ? getClassCode() : getImplied007();
-
-        if (c007 != null) {
-
-            bundle.setClassCode(c007);
-
-            // Claim007 固定の値
-            bundle.setClassCodeSystem(getClassCodeId());
-
-            // 上記テーブルで定義されている診療行為の名称
-            bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
-        }
-
-        // バンドル数
-        bundle.setBundleNumber((String) view.getNumberCombo().getSelectedItem());
-
+        
         retModel.setModel((InfoModel) bundle);
 
         return new ModuleModel[]{retModel};
@@ -265,12 +259,9 @@ public final class InstractionEditor extends AbstractStampEditor {
             return;
         }
 
-        // バンドル数を数量コンボへ設定する
+        // バンドル数を数量フィールドへ設定する
         String number = bundle.getBundleNumber();
-        if (number != null && (!number.trim().equals(""))) {
-            number = ZenkakuUtils.toHalfNumber(number.trim());
-            view.getNumberCombo().setSelectedItem(number);
-        }
+        view.getNumberField().setText(number);
         
         // メモ復活
         String memo = bundle.getMemo();

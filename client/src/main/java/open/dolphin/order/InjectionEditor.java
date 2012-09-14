@@ -135,10 +135,8 @@ public final class InjectionEditor extends AbstractStampEditor {
         List<MasterItem> itemList = tableModel.getDataProvider();
 
         // 診療行為があるかどうかのフラグ
-        boolean admission = isAdmission();
         boolean found = false;
-        String bundleNum =  view.getNumberField().getText().trim();
-        
+
         String c007 = null;
 
         for (MasterItem masterItem : itemList) {
@@ -158,34 +156,20 @@ public final class InjectionEditor extends AbstractStampEditor {
             bundle.addClaimItem(item);
         }
         
-        // バンドルメモ復活
-        String memo = view.getCommentField().getText().trim();
-        if (!memo.equals("")) {
-            bundle.setMemo(memo);
-        }
-
-        // バンドル数を設定
-        bundle.setBundleNumber(bundleNum);
-        
-        // 診療行為区分
+        // 診療行為区分を設定する
         if (c007 == null) {
+            // 入院で手技なしの場合はコンボボックスで指定されたものがgetClassCodeで取得できる
             c007 = (getClassCode() != null) ? getClassCode() : getImplied007();
         }
-        bundle.setClassCode(c007);
-
-        // Claim007 固定の値
-        bundle.setClassCodeSystem(getClassCodeId());
-        // 上記テーブルで定義されている診療行為の名称
-        bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
-
-        if (!admission) {
-            // 手技料なしの場合、再設定する 2010-10-27
-            String test = bundle.getClassCode();
+        if (c007 == null) {
+            c007 = ClaimConst.INJECTION_330;
+        }
+        // 外来で手技料なしの場合、再設定する 2010-10-27
+        if (!isAdmission()) {
+            String memo = view.getCommentField().getText().trim();
             // 手技料なしがチェックされている場合で皮下、静脈、点滴の場合
-            if (view.getNoChargeChk().isSelected() && isInjection(test)) {
-
-                test = test.substring(0, 2) + "1"; // 手技なしコードにする
-                bundle.setClassCode(test);
+            if (view.getNoChargeChk().isSelected() && isInjection(c007)) {
+                c007 = c007.substring(0, 2) + "1"; // 手技なしコードにする
                 // memoする
                 if (!text.contains(NO_CHARGE)) {
                     bundle.setMemo(memo + NO_CHARGE);
@@ -197,9 +181,25 @@ public final class InjectionEditor extends AbstractStampEditor {
                 } else {
                     bundle.setMemo(memo);
                 }
-                test = test.substring(0, 2) + "0";
-                bundle.setClassCode(test);
+                c007 = c007.substring(0, 2) + "0";
             }
+        }
+        if (c007 != null) {
+            bundle.setClassCode(c007);
+            // Claim007 固定の値
+            bundle.setClassCodeSystem(getClassCodeId());
+            // 上記テーブルで定義されている診療行為の名称
+            bundle.setClassName(MMLTable.getClaimClassCodeName(c007));
+        }
+
+        // バンドル数を設定
+        String bundleNum =  view.getNumberField().getText().trim();
+        bundle.setBundleNumber(bundleNum);
+        
+        // バンドルメモ復活
+        String memo = view.getCommentField().getText().trim();
+        if (!memo.equals("")) {
+            bundle.setMemo(memo);
         }
         
         retModel.setModel((InfoModel) bundle);
@@ -382,11 +382,12 @@ public final class InjectionEditor extends AbstractStampEditor {
         // Info Label
         view.getInfoLabel().setText(this.getInfo());
         
-       // 入院診療行為
+       // 入院注射区分指示
         view.getShugiCmb().addActionListener(new ActionListener(){
 
             @Override
             public void actionPerformed(ActionEvent e) {
+                // 選択されたClaimClassCodeを保存する。あとで使う
                 setClassCode(view.getSelectedClassCode());
                 view.getNumberField().setText("/");
                 SwingUtilities.invokeLater(new Runnable() {
