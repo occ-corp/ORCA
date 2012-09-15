@@ -4,8 +4,8 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridLayout;
 import java.awt.Window;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.beans.EventHandler;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -20,31 +20,31 @@ import open.dolphin.project.Project;
 /**
  * SaveDialog
  *
- * @author  Kazushi Minagawa, Digital Globe, Inc.
+ * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 public final class SaveDialog {
     
-    private static final String[] PRINT_COUNT = {
-        "0", "1",  "2",  "3",  "4", "5"
-    };
-    
+    private static final String[] PRINT_COUNT 
+            = {"0", "1",  "2",  "3",  "4", "5"};
     private static final String[] TITLE_LIST = {"経過記録", "処方", "処置", "検査", "画像", "指導"};
-    
     private static final String TITLE = "ドキュメント保存";
     private static final String SAVE = "保存";
     private static final String TMP_SAVE = "仮保存";
     
-    private JCheckBox patientCheck;
-    private JCheckBox clinicCheck;
+    private Window parent;
+    // ダイアログ
+    private JDialog dialog;
     
     // 保存ボタン
     private JButton okButton;
-    
     // キャンセルボタン
     private JButton cancelButton;
-    
     // 仮保存ボタン
     private JButton tmpButton;
+    
+    private JCheckBox patientCheck;
+    private JCheckBox clinicCheck;
     
     private JTextField titleField;
     private JComboBox titleCombo;
@@ -53,49 +53,24 @@ public final class SaveDialog {
     
     // CLAIM 送信
     private JCheckBox sendClaim;
-
     // LabTest 送信
     private JCheckBox sendLabtest;
     
-    // 戻り値のSaveParams/
+    // 戻り値のSaveParams
     private SaveParams value;
     
-    // ダイアログ
-    private JDialog dialog;
-    
-//masuda^
     // 保存日変更関連
     private JTextField dateField;
     private JCheckBox cb_dateEnable;
-    private Window parent;
+
+    // 入力値のSaveParams
     private SaveParams saveParams;
     // 退院日登録
     private JCheckBox cb_registEndDate;
-//masuda$
-    
-    /** 
-     * Creates new OpenKarteDialog  
-     */
+
+
     public SaveDialog(Window parent) {
-        
-//masuda^
         this.parent = parent;
-/*
-        JPanel contentPanel = createComponent();
-        
-        Object[] options = new Object[]{okButton, tmpButton, cancelButton};
-        
-        JOptionPane jop = new JOptionPane(
-                contentPanel,
-                JOptionPane.PLAIN_MESSAGE,
-                JOptionPane.DEFAULT_OPTION,
-                null,
-                options,
-                okButton);
-        
-        dialog = jop.createDialog(parent, ClientContext.getFrameTitle(TITLE));
-*/
-//masuda$
     }
     
     public void start() {
@@ -111,8 +86,9 @@ public final class SaveDialog {
      */
     public void setValue(SaveParams params) {
         
-//masuda^   コンストラクタから移動
         saveParams = params;
+        // 確定日を設定
+        saveParams.setConfirmed(new Date());
 
         JPanel contentPanel = createComponent();
 
@@ -127,27 +103,20 @@ public final class SaveDialog {
                 okButton);
 
         dialog = jop.createDialog(parent, ClientContext.getFrameTitle(TITLE));
-//masuda$
         
         // Titleを表示する
-//masuda^   修正元のタイトルもコンボボックスに入れる   
+        // 修正元のタイトルもコンボボックスに入れる   
         String[] titles = new String[]{params.getOldTitle(), params.getTitle()};
         for (String str : titles) {
             if (str != null && (!str.equals("") && (!str.equals("経過記録")))) {
                 titleCombo.insertItemAt(str, 0);
             }
         }
-        String val = null;
-        //String val = params.getTitle();
-        //if (val != null && (!val.equals("") &&(!val.equals("経過記録")))) {
-        //    titleCombo.insertItemAt(val, 0);
-        //}
-//masuda$         
         titleCombo.setSelectedIndex(0);
         
         // 診療科を表示する
         // 受付情報からの診療科を設定する
-        val = params.getDepartment();
+        String val = params.getDepartment();
         if (val != null) {
             String[] depts = val.split("\\s*,\\s*");
             if (depts[0] != null) {
@@ -199,14 +168,6 @@ public final class SaveDialog {
         sendLabtest.setSelected(params.isSendLabtest() && params.isHasLabtest());
         sendLabtest.setEnabled((send && params.isHasLabtest()));
         
-//masuda^
-        // デフォルトの保存日（現在）をセット
-        if (dateField != null) {
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-            String dateStr = frmt.format(params.getKarteDate());
-            dateField.setText(dateStr);
-        }
-//masuda$
         checkTitle();
     }
 
@@ -269,14 +230,18 @@ public final class SaveDialog {
         
 //masuda^
         // 新規カルテの場合は保存日変更パネルを追加
-        if (saveParams.getKarteDate() != null) {
+        if (!saveParams.isModify()) {
+            // デフォルトの保存日（現在）をセット
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
+            String dateStr = frmt.format(saveParams.getConfirmed());
             dateField = new JTextField(12);
-
+            dateField.setText(dateStr);
             dateField.addFocusListener(AutoRomanListener.getInstance());
             int[] range = {-12, 2};
             PopupListener pl = new PopupListener(dateField, range);
-            cb_dateEnable = new JCheckBox("保存日変更:");
+
             JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
+            cb_dateEnable = new JCheckBox("保存日変更:");
             cb_dateEnable.addItemListener(new java.awt.event.ItemListener() {
 
                 @Override
@@ -289,6 +254,7 @@ public final class SaveDialog {
             p2.add(dateField);
             content.add(p2);
         }
+        
         // 退院日登録するか
         if (saveParams.isInHospital()) {
             cb_registEndDate = new JCheckBox("退院日登録する");
@@ -323,165 +289,48 @@ public final class SaveDialog {
         // OK button
         okButton = new JButton(SAVE);
         okButton.setToolTipText("診療行為の送信はチェックボックスに従います。");
-        okButton.addActionListener(EventHandler.create(ActionListener.class, this, "doOk"));
+        okButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // 戻り値のSaveparamsを生成する
+                value = viewToModel(false);
+                if (value != null) {
+                    close();
+                }
+            }
+        });
         okButton.setEnabled(false);
         
         // Cancel Button
         String buttonText =  (String)UIManager.get("OptionPane.cancelButtonText");
         cancelButton = new JButton(buttonText);
-        cancelButton.addActionListener(EventHandler.create(ActionListener.class, this, "doCancel"));
+        cancelButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                value = null;
+                close();
+            }
+        });
         
         // 仮保存 button
         tmpButton = new JButton(TMP_SAVE);
         tmpButton.setToolTipText("診療行為は送信しません。");
-        tmpButton.addActionListener(EventHandler.create(ActionListener.class, this, "doTemp"));
+        tmpButton.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                // 戻り値のSaveparamsを生成する
+                value = viewToModel(true);
+                if (value != null) {
+                    close();
+                }
+            }
+        });
         tmpButton.setEnabled(false);
         
         return content;
-    }
-    
-    /**
-     * タイトルフィールドの有効性をチェックする。
-     */
-    public void checkTitle() {    
-        boolean enabled = !titleField.getText().trim().isEmpty();
-        okButton.setEnabled(enabled);
-        tmpButton.setEnabled(enabled);
-    }
-    
-    
-    /**
-     * GUIコンポーネントから値を取得し、saveparamsに設定する。
-     */
-    public void doOk() {
-        
-        // 戻り値のSaveparamsを生成する
-        value = new SaveParams();
-        
-        // 文書タイトルを取得する
-        String val = (String) titleCombo.getSelectedItem();
-        if (! val.equals("")) {
-            value.setTitle(val);
-        } else {
-            value.setTitle("経過記録");
-        }
-        
-        // Department
-        val = departmentLabel.getText();
-        value.setDepartment(val);
-        
-        // 印刷部数を取得する
-        int count = Integer.parseInt((String)printCombo.getSelectedItem());
-        value.setPrintCount(count);
-        
-        //-------------------
-        // CLAIM 送信
-        //-------------------
-        value.setSendClaim(sendClaim.isSelected());
-        
-        // 患者への参照許可を取得する
-        boolean b = patientCheck.isSelected();
-        value.setAllowPatientRef(b);
-        
-        // 診療歴のある施設への参照許可を設定する
-        b = clinicCheck.isSelected();
-        value.setAllowClinicRef(b);
-
-        //-------------------
-        // LabTest 送信
-        //-------------------
-        value.setSendLabtest(sendLabtest.isSelected());
-        
-//masuda^
-        // 保存日を保存
-        if (dateField != null) {
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-            try {
-                Date karteDate = frmt.parse(dateField.getText().trim());
-                value.setKarteDate(karteDate);
-            } catch (ParseException ex) {
-                return;
-            }
-        }
-        // 退院日登録フラッグを設定
-        if (cb_registEndDate != null && cb_registEndDate.isSelected()) {
-            value.setRegistEndDate(cb_registEndDate.isSelected());
-        }
-//masuda$
-        
-        close();
-    }
-    
-      
-    /**
-     * 仮保存の場合のパラメータを設定する。
-     */
-    public void doTemp() {
-        
-        // 戻り値のSaveparamsを生成する
-        value = new SaveParams();
-        
-        //------------------------
-        // 仮保存であることを設定する
-        //------------------------
-        value.setTmpSave(true);
-        
-        // 文書タイトルを取得する
-        String val = (String) titleCombo.getSelectedItem();
-        if (! val.equals("")) {
-            value.setTitle(val);
-        }
-        
-        // Department
-        val = departmentLabel.getText();
-        value.setDepartment(val);
-        
-        //-----------------------
-        // 印刷部数を取得する
-        // 仮保存でも印刷するかも知れない
-        //-----------------------
-        int count = Integer.parseInt((String)printCombo.getSelectedItem());
-        value.setPrintCount(count);
-        
-        //-----------------------
-        // CLAIM 送信
-        //-----------------------
-        value.setSendClaim(false);
-        
-        // 患者への参照許可を取得する
-        boolean b = false;
-        value.setAllowPatientRef(b);
-        
-        // 診療歴のある施設への参照許可を設定する
-        b = false;
-        value.setAllowClinicRef(b);
-
-        //-------------------
-        // LabTest 送信
-        //-------------------
-        value.setSendLabtest(false);
-        
-//masuda^   保存日を保存
-        if (dateField != null) {
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-            try {
-                Date karteDate = frmt.parse(dateField.getText().trim());
-                value.setKarteDate(karteDate);
-            } catch (ParseException ex) {
-                return;
-            }
-        }
-//masuda$
-        
-        close();
-    }
-    
-    /**
-     * キャンセルしたことを設定する。
-     */
-    public void doCancel() {
-        value = null;
-        close();
     }
     
     private void close() {
@@ -489,7 +338,79 @@ public final class SaveDialog {
         dialog.dispose();
     }
     
-    
+    /**
+     * タイトルフィールドの有効性をチェックする。
+     */
+    private void checkTitle() {    
+        boolean enabled = !titleField.getText().trim().isEmpty();
+        okButton.setEnabled(enabled);
+        tmpButton.setEnabled(enabled);
+    }
+
+    private SaveParams viewToModel(boolean temp ){
+        
+        // 戻り値のSaveparamsを生成する
+        SaveParams model = new SaveParams();
+        
+        // 仮保存であることを設定する
+        model.setTmpSave(temp);
+        
+        // 文書タイトルを取得する
+        String val = (String) titleCombo.getSelectedItem();
+        if (!val.isEmpty()) {
+            model.setTitle(val);
+        } else {
+            if (!temp) {
+                model.setTitle("経過記録");
+            }
+        }
+        
+        // Department
+        val = departmentLabel.getText();
+        model.setDepartment(val);
+        
+        // 印刷部数を取得する
+        int count = Integer.parseInt((String)printCombo.getSelectedItem());
+        model.setPrintCount(count);
+        
+        //-------------------
+        // CLAIM 送信
+        //-------------------
+        model.setSendClaim(!temp && sendClaim.isSelected());
+        
+        // 患者への参照許可を取得する
+        boolean b = !temp && patientCheck.isSelected();
+        model.setAllowPatientRef(b);
+        
+        // 診療歴のある施設への参照許可を設定する
+        b = !temp && clinicCheck.isSelected();
+        model.setAllowClinicRef(b);
+
+        //-------------------
+        // LabTest 送信
+        //-------------------
+        b = !temp && sendLabtest.isSelected();
+        model.setSendLabtest(b);
+        
+        // 保存日を保存
+        model.setConfirmed(saveParams.getConfirmed());
+        if (cb_dateEnable != null && cb_dateEnable.isSelected()) {
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
+            try {
+                Date karteDate = frmt.parse(dateField.getText().trim());
+                model.setConfirmed(karteDate);
+            } catch (ParseException ex) {
+                return null;
+            }
+        }
+        // 退院日登録フラッグを設定
+        if (cb_registEndDate != null && cb_registEndDate.isSelected()) {
+            model.setRegistEndDate(cb_registEndDate.isSelected());
+        }
+        
+        return model;
+    }
+
     private class PopupListener extends PopupCalendarListener {
 
         private PopupListener(JTextField tf, int[] range) {
@@ -502,7 +423,7 @@ public final class SaveDialog {
             gc.set(GregorianCalendar.YEAR, sd.getYear());
             gc.set(GregorianCalendar.MONTH, sd.getMonth());
             gc.set(GregorianCalendar.DATE, sd.getDay());
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             tf.setText(frmt.format(gc.getTime()));
         }
     }

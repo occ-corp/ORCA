@@ -62,7 +62,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
     private Date started;
 
     // 終了（保存した時間）
-    private Date saved;
+    //private Date saved;
     
     // 健康保険Box
     private boolean insuranceVisible;
@@ -714,11 +714,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
 //masuda^
             // 旧タイトルを設定
             params.setOldTitle(oldTitle);
-            // 新規カルテの場合は保存日を設定する
-            if (!modify && docInfo.getStatus().equals(IInfoModel.STATUS_NONE)) {
-                params.setKarteDate(new Date());
-            }
-            
+            // 新規カルテか修正か設定する
+            params.setModify(modify);
             // 入院中か
             AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
             params.setInHospital(admission != null);
@@ -868,13 +865,6 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                 //------------------------
                 // 次のステージを実行する
                 //------------------------
-                saved = new Date();
-                
-//masuda^   カルテ保存ダイアログから保存日を取得
-                if (!modify) {
-                    saved = params.getKarteDate();
-                }
-//masuda$
                 if (getMode() == SINGLE_MODE) {
                     save1(params);
                 } else if (getMode() == DOUBLE_MODE) {
@@ -898,7 +888,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         final DocInfoModel docInfo = model.getDocInfoModel();
 
         // 現在時刻を ConfirmDate にする
-        Date confirmed = saved;
+        Date confirmed = params.getConfirmed();
         docInfo.setConfirmDate(confirmed);
 
         //----------------------------------------------------
@@ -1283,7 +1273,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     final DocInfoModel docInfo = model.getDocInfoModel();
 
                     // 現在時刻を ConfirmDate にする
-                    Date confirmed = saved;
+                    Date confirmed = params.getConfirmed();
                     docInfo.setConfirmDate(confirmed);
 
                     //----------------------------------------------------

@@ -41,14 +41,24 @@ public final class SaveParams {
 
     private boolean hasLabtest;
     
-//masuda^   カルテの保存日
-    private Date karteDate;
-    public Date getKarteDate(){
-        return karteDate;
+//masuda^
+    // 修正か否か
+    private boolean modify;
+    public boolean isModify() {
+        return modify;
     }
-    public void setKarteDate(Date date){
-        this.karteDate =date;
+    public void setModify(boolean b) {
+        modify = b;
     }
+    // カルテの保存日
+    private Date confirmed;
+    public Date getConfirmed(){
+        return confirmed;
+    }
+    public void setConfirmed(Date confirmed) {
+        this.confirmed = confirmed;
+    }
+
     // 編集元のタイトル
     private String oldTitle;
     public String getOldTitle() {
