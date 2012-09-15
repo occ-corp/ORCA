@@ -94,6 +94,8 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     @Override
     public void stop() {
         listTableModel = null;
+        entryList.clear();
+        entryList = null;
         
         shutdownExecutor();
         
