@@ -860,6 +860,11 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             // 地域連携に参加する場合のみに変更する
             SaveParams params = getSaveParams(Project.getBoolean(Project.JOIN_AREA_NETWORK));
 
+            // SaveParamsに保存日を設定しておく masuda
+            if (params.getConfirmed() == null) {
+                params.setConfirmed(new Date());
+            }
+
             // キャンセルの場合はリターンする
             if (params != null) {
                 //------------------------
