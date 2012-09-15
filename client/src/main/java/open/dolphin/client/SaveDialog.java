@@ -232,7 +232,7 @@ public final class SaveDialog {
         // 新規カルテの場合は保存日変更パネルを追加
         if (!saveParams.isModify()) {
             // デフォルトの保存日（現在）をセット
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             String dateStr = frmt.format(saveParams.getConfirmed());
             dateField = new JTextField(12);
             dateField.setText(dateStr);
@@ -420,6 +420,7 @@ public final class SaveDialog {
         @Override
         public void setValue(SimpleDate sd) {
             GregorianCalendar gc = new GregorianCalendar();
+            gc.clear();
             gc.set(GregorianCalendar.YEAR, sd.getYear());
             gc.set(GregorianCalendar.MONTH, sd.getMonth());
             gc.set(GregorianCalendar.DATE, sd.getDay());
