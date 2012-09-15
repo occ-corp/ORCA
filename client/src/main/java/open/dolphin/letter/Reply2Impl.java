@@ -6,6 +6,7 @@ import javax.swing.JScrollPane;
 import javax.swing.text.JTextComponent;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.Panel2;
+import open.dolphin.client.PopupCalendarListener;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.util.AgeCalculator;
@@ -264,7 +265,7 @@ public class Reply2Impl extends AbstractLetterImpl {
         setComponentListeners(jcs);
         
         // 来院日
-        PopupCalendarListener pl = new PopupCalendarListener(view.getVisited());
+        PopupCalendarListener pcl = new PopupCalendarListener(view.getVisited());
         view.getVisited().getDocument().addDocumentListener(dl);
 
         listenerIsAdded = true;

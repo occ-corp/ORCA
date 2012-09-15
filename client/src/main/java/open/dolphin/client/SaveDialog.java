@@ -6,9 +6,13 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.beans.EventHandler;
+import java.text.SimpleDateFormat;
+import java.util.GregorianCalendar;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import open.dolphin.infomodel.IInfoModel;
+import open.dolphin.infomodel.SimpleDate;
 import open.dolphin.project.Project;
 
 /**
@@ -265,6 +269,8 @@ public final class SaveDialog {
             dateField = new JTextField(12);
 
             dateField.addFocusListener(AutoRomanListener.getInstance());
+            int[] range = {-12, 2};
+            PopupListener pl = new PopupListener(dateField, range);
             cb_dateEnable = new JCheckBox("保存日変更:");
             JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
             cb_dateEnable.addItemListener(new java.awt.event.ItemListener() {
@@ -465,5 +471,23 @@ public final class SaveDialog {
     private void close() {
         dialog.setVisible(false);
         dialog.dispose();
+    }
+    
+    
+    private class PopupListener extends PopupCalendarListener {
+
+        private PopupListener(JTextField tf, int[] range) {
+            super(tf, range);
+        }
+
+        @Override
+        public void setValue(SimpleDate sd) {
+            GregorianCalendar gc = new GregorianCalendar();
+            gc.set(GregorianCalendar.YEAR, sd.getYear());
+            gc.set(GregorianCalendar.MONTH, sd.getMonth());
+            gc.set(GregorianCalendar.DATE, sd.getDay());
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
+            tf.setText(frmt.format(gc.getTime()));
+        }
     }
 }

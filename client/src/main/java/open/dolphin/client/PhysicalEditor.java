@@ -1,16 +1,19 @@
 package open.dolphin.client;
 
-import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JDialog;
+import javax.swing.JOptionPane;
+import javax.swing.SwingConstants;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.PhysicalModel;
-import open.dolphin.infomodel.SimpleDate;
 
 /**
  * 身長体重データを編集するエディタクラス。
@@ -25,99 +28,7 @@ public class PhysicalEditor {
     private JButton addBtn;
     private JButton clearBtn;
     private boolean ok;
-    
-    private void checkBtn() {
-        
-        boolean newOk = true;
-        String height = view.getHeightFld().getText().trim();
-        String weight = view.getWeightFld().getText().trim();
-        String dateStr = view.getIdentifiedDateFld().getText().trim();
-        
-        if (height.equals("") && weight.equals("")) {
-            newOk = false;
-        } else if (dateStr.equals("")) {
-            newOk = false;
-        }
-        
-        if (ok != newOk) {
-            ok = newOk;
-            addBtn.setEnabled(ok);
-            clearBtn.setEnabled(ok);
-        }
-    }
-    
-    private void add() {
-        
-        String h = view.getHeightFld().getText().trim();
-        String w = view.getWeightFld().getText().trim();
-        final PhysicalModel model = new PhysicalModel();
 
-        if (!h.equals("")) {
-            model.setHeight(h);
-        }
-        if (!w.equals("")) {
-            model.setWeight(w);
-        }
-
-        // 同定日
-        String confirmedStr = view.getIdentifiedDateFld().getText().trim();
-        model.setIdentifiedDate(confirmedStr);
-        
-        addBtn.setEnabled(false);
-        clearBtn.setEnabled(false);
-        inspector.add(model);
-    }
-    
-    private void clear() {
-        view.getHeightFld().setText("");
-        view.getWeightFld().setText("");
-        view.getIdentifiedDateFld().setText("");
-    }
-    
-    class PopupListener extends MouseAdapter implements PropertyChangeListener {
-
-        private JPopupMenu popup;
-        private JTextField tf;
-
-        // private LiteCalendarPanel calendar;
-        public PopupListener(JTextField tf) {
-            this.tf = tf;
-            tf.addMouseListener(PopupListener.this);
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        private void maybeShowPopup(MouseEvent e) {
-
-            if (e.isPopupTrigger()) {
-                popup = new JPopupMenu();
-                CalendarCardPanel cc = new CalendarCardPanel(ClientContext.getEventColorTable());
-                cc.addPropertyChangeListener(CalendarCardPanel.PICKED_DATE, this);
-                cc.setCalendarRange(new int[]{-12, 0});
-                popup.insert(cc, 0);
-                popup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent e) {
-            if (e.getPropertyName().equals(CalendarCardPanel.PICKED_DATE)) {
-                SimpleDate sd = (SimpleDate) e.getNewValue();
-                tf.setText(SimpleDate.simpleDateToMmldate(sd));
-                popup.setVisible(false);
-                popup = null;
-            }
-        }
-    }
-    
     public PhysicalEditor(PhysicalInspector inspector) {
         
         this.inspector = inspector;
@@ -168,7 +79,7 @@ public class PhysicalEditor {
         SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         String todayString = sdf.format(date);
         view.getIdentifiedDateFld().setText(todayString);
-        PopupListener npl = new PopupListener(view.getIdentifiedDateFld());
+        PopupCalendarListener pcl = new PopupCalendarListener(view.getIdentifiedDateFld());
         
         view.getHeightFld().addFocusListener(AutoRomanListener.getInstance());
         view.getWeightFld().addFocusListener(AutoRomanListener.getInstance());
@@ -208,4 +119,53 @@ public class PhysicalEditor {
         });
         dialog.setVisible(true);
     }
+    
+    private void checkBtn() {
+        
+        boolean newOk = true;
+        String height = view.getHeightFld().getText().trim();
+        String weight = view.getWeightFld().getText().trim();
+        String dateStr = view.getIdentifiedDateFld().getText().trim();
+        
+        if (height.equals("") && weight.equals("")) {
+            newOk = false;
+        } else if (dateStr.equals("")) {
+            newOk = false;
+        }
+        
+        if (ok != newOk) {
+            ok = newOk;
+            addBtn.setEnabled(ok);
+            clearBtn.setEnabled(ok);
+        }
+    }
+    
+    private void add() {
+        
+        String h = view.getHeightFld().getText().trim();
+        String w = view.getWeightFld().getText().trim();
+        final PhysicalModel model = new PhysicalModel();
+
+        if (!h.equals("")) {
+            model.setHeight(h);
+        }
+        if (!w.equals("")) {
+            model.setWeight(w);
+        }
+
+        // 同定日
+        String confirmedStr = view.getIdentifiedDateFld().getText().trim();
+        model.setIdentifiedDate(confirmedStr);
+        
+        addBtn.setEnabled(false);
+        clearBtn.setEnabled(false);
+        inspector.add(model);
+    }
+    
+    private void clear() {
+        view.getHeightFld().setText("");
+        view.getWeightFld().setText("");
+        view.getIdentifiedDateFld().setText("");
+    }
+
 }

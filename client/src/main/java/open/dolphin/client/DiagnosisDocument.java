@@ -431,7 +431,8 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         JTextField tf = new JTextField();
         // IME を OFF にする
         tf.addFocusListener(AutoRomanListener.getInstance());
-        PopupListener popupListener = new PopupListener(tf);
+        final int[] range = {-12, 2};
+        PopupCalendarListener pcl1 = new PopupCalendarListener(tf, range);
         tf.setDocument(new RegexConstrainedDocument(datePattern));
         DefaultCellEditor de = new DefaultCellEditor2(tf);
         column.setCellEditor(de);
@@ -442,7 +443,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         // IME を OFF にする
         tf.addFocusListener(AutoRomanListener.getInstance());
         tf.setDocument(new RegexConstrainedDocument(datePattern));
-        PopupListener popupListener1 = new PopupListener(tf);
+        PopupCalendarListener pcl2 = new PopupCalendarListener(tf, range);
         de = new DefaultCellEditor2(tf);
         column.setCellEditor(de);
         de.setClickCountToStart(clickCountToStartEdit);
@@ -1405,59 +1406,11 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         
         tableModel.setDataProvider(new ArrayList<RegisteredDiagnosisModel>(rdList));
     }
-    
-    /**
-     * PopupListener
-     */
-//masuda class -> private static class
-    private static class PopupListener extends MouseAdapter implements PropertyChangeListener {
-
-        private JPopupMenu popup;
-        private JTextField tf;
-
-        public PopupListener(JTextField tf) {
-            this.tf = tf;
-            tf.addMouseListener(PopupListener.this);
-        }
-
-        @Override
-        public void mousePressed(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        private void maybeShowPopup(MouseEvent e) {
-
-            if (e.isPopupTrigger()) {
-                popup = new JPopupMenu();
-                CalendarCardPanel cc = new CalendarCardPanel(ClientContext.getEventColorTable());
-                cc.addPropertyChangeListener(CalendarCardPanel.PICKED_DATE, this);
-                //cc.setCalendarRange(new int[]{-12, 0});
-                cc.setCalendarRange(new int[]{-12, 2});
-                popup.insert(cc, 0);
-                popup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent e) {
-            if (e.getPropertyName().equals(CalendarCardPanel.PICKED_DATE)) {
-                SimpleDate sd = (SimpleDate) e.getNewValue();
-                tf.setText(SimpleDate.simpleDateToMmldate(sd));
-                popup.setVisible(false);
-                popup = null;
-            }
-        }
-    }
 
     /**
      * DiagnosisPutTask
      */
-    class DiagnosisPutTask extends DBTask<List<Long>, Void> {
+    private class DiagnosisPutTask extends DBTask<List<Long>, Void> {
 
         //private Chart chart;
         private List<RegisteredDiagnosisModel> added;

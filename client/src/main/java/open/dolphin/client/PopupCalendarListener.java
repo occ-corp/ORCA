@@ -1,4 +1,4 @@
-package open.dolphin.letter;
+package open.dolphin.client;
 
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -6,32 +6,42 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
-import open.dolphin.client.CalendarCardPanel;
-import open.dolphin.client.ClientContext;
 import open.dolphin.infomodel.SimpleDate;
 
 /**
+ * PopupCalendarListener
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  */
 public class PopupCalendarListener extends MouseAdapter implements PropertyChangeListener {
-    
+
+    private static final int[] defaultRange = {-12, 0};
     private JPopupMenu popup;
-
-    private JTextField tf;
-
+    private int[] range;
+    protected JTextField tf;
+    
     public PopupCalendarListener(JTextField tf) {
+        this(tf, defaultRange);
+    }
+    
+    public PopupCalendarListener(JTextField tf, int[] range) {
         this.tf = tf;
+        this.range = range;
         tf.addMouseListener(PopupCalendarListener.this);
+    }
+    
+    public void setValue(SimpleDate sd) {
+        tf.setText(SimpleDate.simpleDateToMmldate(sd));
     }
 
     @Override
-    public void mousePressed(MouseEvent e) {
+    public final void mousePressed(MouseEvent e) {
         maybeShowPopup(e);
     }
 
     @Override
-    public void mouseReleased(MouseEvent e) {
+    public final void mouseReleased(MouseEvent e) {
         maybeShowPopup(e);
     }
 
@@ -41,18 +51,17 @@ public class PopupCalendarListener extends MouseAdapter implements PropertyChang
             popup = new JPopupMenu();
             CalendarCardPanel cc = new CalendarCardPanel(ClientContext.getEventColorTable());
             cc.addPropertyChangeListener(CalendarCardPanel.PICKED_DATE, this);
-            cc.setCalendarRange(new int[]{-12, 0});
+            cc.setCalendarRange(range);
             popup.insert(cc, 0);
             popup.show(e.getComponent(), e.getX(), e.getY());
         }
     }
 
     @Override
-    public void propertyChange(PropertyChangeEvent e) {
+    public final void propertyChange(PropertyChangeEvent e) {
         if (e.getPropertyName().equals(CalendarCardPanel.PICKED_DATE)) {
             SimpleDate sd = (SimpleDate) e.getNewValue();
-            String mmldate = SimpleDate.simpleDateToMmldate(sd);
-            tf.setText(mmldate);
+            setValue(sd);
             popup.setVisible(false);
             popup = null;
         }

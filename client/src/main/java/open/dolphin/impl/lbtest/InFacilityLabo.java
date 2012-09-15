@@ -1,12 +1,9 @@
-
 package open.dolphin.impl.lbtest;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -14,9 +11,9 @@ import java.util.GregorianCalendar;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.table.TableColumn;
-import open.dolphin.client.CalendarCardPanel;
 import open.dolphin.client.Chart;
 import open.dolphin.client.ClientContext;
+import open.dolphin.client.PopupCalendarListener;
 import open.dolphin.delegater.LaboDelegater;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.*;
@@ -446,47 +443,15 @@ public class InFacilityLabo {
         }
     }
 
-    private class PopupListener extends MouseAdapter implements PropertyChangeListener {
-
-        private JPopupMenu popup;
-
-        private JTextField tf;
+    private class PopupListener extends PopupCalendarListener {
 
         public PopupListener(JTextField tf) {
-            this.tf = tf;
-            tf.addMouseListener(PopupListener.this);
+            super(tf);
         }
-
+        
         @Override
-        public void mousePressed(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        private void maybeShowPopup(MouseEvent e) {
-
-            if (e.isPopupTrigger()) {
-                popup = new JPopupMenu();
-                CalendarCardPanel cc = new CalendarCardPanel(ClientContext.getEventColorTable());
-                cc.addPropertyChangeListener(CalendarCardPanel.PICKED_DATE, this);
-                cc.setCalendarRange(new int[]{-12, 0});
-                popup.insert(cc, 0);
-                popup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent e) {
-            if (e.getPropertyName().equals(CalendarCardPanel.PICKED_DATE)) {
-                SimpleDate sd = (SimpleDate) e.getNewValue();
-                tf.setText(getFormattedDate(sd));
-                popup.setVisible(false);
-                popup = null;
-            }
+        public void setValue(SimpleDate sd) {
+            tf.setText(getFormattedDate(sd));
         }
     }
 }

@@ -5,8 +5,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.beans.EventHandler;
-import java.beans.PropertyChangeEvent;
-import java.beans.PropertyChangeListener;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -754,51 +752,18 @@ public class PatientSearchImpl extends AbstractMainComponent {
     /**
      * テキストフィールドへ日付を入力するためのカレンダーポップアップメニュークラス。
      */
-    private class PopupListener extends MouseAdapter implements PropertyChangeListener {
-
-        /** ポップアップメニュー */
-        private JPopupMenu popup;
-        /** ターゲットのテキストフィールド */
-        private JTextField tf;
+    private class PopupListener extends PopupCalendarListener {
 
         public PopupListener(JTextField tf) {
-            this.tf = tf;
-            tf.addMouseListener(PopupListener.this);
+            super(tf);
         }
-
+        
         @Override
-        public void mousePressed(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        @Override
-        public void mouseReleased(MouseEvent e) {
-            maybeShowPopup(e);
-        }
-
-        private void maybeShowPopup(MouseEvent e) {
-
-            if (e.isPopupTrigger()) {
-                popup = new JPopupMenu();
-                CalendarCardPanel cc = new CalendarCardPanel(ClientContext.getEventColorTable());
-                cc.addPropertyChangeListener(CalendarCardPanel.PICKED_DATE, this);
-                cc.setCalendarRange(new int[]{-12, 0});
-                popup.insert(cc, 0);
-                popup.show(e.getComponent(), e.getX(), e.getY());
-            }
-        }
-
-        @Override
-        public void propertyChange(PropertyChangeEvent e) {
-            if (e.getPropertyName().equals(CalendarCardPanel.PICKED_DATE)) {
-                SimpleDate sd = (SimpleDate) e.getNewValue();
-                tf.setText(SimpleDate.simpleDateToMmldate(sd));
-                popup.setVisible(false);
-                popup = null;
-                String test = tf.getText().trim();
-                if (!test.equals("")) {
-                    find(test);
-                }
+        public void setValue(SimpleDate sd) {
+            tf.setText(SimpleDate.simpleDateToMmldate(sd));
+            String test = tf.getText().trim();
+            if (!test.isEmpty()) {
+                find(test);
             }
         }
     }
