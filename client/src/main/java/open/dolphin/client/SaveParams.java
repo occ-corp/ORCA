@@ -1,5 +1,7 @@
 package open.dolphin.client;
 
+import java.util.Date;
+
 /**
  * Parametrs to save document.
  *
@@ -40,11 +42,11 @@ public final class SaveParams {
     private boolean hasLabtest;
     
 //masuda^   カルテの保存日
-    private String karteDate;
-    public String getKarteDate(){
+    private Date karteDate;
+    public Date getKarteDate(){
         return karteDate;
     }
-    public void setKarteDate(String date){
+    public void setKarteDate(Date date){
         this.karteDate =date;
     }
     // 編集元のタイトル

@@ -8,9 +8,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.io.IOException;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Collection;
+import java.util.Date;
 import java.util.List;
 import java.util.TooManyListenersException;
 import javax.swing.*;
@@ -717,8 +716,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             params.setOldTitle(oldTitle);
             // 新規カルテの場合は保存日を設定する
             if (!modify && docInfo.getStatus().equals(IInfoModel.STATUS_NONE)) {
-                SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
-                params.setKarteDate(sdf.format(new Date()));
+                params.setKarteDate(new Date());
             }
             
             // 入院中か
@@ -873,14 +871,8 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                 saved = new Date();
                 
 //masuda^   カルテ保存ダイアログから保存日を取得
-                SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
-                String date = params.getKarteDate();
                 if (!modify) {
-                    try {
-                        saved = sdf.parse(date);
-                    } catch (ParseException ex) {
-                        return;
-                    }
+                    saved = params.getKarteDate();
                 }
 //masuda$
                 if (getMode() == SINGLE_MODE) {

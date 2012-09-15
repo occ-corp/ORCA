@@ -6,7 +6,9 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionListener;
 import java.beans.EventHandler;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.GregorianCalendar;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -200,7 +202,9 @@ public final class SaveDialog {
 //masuda^
         // デフォルトの保存日（現在）をセット
         if (dateField != null) {
-            dateField.setText(params.getKarteDate());
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
+            String dateStr = frmt.format(params.getKarteDate());
+            dateField.setText(dateStr);
         }
 //masuda$
         checkTitle();
@@ -391,7 +395,13 @@ public final class SaveDialog {
 //masuda^
         // 保存日を保存
         if (dateField != null) {
-            value.setKarteDate(dateField.getText());
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
+            try {
+                Date karteDate = frmt.parse(dateField.getText().trim());
+                value.setKarteDate(karteDate);
+            } catch (ParseException ex) {
+                return;
+            }
         }
         // 退院日登録フラッグを設定
         if (cb_registEndDate != null && cb_registEndDate.isSelected()) {
@@ -453,7 +463,13 @@ public final class SaveDialog {
         
 //masuda^   保存日を保存
         if (dateField != null) {
-            value.setKarteDate(dateField.getText());
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
+            try {
+                Date karteDate = frmt.parse(dateField.getText().trim());
+                value.setKarteDate(karteDate);
+            } catch (ParseException ex) {
+                return;
+            }
         }
 //masuda$
         
@@ -486,7 +502,7 @@ public final class SaveDialog {
             gc.set(GregorianCalendar.YEAR, sd.getYear());
             gc.set(GregorianCalendar.MONTH, sd.getMonth());
             gc.set(GregorianCalendar.DATE, sd.getDay());
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
             tf.setText(frmt.format(gc.getTime()));
         }
     }
