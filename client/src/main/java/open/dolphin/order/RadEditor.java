@@ -161,6 +161,9 @@ public final class RadEditor extends AbstractStampEditor {
         
         // バンドル数を設定
         String bundleNum =  view.getNumberField().getText().trim();
+        if (bundleNum.isEmpty()) {
+            bundleNum = "1";
+        }
         bundle.setBundleNumber(bundleNum);
         
          // バンドルメモ復活

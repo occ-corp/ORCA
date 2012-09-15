@@ -196,6 +196,9 @@ public final class InjectionEditor extends AbstractStampEditor {
 
         // バンドル数を設定
         String bundleNum =  view.getNumberField().getText().trim();
+        if (bundleNum.isEmpty()) {
+            bundleNum = "1";
+        }
         bundle.setBundleNumber(bundleNum);
         
         // バンドルメモ復活
@@ -391,7 +394,6 @@ public final class InjectionEditor extends AbstractStampEditor {
             public void actionPerformed(ActionEvent e) {
                 // 選択されたClaimClassCodeを保存する。あとで使う
                 setClassCode(view.getSelectedClassCode());
-                view.getNumberField().setText("/");
                 SwingUtilities.invokeLater(new Runnable() {
 
                     @Override
