@@ -146,7 +146,7 @@ public class ExamHistory {
                     if (selectedRow == -1 || selectedRow >= tableModel.getObjectCount()) {
                         return;
                     }
-                    ExamHistoryModel eh = (ExamHistoryModel) tableModel.getObject(selectedRow);
+                    ExamHistoryModel eh = tableModel.getObject(selectedRow);
                     long docPk = eh.getDocPk();
                     List<DocInfoModel> docInfoList = getDocInfoList();
                     for (DocInfoModel dim : docInfoList) {
@@ -277,7 +277,9 @@ public class ExamHistory {
                 }
             }
         };
-        worker.execute();
+        // ここは別スレッドで実行する
+        java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
+        //worker.execute();
     }
 
     private class ExamHistoryComparator implements Comparator {

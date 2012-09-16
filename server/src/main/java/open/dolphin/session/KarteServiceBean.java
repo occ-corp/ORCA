@@ -419,16 +419,30 @@ public class KarteServiceBean {
      * @return 追加した数
      */
     public long addDocument(DocumentModel document) {
-
+        
+//masuda^   編集元が仮保存文書なら残す必要なし。それは仮保存だから。
+        DocInfoModel docInfo = document.getDocInfoModel();
+        if (docInfo.getParentId() != null) {
+            DocumentModel parent = em.find(DocumentModel.class, docInfo.getParentPk());
+            if (IInfoModel.STATUS_TMP.equals(parent.getStatus())) {
+                // 編集元文書の情報を引き継ぐ
+                DocInfoModel pInfo = parent.getDocInfoModel();
+                docInfo.setParentId(pInfo.getParentId());
+                docInfo.setParentIdRelation(pInfo.getParentIdRelation());
+                docInfo.setParentPk(pInfo.getParentPk());
+                docInfo.setVersionNumber(pInfo.getVersionNumber());
+                // 編集元は削除
+                em.remove(parent);
+            }
+        }
+//masuda$
+        
         // 永続化する
         em.persist(document);
-
-        // ID
-        long id = document.getId();
-
+        
         // 修正版の処理を行う
-        long parentPk = document.getDocInfoModel().getParentPk();
-
+        long parentPk = docInfo.getParentPk();
+        
         if (parentPk != 0L) {
 
             // 適合終了日を新しい版の確定日にする
@@ -470,61 +484,9 @@ public class KarteServiceBean {
         registSanteiHistory(document);
 //masuda$
         
-        return id;
-    }
-
-
-    public long addDocumentAndUpdatePVTState(DocumentModel document, long pvtPK, int state) {
-
-        // 永続化する
-        em.persist(document);
-
         // ID
         long id = document.getId();
-
-        // 修正版の処理を行う
-        long parentPk = document.getDocInfoModel().getParentPk();
-
-        if (parentPk != 0L) {
-
-            // 適合終了日を新しい版の確定日にする
-            Date ended = document.getConfirmed();
-
-            // オリジナルを取得し 終了日と status = M を設定する
-            DocumentModel old = em.find(DocumentModel.class, parentPk);
-            old.setEnded(ended);
-            old.setStatus(IInfoModel.STATUS_MODIFIED);
-
-            // 関連するモジュールとイメージに同じ処理を実行する
-            @SuppressWarnings("unchecked")
-            List<ModuleModel> oldModules = 
-                    em.createQuery(QUERY_MODULE_BY_DOC_ID)
-                    .setParameter(ID, parentPk)
-                    .getResultList();
-            for(ModuleModel model : oldModules) {
-                model.setEnded(ended);
-                model.setStatus(IInfoModel.STATUS_MODIFIED);
-            }
-
-            @SuppressWarnings("unchecked")
-            List<SchemaModel> oldImages = 
-                    em.createQuery(QUERY_SCHEMA_BY_DOC_ID)
-                    .setParameter(ID, parentPk)
-                    .getResultList();
-            for(SchemaModel model : oldImages) {
-                model.setEnded(ended);
-                model.setStatus(IInfoModel.STATUS_MODIFIED);
-            }
-        }
         
-        try {
-            // PVT 更新  state==2 || state == 4
-            PatientVisitModel exist = em.find(PatientVisitModel.class, new Long(pvtPK));
-            exist.setState(state);
-        } catch (Throwable e) {
-            e.printStackTrace(System.err);
-        }
-
         return id;
     }
 

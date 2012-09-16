@@ -42,13 +42,13 @@ public final class SaveParams {
     private boolean hasLabtest;
     
 //masuda^
-    // 修正か否か
-    private boolean modify;
-    public boolean isModify() {
-        return modify;
+    // 確定日の変更可否
+    private boolean dateEditable;
+    public boolean isDateEditable() {
+        return dateEditable;
     }
-    public void setModify(boolean b) {
-        modify = b;
+    public void setDateEditable(boolean b) {
+        dateEditable = b;
     }
     // カルテの保存日
     private Date confirmed;
@@ -57,6 +57,15 @@ public final class SaveParams {
     }
     public void setConfirmed(Date confirmed) {
         this.confirmed = confirmed;
+        firstConfirmed = confirmed;
+    }
+    
+    private Date firstConfirmed;
+    public Date getFirstConfirmed() {
+        return firstConfirmed;
+    }
+    public void setFirstConfirmed(Date d) {
+        firstConfirmed = d;
     }
 
     // 編集元のタイトル
@@ -89,7 +98,10 @@ public final class SaveParams {
      * Creates new SaveParams 
      */
     public SaveParams() {
-        super();
+//masuda^
+        // 確定日を現在に設定
+        setConfirmed(new Date());
+//masuda$
     }
     
     public SaveParams(boolean sendMML) {

@@ -1243,7 +1243,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      */
     @Override
     public DocumentModel getKarteModelToEdit(DocumentModel oldModel) {
-
+        
         // 修正対象の DocInfo を取得する
         DocInfoModel oldDocInfo = oldModel.getDocInfoModel();
 

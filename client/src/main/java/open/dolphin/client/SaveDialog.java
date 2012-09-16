@@ -47,8 +47,8 @@ public final class SaveDialog {
     private JCheckBox clinicCheck;
     
     private JTextField titleField;
-    private JComboBox titleCombo;
-    private JComboBox printCombo;
+    private JComboBox<String> titleCombo;
+    private JComboBox<String> printCombo;
     private JLabel departmentLabel;
     
     // CLAIM 送信
@@ -87,9 +87,7 @@ public final class SaveDialog {
     public void setValue(SaveParams params) {
         
         saveParams = params;
-        // 確定日を設定
-        saveParams.setConfirmed(new Date());
-
+        
         JPanel contentPanel = createComponent();
 
         Object[] options = new Object[]{okButton, tmpButton, cancelButton};
@@ -183,7 +181,7 @@ public final class SaveDialog {
         
         // 文書Title
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        titleCombo = new JComboBox(TITLE_LIST);
+        titleCombo = new JComboBox<String>(TITLE_LIST);
         titleCombo.setPreferredSize(new Dimension(220, titleCombo.getPreferredSize().height));
         titleCombo.setMaximumSize(titleCombo.getPreferredSize());
         titleCombo.setEditable(true);
@@ -221,7 +219,7 @@ public final class SaveDialog {
         p1.add(Box.createRigidArea(new Dimension(11, 0)));
         
         // Print
-        printCombo = new JComboBox(PRINT_COUNT);
+        printCombo = new JComboBox<String>(PRINT_COUNT);
         printCombo.setSelectedIndex(1);
         p1.add(new JLabel("印刷部数:"));
         p1.add(printCombo);
@@ -229,8 +227,8 @@ public final class SaveDialog {
         content.add(p1);
         
 //masuda^
-        // 新規カルテの場合は保存日変更パネルを追加
-        if (!saveParams.isModify()) {
+        // 保存日変更パネルを追加
+        if (saveParams.isDateEditable()) {
             // デフォルトの保存日（現在）をセット
             SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             String dateStr = frmt.format(saveParams.getConfirmed());
@@ -241,7 +239,7 @@ public final class SaveDialog {
             PopupListener pl = new PopupListener(dateField, range);
 
             JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
-            cb_dateEnable = new JCheckBox("保存日変更:");
+            cb_dateEnable = new JCheckBox("記録日変更:");
             cb_dateEnable.addItemListener(new java.awt.event.ItemListener() {
 
                 @Override
@@ -347,7 +345,7 @@ public final class SaveDialog {
         tmpButton.setEnabled(enabled);
     }
 
-    private SaveParams viewToModel(boolean temp ){
+    private SaveParams viewToModel(boolean temp) {
         
         // 戻り値のSaveparamsを生成する
         SaveParams model = new SaveParams();
@@ -398,7 +396,7 @@ public final class SaveDialog {
             SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             try {
                 Date karteDate = frmt.parse(dateField.getText().trim());
-                model.setConfirmed(karteDate);
+                model.setFirstConfirmed(karteDate);
             } catch (ParseException ex) {
                 return null;
             }
