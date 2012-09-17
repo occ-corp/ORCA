@@ -882,12 +882,16 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             //
             boolean canEdit = !isReadOnly();
             boolean tmpKarte = false;
+//masuda^   制限解除       
+/*
             if (selectedKarte != null) {
                 String state = selectedKarte.getModel().getDocInfoModel().getStatus();
                 if (state.equals(IInfoModel.STATUS_TMP)) {
                     tmpKarte = true;
                 }
             }
+*/
+//masuda$
             boolean newOk = (canEdit && !tmpKarte);
             getContext().enabledAction(GUIConst.ACTION_NEW_KARTE, newOk);        // 新規カルテ
             getContext().enabledAction(GUIConst.ACTION_NEW_DOCUMENT, canEdit);   // 新規文書
