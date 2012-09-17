@@ -46,6 +46,10 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
     private static final String DEFAULT_TITLE = "経過記録";
     private static final String UPDATE_TAB_TITLE = "更新";
 
+//masuda^
+    private static final String TEMP_KARTE_TITLE = "仮保存中";
+//masuda$
+    
     // このエディタのモード
     private int mode = 2;
 
@@ -480,7 +484,13 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         if (modify) {
             // 更新: YYYY-MM-DDTHH:MM:SS (firstConfirmDate)
             sb = new StringBuilder();
-            sb.append(UPDATE_TAB_TITLE);
+//masuda^   仮保存の場合はタイトル変更
+            if (IInfoModel.STATUS_TMP.equals(docInfo.getStatus())) {
+                sb.append(TEMP_KARTE_TITLE);
+            } else {
+                sb.append(UPDATE_TAB_TITLE);
+            }
+//masuda$
             sb.append(": ");
             sb.append(timeStamp);
             sb.append(" [");
@@ -551,13 +561,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         timeStampLabel.addMouseListener(new PopupListener());
         
 //masuda^   タイトルを文書種別によって色分けする
-        KartePanel.DOC_TYPE docType = KartePanel.DOC_TYPE.OUT_PATIENT;
-        if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-            docType = KartePanel.DOC_TYPE.SELF_INSURANCE;
-        } else if (admission != null) {
-            docType = KartePanel.DOC_TYPE.ADMISSION;
-        }
-        kartePanel.setTitleColor(docType);
+        kartePanel.setTitleColor(docInfo);
 //masuda$
         
         insuranceVisible = true;
@@ -720,9 +724,9 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             boolean editTemp = modify && IInfoModel.STATUS_TMP.equals(status);
             params.setDateEditable(newKarte || editTemp);
             // FirstConfirmDateを設定する
-            Date firstConfirmed = model.getFirstConfirmed();
+            Date firstConfirmed = model.getDocInfoModel().getFirstConfirmDate();
             if (firstConfirmed != null) {
-                params.setFirstConfirmed(firstConfirmed);
+                params.setConfirmed(firstConfirmed);
             }
             // 入院中か
             AdmissionModel admission = model.getDocInfoModel().getAdmissionModel();
@@ -898,7 +902,6 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         // 現在時刻を ConfirmDate にする
 //masuda^   SaveParamsから取得
         docInfo.setConfirmDate(params.getConfirmed());
-//masuda$
         
         //----------------------------------------------------
         // 修正でない場合は FirstConfirmDate = ConfirmDate にする
@@ -906,11 +909,15 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
         // 修正でない新規カルテは parentId = null である
         //----------------------------------------------------
         if (docInfo.getParentId() == null) {
-//masuda^   SaveParamsから取得
-            docInfo.setFirstConfirmDate(params.getFirstConfirmed());
-//masuda$
+            // SaveParamsから取得
+            docInfo.setFirstConfirmDate(params.getConfirmed());
         }
-
+        // 編集元が仮保存カルテならばFirstConfirmDateを上書きする
+        String oldStatus = getModel().getDocInfoModel().getStatus();
+        if (IInfoModel.STATUS_TMP.equals(oldStatus)) {
+            docInfo.setFirstConfirmDate(params.getConfirmed());
+        }
+//masuda$
         //----------------------------------------------------
         // Status 仮保存か確定保存かを設定する
         // final の時は CLAIM 送信するが前の状態に依存する
@@ -919,7 +926,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             // 
             // 編集が開始された時の state を取得する
             //
-            String oldStatus = docInfo.getStatus();
+            //String oldStatus = docInfo.getStatus();
 
             if (oldStatus.equals(STATUS_NONE)) {
                 //
@@ -1286,7 +1293,6 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     // 現在時刻を ConfirmDate にする
 //masuda^   SaveParamsから取得
                     docInfo.setConfirmDate(params.getConfirmed());
-//masuda$
 
                     //----------------------------------------------------
                     // 修正でない場合は FirstConfirmDate = ConfirmDate にする
@@ -1294,11 +1300,15 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     // 修正でない新規カルテは parentId = null である
                     //----------------------------------------------------
                     if (docInfo.getParentId() == null) {
-//masuda^   SaveParamsから取得
-                        docInfo.setFirstConfirmDate(params.getFirstConfirmed());
-//masuda$
+                        // SaveParamsから取得
+                        docInfo.setFirstConfirmDate(params.getConfirmed());
                     }
-
+                    // 編集元が仮保存カルテならばFirstConfirmDateを上書きする
+                    String oldStatus = getModel().getDocInfoModel().getStatus();
+                    if (IInfoModel.STATUS_TMP.equals(oldStatus)) {
+                        docInfo.setFirstConfirmDate(params.getConfirmed());
+                    }
+//masuda$        
                     //----------------------------------------------------
                     // Status 仮保存か確定保存かを設定する
                     // final の時は CLAIM 送信するが前の状態に依存する
@@ -1306,7 +1316,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     if (!params.isTmpSave()) {
 
                         // 編集が開始された時の state を取得する
-                        String oldStatus = docInfo.getStatus();
+                        //String oldStatus = docInfo.getStatus();
 
                         if (oldStatus.equals(STATUS_NONE)) {
                             //------------------------------

@@ -46,6 +46,7 @@ public class DocumentHistory {
     
     private static final Color SELF_INSURANCE_COLOR = new Color(255, 236, 103);
     private static final Color ADMISSION_COLOR = new Color(253, 202, 138);
+    private static final Color TEMP_KARTE_COLOR = new Color(239, 156, 153);
 
     // 文書履歴テーブル
     private ListTableModel<DocInfoModel> tableModel;
@@ -1152,7 +1153,9 @@ public class DocumentHistory {
 
             // 自費保険・入院のカラーリング
             if (info != null && !isSelected) {
-                if (info.getAdmissionModel() == null) {
+                if (IInfoModel.STATUS_TMP.equals(info.getStatus())) {
+                    setBackground(TEMP_KARTE_COLOR);
+                } else if (info.getAdmissionModel() == null) {
                     if (info.isKarte()
                             && info.getHealthInsurance() != null
                             && info.getHealthInsurance().startsWith(SELF_PREFIX)) {

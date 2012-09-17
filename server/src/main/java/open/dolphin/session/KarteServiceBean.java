@@ -420,19 +420,22 @@ public class KarteServiceBean {
      */
     public long addDocument(DocumentModel document) {
         
-//masuda^   編集元が仮保存文書なら残す必要なし。それは仮保存だから。
+//masuda^   編集元が仮保存文書なら残す必要なし。なぜならそれは仮保存だから。
         DocInfoModel docInfo = document.getDocInfoModel();
         if (docInfo.getParentId() != null) {
             DocumentModel parent = em.find(DocumentModel.class, docInfo.getParentPk());
-            if (IInfoModel.STATUS_TMP.equals(parent.getStatus())) {
+            if (parent != null && IInfoModel.STATUS_TMP.equals(parent.getStatus())) {
                 // 編集元文書の情報を引き継ぐ
+                document.setLinkId(parent.getLinkId());
+                document.setLinkRelation(parent.getLinkRelation());
                 DocInfoModel pInfo = parent.getDocInfoModel();
                 docInfo.setParentId(pInfo.getParentId());
                 docInfo.setParentIdRelation(pInfo.getParentIdRelation());
-                docInfo.setParentPk(pInfo.getParentPk());
                 docInfo.setVersionNumber(pInfo.getVersionNumber());
                 // 編集元は削除
                 em.remove(parent);
+                // parentPkをリセットする
+                docInfo.setParentPk(0L);
             }
         }
 //masuda$

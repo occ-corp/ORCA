@@ -396,7 +396,7 @@ public final class SaveDialog {
             SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             try {
                 Date karteDate = frmt.parse(dateField.getText().trim());
-                model.setFirstConfirmed(karteDate);
+                model.setConfirmed(karteDate);
             } catch (ParseException ex) {
                 return null;
             }

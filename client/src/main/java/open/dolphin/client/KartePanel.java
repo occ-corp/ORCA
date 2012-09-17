@@ -5,6 +5,9 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.JViewport;
+import open.dolphin.infomodel.AdmissionModel;
+import open.dolphin.infomodel.DocInfoModel;
+import open.dolphin.infomodel.IInfoModel;
 
 /**
  * KartePanelの抽象クラス
@@ -16,11 +19,12 @@ public abstract class KartePanel extends Panel2 {
 
     public static enum MODE {SINGLE_VIEWER, DOUBLE_VIEWER, SINGLE_EDITOR, DOUBLE_EDITOR};
     
-    public static enum DOC_TYPE {OUT_PATIENT, ADMISSION, SELF_INSURANCE};
+    private static enum DOC_TYPE {OUT_PATIENT, ADMISSION, SELF_INSURANCE, TEMP_KARTE};
     
     private static final Color OUT_PATIENT_COLOR = new Color(0, 0, 0, 0);
     private static final Color SELF_INSURANCE_COLOR = new Color(255, 236, 103);
     private static final Color ADMISSION_COLOR = new Color(253, 202, 138);
+    private static final Color TEMP_KARTE_COLOR = new Color(239, 156, 153);
 
     // タイムスタンプの foreground カラー
     private static final Color TIMESTAMP_FORE = Color.BLUE;
@@ -125,16 +129,29 @@ public abstract class KartePanel extends Panel2 {
         return contentPanel;
     }
     
-    public void setTitleColor(DOC_TYPE type) {
+    public void setTitleColor(DocInfoModel docInfo) {
         
-        switch (type) {
+        DOC_TYPE docType = DOC_TYPE.OUT_PATIENT;
+        AdmissionModel admission = docInfo.getAdmissionModel();
+        if (IInfoModel.STATUS_TMP.equals(docInfo.getStatus())) {
+            docType = DOC_TYPE.TEMP_KARTE;
+        } else if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+            docType = DOC_TYPE.SELF_INSURANCE;
+        } else if (admission != null) {
+            docType = DOC_TYPE.ADMISSION;
+        }
+
+        switch (docType) {
             case ADMISSION:
                 timeStampPanel.setBackground(ADMISSION_COLOR);
                 break;
             case SELF_INSURANCE:
                 timeStampPanel.setBackground(SELF_INSURANCE_COLOR);
                 break;
-            case OUT_PATIENT:    
+            case TEMP_KARTE:
+                timeStampPanel.setBackground(TEMP_KARTE_COLOR);
+                break;
+            case OUT_PATIENT:
             default:
                 timeStampPanel.setBackground(OUT_PATIENT_COLOR);
                 break;

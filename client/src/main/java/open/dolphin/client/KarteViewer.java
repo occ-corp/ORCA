@@ -142,13 +142,7 @@ public abstract class KarteViewer extends AbstractChartDocument {
         kartePanel.getTimeStampLabel().setText(sb.toString());
         
 //masuda^   タイトルを文書種別によって色分けする
-        KartePanel.DOC_TYPE docType = KartePanel.DOC_TYPE.OUT_PATIENT;
-        if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-            docType = KartePanel.DOC_TYPE.SELF_INSURANCE;
-        } else if (admission != null) {
-            docType = KartePanel.DOC_TYPE.ADMISSION;
-        }
-        kartePanel.setTitleColor(docType);
+        kartePanel.setTitleColor(docInfo);
 //masuda$
     }
 

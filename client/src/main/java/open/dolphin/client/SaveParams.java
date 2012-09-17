@@ -57,15 +57,6 @@ public final class SaveParams {
     }
     public void setConfirmed(Date confirmed) {
         this.confirmed = confirmed;
-        firstConfirmed = confirmed;
-    }
-    
-    private Date firstConfirmed;
-    public Date getFirstConfirmed() {
-        return firstConfirmed;
-    }
-    public void setFirstConfirmed(Date d) {
-        firstConfirmed = d;
     }
 
     // 編集元のタイトル
