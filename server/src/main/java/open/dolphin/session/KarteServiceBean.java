@@ -432,6 +432,8 @@ public class KarteServiceBean {
                 docInfo.setParentId(pInfo.getParentId());
                 docInfo.setParentIdRelation(pInfo.getParentIdRelation());
                 docInfo.setVersionNumber(pInfo.getVersionNumber());
+                // 算定履歴も削除
+                deleteSanteiHistory(parent.getId());
                 // 編集元は削除
                 em.remove(parent);
                 // parentPkをリセットする
@@ -989,9 +991,7 @@ public class KarteServiceBean {
         
         // 修正されたものは削除する
         long parentPk = document.getDocInfoModel().getParentPk();
-        if (parentPk != 0) {
-            deleteSanteiHistory(parentPk);
-        }
+        deleteSanteiHistory(parentPk);
     }
     
     private int parseInt(String str) {
@@ -1008,14 +1008,21 @@ public class KarteServiceBean {
     //@Asynchronous
     private void deleteSanteiHistory(long docPk) {
         
-        final String sql = "delete from SanteiHistoryModel s where s.moduleModel.id = :mId";
+        if (docPk == 0L) {
+            return;
+        }
+        
+        final String sql = "delete from SanteiHistoryModel s where s.moduleModel.id in (:mIds)";
 
         DocumentModel document = em.find(DocumentModel.class, docPk);
+        List<Long> mIds = new ArrayList<Long>();
+        
         for (ModuleModel mm : document.getModules()) {
-            long mId = mm.getId();
-            em.createQuery(sql).setParameter("mId", mId).executeUpdate();
+            mIds.add(mm.getId());
         }
-
+        if (!mIds.isEmpty()) {
+            em.createQuery(sql).setParameter("mIds", mIds).executeUpdate();
+        }
     }
     
     @SuppressWarnings("unchecked")
