@@ -414,9 +414,8 @@ public class KarteServiceBean {
     
     /**
      * ドキュメント DocumentModel オブジェクトを保存する。
-     * @param karteId カルテId
      * @param document 追加するDocumentModel オブジェクト
-     * @return 追加した数
+     * @return Document.id
      */
     public long addDocument(DocumentModel document) {
         
@@ -426,9 +425,10 @@ public class KarteServiceBean {
             DocumentModel parent = em.find(DocumentModel.class, docInfo.getParentPk());
             if (parent != null && IInfoModel.STATUS_TMP.equals(parent.getStatus())) {
                 // 編集元文書の情報を引き継ぐ
+                DocInfoModel pInfo = parent.getDocInfoModel();
                 document.setLinkId(parent.getLinkId());
                 document.setLinkRelation(parent.getLinkRelation());
-                DocInfoModel pInfo = parent.getDocInfoModel();
+                //docInfo.setParentPk(pInfo.getParentPk());   // parentPk = linkId
                 docInfo.setParentId(pInfo.getParentId());
                 docInfo.setParentIdRelation(pInfo.getParentIdRelation());
                 docInfo.setVersionNumber(pInfo.getVersionNumber());
@@ -436,8 +436,10 @@ public class KarteServiceBean {
                 deleteSanteiHistory(parent.getId());
                 // 編集元は削除
                 em.remove(parent);
-                // parentPkをリセットする
-                docInfo.setParentPk(0L);
+                // 永続化する
+                em.persist(document);
+                long id = document.getId();
+                return id;
             }
         }
 //masuda$
