@@ -929,6 +929,9 @@ public class DocInfoModel extends InfoModel implements Comparable {
     public String getFirstConfirmDateWithMark() {
         StringBuilder sb = new StringBuilder();
         sb.append(getFirstConfirmDateTrimTime());
+        if (IInfoModel.STATUS_TMP.equals(status)) {
+            sb.append("仮");
+        }
         if (admission != null) {
             sb.append("入");
         }

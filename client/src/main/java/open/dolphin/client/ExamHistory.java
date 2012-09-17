@@ -6,14 +6,11 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import javax.swing.JPanel;
-import javax.swing.JTable;
-import javax.swing.JViewport;
-import javax.swing.ListSelectionModel;
+import java.util.concurrent.Executors;
+import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import open.dolphin.delegater.MasudaDelegater;
-import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.DocInfoModel;
 import open.dolphin.infomodel.ExamHistoryModel;
 import open.dolphin.infomodel.ModelUtils;
@@ -228,7 +225,7 @@ public class ExamHistory {
         final Date fromDate = docHistory.getExtractionPeriod();
         final Date toDate = new Date();
 
-        final SimpleWorker worker = new SimpleWorker<List<ExamHistoryModel>, Void>() {
+        final SwingWorker worker = new SwingWorker<List<ExamHistoryModel>, Void>() {
 
             @Override
             protected List<ExamHistoryModel> doInBackground() throws Exception {
@@ -278,7 +275,7 @@ public class ExamHistory {
             }
         };
         // ここは別スレッドで実行する
-        java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
+        Executors.newCachedThreadPool().execute(worker);
         //worker.execute();
     }
 
