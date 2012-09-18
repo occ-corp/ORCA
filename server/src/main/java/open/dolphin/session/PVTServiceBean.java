@@ -2,8 +2,11 @@ package open.dolphin.session;
 
 import java.util.Date;
 import java.util.List;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import open.dolphin.mbean.ServletContextHolder;
 
@@ -13,6 +16,7 @@ import open.dolphin.mbean.ServletContextHolder;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
+@Stateless
 public class PVTServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_PATIENT_BY_FID_PID
@@ -27,6 +31,9 @@ public class PVTServiceBean extends AbstractServiceBean {
     
     @Inject
     private ServletContextHolder contextHolder;
+    
+    @PersistenceContext
+    private EntityManager em;
     
     //private static final Logger logger = Logger.getLogger(PVTServiceBean.class.getName());
 

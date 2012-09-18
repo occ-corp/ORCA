@@ -2,8 +2,11 @@ package open.dolphin.session;
 
 import java.util.ArrayList;
 import java.util.List;
+import javax.ejb.Stateless;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
@@ -12,6 +15,7 @@ import open.dolphin.infomodel.PatientVisitModel;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc
  */
+@Stateless
 public class PatientServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_PATIENT_BY_PVTDATE 
@@ -31,7 +35,10 @@ public class PatientServiceBean extends AbstractServiceBean {
     private static final String NUMBER = "number";
     private static final String ZIPCODE = "zipCode";
     private static final String PERCENT = "%";
-
+    
+    @PersistenceContext
+    private EntityManager em;
+    
 //masuda^
     @Inject
     private ChartEventServiceBean eventServiceBean;
@@ -55,12 +62,8 @@ public class PatientServiceBean extends AbstractServiceBean {
         }
         
         //-----------------------------------
-        if (!ret.isEmpty()) {
-            for (PatientModel patient : ret) {
-                // 患者の健康保険を取得する
-                //setHealthInsurances(patient);
-            }
-        }
+        // 患者の健康保険を取得する
+        setHealthInsurances(ret);
         //-----------------------------------
 
 //masuda^   最終受診日設定
@@ -131,13 +134,8 @@ public class PatientServiceBean extends AbstractServiceBean {
         }
 
         //-----------------------------------
-        if (!ret.isEmpty()) {
-
-            for (PatientModel patient : ret) {
-                // 患者の健康保険を取得する
-                //setHealthInsurances(patient);
-            }
-        }
+        // 患者の健康保険を取得する
+        setHealthInsurances(ret);
         //-----------------------------------
         
 //masuda^   最終受診日設定
@@ -162,7 +160,7 @@ public class PatientServiceBean extends AbstractServiceBean {
 
         for (PatientVisitModel pvt : list) {
             PatientModel patient = pvt.getPatientModel();
-            //setHealthInsurances(patient);
+            setHealthInsurances(patient);
             ret.add(patient);
 //masuda^   最終受診日設定
            patient.setPvtDate(pvt.getPvtDate());
@@ -189,7 +187,7 @@ public class PatientServiceBean extends AbstractServiceBean {
 
         // Lazy Fetch の 基本属性を検索する
         // 患者の健康保険を取得する
-        //setHealthInsurances(bean);
+        setHealthInsurances(bean);
 
         return bean;
     }
@@ -270,11 +268,7 @@ public class PatientServiceBean extends AbstractServiceBean {
                 .getResultList();
         
         // 患者の健康保険を取得する。忘れがちｗ
-        if (!list.isEmpty()) {
-            for (PatientModel patient : list) {
-                //setHealthInsurances(patient);
-            }
-        }
+        setHealthInsurances(list);
         
         return list;
     }

@@ -1,5 +1,6 @@
 package open.dolphin.session;
 
+import java.util.Collection;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.persistence.EntityManager;
@@ -29,14 +30,23 @@ public class AbstractServiceBean {
     protected static final String DATE = "date";
     protected static final String PATIENT_PK = "patientPk";
     
-
     @PersistenceContext
-    protected EntityManager em;
+    private EntityManager em;
     
 
+    protected void setHealthInsurances(Collection<PatientModel> list) {
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                setHealthInsurances(pm);
+            }
+        }
+    }
+    
     protected void setHealthInsurances(PatientModel pm) {
-        List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
-        pm.setHealthInsurances(ins);
+        if (pm != null) {
+            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
+            pm.setHealthInsurances(ins);
+        }
     }
 
     protected List<HealthInsuranceModel> getHealthInsurances(long pk) {

@@ -1,6 +1,9 @@
 package open.dolphin.session;
 
 import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.LetterDate;
 import open.dolphin.infomodel.LetterItem;
 import open.dolphin.infomodel.LetterModule;
@@ -10,6 +13,7 @@ import open.dolphin.infomodel.LetterText;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
+@Stateless
 public class LetterServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_LETTER_BY_KARTE_ID = "from LetterModule l where l.karte.id=:karteId";
@@ -18,6 +22,10 @@ public class LetterServiceBean extends AbstractServiceBean {
     private static final String QUERY_TEXT_BY_ID = "from LetterText l where l.module.id=:id";
     private static final String QUERY_DATE_BY_ID = "from LetterDate l where l.module.id=:id";
 
+    @PersistenceContext
+    private EntityManager em;
+    
+    
     public long saveOrUpdateLetter(LetterModule model) {
 
         // 保存

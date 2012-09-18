@@ -2,8 +2,11 @@ package open.dolphin.session;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
+import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryParser.ParseException;
@@ -16,9 +19,13 @@ import org.hibernate.search.jpa.Search;
  * MasudaServiceBean
  * @author masuda, Masuda Naika
  */
+@Stateless
 public class MasudaServiceBean extends AbstractServiceBean {
 
     private static final String FINISHED = "finished";
+    
+    @PersistenceContext
+    private EntityManager em;
     
     
     // 定期処方
@@ -668,9 +675,8 @@ public class MasudaServiceBean extends AbstractServiceBean {
                 String pvtDate = ModelUtils.getDateTimeAsString(lastDate);
                 model.setPvtDate(pvtDate);
                 ret.add(model);
-
                 // 患者の健康保険を取得する
-                //setHealthInsurances(model);
+                setHealthInsurances(model);
             }
         }
 
@@ -1187,11 +1193,7 @@ public class MasudaServiceBean extends AbstractServiceBean {
         }
         
         // 患者の健康保険を取得する。忘れがちｗ
-        if (!set.isEmpty()) {
-            for (PatientModel patient : set) {
-                //setHealthInsurances(patient);
-            }
-        }
+        setHealthInsurances(set);
 
         return new ArrayList<PatientModel>(set);
     }

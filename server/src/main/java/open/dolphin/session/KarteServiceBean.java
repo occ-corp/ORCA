@@ -2,7 +2,10 @@ package open.dolphin.session;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
@@ -11,6 +14,7 @@ import org.hibernate.search.jpa.Search;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
+@Stateless
 public class KarteServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_KARTE 
@@ -73,6 +77,10 @@ public class KarteServiceBean extends AbstractServiceBean {
             = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate "
             + "and (d.status='F' or d.status='T')";
 //masuda$
+    
+    @PersistenceContext
+    private EntityManager em;
+    
     
     public KarteBean getKarte(String fid, String pid, Date fromDate) {
         

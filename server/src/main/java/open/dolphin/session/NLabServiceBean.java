@@ -4,13 +4,17 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import javax.ejb.Stateless;
+import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
+@Stateless
 public class NLabServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_MODULE_BY_MODULE_KEY 
@@ -34,7 +38,10 @@ public class NLabServiceBean extends AbstractServiceBean {
     private static final String ITEM_CODE = "itemCode";
     private static final String WOLF = "WOLF";
 
-
+    @PersistenceContext
+    private EntityManager em;
+    
+    
     public List<PatientLiteModel> getConstrainedPatients(String fid, List<String>idList) {
 
         List<PatientLiteModel> ret = new ArrayList<PatientLiteModel>(idList.size());
@@ -75,10 +82,8 @@ public class NLabServiceBean extends AbstractServiceBean {
 
 
         //--------------------------------------------------------
-        if (patient != null) {
-            // 患者の健康保険を取得する
-            //setHealthInsurances(patient);
-        }
+        // 患者の健康保険を取得する
+        setHealthInsurances(patient);
         //--------------------------------------------------------
 
         String fidPid = fid + ":" + pid;
