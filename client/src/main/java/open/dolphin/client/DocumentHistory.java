@@ -1155,14 +1155,14 @@ public class DocumentHistory {
             if (info != null && !isSelected) {
                 if (IInfoModel.STATUS_TMP.equals(info.getStatus())) {
                     setBackground(TEMP_KARTE_COLOR);
+                } else if (info.getAdmissionModel() != null) {
+                    setBackground(ADMISSION_COLOR);
                 } else if (info.getAdmissionModel() == null) {
                     if (info.isKarte()
                             && info.getHealthInsurance() != null
                             && info.getHealthInsurance().startsWith(SELF_PREFIX)) {
                         setBackground(SELF_INSURANCE_COLOR);
                     }
-                } else {
-                    setBackground(ADMISSION_COLOR);
                 }
             }
             return this;

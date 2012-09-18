@@ -135,10 +135,10 @@ public abstract class KartePanel extends Panel2 {
         AdmissionModel admission = docInfo.getAdmissionModel();
         if (IInfoModel.STATUS_TMP.equals(docInfo.getStatus())) {
             docType = DOC_TYPE.TEMP_KARTE;
-        } else if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
-            docType = DOC_TYPE.SELF_INSURANCE;
         } else if (admission != null) {
             docType = DOC_TYPE.ADMISSION;
+        } else if (docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX)) {
+            docType = DOC_TYPE.SELF_INSURANCE;
         }
 
         switch (docType) {
