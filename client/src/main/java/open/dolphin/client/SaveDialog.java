@@ -247,11 +247,13 @@ public final class SaveDialog {
 
                 @Override
                 public void itemStateChanged(ItemEvent evt) {
-                    dateField.setEnabled(cb_dateEnable.isSelected());
+                    boolean b = cb_dateEnable.isSelected();
+                    dateField.setEnabled(b);
+                    btnNow.setEnabled(b);
                 }
             });
             
-            btnNow = new JButton("今");
+            btnNow = new JButton("現時刻");
             btnNow.addActionListener(new ActionListener(){
 
                 @Override
