@@ -205,9 +205,9 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
             protected List<PatientModel> doInBackground() throws Exception {
                 Date d = new Date();
                 UserModel user = Project.getUserModel();
-                long userId = user.getId();
+                long userPk = user.getId();
                 MasudaDelegater del = MasudaDelegater.getInstance();
-                List<PatientModel> list = del.getTempDocumentPatients(d, userId);
+                List<PatientModel> list = del.getTempDocumentPatients(d, userPk);
                 return list;
             }
 

@@ -1177,16 +1177,15 @@ public class MasudaServiceBean extends AbstractServiceBean {
     }
 
     // 現時点で過去日になった仮保存カルテを取得する
-    @SuppressWarnings("unchecked")
-    public List<PatientModel> getTempDocumentPatients(Date fromDate, long userId) {
+    public List<PatientModel> getTempDocumentPatients(Date fromDate, long userPk) {
 
         final String sql = "from DocumentModel d where d.status='T' "
                 + "and d.started <= :fromDate and d.creator.id = :id";
 
-        List<DocumentModel> documents =
+        List<DocumentModel> documents = (List<DocumentModel>)
                 em.createQuery(sql)
                 .setParameter("fromDate", fromDate)
-                .setParameter("id", userId)
+                .setParameter("id", userPk)
                 .getResultList();
 
         Set<PatientModel> set = new HashSet<PatientModel>();
