@@ -34,7 +34,7 @@ import open.dolphin.helper.WindowSupport;
 import open.dolphin.impl.login.LoginDialog;
 import open.dolphin.impl.orcaapi.OrcaApi;
 import open.dolphin.impl.server.StandAlonePVTServer;
-import open.dolphin.impl.tempkarte.TempKarteChecker;
+import open.dolphin.impl.tempkarte.TempKarteCheckDialog;
 import open.dolphin.infomodel.*;
 import open.dolphin.plugin.PluginLoader;
 import open.dolphin.project.AbstractProjectFactory;
@@ -529,6 +529,15 @@ public class Dolphin implements MainWindow {
         providers.put("stampBox", stampBox);
         
         windowSupport.getFrame().setVisible(true);
+        
+//masuda^   仮保存カルテチェック
+        TempKarteCheckDialog tempKarte = TempKarteCheckDialog.getInstance();
+        if (tempKarte.isTempKarteExists()) {
+            Toolkit.getDefaultToolkit().beep();
+            tempKarte.setLocationRelativeTo(null);
+            tempKarte.setVisible(true);
+        }
+//masuda$
     }
 
     @Override
@@ -1672,7 +1681,8 @@ public class Dolphin implements MainWindow {
     }
     
     public void checkTempKarte() {
-        TempKarteChecker tempKarte = TempKarteChecker.getInstance();
+        TempKarteCheckDialog tempKarte = TempKarteCheckDialog.getInstance();
+        tempKarte.renewList();
         tempKarte.setVisible(true);
     }
 //masuda$

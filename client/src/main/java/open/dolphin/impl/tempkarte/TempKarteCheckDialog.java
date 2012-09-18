@@ -6,7 +6,6 @@ import java.awt.Point;
 import java.awt.event.*;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -30,7 +29,7 @@ import open.dolphin.table.StripeTableCellRenderer;
  * 現時点で過去日で仮保存のままのカルテを警告する
  * @author masuda, Masuda Naika
  */
-public class TempKarteChecker extends JFrame implements IChartEventListener {
+public class TempKarteCheckDialog extends JDialog implements IChartEventListener {
     
     private JPanel panel;
     private JTable table;
@@ -67,19 +66,19 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
     private ChartEventListener cel;
     
     
-    private static final TempKarteChecker instance;
+    private static final TempKarteCheckDialog instance;
     
     static {
-        instance = new TempKarteChecker();
+        instance = new TempKarteCheckDialog();
     }
     
-    private TempKarteChecker() {
+    private TempKarteCheckDialog() {
         setup();
         initComponents();
         connect();
     }
     
-    public static TempKarteChecker getInstance() {
+    public static TempKarteCheckDialog getInstance() {
         return instance;
     }
     
@@ -159,7 +158,7 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
         panel.add(infoLbl, BorderLayout.NORTH);
         
         pack();
-        ComponentMemory cm = new ComponentMemory(this, new Point(100, 100), this.getPreferredSize(), TempKarteChecker.this);
+        ComponentMemory cm = new ComponentMemory(this, new Point(100, 100), this.getPreferredSize(), TempKarteCheckDialog.this);
         cm.setToPreferenceBounds();
     }
     
@@ -208,37 +207,30 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                renewList();
+                SwingWorker worker = new SwingWorker() {
+
+                    @Override
+                    protected Object doInBackground() throws Exception {
+                        renewList();
+                        return null;
+                    }
+                };
+                worker.execute();
             }
         });
     }
     
-    private void renewList() {
+    public void renewList() {
+
+        Date d = new Date();
+        UserModel user = Project.getUserModel();
+        long userPk = user.getId();
         
-        SwingWorker worker = new SwingWorker<List<PatientModel>, Void>(){
+        MasudaDelegater del = MasudaDelegater.getInstance();
+        List<PatientModel> list = del.getTempDocumentPatients(d, userPk);
 
-            @Override
-            protected List<PatientModel> doInBackground() throws Exception {
-                Date d = new Date();
-                UserModel user = Project.getUserModel();
-                long userPk = user.getId();
-                MasudaDelegater del = MasudaDelegater.getInstance();
-                List<PatientModel> list = del.getTempDocumentPatients(d, userPk);
-                return list;
-            }
-
-            @Override
-            protected void done() {
-                try {
-                    List<PatientModel> list = get();
-                    tableModel.setDataProvider(list);
-                } catch (InterruptedException ex) {
-                } catch (ExecutionException ex) {
-                }
-                cntLbl.setText(tableModel.getObjectCount() + "件");
-            }
-        };
-        worker.execute();
+        tableModel.setDataProvider(list);
+        cntLbl.setText(tableModel.getObjectCount() + "件");
     }
     
     @Override
@@ -248,14 +240,15 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
         }
         if (b) {
             cel.addListener(instance);
-            renewList();
         } else {
             cel.removeListener(instance);
+            setModal(false);
         }
         super.setVisible(b);
     }
     
     public boolean isTempKarteExists() {
+        renewList();
         return tableModel.getObjectCount() > 0;
     }
     
