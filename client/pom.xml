@@ -75,7 +75,7 @@
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.4-703.jdbc4</version>
+            <version>8.4-702.jdbc4</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
