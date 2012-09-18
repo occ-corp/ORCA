@@ -7,10 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.dto.PatientSearchSpec;
-import open.dolphin.infomodel.HealthInsuranceModel;
-import open.dolphin.infomodel.PVTHealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
-import open.dolphin.util.BeanUtils;
 
 /**
  * 患者関連の Business Delegater　クラス。
@@ -141,11 +138,8 @@ public class  PatientDelegater extends BusinessDelegater {
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
         
-        if (list != null && !list.isEmpty()) {
-            for (PatientModel pm : list) {
-                decodeHealthInsurance(pm);
-            }
-        }
+        decodePmHealthInsurance(list);
+
         return list;
     }
 
@@ -198,40 +192,11 @@ public class  PatientDelegater extends BusinessDelegater {
                 getConverter().fromJson(entityStr, typeRef);
         
         // 忘れがちｗ
-        if (list != null && !list.isEmpty()) {
-            for (PatientModel pm : list) {
-                decodeHealthInsurance(pm);
-            }
-        }
+        decodePmHealthInsurance(list);
         
         return list;
     }
 
-
-    /**
-     * バイナリの健康保険データをオブジェクトにデコードする。
-     */
-    private void decodeHealthInsurance(PatientModel patient) {
-
-        // Health Insurance を変換をする beanXML2PVT
-        Collection<HealthInsuranceModel> c = patient.getHealthInsurances();
-
-        if (c != null && c.size() > 0) {
-
-            for (HealthInsuranceModel model : c) {
-                try {
-                    // byte[] を XMLDecord
-                    PVTHealthInsuranceModel hModel = (PVTHealthInsuranceModel)BeanUtils.xmlDecode(model.getBeanBytes());
-                    patient.addPvtHealthInsurance(hModel);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-            }
-
-            c.clear();
-            patient.setHealthInsurances(null);
-        }
-    }
     
     @Override
     protected void debug(int status, String entity) {

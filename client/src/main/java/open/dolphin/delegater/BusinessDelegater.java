@@ -2,10 +2,12 @@ package open.dolphin.delegater;
 
 import com.sun.jersey.api.client.WebResource;
 import java.text.SimpleDateFormat;
+import java.util.Collection;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ClientContext;
-import open.dolphin.infomodel.JsonConverter;
+import open.dolphin.infomodel.*;
+import open.dolphin.util.BeanUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -54,5 +56,49 @@ public class BusinessDelegater {
     
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
+    }
+    
+
+    /**
+     * バイナリの健康保険データをオブジェクトにデコードする。
+     */
+    protected void decodePvtHealthInsurance(Collection<PatientVisitModel> list) {
+        
+        if (list != null && !list.isEmpty()) {
+            for (PatientVisitModel pm : list) {
+                decodeHealthInsurance(pm.getPatientModel());
+            }
+        }
+    }
+    protected void decodePmHealthInsurance(Collection<PatientModel> list) {
+        
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                decodeHealthInsurance(pm);
+            }
+        }
+    }
+    
+    private void decodeHealthInsurance(PatientModel patient) {
+
+        // Health Insurance を変換をする beanXML2PVT
+        Collection<HealthInsuranceModel> c = patient.getHealthInsurances();
+
+        if (c != null && !c.isEmpty()) {
+
+            for (HealthInsuranceModel model : c) {
+                try {
+                    // byte[] を XMLDecord
+                    PVTHealthInsuranceModel hModel = (PVTHealthInsuranceModel) 
+                            BeanUtils.xmlDecode(model.getBeanBytes());
+                    patient.addPvtHealthInsurance(hModel);
+                } catch (Exception e) {
+                    e.printStackTrace(System.err);
+                }
+            }
+
+            c.clear();
+            patient.setHealthInsurances(null);
+        }
     }
 }

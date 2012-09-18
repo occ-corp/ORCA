@@ -4,18 +4,14 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
-@Stateless
-public class NLabServiceBean {
+public class NLabServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_MODULE_BY_MODULE_KEY 
             = "from NLaboModule m where m.moduleKey=:moduleKey";
@@ -29,10 +25,7 @@ public class NLabServiceBean {
             = "from NLaboItem l where l.laboModule.id=:mid order by l.sortKey";
     private static final String QUERY_ITEM_BY_FIDPID_ITEMCODE 
             = "from NLaboItem l where l.patientId=:fidPid and l.itemCode=:itemCode order by l.sampleDate desc";
-    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
-            = "from HealthInsuranceModel h where h.patient.id=:pk";
 
-    private static final String PK = "pk";
     private static final String FIDPID = "fidPid";
     private static final String SAMPLEDATE = "sampleDate";
     private static final String LABOCODE = "laboCode";
@@ -41,8 +34,6 @@ public class NLabServiceBean {
     private static final String ITEM_CODE = "itemCode";
     private static final String WOLF = "WOLF";
 
-    @PersistenceContext
-    private EntityManager em;
 
     public List<PatientLiteModel> getConstrainedPatients(String fid, List<String>idList) {
 
@@ -84,15 +75,9 @@ public class NLabServiceBean {
 
 
         //--------------------------------------------------------
-        if (patient!=null) {
-
+        if (patient != null) {
             // 患者の健康保険を取得する
-            @SuppressWarnings("unchecked")
-            List<HealthInsuranceModel> insurances = 
-                    em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                    .setParameter(PK, patient.getId())
-                    .getResultList();
-            patient.setHealthInsurances(insurances);
+            //setHealthInsurances(patient);
         }
         //--------------------------------------------------------
 

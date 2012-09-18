@@ -3,28 +3,18 @@ package open.dolphin.session;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.AppointmentModel;
 
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
-@Stateless
-public class AppoServiceBean {
+public class AppoServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_APPOINTMENT_BY_KARTE_ID 
             = "from AppointmentModel a where a.karte.id=:karteId and a.date between :fromDate and :toDate";
-    private static final String KARTE_ID = "karteId";
-    private static final String FROM_DATE = "fromDate";
-    private static final String TO_DATE = "toDate";
 
-    @PersistenceContext
-    private EntityManager em;
-
-
+    
     public int putAppointments(List<AppointmentModel> list) {
 
         int cnt = 0;

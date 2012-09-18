@@ -2,11 +2,8 @@ package open.dolphin.session;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.NonUniqueResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import org.apache.lucene.analysis.Analyzer;
 import org.apache.lucene.queryParser.ParseException;
@@ -19,14 +16,10 @@ import org.hibernate.search.jpa.Search;
  * MasudaServiceBean
  * @author masuda, Masuda Naika
  */
-@Stateless
-public class MasudaServiceBean {
+public class MasudaServiceBean extends AbstractServiceBean {
 
     private static final String FINISHED = "finished";
-
-    @PersistenceContext
-    private EntityManager em;
-
+    
     
     // 定期処方
     @SuppressWarnings("unchecked")
@@ -244,9 +237,6 @@ public class MasudaServiceBean {
                     .setParameter("toDate", toDate)
                     .setMaxResults(1)
                     .getSingleResult();
-            // 保険がnullだとconverterでexceptionが出てしまうので取り敢えず空のリストを設定する
-            //List<HealthInsuranceModel> insurances = Collections.emptyList();
-            //result.getPatientModel().setHealthInsurances(insurances);
         } catch (NoResultException e) {
         }
         return result;
@@ -462,18 +452,12 @@ public class MasudaServiceBean {
     private void setInsuranceAndPvtDate(String fid, List<PatientModel> list) {
 
         final int CANCEL_PVT = 1 << 6;  // BIT_CANCEL = 6;
-        final String sqlIns = "from HealthInsuranceModel h where h.patient.id = :pk";
         final String sqlPvt = "from PatientVisitModel p where p.facilityId = :fid " +
                 "and p.patient.id = :patientPk and p.status != :status order by p.pvtDate desc";
 
         for (PatientModel pm : list) {
             // 患者の健康保険を取得する
-            @SuppressWarnings("unchecked")
-            List<HealthInsuranceModel> insurances =
-                    em.createQuery(sqlIns)
-                    .setParameter("pk", pm.getId())
-                    .getResultList();
-            pm.setHealthInsurances(insurances);
+            setHealthInsurances(pm);
 
             try {
                 PatientVisitModel pvt = (PatientVisitModel)
@@ -686,13 +670,7 @@ public class MasudaServiceBean {
                 ret.add(model);
 
                 // 患者の健康保険を取得する
-                @SuppressWarnings("unchecked")
-                List<HealthInsuranceModel> insurances =
-                        em.createQuery("from HealthInsuranceModel h where h.patient.id=:pk")
-                        .setParameter("pk", model.getId())
-                        .getResultList();
-                model.setHealthInsurances(insurances);
-
+                //setHealthInsurances(model);
             }
         }
 
@@ -1186,5 +1164,35 @@ public class MasudaServiceBean {
         }
         
         return cnt;
+    }
+
+    // 現時点で過去日になった仮保存カルテを取得する
+    @SuppressWarnings("unchecked")
+    public List<PatientModel> getTempDocumentPatients(String fid, Date fromDate) {
+
+        final String sql = "from DocumentModel d where d.status='T' "
+                + "and d.started <= :fromDate and d.karte.patient.facilityId = :fid";
+
+        List<DocumentModel> documents =
+                em.createQuery(sql)
+                .setParameter("fid", fid)
+                .setParameter("fromDate", fromDate)
+                .getResultList();
+
+        Set<PatientModel> set = new HashSet<PatientModel>();
+
+        for (DocumentModel doc : documents) {
+            PatientModel pm = doc.getKarteBean().getPatientModel();
+            set.add(pm);
+        }
+        
+        // 患者の健康保険を取得する。忘れがちｗ
+        if (!set.isEmpty()) {
+            for (PatientModel patient : set) {
+                //setHealthInsurances(patient);
+            }
+        }
+
+        return new ArrayList<PatientModel>(set);
     }
 }

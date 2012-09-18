@@ -2,14 +2,8 @@ package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
-import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
-import open.dolphin.infomodel.HealthInsuranceModel;
-import open.dolphin.infomodel.PVTHealthInsuranceModel;
-import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.util.BeanUtils;
 
 /**
  * PVT 関連の Business Delegater　クラス。
@@ -101,44 +95,9 @@ public class PVTDelegater extends BusinessDelegater {
                 getConverter().fromJson(entityStr, typeRef);
 
         // 保険をデコード
-        if (pvtList != null && !pvtList.isEmpty()) {
-            for (PatientVisitModel pvt : pvtList) {
-                PatientModel pm = pvt.getPatientModel();
-                decodeHealthInsurance(pm);
-            }
-        }
+        decodePvtHealthInsurance(pvtList);
 
         return pvtList;
-    }
-
-    /**
-     * バイナリの健康保険データをオブジェクトにデコードする。
-     *
-     * @param patient 患者モデル
-     */
-    private void decodeHealthInsurance(PatientModel patient) {
-
-        // Health Insurance を変換をする beanXML2PVT
-        Collection<HealthInsuranceModel> c = patient.getHealthInsurances();
-
-        if (c != null && c.size() > 0) {
-
-            List<PVTHealthInsuranceModel> list = new ArrayList<PVTHealthInsuranceModel>(c.size());
-
-            for (HealthInsuranceModel model : c) {
-                try {
-                    // byte[] を XMLDecord
-                    PVTHealthInsuranceModel hModel = (PVTHealthInsuranceModel) BeanUtils.xmlDecode(model.getBeanBytes());
-                    list.add(hModel);
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-            }
-
-            patient.setPvtHealthInsurances(list);
-            patient.getHealthInsurances().clear();
-            patient.setHealthInsurances(null);
-        }
     }
 
     @Override

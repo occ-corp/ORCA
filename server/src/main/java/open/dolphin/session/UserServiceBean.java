@@ -1,32 +1,24 @@
 package open.dolphin.session;
 
 import java.util.List;
-import javax.ejb.Stateless;
 import javax.persistence.EntityExistsException;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 
 /**
  *
  * @author kazushi Minagawa, Digital Globe, Inc.
  */
-@Stateless
-public class UserServiceBean { //implements UserServiceBeanLocal {
+public class UserServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_USER_BY_UID 
             = "from UserModel u where u.userId=:uid";
     private static final String QUERY_USER_BY_FID_MEMBERTYPE 
             = "from UserModel u where u.userId like :fid and u.memberType!=:memberType";
 
-    private static final String UID = "uid";
-    private static final String FID = "fid";
     private static final String MEMBER_TYPE = "memberType";
     private static final String MEMBER_TYPE_EXPIRED = "EXPIRED";
     
-    @PersistenceContext
-    private EntityManager em;
 
     public boolean authenticate(String userName, String password) {
 

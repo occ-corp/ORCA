@@ -2,13 +2,9 @@ package open.dolphin.session;
 
 import java.util.ArrayList;
 import java.util.List;
-import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.ChartEventModel;
-import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
 
@@ -16,8 +12,7 @@ import open.dolphin.infomodel.PatientVisitModel;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc
  */
-@Stateless
-public class PatientServiceBean { //implements PatientServiceBeanLocal {
+public class PatientServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_PATIENT_BY_PVTDATE 
             = "from PatientVisitModel p where p.facilityId = :fid and p.pvtDate like :date";
@@ -31,21 +26,12 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
             = "from PatientModel p where p.facilityId = :fid and (p.telephone like :number or p.mobilePhone like :number)";
     private static final String QUERY_PATIENT_BY_ZIPCODE 
             = "from PatientModel p where p.facilityId = :fid and p.address.zipCode like :zipCode";
-    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
-            = "from HealthInsuranceModel h where h.patient.id=:pk";
 
-    private static final String PK = "pk";
-    private static final String FID = "fid";
-    private static final String PID = "pid";
     private static final String NAME = "name";
     private static final String NUMBER = "number";
     private static final String ZIPCODE = "zipCode";
-    private static final String DATE = "date";
     private static final String PERCENT = "%";
 
-    @PersistenceContext
-    private EntityManager em;
-    
 //masuda^
     @Inject
     private ChartEventServiceBean eventServiceBean;
@@ -70,15 +56,9 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
         
         //-----------------------------------
         if (!ret.isEmpty()) {
-
             for (PatientModel patient : ret) {
-
                 // 患者の健康保険を取得する
-                List<HealthInsuranceModel> insurances = 
-                        em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                        .setParameter(PK, patient.getId())
-                        .getResultList();
-                patient.setHealthInsurances(insurances);
+                //setHealthInsurances(patient);
             }
         }
         //-----------------------------------
@@ -112,13 +92,8 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
         if (!ret.isEmpty()) {
 
             for (PatientModel patient : ret) {
-
                 // 患者の健康保険を取得する
-                List<HealthInsuranceModel> insurances = 
-                        em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                        .setParameter(PK, patient.getId())
-                        .getResultList();
-                patient.setHealthInsurances(insurances);
+                //setHealthInsurances(patient);
             }
         }
         //-----------------------------------
@@ -159,13 +134,8 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
         if (!ret.isEmpty()) {
 
             for (PatientModel patient : ret) {
-
                 // 患者の健康保険を取得する
-                List<HealthInsuranceModel> insurances = 
-                        em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                        .setParameter(PK, patient.getId())
-                        .getResultList();
-                patient.setHealthInsurances(insurances);
+                //setHealthInsurances(patient);
             }
         }
         //-----------------------------------
@@ -192,12 +162,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
 
         for (PatientVisitModel pvt : list) {
             PatientModel patient = pvt.getPatientModel();
-            @SuppressWarnings("unchecked")
-            List<HealthInsuranceModel> insurances = 
-                    em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                    .setParameter(PK, patient.getId())
-                    .getResultList();
-                patient.setHealthInsurances(insurances);
+            //setHealthInsurances(patient);
             ret.add(patient);
 //masuda^   最終受診日設定
            patient.setPvtDate(pvt.getPvtDate());
@@ -222,16 +187,9 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
                 .setParameter(PID, pid)
                 .getSingleResult();
 
-        long pk = bean.getId();
-
         // Lazy Fetch の 基本属性を検索する
         // 患者の健康保険を取得する
-        @SuppressWarnings("unchecked")
-        List<HealthInsuranceModel> insurances =
-                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                .setParameter(PK, pk)
-                .getResultList();
-        bean.setHealthInsurances(insurances);
+        //setHealthInsurances(bean);
 
         return bean;
     }
@@ -314,11 +272,7 @@ public class PatientServiceBean { //implements PatientServiceBeanLocal {
         // 患者の健康保険を取得する。忘れがちｗ
         if (!list.isEmpty()) {
             for (PatientModel patient : list) {
-                List<HealthInsuranceModel> insurances =
-                        em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                        .setParameter(PK, patient.getId())
-                        .getResultList();
-                patient.setHealthInsurances(insurances);
+                //setHealthInsurances(patient);
             }
         }
         

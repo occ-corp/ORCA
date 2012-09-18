@@ -2,11 +2,8 @@ package open.dolphin.session;
 
 import java.util.Date;
 import java.util.List;
-import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import open.dolphin.mbean.ServletContextHolder;
 
@@ -16,27 +13,15 @@ import open.dolphin.mbean.ServletContextHolder;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-@Stateless
-public class PVTServiceBean { //implements PVTServiceBeanLocal {
+public class PVTServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_PATIENT_BY_FID_PID
             = "from PatientModel p where p.facilityId=:fid and p.patientId=:pid";
-    private static final String QUERY_INSURANCE_BY_PATIENT_ID
-            = "from HealthInsuranceModel h where h.patient.id=:id";
-    //private static final String QUERY_KARTE_BY_PATIENT_ID
-    //      = "from KarteBean k where k.patient.id=:id";
     private static final String QUERY_KARTE_ID_BY_PATIENT_ID
             = "select k.id from KarteBean k where k.patient.id = :id";
     private static final String QUERY_APPO_BY_KARTE_ID_DATE
             = "from AppointmentModel a where a.karte.id=:id and a.date=:date";
-    private static final String FID = "fid";
-    private static final String PID = "pid";
-    private static final String ID = "id";
-    private static final String DATE = "date";
 
-    @PersistenceContext
-    private EntityManager em;
-    
     @Inject
     private ChartEventServiceBean eventServiceBean;
     
@@ -80,11 +65,7 @@ public class PVTServiceBean { //implements PVTServiceBeanLocal {
             //-----------------------------
             // 健康保険情報を更新する
             //-----------------------------
-            @SuppressWarnings("unchecked")
-            List<HealthInsuranceModel> old =
-                    em.createQuery(QUERY_INSURANCE_BY_PATIENT_ID)
-                    .setParameter(ID, exist.getId())
-                    .getResultList();
+            List<HealthInsuranceModel> old = getHealthInsurances(exist.getId());
             
             // ORCAからpvtに乗ってやってきた保険情報を取得する。検索などからPVT登録したものには乗っかっていない
             List<HealthInsuranceModel> newOne = patient.getHealthInsurances();

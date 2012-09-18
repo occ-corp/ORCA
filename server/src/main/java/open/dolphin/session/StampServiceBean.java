@@ -4,18 +4,14 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 
 /**
  *
  * @author kazushi, Minagawa, Digital Globe, Inc.
  */
-@Stateless
-public class StampServiceBean { //implements StampServiceBeanLocal {
+public class StampServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_TREE_BY_USER_PK 
             = "from StampTreeModel s where s.user.id=:userPK";
@@ -31,12 +27,8 @@ public class StampServiceBean { //implements StampServiceBeanLocal {
             = "from SubscribedTreeModel s where s.user.id=:userPK and s.treeId=:treeId";
 
     private static final String USER_PK = "userPK";
-    private static final String FID = "fid";
     private static final String TREE_ID = "treeId";
-    private static final String ID = "id";
-    
-    @PersistenceContext
-    private EntityManager em;
+   
 
     /**
      * user個人のStampTreeを保存/更新する。

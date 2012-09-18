@@ -2,10 +2,7 @@ package open.dolphin.session;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
-import javax.ejb.Stateless;
-import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
@@ -14,19 +11,7 @@ import org.hibernate.search.jpa.Search;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
-@Stateless
-public class KarteServiceBean {
-
-    //private static final String QUERY_PATIENT_BY_FIDPID = "from PatientModel p where p.facilityId=:fid and p.patientId=:pid";
-
-    private static final String PATIENT_PK = "patientPk";
-    private static final String KARTE_ID = "karteId";
-    private static final String FROM_DATE = "fromDate";
-    private static final String TO_DATE = "toDate";
-    private static final String ID = "id";
-    private static final String ENTITY = "entity";
-    private static final String FID = "fid";
-    private static final String PID = "pid";
+public class KarteServiceBean extends AbstractServiceBean {
 
     private static final String QUERY_KARTE 
             = "from KarteBean k where k.patient.id=:patientPk";
@@ -71,27 +56,13 @@ public class KarteServiceBean {
     private static final String QUERY_DIAGNOSIS_BY_KARTE_ACTIVEONLY 
             = "from RegisteredDiagnosisModel r where r.karte.id=:karteId and r.ended is NULL";
     
-    private static final String TOUTOU = "TOUTOU";
-    private static final String TOUTOU_REPLY = "TOUTOU_REPLY";
-    private static final String QUERY_LETTER_BY_KARTE_ID 
-            = "from TouTouLetter f where f.karte.id=:karteId";
-    private static final String QUERY_REPLY_BY_KARTE_ID 
-            = "from TouTouReply f where f.karte.id=:karteId";
-    private static final String QUERY_LETTER_BY_ID 
-            = "from TouTouLetter t where t.id=:id";
-    private static final String QUERY_REPLY_BY_ID 
-            = "from TouTouReply t where t.id=:id";
-
     private static final String QUERY_APPO_BY_KARTE_ID_PERIOD
             = "from AppointmentModel a where a.karte.id = :karteId and a.date between :fromDate and :toDate";
 
-    //private static final String QUERY_PVT_BY_ID = "from PatientVisitModel p where p.id=id";
-    
     private static final String QUERY_PATIENT_BY_FID_PID 
             = "from PatientModel p where p.facilityId=:fid and p.patientId=:pid";
 
 //masuda^
-    private static final String DOC_TYPES = "docTypes";
     private static final String QUERY_LASTDOC_DATE 
             = "select max(m.started) from DocumentModel m where m.karte.id = :karteId and (m.status = 'F' or m.status = 'T')";
     private static final String QUERY_APPOINTMENTS 
@@ -102,9 +73,6 @@ public class KarteServiceBean {
             = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate "
             + "and (d.status='F' or d.status='T')";
 //masuda$
-    
-    @PersistenceContext
-    private EntityManager em;
     
     public KarteBean getKarte(String fid, String pid, Date fromDate) {
         

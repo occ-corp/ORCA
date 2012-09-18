@@ -3,10 +3,7 @@ package open.dolphin.session;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Logger;
-import javax.ejb.Stateless;
 import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 import javax.servlet.AsyncContext;
 import open.dolphin.infomodel.*;
 import open.dolphin.mbean.ServletContextHolder;
@@ -16,18 +13,14 @@ import open.dolphin.rest.ChartEventResource;
  * ChartEventServiceBean
  * @author masuda, Masuda Naika
  */
-@Stateless
-public class ChartEventServiceBean {
+public class ChartEventServiceBean extends AbstractServiceBean {
 
     private static final Logger logger = Logger.getLogger(ChartEventServiceBean.class.getSimpleName());
     
     @Inject
     private ServletContextHolder contextHolder;
 
-    @PersistenceContext
-    private EntityManager em;
     
-
     public void notifyEvent(ChartEventModel evt) {
 
         String fid = evt.getFacilityId();
@@ -195,12 +188,7 @@ public class ChartEventServiceBean {
             PatientModel patient = pvt.getPatientModel();
 
             // 患者の健康保険を取得する
-            @SuppressWarnings("unchecked")
-            List<HealthInsuranceModel> insurances =
-                    em.createQuery("from HealthInsuranceModel h where h.patient.id = :pk")
-                    .setParameter("pk", patient.getId())
-                    .getResultList();
-            patient.setHealthInsurances(insurances);
+            //setHealthInsurances(patient);
 
             KarteBean karte = (KarteBean)
                     em.createQuery("from KarteBean k where k.patient.id = :pk")

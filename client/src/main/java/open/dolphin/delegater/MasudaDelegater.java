@@ -409,6 +409,9 @@ public class MasudaDelegater extends BusinessDelegater {
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
         
+        // 忘れがちｗ
+        decodePmHealthInsurance(list);
+        
         return list;
     }
 
@@ -491,6 +494,9 @@ public class MasudaDelegater extends BusinessDelegater {
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
+        
+        // 忘れがちｗ
+        decodePmHealthInsurance(list);
         
         return list;
     }
@@ -670,6 +676,36 @@ public class MasudaDelegater extends BusinessDelegater {
         TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
         List<UserPropertyModel> list = (List<UserPropertyModel>) 
                 getConverter().fromJson(entityStr, typeRef);
+        
+        return list;
+    }
+    
+    // 現時点で過去日になった仮保存カルテを取得する
+    public List<PatientModel> getTempDocumentPatients(Date fromDate) {
+        
+        String path = RES_BASE + "tempKarte";
+        
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
+        
+        ClientResponse response = getResource(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+        
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return null;
+        }
+        
+        TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
+        List<PatientModel> list = (List<PatientModel>) 
+                getConverter().fromJson(entityStr, typeRef);
+        
+        // 忘れがちｗ
+        decodePmHealthInsurance(list);
         
         return list;
     }
