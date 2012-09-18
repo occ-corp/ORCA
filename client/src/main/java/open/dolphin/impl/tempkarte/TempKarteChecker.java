@@ -4,10 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.FlowLayout;
 import java.awt.Point;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
+import java.awt.event.*;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -45,14 +42,15 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
     private JButton searchBtn;  
     
     private static final String[] COLUMN_NAMES 
-            = {"ID", "氏名", "カナ", "性別", "生年月日", "受診日", "状態"};
+            = {"ID", "氏名", "カナ", "性別", "生年月日", "状態"};
     private final String[] PROPERTY_NAMES 
-            = {"patientId", "fullName", "kanaName", "genderDesc", "ageBirthday", "pvtDateTrimTime", "isOpened"};
+            = {"patientId", "fullName", "kanaName", "genderDesc", "ageBirthday", "isOpened"};
     private static final Class[] COLUMN_CLASSES = {
         String.class, String.class, String.class, String.class, String.class, 
-        String.class, String.class};
-    private final int[] COLUMN_WIDTH = {50, 100, 120, 30, 100, 80, 20};
-    private final int START_NUM_ROWS = 1;
+        String.class};
+    private final int[] COLUMN_WIDTH = {50, 100, 120, 30, 100, 20};
+    
+    private static final ImageIcon INFO_ICON = ClientContext.getImageIcon("about_16.gif");
     
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "tempKarteChecker.column.spec";
@@ -103,6 +101,7 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
         ClientContext.setDolphinIcon(this);
         String title = ClientContext.getFrameTitle("仮保存カルテチェック");
         setTitle(title);
+        
         panel = new JPanel();
         panel.setLayout(new BorderLayout());
         setContentPane(panel);
@@ -141,15 +140,20 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
         // カラム幅更新
         columnHelper.updateColumnWidth();
         
-        searchBtn = new JButton("検索");
+        searchBtn = new JButton("更新");
         closeBtn = new JButton("閉じる");
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
         btnPanel.add(searchBtn);
         btnPanel.add(closeBtn);
         
-        panel.add(table, BorderLayout.CENTER);
+        JLabel infoLbl = new JLabel("過去日の仮保存カルテを検索します");
+        infoLbl.setIcon(INFO_ICON);
+        
+        JScrollPane scrl = new JScrollPane(table);
+        panel.add(scrl, BorderLayout.CENTER);
         panel.add(btnPanel, BorderLayout.SOUTH);
+        panel.add(infoLbl, BorderLayout.NORTH);
         
         pack();
         ComponentMemory cm = new ComponentMemory(this, new Point(100, 100), this.getPreferredSize(), TempKarteChecker.this);
@@ -157,6 +161,15 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
     }
     
     private void connect() {
+        
+        // Window がクローズされた時の処理を行う
+        addWindowListener(new WindowAdapter() {
+
+            @Override
+            public void windowClosed(WindowEvent e) {
+                setVisible(false);
+            }
+        });
         
         // 来院リストテーブル 選択
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {

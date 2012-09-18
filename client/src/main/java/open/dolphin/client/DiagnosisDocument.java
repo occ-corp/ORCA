@@ -1666,20 +1666,21 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         setNewDiagnosis(itemName, modifierCode);
-                        cancelCellEditing();
+                        //cancelCellEditing();
+                        stopCellEditing();
                     }
                 });
 
             }
         }
-
+/*
         // popup 終了
         @Override
         public void cancelCellEditing() {
-            super.cancelCellEditing();
+            //super.cancelCellEditing();
             diagTable.requestFocusInWindow();
         }
-
+*/
         private void setNewDiagnosis(String itemName, String modifierCode) {
             //新しく作った診断を設定
             int r = diagTable.getSelectedRow();

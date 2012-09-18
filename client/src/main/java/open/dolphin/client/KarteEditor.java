@@ -720,8 +720,11 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             params.setOldTitle(oldTitle);
             // 確定日変更可能かどうか　新規カルテかベースが仮カルテ
             String status = docInfo.getStatus();
+            String ver = docInfo.getVersionNumber();
             boolean newKarte = !modify && IInfoModel.STATUS_NONE.equals(status);
-            boolean editTemp = modify && IInfoModel.STATUS_TMP.equals(status);
+            boolean editTemp = modify 
+                    && IInfoModel.STATUS_TMP.equals(status)
+                    && "2.0".compareTo(ver) >= 0;   // うまくない
             params.setDateEditable(newKarte || editTemp);
             // FirstConfirmDateを設定する
             Date firstConfirmed = model.getDocInfoModel().getFirstConfirmDate();

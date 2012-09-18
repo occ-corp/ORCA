@@ -425,12 +425,12 @@ public class KarteServiceBean extends AbstractServiceBean {
             docInfo.setParentId(pInfo.getParentId());
             docInfo.setParentIdRelation(pInfo.getParentIdRelation());
             docInfo.setVersionNumber(pInfo.getVersionNumber());
-
+            
+            // 算定履歴も削除。こっちが先
+            deleteSanteiHistory(parentPk);
+            
             // 編集元は削除
             em.remove(old);
-            
-            // 算定履歴も削除
-            deleteSanteiHistory(parentPk);
 
         } else {
             // 適合終了日を新しい版の確定日にする
@@ -992,6 +992,7 @@ public class KarteServiceBean extends AbstractServiceBean {
         final String sql = "delete from SanteiHistoryModel s where s.moduleModel.id in (:mIds)";
 
         DocumentModel document = em.find(DocumentModel.class, docPk);
+        
         List<Long> mIds = new ArrayList<Long>();
         
         for (ModuleModel mm : document.getModules()) {
