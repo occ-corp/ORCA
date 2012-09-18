@@ -75,12 +75,12 @@
         <dependency>
             <groupId>postgresql</groupId>
             <artifactId>postgresql</artifactId>
-            <version>8.4-702.jdbc4</version>
+            <version>8.4-703.jdbc4</version>
         </dependency>
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>1.13</version>
+            <version>1.14</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
@@ -90,7 +90,7 @@
         <dependency>
             <groupId>jfree</groupId>
             <artifactId>jfreechart</artifactId>
-            <version>1.0.13</version>
+            <version>1.0.14</version>
         </dependency>
         <dependency>
             <groupId>com.lowagie</groupId>
