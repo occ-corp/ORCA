@@ -2,7 +2,6 @@ package open.dolphin.impl.tempkarte;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
-import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.*;
 import java.util.Date;
@@ -38,6 +37,7 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
     private ListTableModel<PatientModel> tableModel;
     private ListTableSorter sorter;
     
+    private JLabel cntLbl;
     private JButton closeBtn;
     private JButton searchBtn;  
     
@@ -140,10 +140,13 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
         // カラム幅更新
         columnHelper.updateColumnWidth();
         
+        cntLbl = new JLabel("0件");
         searchBtn = new JButton("更新");
         closeBtn = new JButton("閉じる");
         JPanel btnPanel = new JPanel();
-        btnPanel.setLayout(new FlowLayout(FlowLayout.RIGHT));
+        btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.X_AXIS));
+        btnPanel.add(cntLbl);
+        btnPanel.add(Box.createHorizontalGlue());
         btnPanel.add(searchBtn);
         btnPanel.add(closeBtn);
         
@@ -232,6 +235,7 @@ public class TempKarteChecker extends JFrame implements IChartEventListener {
                 } catch (InterruptedException ex) {
                 } catch (ExecutionException ex) {
                 }
+                cntLbl.setText(tableModel.getObjectCount() + "件");
             }
         };
         worker.execute();

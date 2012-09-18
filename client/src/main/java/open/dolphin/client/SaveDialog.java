@@ -238,6 +238,7 @@ public final class SaveDialog {
             SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             String dateStr = frmt.format(saveParams.getConfirmed());
             dateField = new JTextField(12);
+            dateField.setToolTipText("右クリックでカレンダーがポップアップします");
             dateField.setText(dateStr);
             dateField.addFocusListener(AutoRomanListener.getInstance());
             int[] range = {-12, 2};
@@ -372,18 +373,26 @@ public final class SaveDialog {
     
     private void controlButton() {
         
+        // 未来日カルテは仮保存のみ可能
+        SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
+        Date now = new Date();
+        
         if (dateField == null) {
-            okButton.setEnabled(true);
-            tmpButton.setEnabled(true);
-            setFocus(okButton);
+            if (saveParams.getConfirmed().after(now)) {
+                okButton.setEnabled(false);
+                tmpButton.setEnabled(true);
+                setFocus(tmpButton);
+            } else {
+                okButton.setEnabled(true);
+                tmpButton.setEnabled(true);
+                setFocus(okButton);
+            }
             return;
         }
         
         try {
-            // 未来日カルテは仮保存のみ可能
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
             Date d = frmt.parse(dateField.getText().trim());
-            Date now = new Date();
+            
             if (d.after(now)) {
                 okButton.setEnabled(false);
                 tmpButton.setEnabled(true);
