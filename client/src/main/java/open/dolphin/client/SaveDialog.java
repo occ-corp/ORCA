@@ -6,6 +6,8 @@ import java.awt.GridLayout;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
@@ -62,6 +64,7 @@ public final class SaveDialog {
     // 保存日変更関連
     private JTextField dateField;
     private JCheckBox cb_dateEnable;
+    private JButton btnNow;
 
     // 入力値のSaveParams
     private SaveParams saveParams;
@@ -240,16 +243,28 @@ public final class SaveDialog {
 
             JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
             cb_dateEnable = new JCheckBox("記録日変更:");
-            cb_dateEnable.addItemListener(new java.awt.event.ItemListener() {
+            cb_dateEnable.addItemListener(new ItemListener() {
 
                 @Override
-                public void itemStateChanged(java.awt.event.ItemEvent evt) {
+                public void itemStateChanged(ItemEvent evt) {
                     dateField.setEnabled(cb_dateEnable.isSelected());
+                }
+            });
+            
+            btnNow = new JButton("今");
+            btnNow.addActionListener(new ActionListener(){
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
+                    dateField.setText(frmt.format(new Date()));
                 }
             });
             p2.add(cb_dateEnable);
             dateField.setEnabled(false);
             p2.add(dateField);
+            btnNow.setEnabled(false);
+            p2.add(btnNow);
             content.add(p2);
         }
         

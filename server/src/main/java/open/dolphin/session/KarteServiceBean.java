@@ -418,56 +418,57 @@ public class KarteServiceBean {
      * @return Document.id
      */
     public long addDocument(DocumentModel document) {
-        
-//masuda^   編集元が仮保存文書なら残す必要なし。なぜならそれは仮保存だから。
-        DocInfoModel docInfo = document.getDocInfoModel();
-        if (docInfo.getParentId() != null) {
-            DocumentModel parent = em.find(DocumentModel.class, docInfo.getParentPk());
-            if (parent != null && IInfoModel.STATUS_TMP.equals(parent.getStatus())) {
-                // 編集元文書の情報を引き継ぐ
-                DocInfoModel pInfo = parent.getDocInfoModel();
-                document.setLinkId(parent.getLinkId());
-                document.setLinkRelation(parent.getLinkRelation());
-                //docInfo.setParentPk(pInfo.getParentPk());   // parentPk = linkId
-                docInfo.setParentId(pInfo.getParentId());
-                docInfo.setParentIdRelation(pInfo.getParentIdRelation());
-                docInfo.setVersionNumber(pInfo.getVersionNumber());
-                // 算定履歴も削除
-                deleteSanteiHistory(parent.getId());
-                // 編集元は削除
-                em.remove(parent);
-                // 永続化する
-                em.persist(document);
-                long id = document.getId();
-                return id;
-            }
-        }
-//masuda$
-        
+//masuda^
         // 永続化する
         em.persist(document);
+        long id = document.getId();
         
+        // 算定履歴を登録する
+        registSanteiHistory(document);
+
         // 修正版の処理を行う
+        DocInfoModel docInfo = document.getDocInfoModel();
         long parentPk = docInfo.getParentPk();
         
-        if (parentPk != 0L) {
+        // 親がないならリターン
+        if (parentPk == 0L) {
+            return id;
+        }
+        DocumentModel old = em.find(DocumentModel.class, parentPk);
+        if (old == null) {
+            return id;
+        }
+        
+        // 親文書が仮保存文書なら残す必要なし。なぜならそれは仮保存だから。
+        if (IInfoModel.STATUS_TMP.equals(old.getStatus())) {
+            // 編集元文書の情報を引き継ぐ
+            DocInfoModel pInfo = old.getDocInfoModel();
+            document.setLinkId(old.getLinkId());
+            document.setLinkRelation(old.getLinkRelation());
+            //docInfo.setParentPk(pInfo.getParentPk());   // parentPk = linkId
+            docInfo.setParentId(pInfo.getParentId());
+            docInfo.setParentIdRelation(pInfo.getParentIdRelation());
+            docInfo.setVersionNumber(pInfo.getVersionNumber());
 
+            // 編集元は削除
+            em.remove(old);
+            
+            // 算定履歴も削除
+            deleteSanteiHistory(parentPk);
+
+        } else {
             // 適合終了日を新しい版の確定日にする
             Date ended = document.getConfirmed();
-
-            // オリジナルを取得し 終了日と status = M を設定する
-            DocumentModel old = em.find(DocumentModel.class, parentPk);
+            // 終了日と status = M を設定する
             old.setEnded(ended);
             old.setStatus(IInfoModel.STATUS_MODIFIED);
-            
-//masuda^   HibernateSearchのFulTextEntityManagerを用意。修正済みのものはインデックスから削除する
+
+            // HibernateSearchのFulTextEntityManagerを用意。修正済みのものはインデックスから削除する
             final FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
             fullTextEntityManager.purge(DocumentModel.class, parentPk);
-//masuda$
-            
+
             // 関連するモジュールとイメージに同じ処理を実行する
-            @SuppressWarnings("unchecked")
-            List<ModuleModel> oldModules = 
+            List<ModuleModel> oldModules =
                     em.createQuery(QUERY_MODULE_BY_DOC_ID)
                     .setParameter(ID, parentPk)
                     .getResultList();
@@ -476,8 +477,7 @@ public class KarteServiceBean {
                 model.setStatus(IInfoModel.STATUS_MODIFIED);
             }
 
-            @SuppressWarnings("unchecked")
-            List<SchemaModel> oldImages = 
+            List<SchemaModel> oldImages =
                     em.createQuery(QUERY_SCHEMA_BY_DOC_ID)
                     .setParameter(ID, parentPk)
                     .getResultList();
@@ -485,16 +485,14 @@ public class KarteServiceBean {
                 model.setEnded(ended);
                 model.setStatus(IInfoModel.STATUS_MODIFIED);
             }
+            
+            // 修正されたものは算定履歴から削除する
+            deleteSanteiHistory(parentPk);      
         }
-        
-//masuda^   算定履歴を登録する
-        registSanteiHistory(document);
-//masuda$
-        
-        // ID
-        long id = document.getId();
-        
+
+        // Document.idを返す
         return id;
+//masuda$
     }
 
     /**
@@ -990,10 +988,6 @@ public class KarteServiceBean {
                 em.persist(history);
             }
         }
-        
-        // 修正されたものは削除する
-        long parentPk = document.getDocInfoModel().getParentPk();
-        deleteSanteiHistory(parentPk);
     }
     
     private int parseInt(String str) {
