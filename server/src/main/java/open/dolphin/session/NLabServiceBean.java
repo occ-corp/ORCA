@@ -260,6 +260,9 @@ public class NLabServiceBean extends AbstractServiceBean {
             // 永続化する
             em.persist(laboModuleValue);
 
+            // 保険情報を設定する
+            setHealthInsurances(exist);
+            
             // PatientModelを返す
             return exist;
 

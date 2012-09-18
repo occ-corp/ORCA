@@ -92,13 +92,8 @@ public class PatientServiceBean extends AbstractServiceBean {
         }
 
         //-----------------------------------
-        if (!ret.isEmpty()) {
-
-            for (PatientModel patient : ret) {
-                // 患者の健康保険を取得する
-                //setHealthInsurances(patient);
-            }
-        }
+        // 患者の健康保険を取得する
+        setHealthInsurances(ret);
         //-----------------------------------
         
 //masuda^   最終受診日設定
@@ -160,6 +155,7 @@ public class PatientServiceBean extends AbstractServiceBean {
 
         for (PatientVisitModel pvt : list) {
             PatientModel patient = pvt.getPatientModel();
+            // 患者の健康保険を取得する
             setHealthInsurances(patient);
             ret.add(patient);
 //masuda^   最終受診日設定

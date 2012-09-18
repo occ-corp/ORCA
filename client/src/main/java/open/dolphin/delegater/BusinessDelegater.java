@@ -79,7 +79,7 @@ public class BusinessDelegater {
         }
     }
     
-    private void decodeHealthInsurance(PatientModel patient) {
+    protected void decodeHealthInsurance(PatientModel patient) {
 
         // Health Insurance を変換をする beanXML2PVT
         Collection<HealthInsuranceModel> c = patient.getHealthInsurances();

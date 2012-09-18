@@ -246,6 +246,10 @@ public class MasudaServiceBean extends AbstractServiceBean {
                     .getSingleResult();
         } catch (NoResultException e) {
         }
+        // ダミーの保険情報を設定する
+        List<HealthInsuranceModel> ins = new ArrayList<HealthInsuranceModel>();
+        result.getPatientModel().setHealthInsurances(ins);
+        
         return result;
     }
 

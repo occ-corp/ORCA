@@ -143,6 +143,8 @@ public class LaboDelegater extends BusinessDelegater {
         PatientModel patient = (PatientModel) 
                 getConverter().fromJson(entityStr, PatientModel.class);
         
+        decodeHealthInsurance(patient);
+        
         return patient;
     }
     
