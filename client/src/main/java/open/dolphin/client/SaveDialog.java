@@ -170,6 +170,8 @@ public final class SaveDialog {
         sendLabtest.setEnabled((send && params.isHasLabtest()));
         
         checkTitle();
+        
+        controlButton();
     }
 
     
@@ -240,6 +242,21 @@ public final class SaveDialog {
             dateField.addFocusListener(AutoRomanListener.getInstance());
             int[] range = {-12, 2};
             PopupListener pl = new PopupListener(dateField, range);
+            
+            DocumentListener dl = new DocumentListener() {
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                }
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    controlButton();
+                }
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    controlButton();
+                }
+            };
+            dateField.getDocument().addDocumentListener(dl);
 
             JPanel p2 = new JPanel(new FlowLayout(FlowLayout.LEFT));
             cb_dateEnable = new JCheckBox("記録日変更:");
@@ -351,6 +368,45 @@ public final class SaveDialog {
     private void close() {
         dialog.setVisible(false);
         dialog.dispose();
+    }
+    
+    private void controlButton() {
+        
+        if (dateField == null) {
+            okButton.setEnabled(true);
+            tmpButton.setEnabled(true);
+            setFocus(okButton);
+            return;
+        }
+        
+        try {
+            // 未来日カルテは仮保存のみ可能
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_8601_DATE_FORMAT);
+            Date d = frmt.parse(dateField.getText().trim());
+            Date now = new Date();
+            if (d.after(now)) {
+                okButton.setEnabled(false);
+                tmpButton.setEnabled(true);
+                setFocus(tmpButton);
+            } else {
+                okButton.setEnabled(true);
+                tmpButton.setEnabled(true);
+                setFocus(okButton);
+            }
+        } catch (Exception ex) {
+            okButton.setEnabled(false);
+            tmpButton.setEnabled(false);
+        }
+    }
+    
+    private void setFocus(final JComponent c) {
+        SwingUtilities.invokeLater(new Runnable(){
+
+            @Override
+            public void run() {
+                c.requestFocusInWindow();
+            }
+        });
     }
     
     /**
