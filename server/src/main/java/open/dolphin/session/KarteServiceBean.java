@@ -937,6 +937,11 @@ public class KarteServiceBean {
     //@Asynchronous
     private void registSanteiHistory(DocumentModel document) {
         
+        // 算定履歴登録はFINALカルテのみ
+        if (!IInfoModel.STATUS_FINAL.equals(document.getStatus())) {
+            return;
+        }
+        
         List<ModuleModel> mmList = document.getModules();
         Date date = document.getStarted();
         
