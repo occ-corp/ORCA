@@ -706,6 +706,16 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
             }
         };
         map.put("editUsingDrug", editUsingDrug);
+        
+        text = resource.getString("checkTempKarte.Action.text");
+        AbstractAction checkTempKarte = new AbstractAction(text) {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("checkTempKarte");
+            }
+        };
+        map.put("checkTempKarte", checkTempKarte);
 //masuda$
     }
     
@@ -1260,6 +1270,11 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         editUsingDrug.setName("editUsingDrug");
         editUsingDrug.setAction(actionMap.get("editUsingDrug"));
         tool.add(editUsingDrug);
+        
+        JMenuItem checkTempKarte = new JMenuItem();
+        checkTempKarte.setName("checkTempKarte");
+        checkTempKarte.setAction(actionMap.get("checkTempKarte"));
+        tool.add(checkTempKarte);
 
         tool.add(new JSeparator());
 //masuda$

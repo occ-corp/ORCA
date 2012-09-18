@@ -8,6 +8,7 @@ import java.util.GregorianCalendar;
 import javax.swing.*;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import open.dolphin.client.ClientContext;
 
 /**
  * 入院診療行為の回数と実施日を入力するダイアログ
@@ -33,6 +34,8 @@ public class PeriodSelectDialog extends JDialog {
     }
     
     private void initComponents() {
+        
+        ClientContext.setDolphinIcon(this);
         
         setTitle("期間入力");
         panel = new JPanel();

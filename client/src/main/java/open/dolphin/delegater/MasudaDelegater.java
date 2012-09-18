@@ -680,13 +680,14 @@ public class MasudaDelegater extends BusinessDelegater {
         return list;
     }
     
-    // 現時点で過去日になった仮保存カルテを取得する
-    public List<PatientModel> getTempDocumentPatients(Date fromDate) {
+    // ユーザーの、現時点で過去日になった仮保存カルテを取得する
+    public List<PatientModel> getTempDocumentPatients(Date fromDate, long userId) {
         
         String path = RES_BASE + "tempKarte";
         
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
+        qmap.add("userId", String.valueOf(userId));
         
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)

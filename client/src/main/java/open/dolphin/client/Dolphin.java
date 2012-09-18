@@ -34,6 +34,7 @@ import open.dolphin.helper.WindowSupport;
 import open.dolphin.impl.login.LoginDialog;
 import open.dolphin.impl.orcaapi.OrcaApi;
 import open.dolphin.impl.server.StandAlonePVTServer;
+import open.dolphin.impl.tempkarte.TempKarteChecker;
 import open.dolphin.infomodel.*;
 import open.dolphin.plugin.PluginLoader;
 import open.dolphin.project.AbstractProjectFactory;
@@ -1422,7 +1423,8 @@ public class Dolphin implements MainWindow {
                 GUIConst.ACTION_SHOW_ABOUT,
 //masuda^   中止項目と採用薬編集
                 GUIConst.ACTION_EDIT_DISCONITEM,
-                GUIConst.ACTION_EDIT_USINGDRUG
+                GUIConst.ACTION_EDIT_USINGDRUG,
+                GUIConst.ACTION_CHECK_TEMP_KARTE
 //masuda$
             };
             mediator.enableMenus(enables);
@@ -1667,6 +1669,11 @@ public class Dolphin implements MainWindow {
     public void editUsingDrug() {
         UsingDrugPanel panel = new UsingDrugPanel();
         panel.enter();
+    }
+    
+    public void checkTempKarte() {
+        TempKarteChecker tempKarte = TempKarteChecker.getInstance();
+        tempKarte.setVisible(true);
     }
 //masuda$
 }

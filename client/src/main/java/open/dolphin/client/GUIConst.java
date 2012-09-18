@@ -98,6 +98,7 @@ public class GUIConst {
     // 中止項目編集と採用薬編集
     public static final String ACTION_EDIT_DISCONITEM = "editDisconItem";
     public static final String ACTION_EDIT_USINGDRUG = "editUsingDrug";
+    public static final String ACTION_CHECK_TEMP_KARTE = "checkTempKarte";
     // PacsService
     public static final String KEY_PACS_SERVICE = "pacsService";
     public static final String KEY_PACS_SETTING = "pacsSetting";

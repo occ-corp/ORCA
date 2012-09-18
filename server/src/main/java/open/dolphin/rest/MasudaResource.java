@@ -529,12 +529,14 @@ public class MasudaResource extends AbstractResource {
     @GET
     @Path("tempKarte")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getTempKartePatients(@QueryParam("fromDate") String fromDateStr) {
+    public String getTempKartePatients(
+            @QueryParam("fromDate") String fromDateStr,
+            @QueryParam("userId") String userIdStr) {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
         Date fromDate = parseDate(fromDateStr);
+        long userId = Long.valueOf(userIdStr);
 
-        List<PatientModel> list = masudaServiceBean.getTempDocumentPatients(fid, fromDate);
+        List<PatientModel> list = masudaServiceBean.getTempDocumentPatients(fromDate, userId);
 
         String json = getConverter().toJson(list);
         debug(json);
