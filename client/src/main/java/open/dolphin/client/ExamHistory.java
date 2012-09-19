@@ -6,7 +6,6 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Executors;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -275,8 +274,8 @@ public class ExamHistory {
             }
         };
         // ここは別スレッドで実行する
-        Executors.newCachedThreadPool().execute(worker);
-        //worker.execute();
+        //java.util.concurrent.Executors.newCachedThreadPool().execute(worker);
+        worker.execute();
     }
 
     private class ExamHistoryComparator implements Comparator {
