@@ -27,9 +27,13 @@ public class JerseyClient {
     private String userName;
     private String password;
     
+    private Client client;
+    private Client client2;
     private WebResource webResource;
     private AsyncWebResource asyncResource;
     //private WebResource asyncResource;
+    
+    private ExecutorService exec;
     
     static {
         instance = new JerseyClient();
@@ -37,6 +41,9 @@ public class JerseyClient {
 
     private JerseyClient() {
         clientUUID = Dolphin.getInstance().getClientUUID();
+        exec = Executors.newSingleThreadExecutor();
+        client = Client.create();
+        client2 = Client.create();
     }
 
     public static JerseyClient getInstance() {
@@ -66,15 +73,11 @@ public class JerseyClient {
         }
 
         int readTimeout = TIMEOUT1 * 1000;
-        
-        Client client = Client.create();
         client.setReadTimeout(readTimeout);
         webResource = client.resource(baseURI);
 
         // pvt同期用のクライアントを別に用意する
-        Client client2 = Client.create();
         // 専用のExecutorServiceを設定する
-        ExecutorService exec = Executors.newSingleThreadExecutor();
         client2.setExecutorService(exec);
         asyncResource = client2.asyncResource(baseURI);
         //asyncResource = client2.resource(baseURI);
