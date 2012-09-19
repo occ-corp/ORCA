@@ -480,127 +480,94 @@ public class KarteServiceBean extends AbstractServiceBean {
     public int deleteDocument(long id) {
         
 //masuda^   オリジナルでは修正したり仮保存をした文書を削除できないので改変
-/*
-        //
-        // 対象 Document を取得する
-        //
-        Date ended = new Date();
-        DocumentModel delete = (DocumentModel) em.find(DocumentModel.class, id);
-
-        //
-        // 参照している場合は例外を投げる
-        //
-        if (delete.getLinkId() != 0L) {
-            throw new CanNotDeleteException("他のドキュメントを参照しているため削除できません。");
-        }
-
-        //
-        // 参照されている場合は例外を投げる
-        //
-        Collection refs = em.createQuery(QUERY_DOCUMENT_BY_LINK_ID)
-        .setParameter(ID, id).getResultList();
-        if (refs != null && refs.size() >0) {
-            CanNotDeleteException ce = new CanNotDeleteException("他のドキュメントから参照されているため削除できません。");
-            throw ce;
-        }
-
-        //
-        // 単独レコードなので削除フラグをたてる
-        //
-        delete.setStatus(IInfoModel.STATUS_DELETE);
-        delete.setEnded(ended);
-
-        //
-        // 関連するモジュールに同じ処理を行う
-        //
-        Collection deleteModules = em.createQuery(QUERY_MODULE_BY_DOC_ID)
-        .setParameter(ID, id).getResultList();
-        for (Iterator iter = deleteModules.iterator(); iter.hasNext(); ) {
-            ModuleModel model = (ModuleModel) iter.next();
-            model.setStatus(IInfoModel.STATUS_DELETE);
-            model.setEnded(ended);
-        }
-
-        //
-        // 関連する画像に同じ処理を行う
-        //
-        Collection deleteImages = em.createQuery(QUERY_SCHEMA_BY_DOC_ID)
-        .setParameter(ID, id).getResultList();
-        for (Iterator iter = deleteImages.iterator(); iter.hasNext(); ) {
-            SchemaModel model = (SchemaModel) iter.next();
-            model.setStatus(IInfoModel.STATUS_DELETE);
-            model.setEnded(ended);
-        }
-
-        return 1;
-*/
-        // 対象 Document を取得する
-        Date ended = new Date();
-        List<DocumentModel> deleteList = new ArrayList<DocumentModel>();
-
-        long docPk = id;
-        // まずは親分文書を追加していく
-        while (docPk != 0) {
-            DocumentModel model = em.find(DocumentModel.class, docPk);
-            deleteList.add(model);
-            docPk = model.getLinkId();
-        }
         
-        // 次に子分文書を追加していく
-        long linkId = id;
-        List<DocumentModel> toDelete = null;
-        while (toDelete != null && !toDelete.isEmpty()) {
-            toDelete =
-                    em.createQuery(QUERY_DOCUMENT_BY_LINK_ID)
-                    .setParameter(ID, linkId)
-                    .getResultList();
-            for (DocumentModel model : toDelete) {
-                deleteList.add(model);
-                linkId = model.getId();
-            }
-        }
-
-        for (DocumentModel delete : deleteList) {
+        // 削除対象のDocumentModelを取得
+        DocumentModel target = em.find(DocumentModel.class, id);
+        // その親文書を取得
+        DocumentModel parent = getParent(target);
+        // 関連するDocumentModelを再帰で取得する
+        Set<DocumentModel> delSet = getChildren(parent);
+        
+        Date ended = new Date();
+        
+        for (DocumentModel delete : delSet) {
             
             long delId = delete.getId();
-            // 削除フラグをたてる
-            delete.setStatus(IInfoModel.STATUS_DELETE);
-            delete.setEnded(ended);
-
+            
             // HibernateSearchのFulTextEntityManagerを用意。削除済みのものはインデックスから削除する
             final FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
             fullTextEntityManager.purge(DocumentModel.class, delId);
-
-            // 関連するモジュールに同じ処理を行う
-            @SuppressWarnings("unchecked")
-            List<ModuleModel> deleteModules =
-                    em.createQuery(QUERY_MODULE_BY_DOC_ID)
-                    .setParameter(ID, delId)
-                    .getResultList();
-            for (ModuleModel model : deleteModules) {
-                model.setStatus(IInfoModel.STATUS_DELETE);
-                model.setEnded(ended);
-            }
-
-            // 関連する画像に同じ処理を行う
-            @SuppressWarnings("unchecked")
-            List<SchemaModel> deleteImages =
-                    em.createQuery(QUERY_SCHEMA_BY_DOC_ID)
-                    .setParameter(ID, delId)
-                    .getResultList();
-            for (SchemaModel model : deleteImages) {
-                model.setStatus(IInfoModel.STATUS_DELETE);
-                model.setEnded(ended);
-            }
-
-            // 削除されたものは算定履歴も削除する
+            
+            // 削除するものは算定履歴も削除する
             deleteSanteiHistory(delId);
+
+            // 仮文書の場合は抹消スル
+            if (IInfoModel.STATUS_TMP.equals(delete.getStatus())) {
+                DocumentModel dm = em.find(DocumentModel.class, delId);
+                em.remove(dm);
+            } else {
+                // 削除フラグをたてる
+                delete.setStatus(IInfoModel.STATUS_DELETE);
+                delete.setEnded(ended);
+
+                // 関連するモジュールに同じ処理を行う
+                List<ModuleModel> deleteModules =
+                        em.createQuery(QUERY_MODULE_BY_DOC_ID)
+                        .setParameter(ID, delId)
+                        .getResultList();
+                for (ModuleModel model : deleteModules) {
+                    model.setStatus(IInfoModel.STATUS_DELETE);
+                    model.setEnded(ended);
+                }
+
+                // 関連する画像に同じ処理を行う
+                List<SchemaModel> deleteImages =
+                        em.createQuery(QUERY_SCHEMA_BY_DOC_ID)
+                        .setParameter(ID, delId)
+                        .getResultList();
+                for (SchemaModel model : deleteImages) {
+                    model.setStatus(IInfoModel.STATUS_DELETE);
+                    model.setEnded(ended);
+                }
+            }
         }
         
         return 1;
 //masuda$
     }
+    
+//masuda^
+    // 親分文書を追いかける
+    public DocumentModel getParent(DocumentModel dm) {
 
+        long linkId = dm.getLinkId();
+        DocumentModel model = dm;
+        while (linkId != 0) {
+            model = em.find(DocumentModel.class, linkId);
+            linkId = model.getLinkId();
+        }
+        return model;
+    }
+    
+    // 子文書を再帰で探す
+    public Set<DocumentModel> getChildren(DocumentModel parent) {
+        
+        Set<DocumentModel> ret = new HashSet<DocumentModel>();
+        long linkId = parent.getId();
+        
+        List<DocumentModel> children = 
+                em.createQuery(QUERY_DOCUMENT_BY_LINK_ID)
+                .setParameter(ID, linkId)
+                .getResultList();
+        
+        for (DocumentModel child : children) {
+            ret.addAll(getChildren(child));
+        }
+        
+        return ret;
+    }
+//masuda$
+    
     /**
      * ドキュメントのタイトルを変更する。
      * @param pk 変更するドキュメントの primary key
