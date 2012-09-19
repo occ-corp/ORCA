@@ -85,6 +85,8 @@ public class WatingListImpl extends AbstractMainComponent {
     private int memoColumn;
     // 来院情報テーブルのステータスカラム
     private int stateColumn;
+    // 受付番号カラム
+    private int numberColumn;
 
     // PVT Table 
     private JTable pvtTable;
@@ -190,6 +192,7 @@ public class WatingListImpl extends AbstractMainComponent {
         ageColumn = columnHelper.getColumnPositionEndsWith("Birthday");
         memoColumn = columnHelper.getColumnPosition("getMemo");
         stateColumn = columnHelper.getColumnPosition("getStateInteger");
+        numberColumn = columnHelper.getColumnPosition("getNumber");
 
         
         // 修正送信アイコンを決める
@@ -385,7 +388,7 @@ public class WatingListImpl extends AbstractMainComponent {
         List<ColumnSpec> columnSpecs = columnHelper.getColumnSpecs();
         for (int i = 0; i < columnSpecs.size(); i++) {
 
-            if (i == visitedTimeColumn || i == sexColumn) {
+            if (i == visitedTimeColumn || i == sexColumn || i == numberColumn) {
                 pvtTable.getColumnModel().getColumn(i).setCellRenderer(centerRenderer);
 
             } else if (i == stateColumn) {
