@@ -501,10 +501,11 @@ public class KarteServiceBean extends AbstractServiceBean {
             // 削除するものは算定履歴も削除する
             deleteSanteiHistory(delId);
 
-            // 仮文書の場合は抹消スル
             if (IInfoModel.STATUS_TMP.equals(delete.getStatus())) {
+                // 仮文書の場合は抹消スル
                 DocumentModel dm = em.find(DocumentModel.class, delId);
                 em.remove(dm);
+                
             } else {
                 // 削除フラグをたてる
                 delete.setStatus(IInfoModel.STATUS_DELETE);
@@ -553,15 +554,14 @@ public class KarteServiceBean extends AbstractServiceBean {
     public Set<DocumentModel> getChildren(DocumentModel parent) {
         
         Set<DocumentModel> ret = new HashSet<DocumentModel>();
-        long linkId = parent.getId();
         
+        // 親を追加
+        ret.add(parent);
+
         List<DocumentModel> children = 
                 em.createQuery(QUERY_DOCUMENT_BY_LINK_ID)
-                .setParameter(ID, linkId)
+                .setParameter(ID, parent.getId())
                 .getResultList();
-        
-        // 子供をリストに追加
-        ret.addAll(children);
         
         // 子供の子供をリストに追加
         for (DocumentModel child : children) {
