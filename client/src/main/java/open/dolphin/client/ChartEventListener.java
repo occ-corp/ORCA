@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import open.dolphin.delegater.ChartEventDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
@@ -138,6 +139,7 @@ public class ChartEventListener {
         thread = null;
     }
     
+/*
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
@@ -171,8 +173,8 @@ public class ChartEventListener {
             }
         }
     }
+*/
     
-/*
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
@@ -212,7 +214,6 @@ public class ChartEventListener {
             }
         }
     }
-*/
     
     // 自クライアントの状態変更後、サーバーに通知するタスク
     private class LocalOnEventTask implements Runnable {

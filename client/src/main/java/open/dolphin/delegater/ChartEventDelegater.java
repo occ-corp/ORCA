@@ -50,7 +50,7 @@ public class ChartEventDelegater extends BusinessDelegater {
         
         return Integer.parseInt(enityStr);
     }
-/*
+
     public Future<String> subscribe() throws Exception {
         
         // できるだけ時間をとらないようにデシリアライズは後回しにする
@@ -61,18 +61,18 @@ public class ChartEventDelegater extends BusinessDelegater {
                 .get(String.class);
         return future;
     }
-*/
+/*
     public String subscribe() throws Exception {
         
         // できるだけ時間をとらないようにデシリアライズは後回しにする
         // 処理もれが心配
-        String future = JerseyClient.getInstance()
+        String json = JerseyClient.getInstance()
                 .getAsyncResource(SUBSCRIBE_PATH)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(String.class);
-        return future;
+        return json;
     }
-    
+*/
     @Override
     protected void debug(int status, String entity) {
         if (debug || DEBUG) {
