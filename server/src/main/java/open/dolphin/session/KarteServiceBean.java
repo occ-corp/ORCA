@@ -560,6 +560,10 @@ public class KarteServiceBean extends AbstractServiceBean {
                 .setParameter(ID, linkId)
                 .getResultList();
         
+        // 子供をリストに追加
+        ret.addAll(children);
+        
+        // 子供の子供をリストに追加
         for (DocumentModel child : children) {
             ret.addAll(getChildren(child));
         }
