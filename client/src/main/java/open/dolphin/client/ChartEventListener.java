@@ -6,7 +6,6 @@ import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 import open.dolphin.delegater.ChartEventDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
@@ -138,7 +137,42 @@ public class ChartEventListener {
         thread.interrupt();
         thread = null;
     }
+    
+    // Commetでサーバーと同期するスレッド
+    private class EventListenTask implements Runnable {
+        
+        private boolean isRunning;
+        
+        private EventListenTask() {
+            isRunning = true;
+        }
 
+        private void stop() {
+            isRunning = false;
+        }
+        
+        @Override
+        public void run() {
+
+            //long t1 = System.currentTimeMillis();
+            
+            while (isRunning) {
+                try {
+                    //System.out.println("time = " + String.valueOf(System.currentTimeMillis() - t1));
+                    String json = ChartEventDelegater.getInstance().subscribe();
+                    //t1 = System.currentTimeMillis();
+                    if (json != null) {
+                        exec.execute(new RemoteOnEventTask(json));
+                    }
+                    //System.out.println("ChartEvent= " + json);
+                } catch (Exception e) {
+                    //System.out.println(e.toString());
+                }
+            }
+        }
+    }
+    
+/*
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
@@ -178,6 +212,7 @@ public class ChartEventListener {
             }
         }
     }
+*/
     
     // 自クライアントの状態変更後、サーバーに通知するタスク
     private class LocalOnEventTask implements Runnable {

@@ -1,6 +1,5 @@
 package open.dolphin.delegater;
 
-import com.sun.jersey.api.client.AsyncWebResource;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.MultivaluedMap;
@@ -26,7 +25,8 @@ public class JerseyClient {
     private String password;
     
     private WebResource webResource;
-    private AsyncWebResource asyncResource;
+    //private AsyncWebResource asyncResource;
+    private WebResource asyncResource;
     
     static {
         instance = new JerseyClient();
@@ -70,7 +70,8 @@ public class JerseyClient {
 
         // pvt同期用のクライアントを別に用意する
         Client client2 = Client.create();
-        asyncResource = client2.asyncResource(baseURI);
+        //asyncResource = client2.asyncResource(baseURI);
+        asyncResource = client2.resource(baseURI);
     }
 
     // QueryParam付のWebResource
@@ -86,7 +87,15 @@ public class JerseyClient {
     }
     
     // pvt同期用のクライアント
+/*
     public AsyncWebResource.Builder getAsyncResource(String path) {
+        return asyncResource.path(path)
+                .header(USER_NAME, userName)
+                .header(PASSWORD, password)
+                .header(CLIENT_UUID, clientUUID);
+    }
+*/
+    public WebResource.Builder getAsyncResource(String path) {
         return asyncResource.path(path)
                 .header(USER_NAME, userName)
                 .header(PASSWORD, password)
