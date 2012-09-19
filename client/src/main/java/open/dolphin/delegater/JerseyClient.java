@@ -73,6 +73,7 @@ public class JerseyClient {
 
         // pvt同期用のクライアントを別に用意する
         Client client2 = Client.create();
+        // 専用のExecutorServiceを設定する
         ExecutorService exec = Executors.newSingleThreadExecutor();
         client2.setExecutorService(exec);
         asyncResource = client2.asyncResource(baseURI);
