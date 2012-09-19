@@ -633,6 +633,7 @@ public class MasudaServiceBean extends AbstractServiceBean {
             pmmmMap.put(pModel, list);
         }
         // mmListは用なし。メモリ食いそうなのでnullにしてみるが、効果は？
+        mmList.clear();
         mmList = null;
         // 患者毎に処方切れかどうか調べる
         List<PatientModel> ret = new ArrayList<PatientModel>();
@@ -1181,7 +1182,7 @@ public class MasudaServiceBean extends AbstractServiceBean {
 
         final String sql = "from DocumentModel d where d.status='T' "
                 + "and d.started <= :fromDate and d.creator.id = :id";
-
+        
         List<DocumentModel> documents = (List<DocumentModel>)
                 em.createQuery(sql)
                 .setParameter("fromDate", fromDate)

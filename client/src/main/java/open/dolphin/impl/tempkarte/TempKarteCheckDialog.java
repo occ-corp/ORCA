@@ -4,7 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.*;
-import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -36,6 +36,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     private ListTableModel<PatientModel> tableModel;
     private ListTableSorter sorter;
     
+    private JCheckBox allCheck;
     private JLabel cntLbl;
     private JButton closeBtn;
     private JButton searchBtn;  
@@ -139,17 +140,20 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
         // カラム幅更新
         columnHelper.updateColumnWidth();
         
+        allCheck = new JCheckBox("全仮保存カルテ");
         cntLbl = new JLabel("0件");
         searchBtn = new JButton("更新");
         closeBtn = new JButton("閉じる");
         JPanel btnPanel = new JPanel();
         btnPanel.setLayout(new BoxLayout(btnPanel, BoxLayout.X_AXIS));
+        btnPanel.add(allCheck);
+        btnPanel.add(Box.createHorizontalStrut(10));
         btnPanel.add(cntLbl);
         btnPanel.add(Box.createHorizontalGlue());
         btnPanel.add(searchBtn);
         btnPanel.add(closeBtn);
         
-        JLabel infoLbl = new JLabel("過去日の仮保存カルテを検索します");
+        JLabel infoLbl = new JLabel("仮保存カルテを検索します");
         infoLbl.setIcon(INFO_ICON);
         
         JScrollPane scrl = new JScrollPane(table);
@@ -222,12 +226,18 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     
     public void renewList() {
 
-        Date d = new Date();
         UserModel user = Project.getUserModel();
         long userPk = user.getId();
+
+        GregorianCalendar gc = new GregorianCalendar();
+        
+        // ２年先まで入力することはなかろうｗ
+        if (allCheck.isSelected()) {
+            gc.add(GregorianCalendar.YEAR, 2);
+        }
         
         MasudaDelegater del = MasudaDelegater.getInstance();
-        List<PatientModel> list = del.getTempDocumentPatients(d, userPk);
+        List<PatientModel> list = del.getTempDocumentPatients(gc.getTime(), userPk);
 
         tableModel.setDataProvider(list);
         cntLbl.setText(tableModel.getObjectCount() + "件");
