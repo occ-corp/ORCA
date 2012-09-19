@@ -49,8 +49,8 @@ public final class SaveDialog {
     private JCheckBox clinicCheck;
     
     private JTextField titleField;
-    private JComboBox<String> titleCombo;
-    private JComboBox<String> printCombo;
+    private JComboBox titleCombo;
+    private JComboBox printCombo;
     private JLabel departmentLabel;
     
     // CLAIM 送信
@@ -186,7 +186,7 @@ public final class SaveDialog {
         
         // 文書Title
         JPanel p = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        titleCombo = new JComboBox<String>(TITLE_LIST);
+        titleCombo = new JComboBox(TITLE_LIST);
         titleCombo.setPreferredSize(new Dimension(220, titleCombo.getPreferredSize().height));
         titleCombo.setMaximumSize(titleCombo.getPreferredSize());
         titleCombo.setEditable(true);
@@ -224,7 +224,7 @@ public final class SaveDialog {
         p1.add(Box.createRigidArea(new Dimension(11, 0)));
         
         // Print
-        printCombo = new JComboBox<String>(PRINT_COUNT);
+        printCombo = new JComboBox(PRINT_COUNT);
         printCombo.setSelectedIndex(1);
         p1.add(new JLabel("印刷部数:"));
         p1.add(printCombo);

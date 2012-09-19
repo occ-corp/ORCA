@@ -132,7 +132,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // State 設定用のcombobox model
     private BitAndIconPair[] stateComboArray;
     // State 設定用のcombobox
-    private JComboBox<BitAndIconPair> stateCmb;
+    private JComboBox stateCmb;
     private AbstractAction copyAction;
 
     // 受付数・待ち時間の更新間隔
@@ -207,7 +207,7 @@ public class WatingListImpl extends AbstractMainComponent {
         for (int i = 0; i < userBitArray.length; i++) {
             stateComboArray[i] = new BitAndIconPair(userBitArray[i], userIconArray[i]);
         }
-        stateCmb = new JComboBox<BitAndIconPair>(stateComboArray);
+        stateCmb = new JComboBox(stateComboArray);
         ComboBoxRenderer renderer = new ComboBoxRenderer();
         renderer.setPreferredSize(new Dimension(30, ClientContext.getHigherRowHeight()));
         stateCmb.setRenderer(renderer);
