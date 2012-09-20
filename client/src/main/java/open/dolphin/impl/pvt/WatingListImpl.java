@@ -317,6 +317,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 if (col == memoColumn) {
                     String memo = ((String) value).trim();
                     if (memo != null && (!memo.equals(""))) {
+                        pvt.setMemo(memo);
                         cel.publishPvtState(pvt);
                     }
 
