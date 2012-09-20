@@ -99,6 +99,11 @@ public class ChartEventListener {
     }
     
     public void publishKarteOpened(PatientVisitModel pvt) {
+        
+        // 閲覧のみの処理、ええい！面倒だ！
+        if (!clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
+            return;
+        }
 
         // PatientVisitModel.BIT_OPENを立てる
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, true);
@@ -111,6 +116,11 @@ public class ChartEventListener {
     }
     
     public void publishKarteClosed(PatientVisitModel pvt) {
+        
+        // 閲覧のみの処理、ええい！面倒だ！
+        if (!clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
+            return;
+        }
         
         // PatientVisitModel.BIT_OPENとownerUUIDをリセットする
         pvt.setStateBit(PatientVisitModel.BIT_OPEN, false);
