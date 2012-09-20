@@ -236,15 +236,18 @@ public class ChartEventListener {
 
         @Override
         public void run() {
+            
             // まずは自クライアントを更新
             for (IChartEventListener listener : listeners) {
                 listener.onEvent(evt);
             }
+
             // サーバーに更新を通知
-            ChartEventDelegater del = ChartEventDelegater.getInstance();
-            del.putChartEvent(evt);
+            if (!evt.isLocalOnly()) {
+                ChartEventDelegater del = ChartEventDelegater.getInstance();
+                del.putChartEvent(evt);
+            }
         }
-        
     }
     
     // 状態変化通知メッセージをデシリアライズし各リスナに処理を分配する
