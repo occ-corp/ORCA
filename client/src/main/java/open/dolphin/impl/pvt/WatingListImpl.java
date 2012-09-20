@@ -686,9 +686,11 @@ public class WatingListImpl extends AbstractMainComponent {
                             new ReflectAction(pop1, WatingListImpl.this, "openKarte")));
                     contextMenu.addSeparator();
                     contextMenu.add(new JMenuItem(copyAction));
-                    // pvt削除
-                    contextMenu.add(new JMenuItem(
-                            new ReflectAction("受付削除", WatingListImpl.this, "removePvt")));
+                    // pvt削除は誰も開いていない場合のみ
+                    if (obj.getPatientModel().getOwnerUUID() == null) {
+                        contextMenu.add(new JMenuItem(
+                                new ReflectAction("受付削除", WatingListImpl.this, "removePvt")));
+                    }
                     contextMenu.addSeparator();
                 }
                 
