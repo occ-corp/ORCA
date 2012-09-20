@@ -29,8 +29,10 @@ public class PeriodSelectDialog extends JDialog {
     private JButton nextBtn;
     private JButton prevBtn;
     private JSpinner spinner;
+    private GregorianCalendar today;
     private GregorianCalendar gc;
     private String value;
+    private JLabel monthLbl;
 
     public PeriodSelectDialog() {
         initComponents();
@@ -44,6 +46,7 @@ public class PeriodSelectDialog extends JDialog {
     private void initComponents() {
 
         setResizable(false);
+        today = new GregorianCalendar();
         gc = new GregorianCalendar();
 
         ClientContext.setDolphinIcon(this);
@@ -52,6 +55,10 @@ public class PeriodSelectDialog extends JDialog {
         panel = new JPanel();
         panel.setLayout(new BoxLayout(panel, BoxLayout.Y_AXIS));
         setContentPane(panel);
+        
+        monthLbl = new JLabel();
+        monthLbl.setAlignmentX(CENTER_ALIGNMENT);
+        panel.add(monthLbl);
 
         table = new JTable();
         table.setShowGrid(false);
@@ -88,6 +95,12 @@ public class PeriodSelectDialog extends JDialog {
         setModal(true);
     }
 
+    private void setMonthLabel() {
+        int year = gc.get(GregorianCalendar.YEAR);
+        int month = gc.get(GregorianCalendar.MONTH) + 1;
+        monthLbl.setText(String.format("%d年%d月", year, month));
+    }
+    
     // わけわかんねーｗ　'*1/1-3,5,7'のようなフォーマットにする。
     private void construct() {
 
@@ -169,7 +182,6 @@ public class PeriodSelectDialog extends JDialog {
             public void actionPerformed(ActionEvent e) {
                 gc.add(GregorianCalendar.WEEK_OF_YEAR, -1);
                 createTableModel();
-
             }
         });
 
@@ -202,6 +214,7 @@ public class PeriodSelectDialog extends JDialog {
         for (int i = 0; i < len; ++i) {
             table.getColumnModel().getColumn(i).setPreferredWidth(30);
         }
+        setMonthLabel();
     }
     
 
@@ -210,11 +223,12 @@ public class PeriodSelectDialog extends JDialog {
         @Override
         public Component getTableCellRendererComponent(
                 JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-
+            
             super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 
             this.setHorizontalAlignment(JLabel.CENTER);
             GregorianCalendar tmp = (GregorianCalendar) table.getModel().getValueAt(row, column);
+
             int dayOfWeek = tmp.get(GregorianCalendar.DAY_OF_WEEK);
             int date = tmp.get(GregorianCalendar.DAY_OF_MONTH);
 
@@ -229,16 +243,39 @@ public class PeriodSelectDialog extends JDialog {
                     setForeground(Color.BLACK);
                     break;
             }
-
+            if (isToday(tmp)) {
+                if (isSelected) {
+                    setBackground(Color.ORANGE);
+                } else {
+                    setBackground(Color.YELLOW);
+                }
+            } else {
+                if (!isSelected) {
+                    setBackground(null);
+                }
+            }
+            
             StringBuilder sb = new StringBuilder();
-            sb.append("<html>");
+            sb.append("<html><div align=\"center\">");
             sb.append(String.valueOf(date));
             sb.append("<br>");
             sb.append(getDayOfWeekStr(dayOfWeek));
-            sb.append("</html>");
+            sb.append("</div></html>");
             setText(sb.toString());
 
             return this;
+        }
+        
+        private boolean isToday(GregorianCalendar tmp) {
+
+            int year = tmp.get(GregorianCalendar.YEAR);
+            int month = tmp.get(GregorianCalendar.MONTH);
+            int day = tmp.get(GregorianCalendar.DATE);
+            boolean b = year == today.get(GregorianCalendar.YEAR);
+            b &= month == today.get(GregorianCalendar.MONTH);
+            b &= day == today.get(GregorianCalendar.DATE);
+            return b;
+            
         }
 
         private String getDayOfWeekStr(int dayOfWeek) {
