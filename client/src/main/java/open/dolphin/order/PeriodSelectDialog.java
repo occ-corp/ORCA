@@ -198,9 +198,9 @@ public class PeriodSelectDialog extends JDialog {
 
         tableModel = new DefaultTableModel(obj, header);
         table.setModel(tableModel);
+        table.setRowHeight(40);
         for (int i = 0; i < len; ++i) {
             table.getColumnModel().getColumn(i).setPreferredWidth(30);
-            table.setRowHeight(40);
         }
     }
     
