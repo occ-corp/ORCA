@@ -1,9 +1,6 @@
 package open.dolphin.client;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Rectangle;
-import java.awt.Shape;
+import java.awt.*;
 import javax.swing.text.*;
 
 /**
@@ -27,18 +24,21 @@ public class KartePanelEditorKit extends StyledEditorKit {
 
     @Override
     public ViewFactory getViewFactory() {
+        
         if (showCr) {
             return new VisibleCrViewFactory();
         } else {
             return new InvisibleCrViewFactory();
         }
     }
-
-    private class VisibleCrViewFactory implements ViewFactory {
+    
+    private static final class VisibleCrViewFactory implements ViewFactory {
 
         @Override
         public View create(Element elem) {
+            
             String kind = elem.getName();
+            
             if (kind != null) {
                 if (kind.equals(AbstractDocument.ContentElementName)) {
                     return new LabelView(elem);
@@ -56,11 +56,13 @@ public class KartePanelEditorKit extends StyledEditorKit {
         }
     }
 
-    private class InvisibleCrViewFactory implements ViewFactory {
+    private static final class InvisibleCrViewFactory implements ViewFactory {
 
         @Override
         public View create(Element elem) {
+            
             String kind = elem.getName();
+            
             if (kind != null) {
                 if (kind.equals(AbstractDocument.ContentElementName)) {
                     return new LabelView(elem);
@@ -78,7 +80,7 @@ public class KartePanelEditorKit extends StyledEditorKit {
         }
     }
 
-    private class MyComponentView extends ComponentView {
+    private static final class MyComponentView extends ComponentView {
 
         private MyComponentView(Element elem) {
             super(elem);
@@ -88,34 +90,39 @@ public class KartePanelEditorKit extends StyledEditorKit {
         // 厳密には正しくない
         @Override
         public float getPreferredSpan(int axis) {
-            if (axis == View.X_AXIS && getComponent() instanceof StampHolder) {
-                return getStampHolderSpanX();
-                //return 0;
+            
+            Component comp = getComponent();
+            if (axis == View.X_AXIS && comp instanceof StampHolder) {
+                StampHolder sh = (StampHolder) comp;
+                return getStampHolderSpanX(sh);
             }
             return super.getPreferredSpan(axis);
         }
 
         @Override
         public float getMaximumSpan(int axis) {
-
-            if (axis == View.X_AXIS && getComponent() instanceof StampHolder) {
-                return getStampHolderSpanX();
+            
+            Component comp = getComponent();
+            if (axis == View.X_AXIS && comp instanceof StampHolder) {
+                StampHolder sh = (StampHolder) comp;
+                return getStampHolderSpanX(sh);
             }
             return super.getMaximumSpan(axis);
         }
 
-        private float getStampHolderSpanX() {
+        private float getStampHolderSpanX(StampHolder sh) {
 
-            float span = super.getPreferredSpan(View.X_AXIS);
-            int width = getComponent().getParent().getParent().getWidth() - crMargin;
-            if (span > width && width > 0) {
-                return width;
+            int paneWidth = sh.getKartePane().getTextPane().getWidth() - crMargin;
+            int stampWidth = sh.getPreferredSize().width;
+            if (paneWidth > stampWidth) {
+                return (float) stampWidth;
+            } else {
+                return (float) paneWidth;
             }
-            return span;
         }
     }
 
-    private class MyParagraphView extends ParagraphView {
+    private static final class MyParagraphView extends ParagraphView {
 
         private MyParagraphView(Element elem) {
             super(elem);
@@ -123,7 +130,9 @@ public class KartePanelEditorKit extends StyledEditorKit {
 
         @Override
         public void paint(Graphics g, Shape a) {
+            
             super.paint(g, a);
+            
             try {
                 Shape paragraph = modelToView(getEndOffset(), a, Position.Bias.Backward);
                 Rectangle r = (paragraph == null) ? a.getBounds() : paragraph.getBounds();
