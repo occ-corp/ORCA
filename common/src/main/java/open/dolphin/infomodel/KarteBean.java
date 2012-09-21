@@ -64,13 +64,12 @@ public class KarteBean extends InfoModel {
     // bi-directional references, @JsonIdentityInfo added to KarteBean
     @Transient
     private List<AppointmentModel> appoList;
-
-    // サマリーテキスト
-    @Transient
-    private String summary;
     
     @Transient
     private Date lastDocDate; 
+    
+    @Transient
+    private DocumentModel summary;
     
     //==========================================================================
     public void setLastDocDate(Date d) {
@@ -86,10 +85,11 @@ public class KarteBean extends InfoModel {
     public List<AppointmentModel> getAppointmentList() {
         return appoList;
     }
-    public void setSummary(String text) {
-        summary = text;
+    
+    public void setSummary(DocumentModel doc) {
+        summary = doc;
     }
-    public String getSummary() {
+    public DocumentModel getSummary() {
         return summary;
     }
     //==========================================================================

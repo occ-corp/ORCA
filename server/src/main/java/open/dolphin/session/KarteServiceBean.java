@@ -79,6 +79,9 @@ public class KarteServiceBean extends AbstractServiceBean {
     private static final String QUERY_SUMMARY
             = "from DocumentModel d where d.karte.id=:karteId and d.docInfo.docType = "
             + "'" + IInfoModel.DOCTYPE_SUMMARY + "' and (d.status='F' or d.status='T') order by d.started desc";
+    private static final String QUERY_SOA_SPEC
+            = "from ModuleModel m where m.document.id = :id "
+            + "and m.moduleInfo.role = 'soaSpec' and m.moduleInfo.name = 'progressCourse'";
 //masuda$
     
     @PersistenceContext
@@ -253,13 +256,18 @@ public class KarteServiceBean extends AbstractServiceBean {
                     .getResultList();
             
             if (summaryList != null && !summaryList.isEmpty()) {
-                // テキストを抽出する
-                DocumentModel doc = summaryList.get(0);
-                ModuleModel mm = doc.getModule(IInfoModel.MODULE_PROGRESS_COURSE);
-                ProgressCourse pc = (ProgressCourse) ModelUtils.xmlDecode(mm.getBeanBytes());
-                String xml = pc.getFreeText();
-                String text = ModelUtils.extractText(xml);
-                karte.setSummary(text);
+                DocumentModel summary = summaryList.get(0);
+                long id = summary.getId();
+                // progressCourse, soaSpecのみを取得する
+                List modules = em.createQuery(QUERY_SOA_SPEC)
+                        .setParameter(ID, id)
+                        .getResultList();
+                summary.setModules(modules);
+                // SchemaModelは空にする
+                List<SchemaModel> schemas = Collections.emptyList();
+                summary.setSchema(schemas);
+                
+                karte.setSummary(summary);
             }
 //masuda$
             return karte;
