@@ -30,8 +30,7 @@ public class BasicInfoInspector {
     
     // Context このインスペクタの親コンテキスト
     private ChartImpl context;
-    
-    private DocumentModel doc;
+
 
     /**
      * BasicInfoInspectorオブジェクトを生成する。
@@ -123,10 +122,9 @@ public class BasicInfoInspector {
         basePanel.putClientProperty("fixedHeight", true);
         
 //masuda^ サマリー表示
-         doc = context.getKarte().getSummary();
-        if (doc != null) {
-            ModuleModel mm = doc.getModule(IInfoModel.MODULE_PROGRESS_COURSE);
-            JTextArea ta = createTextArea(mm);
+        DocumentModel summary = context.getKarte().getSummary();
+        if (summary != null) {
+            JTextArea ta = createTextArea(summary);
             summaryBtn.addActionListener(new PopupAction(ta));
             summaryBtn.setVisible(true);
         }
@@ -139,9 +137,11 @@ public class BasicInfoInspector {
         panel.setMinimumSize(new Dimension(0, height));
     }
     
-    private JTextArea createTextArea(ModuleModel mm) {
-        
+    private JTextArea createTextArea(DocumentModel summary) {
+
         final SimpleDateFormat sdf = new SimpleDateFormat(IInfoModel.KARTE_DATE_FORMAT);
+        
+        ModuleModel mm = summary.getModule(IInfoModel.MODULE_PROGRESS_COURSE);
         ProgressCourse pc = (ProgressCourse) ModelUtils.xmlDecode(mm.getBeanBytes());
         
         boolean first = true;
