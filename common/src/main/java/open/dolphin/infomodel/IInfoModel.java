@@ -88,6 +88,9 @@ public interface IInfoModel extends java.io.Serializable, java.lang.Cloneable {
     public static final String ORCA_OUTCOME_END = "中止";
     public static final String ORCA_OUTCOME_TRANSFERED = "移行";
     
+//masuda    サマリー文書
+    public static final String DOCTYPE_SUMMARY = "summary";
+    
     //
     // Stamp Roles
     //

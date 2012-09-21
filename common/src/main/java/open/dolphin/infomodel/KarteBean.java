@@ -65,6 +65,10 @@ public class KarteBean extends InfoModel {
     @Transient
     private List<AppointmentModel> appoList;
 
+    // サマリーテキスト
+    @Transient
+    private String summary;
+    
     @Transient
     private Date lastDocDate; 
     
@@ -81,6 +85,12 @@ public class KarteBean extends InfoModel {
     }
     public List<AppointmentModel> getAppointmentList() {
         return appoList;
+    }
+    public void setSummary(String text) {
+        summary = text;
+    }
+    public String getSummary() {
+        return summary;
     }
     //==========================================================================
     

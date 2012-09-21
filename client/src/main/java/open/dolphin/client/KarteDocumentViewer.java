@@ -319,8 +319,12 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
 
     private KarteViewer createKarteViewer(DocInfoModel docInfo) {
 
-        if (docInfo != null && docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE)) {
-            return KarteViewer.createKarteViewer(KarteViewer.MODE.SINGLE);
+        // サマリー対応
+        if (docInfo != null) {
+            if (docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE)
+                    || docInfo.getDocType().equals(IInfoModel.DOCTYPE_SUMMARY)) {
+                return KarteViewer.createKarteViewer(KarteViewer.MODE.SINGLE);
+            }
         }
         return KarteViewer.createKarteViewer(KarteViewer.MODE.DOUBLE);
     }
@@ -570,13 +574,15 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         DocumentModel model = selectedKarte.getModel();
         String docType = model.getDocInfoModel().getDocType();
 
-        if (docType.equals(IInfoModel.DOCTYPE_S_KARTE)) {
+//masuda^   サマリー対応
+        if (docType.equals(IInfoModel.DOCTYPE_S_KARTE)
+                || docType.equals(IInfoModel.DOCTYPE_SUMMARY)) {
             KarteViewer viwer = KarteViewer.createKarteViewer(KarteViewer.MODE.SINGLE);
             viwer.setModel(model);
             editorFrame.setKarteViewer(viwer);
             editorFrame.start();
         } else if (docType.equals(IInfoModel.DOCTYPE_KARTE)) {
-//masuda^   カルテ表示はひとつだけ
+            // カルテ表示はひとつだけ
             // すでに修正中の document があれば toFront するだけで帰る
             if (!canModifyKarte()) {
                 return;

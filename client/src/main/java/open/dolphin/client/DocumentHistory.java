@@ -42,6 +42,7 @@ public class DocumentHistory {
     private static final String CMB_KARTE = "全て";
     private static final String CMB_KARTE_ADMISSION = "入院";
     private static final String CMB_KARTE_OUT_PATIENT = "外来";
+    private static final String CMB_KARTE_SUMMARY = "要約";
     private static final String CMB_LETTER = "文書";
     
     private static final Color SELF_INSURANCE_COLOR = new Color(255, 236, 103);
@@ -124,6 +125,7 @@ public class DocumentHistory {
     private static final String ALL = "ALL";
     private static final String ADMISSION = "ADMISSION";
     private static final String OUT_PATIENT = "OUT_PATIENT";
+    private static final String SUMMARY = "SUMMARY";
     private static final String KARTE = IInfoModel.DOCTYPE_KARTE;
     private static final String LETTER = IInfoModel.DOCTYPE_LETTER;
     private static final String CAMMA = ",";
@@ -150,6 +152,7 @@ public class DocumentHistory {
             new NameValuePair(CMB_KARTE, KARTE + CAMMA + ALL),
             new NameValuePair(CMB_KARTE_OUT_PATIENT, KARTE + CAMMA + OUT_PATIENT),
             new NameValuePair(CMB_KARTE_ADMISSION, KARTE + CAMMA + ADMISSION),
+            new NameValuePair(CMB_KARTE_SUMMARY, KARTE + CAMMA + SUMMARY),
             new NameValuePair(CMB_LETTER, LETTER + CAMMA + ALL)
         };
     }
@@ -375,16 +378,25 @@ public class DocumentHistory {
     // 入院・外来カルテでフィルタリング
     private boolean filterByKarteType(DocInfoModel docInfo) {
         
-        String fiterStr = getExtractionFilter();
+        String filterStr = getExtractionFilter();
 
-        if (ALL.equals(fiterStr)) {
+        if (ALL.equals(filterStr)) {
             return true;
         }
-
-        boolean filter = ADMISSION.equals(fiterStr);
-        boolean admission = docInfo.getAdmissionModel() != null;
-        if (admission == filter) {
-            return true;
+        if (OUT_PATIENT.equals(filterStr)) {
+            if (docInfo.getAdmissionModel() == null) {
+                return true;
+            }
+        }
+        if (ADMISSION.equals(filterStr)) {
+            if (docInfo.getAdmissionModel() != null) {
+                return true;
+            }
+        }
+        if (SUMMARY.equals(filterStr)) {
+            if (IInfoModel.DOCTYPE_SUMMARY.equals(docInfo.getDocType())) {
+                return true;
+            }
         }
 
         return false;

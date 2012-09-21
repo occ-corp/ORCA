@@ -107,6 +107,13 @@ public class BasicInfoInspector {
 
         fixHeight(basePanel, PANEL_HEIGHT);
         basePanel.putClientProperty("fixedHeight", true);
+        
+//masuda^ サマリーをtoolTipで表示する
+        String summary = context.getKarte().getSummary();
+        if (summary != null && !summary.isEmpty()) {
+            basePanel.setToolTipText(summary);
+        }
+//masuda$
     }
 
     private void fixHeight(JPanel panel, int height) {

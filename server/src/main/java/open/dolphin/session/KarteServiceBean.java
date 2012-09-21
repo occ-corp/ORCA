@@ -72,10 +72,13 @@ public class KarteServiceBean extends AbstractServiceBean {
     private static final String QUERY_APPOINTMENTS 
             = "from AppointmentModel a where a.karte.id = :karteId and a.started >= :fromDate";
     private static final String QUERY_DOCUMENT_INCLUDE_MODIFIED 
-            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate ";
+            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate";
     private static final String QUERY_DOCUMENT 
             = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate "
             + "and (d.status='F' or d.status='T')";
+    private static final String QUERY_SUMMARY
+            = "from DocumentModel d where d.karte.id=:karteId and d.docInfo.docType = "
+            + "'" + IInfoModel.DOCTYPE_SUMMARY + "' and (d.status='F' or d.status='T') order by d.started desc";
 //masuda$
     
     @PersistenceContext
@@ -242,6 +245,22 @@ public class KarteServiceBean extends AbstractServiceBean {
             if (appoList != null && !appoList.isEmpty()) {
                 karte.setAppointmentList(appoList);
             }
+            // サマリー
+            List<DocumentModel> summaryList = 
+                    em.createQuery(QUERY_SUMMARY)
+                    .setParameter(KARTE_ID, karteId)
+                    .setMaxResults(1)
+                    .getResultList();
+            
+            if (summaryList != null && !summaryList.isEmpty()) {
+                // テキストを抽出する
+                DocumentModel doc = summaryList.get(0);
+                ModuleModel mm = doc.getModule(IInfoModel.MODULE_PROGRESS_COURSE);
+                ProgressCourse pc = (ProgressCourse) ModelUtils.xmlDecode(mm.getBeanBytes());
+                String xml = pc.getFreeText();
+                String text = ModelUtils.extractText(xml);
+                karte.setSummary(text);
+            }
 //masuda$
             return karte;
 
@@ -280,14 +299,27 @@ public class KarteServiceBean extends AbstractServiceBean {
                     .setParameter(FROM_DATE, fromDate)
                     .getResultList();
         }
+//masuda^   最新のサマリーは必ず含める
+        List<DocumentModel> summaries =
+                em.createQuery(QUERY_SUMMARY)
+                .setParameter(KARTE_ID, karteId)
+                .setMaxResults(1)
+                .getResultList();
+        
+        Set<DocumentModel> docSet = new HashSet<DocumentModel>();
+        docSet.addAll(documents);
+        docSet.addAll(summaries);
 
         List<DocInfoModel> result = new ArrayList<DocInfoModel>();
-        for (DocumentModel doc : documents) {
+        
+        for (DocumentModel doc : docSet) {
             // モデルからDocInfo へ必要なデータを移す
             // クライアントが DocInfo だけを利用するケースがあるため
             doc.toDetuch();
             result.add(doc.getDocInfoModel());
         }
+//masuda$
+        
         return result;
 }
 

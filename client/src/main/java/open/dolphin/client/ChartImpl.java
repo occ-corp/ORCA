@@ -1527,12 +1527,16 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      * @param params 追加するドキュメントの情報を保持する NewKarteParams
      */
     public void addChartDocument(ChartDocument doc, NewKarteParams params) {
+//masuda^   サマリー対応
         String title;
-        if (params.getPVTHealthInsurance() != null) {
+        if (doc instanceof SummaryEditor) {
+            title = SummaryEditor.DEFAULT_TITLE;
+        } else if (params.getPVTHealthInsurance() != null) {
             title = getTabTitle(params.getDepartmentName(), params.getPVTHealthInsurance().getInsuranceClass());
         } else {
             title = getTabTitle(params.getDepartmentName(), null);
         }
+//masuda$
         tabbedPane.addTab(title, doc.getUI());
         int index = tabbedPane.getTabCount() - 1;
         providers.put(String.valueOf(index), doc);
@@ -1581,15 +1585,24 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         try {
             NChartDocument doc = (NChartDocument) Class.forName(
                     pluginClass).newInstance();
+            
+//masuda^   サマリー対応
+            String docType = null;
+            if (doc instanceof SummaryEditor) {
+                docType = IInfoModel.DOCTYPE_SUMMARY;
+            } else if (doc instanceof KarteEditor) {
+                docType = IInfoModel.DOCTYPE_S_KARTE;
+            }
 
-            if (doc instanceof KarteEditor) {
+            if (docType != null) {
+//masuda$
                 //String dept = getPatientVisit().getDeptNoTokenize();
                 //String deptCode = getPatientVisit().getDepartmentCode();
                 String dept = getPatientVisit().getDeptName();
                 String deptCode = getPatientVisit().getDeptCode();
                 String insuranceUid = getPatientVisit().getInsuranceUid();
                 Chart.NewKarteOption option = Chart.NewKarteOption.BROWSER_NEW;
-                String docType = IInfoModel.DOCTYPE_S_KARTE;
+                //String docType = IInfoModel.DOCTYPE_S_KARTE;
                 NewKarteParams params = new NewKarteParams(option);
                 params.setDocType(docType);
                 params.setDepartmentName(dept);

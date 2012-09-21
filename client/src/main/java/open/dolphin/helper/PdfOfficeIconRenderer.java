@@ -46,7 +46,7 @@ public class PdfOfficeIconRenderer extends DefaultListCellRenderer {
             }
         }
         
-        if (value!=null) {
+        if (value != null) {
             NameValuePair pair = (NameValuePair)value;
             String test = pair.getValue();
             if (test!=null) {
@@ -54,6 +54,10 @@ public class PdfOfficeIconRenderer extends DefaultListCellRenderer {
                     label.setIcon(ICON_OFFICE);
                 } else if (test.endsWith("KarteEditor")) {
                     label.setIcon(null);
+//masuda^   サマリー対応 
+                } else if (test.endsWith("SummaryEditor")) {
+                    label.setIcon(null);
+//masuda$
                 } else {
                     label.setIcon(ICON_PDF);
                 }
