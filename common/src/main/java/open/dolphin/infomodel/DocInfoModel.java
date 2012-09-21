@@ -932,6 +932,9 @@ public class DocInfoModel extends InfoModel implements Comparable {
         if (IInfoModel.STATUS_TMP.equals(status)) {
             sb.append("仮");
         }
+        if (IInfoModel.DOCTYPE_SUMMARY.equals(docType)) {
+            sb.append("サ");
+        }
         if (admission != null) {
             sb.append("入");
         }
