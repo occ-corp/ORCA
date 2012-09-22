@@ -108,7 +108,6 @@ public class BasicInfoInspector {
         north.setLayout(new BorderLayout());
         north.add(summaryBtn, BorderLayout.WEST);
         north.add(nameLabel, BorderLayout.CENTER);
-        north.setForeground(foreground);
         north.setOpaque(false);
         addressLabel = new JLabel("　");
         addressLabel.setHorizontalAlignment(SwingConstants.CENTER);
