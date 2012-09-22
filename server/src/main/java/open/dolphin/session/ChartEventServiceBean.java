@@ -290,14 +290,15 @@ public class ChartEventServiceBean implements IServiceBean {
         logger.info("ChartEventService: renew pvtList");
     }
     
-        private void setHealthInsurances(Collection<PatientModel> list) {
+    
+    private void setHealthInsurances(Collection<PatientModel> list) {
         if (list != null && !list.isEmpty()) {
             for (PatientModel pm : list) {
                 setHealthInsurances(pm);
             }
         }
     }
-    
+
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {
             List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
@@ -306,10 +307,11 @@ public class ChartEventServiceBean implements IServiceBean {
     }
 
     private List<HealthInsuranceModel> getHealthInsurances(long pk) {
-        
+
         List<HealthInsuranceModel> ins =
                 em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
                 .setParameter(PK, pk)
                 .getResultList();
         return ins;
-    }}
+    }
+}
