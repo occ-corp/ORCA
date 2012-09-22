@@ -1,6 +1,7 @@
 package open.dolphin.session;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import javax.ejb.Stateless;
 import javax.inject.Inject;
@@ -8,6 +9,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.ChartEventModel;
+import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
 
@@ -16,7 +18,7 @@ import open.dolphin.infomodel.PatientVisitModel;
  * @author Kazushi Minagawa, Digital Globe, Inc
  */
 @Stateless
-public class PatientServiceBean extends AbstractServiceBean {
+public class PatientServiceBean implements IServiceBean {
 
     private static final String QUERY_PATIENT_BY_PVTDATE 
             = "from PatientVisitModel p where p.facilityId = :fid and p.pvtDate like :date";
@@ -269,4 +271,28 @@ public class PatientServiceBean extends AbstractServiceBean {
         return list;
     }
 //masuda$
+    
+    private void setHealthInsurances(Collection<PatientModel> list) {
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                setHealthInsurances(pm);
+            }
+        }
+    }
+    
+    private void setHealthInsurances(PatientModel pm) {
+        if (pm != null) {
+            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
+            pm.setHealthInsurances(ins);
+        }
+    }
+
+    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
+        
+        List<HealthInsuranceModel> ins =
+                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
+                .setParameter(PK, pk)
+                .getResultList();
+        return ins;
+    }
 }

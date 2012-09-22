@@ -15,7 +15,7 @@ import org.hibernate.search.jpa.Search;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class KarteServiceBean extends AbstractServiceBean {
+public class KarteServiceBean implements IServiceBean {
 
     private static final String QUERY_KARTE 
             = "from KarteBean k where k.patient.id=:patientPk";

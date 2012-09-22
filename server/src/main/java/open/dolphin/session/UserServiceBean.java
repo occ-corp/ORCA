@@ -13,7 +13,7 @@ import open.dolphin.infomodel.*;
  * @author kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class UserServiceBean extends AbstractServiceBean {
+public class UserServiceBean implements IServiceBean {
 
     private static final String QUERY_USER_BY_UID 
             = "from UserModel u where u.userId=:uid";

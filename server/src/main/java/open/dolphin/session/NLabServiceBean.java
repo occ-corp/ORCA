@@ -15,7 +15,7 @@ import open.dolphin.infomodel.*;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class NLabServiceBean extends AbstractServiceBean {
+public class NLabServiceBean implements IServiceBean {
 
     private static final String QUERY_MODULE_BY_MODULE_KEY 
             = "from NLaboModule m where m.moduleKey=:moduleKey";
@@ -376,4 +376,28 @@ public class NLabServiceBean extends AbstractServiceBean {
         return module;
     }
 //masuda$
+    
+    private void setHealthInsurances(Collection<PatientModel> list) {
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                setHealthInsurances(pm);
+            }
+        }
+    }
+    
+    private void setHealthInsurances(PatientModel pm) {
+        if (pm != null) {
+            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
+            pm.setHealthInsurances(ins);
+        }
+    }
+
+    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
+        
+        List<HealthInsuranceModel> ins =
+                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
+                .setParameter(PK, pk)
+                .getResultList();
+        return ins;
+    }
 }

@@ -20,7 +20,7 @@ import org.hibernate.search.jpa.Search;
  * @author masuda, Masuda Naika
  */
 @Stateless
-public class MasudaServiceBean extends AbstractServiceBean {
+public class MasudaServiceBean implements IServiceBean {
 
     private static final String FINISHED = "finished";
     
@@ -1200,5 +1200,30 @@ public class MasudaServiceBean extends AbstractServiceBean {
         setHealthInsurances(set);
 
         return new ArrayList<PatientModel>(set);
+    }
+    
+    
+    private void setHealthInsurances(Collection<PatientModel> list) {
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                setHealthInsurances(pm);
+            }
+        }
+    }
+    
+    private void setHealthInsurances(PatientModel pm) {
+        if (pm != null) {
+            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
+            pm.setHealthInsurances(ins);
+        }
+    }
+
+    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
+        
+        List<HealthInsuranceModel> ins =
+                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
+                .setParameter(PK, pk)
+                .getResultList();
+        return ins;
     }
 }

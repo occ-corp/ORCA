@@ -15,7 +15,7 @@ import open.dolphin.infomodel.*;
  * @author kazushi, Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class StampServiceBean extends AbstractServiceBean {
+public class StampServiceBean implements IServiceBean {
 
     private static final String QUERY_TREE_BY_USER_PK 
             = "from StampTreeModel s where s.user.id=:userPK";

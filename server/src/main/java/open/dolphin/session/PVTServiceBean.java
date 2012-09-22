@@ -1,5 +1,6 @@
 package open.dolphin.session;
 
+import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -17,8 +18,8 @@ import open.dolphin.mbean.ServletContextHolder;
  * @author modified by masuda, Masuda Naika
  */
 @Stateless
-public class PVTServiceBean extends AbstractServiceBean {
-
+public class PVTServiceBean implements IServiceBean {
+    
     private static final String QUERY_PATIENT_BY_FID_PID
             = "from PatientModel p where p.facilityId=:fid and p.patientId=:pid";
     private static final String QUERY_KARTE_ID_BY_PATIENT_ID
@@ -234,5 +235,30 @@ public class PVTServiceBean extends AbstractServiceBean {
         } catch (Exception e) {
         }
         return 0;
+    }
+    
+    
+    private void setHealthInsurances(Collection<PatientModel> list) {
+        if (list != null && !list.isEmpty()) {
+            for (PatientModel pm : list) {
+                setHealthInsurances(pm);
+            }
+        }
+    }
+    
+    private void setHealthInsurances(PatientModel pm) {
+        if (pm != null) {
+            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
+            pm.setHealthInsurances(ins);
+        }
+    }
+
+    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
+        
+        List<HealthInsuranceModel> ins =
+                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
+                .setParameter(PK, pk)
+                .getResultList();
+        return ins;
     }
 }
