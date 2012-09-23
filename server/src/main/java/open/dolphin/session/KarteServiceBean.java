@@ -15,8 +15,17 @@ import org.hibernate.search.jpa.Search;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class KarteServiceBean implements IServiceBean {
+public class KarteServiceBean {
 
+    private static final String FID = "fid";
+    private static final String PID = "pid";
+    private static final String ID = "id";
+    private static final String ENTITY = "entity";
+    private static final String KARTE_ID = "karteId";
+    private static final String FROM_DATE = "fromDate";
+    private static final String TO_DATE = "toDate";
+    private static final String PATIENT_PK = "patientPk";
+    
     private static final String QUERY_KARTE 
             = "from KarteBean k where k.patient.id=:patientPk";
     private static final String QUERY_ALLERGY 

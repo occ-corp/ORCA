@@ -18,8 +18,17 @@ import open.dolphin.infomodel.PatientVisitModel;
  * @author Kazushi Minagawa, Digital Globe, Inc
  */
 @Stateless
-public class PatientServiceBean implements IServiceBean {
+public class PatientServiceBean {
 
+    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
+            = "from HealthInsuranceModel h where h.patient.id=:pk";
+    
+    private static final String PK = "pk";
+    private static final String FID = "fid";
+    private static final String PID = "pid";
+    private static final String ID = "id";
+    private static final String DATE = "date";
+    
     private static final String QUERY_PATIENT_BY_PVTDATE 
             = "from PatientVisitModel p where p.facilityId = :fid and p.pvtDate like :date";
     private static final String QUERY_PATIENT_BY_NAME 

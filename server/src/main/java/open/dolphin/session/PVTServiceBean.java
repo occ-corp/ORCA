@@ -18,7 +18,16 @@ import open.dolphin.mbean.ServletContextHolder;
  * @author modified by masuda, Masuda Naika
  */
 @Stateless
-public class PVTServiceBean implements IServiceBean {
+public class PVTServiceBean {
+    
+    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
+            = "from HealthInsuranceModel h where h.patient.id=:pk";
+    
+    private static final String PK = "pk";
+    private static final String FID = "fid";
+    private static final String PID = "pid";
+    private static final String ID = "id";
+    private static final String DATE = "date";
     
     private static final String QUERY_PATIENT_BY_FID_PID
             = "from PatientModel p where p.facilityId=:fid and p.patientId=:pid";
@@ -237,15 +246,7 @@ public class PVTServiceBean implements IServiceBean {
         return 0;
     }
     
-    
-    private void setHealthInsurances(Collection<PatientModel> list) {
-        if (list != null && !list.isEmpty()) {
-            for (PatientModel pm : list) {
-                setHealthInsurances(pm);
-            }
-        }
-    }
-    
+
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {
             List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());

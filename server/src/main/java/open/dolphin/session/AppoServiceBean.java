@@ -13,11 +13,15 @@ import open.dolphin.infomodel.AppointmentModel;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class AppoServiceBean implements IServiceBean {
+public class AppoServiceBean {
 
     private static final String QUERY_APPOINTMENT_BY_KARTE_ID 
             = "from AppointmentModel a where a.karte.id=:karteId and a.date between :fromDate and :toDate";
-
+    
+    private static final String KARTE_ID = "karteId";
+    private static final String FROM_DATE = "fromDate";
+    private static final String TO_DATE = "toDate";
+    
     @PersistenceContext
     private EntityManager em;
     

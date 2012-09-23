@@ -17,8 +17,13 @@ import open.dolphin.rest.ChartEventResource;
  * @author masuda, Masuda Naika
  */
 @Stateless
-public class ChartEventServiceBean implements IServiceBean {
+public class ChartEventServiceBean {
 
+    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
+            = "from HealthInsuranceModel h where h.patient.id=:pk";
+    
+    private static final String PK = "pk";
+    
     private static final Logger logger = Logger.getLogger(ChartEventServiceBean.class.getSimpleName());
     
     @Inject
@@ -289,16 +294,8 @@ public class ChartEventServiceBean implements IServiceBean {
         }
         logger.info("ChartEventService: renew pvtList");
     }
-    
-    
-    private void setHealthInsurances(Collection<PatientModel> list) {
-        if (list != null && !list.isEmpty()) {
-            for (PatientModel pm : list) {
-                setHealthInsurances(pm);
-            }
-        }
-    }
 
+    
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {
             List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());

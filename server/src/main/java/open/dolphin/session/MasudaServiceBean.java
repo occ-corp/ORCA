@@ -20,8 +20,12 @@ import org.hibernate.search.jpa.Search;
  * @author masuda, Masuda Naika
  */
 @Stateless
-public class MasudaServiceBean implements IServiceBean {
-
+public class MasudaServiceBean {
+    
+    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
+            = "from HealthInsuranceModel h where h.patient.id=:pk";
+    
+    private static final String PK = "pk";
     private static final String FINISHED = "finished";
     
     @PersistenceContext

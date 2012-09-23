@@ -15,8 +15,8 @@ import open.dolphin.infomodel.*;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class NLabServiceBean implements IServiceBean {
-
+public class NLabServiceBean {
+    
     private static final String QUERY_MODULE_BY_MODULE_KEY 
             = "from NLaboModule m where m.moduleKey=:moduleKey";
     private static final String QUERY_MODULE_BY_PID_SAMPLEDATE_LABCODE 
@@ -30,6 +30,11 @@ public class NLabServiceBean implements IServiceBean {
     private static final String QUERY_ITEM_BY_FIDPID_ITEMCODE 
             = "from NLaboItem l where l.patientId=:fidPid and l.itemCode=:itemCode order by l.sampleDate desc";
 
+    private static final String QUERY_INSURANCE_BY_PATIENT_PK 
+            = "from HealthInsuranceModel h where h.patient.id=:pk";
+    
+    private static final String PK = "pk";
+    
     private static final String FIDPID = "fidPid";
     private static final String SAMPLEDATE = "sampleDate";
     private static final String LABOCODE = "laboCode";
@@ -376,14 +381,6 @@ public class NLabServiceBean implements IServiceBean {
         return module;
     }
 //masuda$
-    
-    private void setHealthInsurances(Collection<PatientModel> list) {
-        if (list != null && !list.isEmpty()) {
-            for (PatientModel pm : list) {
-                setHealthInsurances(pm);
-            }
-        }
-    }
     
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {

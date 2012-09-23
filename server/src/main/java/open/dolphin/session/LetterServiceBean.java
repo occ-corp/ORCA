@@ -14,8 +14,11 @@ import open.dolphin.infomodel.LetterText;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 @Stateless
-public class LetterServiceBean implements IServiceBean {
-
+public class LetterServiceBean {
+    
+    private static final String ID = "id";
+    private static final String KARTE_ID = "karteId";
+    
     private static final String QUERY_LETTER_BY_KARTE_ID = "from LetterModule l where l.karte.id=:karteId";
     private static final String QUERY_LETTER_BY_ID = "from LetterModule l where l.id=:id";
     private static final String QUERY_ITEM_BY_ID = "from LetterItem l where l.module.id=:id";
