@@ -278,7 +278,8 @@ public class ChartEventServiceBean {
             for (PatientVisitModel pvt : pvtList) {
                 // BIT_SAVE_CLAIMとBIT_MODIFY_CLAIMは削除する
                 if (pvt.getStateBit(PatientVisitModel.BIT_SAVE_CLAIM) 
-                        || pvt.getStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)) {
+                        || pvt.getStateBit(PatientVisitModel.BIT_MODIFY_CLAIM)
+                        || pvt.getStateBit(PatientVisitModel.BIT_CANCEL)) {     // 本家からの指摘
                     toRemove.add(pvt);
                 }
             }
