@@ -1,10 +1,8 @@
 package open.dolphin.impl.claim;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import open.dolphin.client.*;
+import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.infomodel.*;
 import open.dolphin.message.ClaimHelper;
 import open.dolphin.message.MessageBuilder;
@@ -248,6 +246,28 @@ public class ClaimSender implements IKarteSender {
                     String replaced = ZenkakuUtils.utf8Replace(ci.getName());
                     ci.setName(replaced);
                 }
+/*
+                // 検体検査の場合は検査等実施判断グループ区分ごとに分類する
+                List<ClaimBundle> cbList = new ArrayList<ClaimBundle>();
+                if (ClaimConst.RECEIPT_CODE_LABO.equals(cb.getClassCode())) {
+                    cbList.addAll(separateClaimBundleByGroup(cb));
+                } else {
+                    cbList.add(cb);
+                }
+                
+                // ClaimItem数が20を超えないように分割する
+                for (ClaimBundle cb1 : cbList) {
+                    int count = cb1.getClaimItem().length;
+                    if (count > maxClaimItemCount) {
+                        for (ClaimBundle cb2 : divideClaimBundle(cb1)) {
+                            helper.addClaimBundle(cb2);
+                        }
+                    } else {
+                        // 20以下なら今までどおり
+                        helper.addClaimBundle(cb1);
+                    }
+                }
+*/
                 int count = cb.getClaimItem().length;
                 if (count > maxClaimItemCount) {
                     for (ClaimBundle cb1 : divideClaimBundle(cb)){
@@ -257,6 +277,7 @@ public class ClaimSender implements IKarteSender {
                     // 20以下なら今までどおり
                     helper.addClaimBundle(cb);
                 }
+
             }
         }
 
@@ -270,6 +291,43 @@ public class ClaimSender implements IKarteSender {
             cb.setClaimItem(commentItem.toArray(new ClaimItem[0]));
             helper.addClaimBundle(cb);
         }
+    }
+    
+    // 検査等実施判断グループ区分ごとに分類する
+    private List<ClaimBundle> separateClaimBundleByGroup(ClaimBundle cb) {
+        
+        // srycdを列挙する
+        List<String> srycds = new ArrayList<String>();
+        for (ClaimItem ci : cb.getClaimItem()) {
+            srycds.add(ci.getCode());
+        }
+        
+        // 検査等実施判断グループ区分とのマップを取得する
+        Map<String, Integer> kbnMap = SqlMiscDao.getInstance().getLaboKbn(srycds);
+        
+        // 各項目をグループ分けする
+        Map<Integer, List<ClaimItem>> ciMap = new HashMap<Integer, List<ClaimItem>>();
+        for (ClaimItem ci : cb.getClaimItem()) {
+            Integer kbn = kbnMap.get(ci.getCode());
+            List<ClaimItem> list = ciMap.get(kbn);
+            if (list == null) {
+                list = new ArrayList<ClaimItem>();
+            }
+            list.add(ci);
+            ciMap.put(kbn, list);
+        }
+        
+        // ClaimBundleに戻す
+        List<ClaimBundle> ret = new ArrayList<ClaimBundle>();
+        for (Iterator itr = ciMap.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry entry = (Map.Entry) itr.next();
+            ClaimBundle bundle = copyClaimBundle(cb);
+            List<ClaimItem> ciList = (List<ClaimItem>) entry.getValue();
+            bundle.setClaimItem(ciList.toArray(new ClaimItem[0]));
+            ret.add(bundle);
+        }
+        
+        return ret;
     }
 
     private List<ClaimBundle> divideClaimBundle(ClaimBundle cb) {

@@ -176,5 +176,8 @@ public final class ClaimConst {
     public static final String INJECTION_340 = "340";
     public static final String INJECTION_332 = "332";
     
+    // 検査
+    public static final String RECEIPT_CODE_LABO = "600";
+    
 //masuda$
 }

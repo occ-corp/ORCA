@@ -30,6 +30,47 @@ public final class SqlMiscDao extends SqlDaoBean {
 
     private SqlMiscDao() {
     }
+    
+    // 検査等実施判断グループ区分を調べる
+    public Map<String, Integer> getLaboKbn(List<String> srycds) {
+        
+        int hospNum = getHospNum();
+        StringBuilder sb = new StringBuilder();
+        sb.append("select srycd, knsjisgrpkbn from tbl_tensu ");
+        sb.append("where yukoedymd = '99999999' ");
+        sb.append("and srycd in (").append(getCodes(srycds)).append(") ");
+        sb.append("and hospnum = ").append(String.valueOf(hospNum));
+        
+        final String sql = sb.toString();
+        Connection con = null;
+        Statement st = null;
+        Map<String, Integer> ret = new HashMap<String, Integer>();
+
+        try {
+            con = getConnection();
+            st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                String srycd = rs.getString(1);
+                Integer kbn = rs.getInt(2);
+                ret.put(srycd, kbn);
+            }
+
+            rs.close();
+            st.close();
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            processError(e);
+            closeConnection(con);
+
+        } finally {
+            closeConnection(con);
+        }
+        
+        return ret;
+    }
 
     // 入院中の患者を検索し入院モデルを作成する
     public List<AdmissionModel> getInHospitalPatients(Date date) {
