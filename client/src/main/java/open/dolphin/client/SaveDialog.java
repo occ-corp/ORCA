@@ -396,11 +396,11 @@ public final class SaveDialog {
             if (d.after(now)) {
                 okButton.setEnabled(false);
                 tmpButton.setEnabled(true);
-                setFocus(tmpButton);
+                //setFocus(tmpButton);  // これは不便と指摘
             } else {
                 okButton.setEnabled(true);
                 tmpButton.setEnabled(true);
-                setFocus(okButton);
+                //setFocus(okButton);  // これは不便と指摘
             }
         } catch (Exception ex) {
             okButton.setEnabled(false);
