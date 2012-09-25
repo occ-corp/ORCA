@@ -1,6 +1,7 @@
 package open.dolphin.client;
 
 import java.util.Date;
+import java.util.GregorianCalendar;
 
 /**
  * Parametrs to save document.
@@ -56,7 +57,10 @@ public final class SaveParams {
         return confirmed;
     }
     public void setConfirmed(Date confirmed) {
-        this.confirmed = confirmed;
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(confirmed);
+        gc.clear(GregorianCalendar.MILLISECOND);
+        this.confirmed = gc.getTime();
     }
 
     // 編集元のタイトル
