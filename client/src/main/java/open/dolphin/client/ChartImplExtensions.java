@@ -1,15 +1,10 @@
-
 package open.dolphin.client;
 
-import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import javax.swing.*;
+import javax.swing.ImageIcon;
+import javax.swing.JButton;
+import javax.swing.JToolBar;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
 
@@ -86,7 +81,7 @@ public class ChartImplExtensions extends AbstractChartExtensions {
         }
 */
     }
-
+/*
     // RSBボタンを追加
     private void addRsbBtn(JToolBar myToolBar) {
 
@@ -153,6 +148,7 @@ public class ChartImplExtensions extends AbstractChartExtensions {
             }
         });
     }
+*/
     
     // FEF-40を起動する
     private void showECG() {
