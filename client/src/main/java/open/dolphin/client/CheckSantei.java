@@ -933,7 +933,7 @@ public class CheckSantei extends CheckSanteiConst {
         if (al1.size() != al2.size()) {
             return false;
         }
-
+/*
         // 薬剤数が同じなら各項目を調べてみる
         for (RpModel rp1 : al1) {
             RpModel toRemove = null;
@@ -949,6 +949,20 @@ public class CheckSantei extends CheckSanteiConst {
                 al2.remove(toRemove);
             }
         }
+*/
+        // 薬剤数が同じなら各項目を調べてみる
+        for (RpModel rp1 : al1) {
+            for (Iterator<RpModel> itr = al2.iterator(); itr.hasNext();) {
+                // 各々の薬剤項目が同じかどうか
+                RpModel rp2 = itr.next();
+                if (rp1.isSameWith(rp2)) {
+                    // 同じ薬剤・用法・用量ならal2から項目を削除
+                    itr.remove();
+                    break;
+                }
+            }
+        }
+            
         // すべて同じならal2の項目はなくなっているはず
         return al2.isEmpty();
     }

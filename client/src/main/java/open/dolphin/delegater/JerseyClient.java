@@ -3,8 +3,6 @@ package open.dolphin.delegater;
 import com.sun.jersey.api.client.AsyncWebResource;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.Dolphin;
 import open.dolphin.util.HashUtil;
@@ -33,7 +31,7 @@ public class JerseyClient {
     private AsyncWebResource asyncResource;
     //private WebResource asyncResource;
     
-    private ExecutorService exec;
+    //private ExecutorService exec;
     
     static {
         instance = new JerseyClient();
@@ -41,7 +39,7 @@ public class JerseyClient {
 
     private JerseyClient() {
         clientUUID = Dolphin.getInstance().getClientUUID();
-        exec = Executors.newSingleThreadExecutor();
+        //exec = Executors.newSingleThreadExecutor();
         client = Client.create();
         client2 = Client.create();
     }
@@ -78,7 +76,7 @@ public class JerseyClient {
 
         // pvt同期用のクライアントを別に用意する
         // 専用のExecutorServiceを設定する
-        client2.setExecutorService(exec);
+        //client2.setExecutorService(exec);
         asyncResource = client2.asyncResource(baseURI);
         //asyncResource = client2.resource(baseURI);
     }
