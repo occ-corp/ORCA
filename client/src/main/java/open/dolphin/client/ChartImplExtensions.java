@@ -1,10 +1,14 @@
 
 package open.dolphin.client;
 
+import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.swing.*;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
@@ -19,6 +23,7 @@ public class ChartImplExtensions extends AbstractChartExtensions {
     private static final ImageIcon ICON_ECG = ClientContext.getImageIcon("ecg_24.gif");
     private static final ImageIcon ICON_MED = ClientContext.getImageIcon("med_24.gif");
     private static final ImageIcon ICON_RSB = ClientContext.getImageIcon("rsb_24.gif");
+    private static final ImageIcon ICON_WEASIS = ClientContext.getImageIcon("weasis.png");
     
     public ChartImplExtensions(Chart context) {
         this.context = context;
@@ -57,6 +62,24 @@ public class ChartImplExtensions extends AbstractChartExtensions {
                 @Override
                 public void actionPerformed(ActionEvent evt) {
                     showECG();
+                }
+            });
+        }
+        
+        // Weasis
+        final String weasisAddr = 
+                Project.getString(MiscSettingPanel.PACS_WEASIS_ADDRESS, MiscSettingPanel.DEFAULT_PACS_WEASIS_ADDRESS);
+        
+        if (weasisAddr != null && !weasisAddr.isEmpty()) {
+            JButton weasisBtn = new JButton();
+            weasisBtn.setIcon(ICON_WEASIS);
+            weasisBtn.setToolTipText("WEASISを開きます。");
+            myToolBar.add(weasisBtn);
+            weasisBtn.addActionListener(new ActionListener(){
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    showWeasis(weasisAddr);
                 }
             });
         }
@@ -153,6 +176,33 @@ public class ChartImplExtensions extends AbstractChartExtensions {
     // FEF-40を起動する
     private void showECG() {
         new ShowEcgViewer().enter(context);
+    }
+    
+    private void showWeasis(String addr) {
+        
+        String patientId = context.getPatient().getPatientId();
+        StringBuilder sb = new StringBuilder();
+        sb.append(addr);
+        if (!addr.endsWith("/")) {
+            sb.append("/");
+        }
+        sb.append("weasis-pacs-connector/viewer.jnlp?patientID=");
+        sb.append(patientId);
+
+        String url = sb.toString();
+
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    desktop.browse(new URI(url));
+                } catch (IOException ex) {
+                    //ex.printStackTrace(System.err);
+                } catch (URISyntaxException ex) {
+                    //ex.printStackTrace(System.err);
+                }
+            }
+        }
     }
 
     // 薬剤相互作用検索
