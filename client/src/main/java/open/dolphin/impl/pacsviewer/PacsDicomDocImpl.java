@@ -93,13 +93,15 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         
         // Weasisの設定
         String addr = Project.getString(MiscSettingPanel.PACS_WEASIS_ADDRESS, MiscSettingPanel.DEFAULT_PACS_WEASIS_ADDRESS);
-        StringBuilder sb = new StringBuilder();
-        sb.append(addr);
-        if (!addr.endsWith("/")) {
-            sb.append("/");
+        if (addr != null && !addr.isEmpty()) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(addr);
+            if (!addr.endsWith("/")) {
+                sb.append("/");
+            }
+            sb.append("weasis-pacs-connector/viewer.jnlp?");
+            weasisAddr = sb.toString();
         }
-        sb.append("weasis-pacs-connector/viewer.jnlp?");
-        weasisAddr = sb.toString();
     }
 
     @Override
@@ -235,6 +237,10 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
                 openWeasisByPatientId();
             }
         });
+        if (weasisAddr == null) {
+            weasisStudyBtn.setEnabled(false);
+            weasisPatientBtn.setEnabled(false);
+        }
         
         //列の入れ替えを禁止
         listTable.getTableHeader().setReorderingAllowed(false);
@@ -409,6 +415,10 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     }
     
     private void openWeasis(String param) {
+        
+        if (weasisAddr == null) {
+            return;
+        }
         
         StringBuilder sb = new StringBuilder();
         sb.append(weasisAddr);
