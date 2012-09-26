@@ -19,6 +19,9 @@ import open.dolphin.util.MMLDate;
 public final class SqlMiscDao extends SqlDaoBean {
 
     private static final SqlMiscDao instance;
+    
+    // srycdと検査等実施判断グループ区分のマップ
+    private Map<String, Integer> hokatsuKbnMap;
 
     static {
         instance = new SqlMiscDao();
@@ -29,22 +32,32 @@ public final class SqlMiscDao extends SqlDaoBean {
     }
 
     private SqlMiscDao() {
+        hokatsuKbnMap = new HashMap<String, Integer>();
     }
     
     // 検査等実施判断グループ区分を調べる
-    public Map<String, Integer> getLaboKbn(List<String> srycds) {
+    public Map<String, Integer> getHokatsuKbnMap(List<String> srycds) {
+        
+        List<String> srycdsToGet = new ArrayList<String>();
+        for (String srycd : srycds) {
+            if (!hokatsuKbnMap.containsKey(srycd)) {
+                srycdsToGet.add(srycd);
+            }
+        }
+        if (srycdsToGet.isEmpty()) {
+            return hokatsuKbnMap;
+        }
         
         int hospNum = getHospNum();
         StringBuilder sb = new StringBuilder();
-        sb.append("select srycd, knsjisgrpkbn from tbl_tensu ");
+        sb.append("select srycd, houksnkbn from tbl_tensu ");
         sb.append("where yukoedymd = '99999999' ");
-        sb.append("and srycd in (").append(getCodes(srycds)).append(") ");
+        sb.append("and srycd in (").append(getCodes(srycdsToGet)).append(") ");
         sb.append("and hospnum = ").append(String.valueOf(hospNum));
         
         final String sql = sb.toString();
         Connection con = null;
         Statement st = null;
-        Map<String, Integer> ret = new HashMap<String, Integer>();
 
         try {
             con = getConnection();
@@ -54,7 +67,10 @@ public final class SqlMiscDao extends SqlDaoBean {
             while (rs.next()) {
                 String srycd = rs.getString(1);
                 Integer kbn = rs.getInt(2);
-                ret.put(srycd, kbn);
+                if (kbn == null) {
+                    kbn = 0;
+                }
+                hokatsuKbnMap.put(srycd, kbn);
             }
 
             rs.close();
@@ -69,7 +85,7 @@ public final class SqlMiscDao extends SqlDaoBean {
             closeConnection(con);
         }
         
-        return ret;
+        return hokatsuKbnMap;
     }
 
     // 入院中の患者を検索し入院モデルを作成する

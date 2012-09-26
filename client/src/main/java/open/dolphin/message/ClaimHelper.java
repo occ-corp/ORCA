@@ -77,7 +77,10 @@ public final class ClaimHelper implements IMessageHelper {
     public void setAdmitFlag(boolean b) {
         admitFlag = b;
     }
-    public String getAdmitFlag() {
+    public boolean getAdmitFlag() {
+        return admitFlag;
+    }
+    public String getAdmitFlagStr() {
         return String.valueOf(admitFlag);
     }
 

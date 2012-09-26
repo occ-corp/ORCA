@@ -208,6 +208,9 @@ public class ClaimSender implements IKarteSender {
         // 保存する KarteModel の全モジュールをチェックしClaimBundleならヘルパーに登録
         // Orcaで受信できないような大きなClaimBundleを分割する
         // 処方のコメント項目は分離して、別に".980"として送信する
+        
+        boolean admission = helper.getAdmitFlag();
+        
         List<ClaimItem> commentItem = new ArrayList<ClaimItem>();
 
         for (ModuleModel module : modules) {
@@ -246,11 +249,13 @@ public class ClaimSender implements IKarteSender {
                     String replaced = ZenkakuUtils.utf8Replace(ci.getName());
                     ci.setName(replaced);
                 }
-/*
-                // 検体検査の場合は検査等実施判断グループ区分ごとに分類する
+
+                // 入院の検体検査の場合は包括対象検査区分ごとに分類する
+                // そうしないと項目によってはbundleNumberが不正になってしまう。
+                // ORCAの「仕様」とのこと…
                 List<ClaimBundle> cbList = new ArrayList<ClaimBundle>();
-                if (ClaimConst.RECEIPT_CODE_LABO.equals(cb.getClassCode())) {
-                    cbList.addAll(separateClaimBundleByGroup(cb));
+                if (admission && ClaimConst.RECEIPT_CODE_LABO.equals(cb.getClassCode())) {
+                    cbList.addAll(divideBundleByHokatsuKbn(cb));
                 } else {
                     cbList.add(cb);
                 }
@@ -267,7 +272,7 @@ public class ClaimSender implements IKarteSender {
                         helper.addClaimBundle(cb1);
                     }
                 }
-*/
+/*
                 int count = cb.getClaimItem().length;
                 if (count > maxClaimItemCount) {
                     for (ClaimBundle cb1 : divideClaimBundle(cb)){
@@ -277,7 +282,7 @@ public class ClaimSender implements IKarteSender {
                     // 20以下なら今までどおり
                     helper.addClaimBundle(cb);
                 }
-
+*/
             }
         }
 
@@ -293,8 +298,8 @@ public class ClaimSender implements IKarteSender {
         }
     }
     
-    // 検査等実施判断グループ区分ごとに分類する
-    private List<ClaimBundle> separateClaimBundleByGroup(ClaimBundle cb) {
+    // 包括対象検査区分分ごとに分類する
+    private List<ClaimBundle> divideBundleByHokatsuKbn(ClaimBundle cb) {
         
         // srycdを列挙する
         List<String> srycds = new ArrayList<String>();
@@ -302,8 +307,8 @@ public class ClaimSender implements IKarteSender {
             srycds.add(ci.getCode());
         }
         
-        // 検査等実施判断グループ区分とのマップを取得する
-        Map<String, Integer> kbnMap = SqlMiscDao.getInstance().getLaboKbn(srycds);
+        // 包括対象検査区分とのマップを取得する
+        Map<String, Integer> kbnMap = SqlMiscDao.getInstance().getHokatsuKbnMap(srycds);
         
         // 各項目をグループ分けする
         Map<Integer, List<ClaimItem>> ciMap = new HashMap<Integer, List<ClaimItem>>();
@@ -321,10 +326,21 @@ public class ClaimSender implements IKarteSender {
         List<ClaimBundle> ret = new ArrayList<ClaimBundle>();
         for (Iterator itr = ciMap.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
-            ClaimBundle bundle = copyClaimBundle(cb);
+            int houksnkbn = (Integer) entry.getKey();
             List<ClaimItem> ciList = (List<ClaimItem>) entry.getValue();
-            bundle.setClaimItem(ciList.toArray(new ClaimItem[0]));
-            ret.add(bundle);
+            // ＯＳＣに問い合わせたところ、下記の返答 2012/09/26
+            // 「包括対象検査の対象でない検査は、検査毎に剤を分けていただくしか方法はありません」
+            if (houksnkbn != 0) {
+                ClaimBundle bundle = copyClaimBundle(cb);
+                bundle.setClaimItem(ciList.toArray(new ClaimItem[0]));
+                ret.add(bundle);
+            } else {
+                for (ClaimItem ci : ciList) {
+                    ClaimBundle bundle = copyClaimBundle(cb);
+                    bundle.setClaimItem(new ClaimItem[]{ci});
+                    ret.add(bundle);
+                }
+            }
         }
         
         return ret;

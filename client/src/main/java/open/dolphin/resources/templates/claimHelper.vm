@@ -195,7 +195,7 @@
                     <claim:information claim:status="perform"
                                        claim:orderTime="${claimHelper.getConfirmDate()}"
 ##masuda^   外来・入院CLAIM
-                                       claim:admitFlag="${claimHelper.getAdmitFlag()}"
+                                       claim:admitFlag="${claimHelper.getAdmitFlagStr()}"
 ##masuda$
 #if ($claimHelper.getHealthInsuranceGUID())
                                        claim:insuranceUid="${claimHelper.getHealthInsuranceGUID()}"
