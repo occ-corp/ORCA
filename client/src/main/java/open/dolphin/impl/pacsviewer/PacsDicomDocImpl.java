@@ -2,6 +2,7 @@ package open.dolphin.impl.pacsviewer;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -10,6 +11,8 @@ import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -42,11 +45,15 @@ import org.dcm4che2.data.Tag;
 public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyChangeListener{
 
     private static final String TITLE = "PACS";
+    private static final ImageIcon ICON_WEASIS_S = ClientContext.getImageIcon("weasis_s.png");
+    private static final ImageIcon ICON_WEASIS_P = ClientContext.getImageIcon("weasis_p.png");
 
     private JPanel panel;
     private JButton retrieveBtn;
     private JButton viewBtn;
     private JButton searchBtn;
+    private JButton weasisStudyBtn;
+    private JButton weasisPatientBtn;
     private JTable listTable;
     private JLabel statusLabel;
 
@@ -76,10 +83,23 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     private PacsService pacsService;
     private ExecutorService executor;
     
+    private String weasisAddr;
+    
 
     public PacsDicomDocImpl() {
+        
         setTitle(TITLE);
         entryList = new ArrayList<DicomImageEntry>();
+        
+        // Weasisの設定
+        String addr = Project.getString(MiscSettingPanel.PACS_WEASIS_ADDRESS, MiscSettingPanel.DEFAULT_PACS_WEASIS_ADDRESS);
+        StringBuilder sb = new StringBuilder();
+        sb.append(addr);
+        if (!addr.endsWith("/")) {
+            sb.append("/");
+        }
+        sb.append("weasis-pacs-connector/viewer.jnlp?");
+        weasisAddr = sb.toString();
     }
 
     @Override
@@ -142,11 +162,21 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         searchBtn = new JButton("検索");
         retrieveBtn = new JButton("取得");
         viewBtn = new JButton("閲覧");
+        weasisStudyBtn = new JButton();
+        weasisStudyBtn.setIcon(ICON_WEASIS_S);
+        weasisStudyBtn.setToolTipText("選択中のstudyをWEASISで開きます");
+        weasisPatientBtn = new JButton();
+        weasisPatientBtn.setIcon(ICON_WEASIS_P);
+        weasisPatientBtn.setToolTipText("この患者をWEASISで開きます");
+        
         JPanel panel2 = new JPanel();
         panel2.setLayout(new BoxLayout(panel2, BoxLayout.Y_AXIS));
         panel2.add(searchBtn);
         panel2.add(retrieveBtn);
         panel2.add(viewBtn);
+        panel2.add(Box.createVerticalStrut(10));
+        panel2.add(weasisStudyBtn);
+        panel2.add(weasisPatientBtn);
         panel1.add(panel2, BorderLayout.EAST);
         panel1.setPreferredSize(new Dimension(0, 300));
         panel.add(panel1);
@@ -188,6 +218,21 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
             @Override
             public void actionPerformed(ActionEvent e) {
                 openViewer();
+            }
+        });
+        // Weasisボタン
+        weasisStudyBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openWeasisByStudyUID();
+            }
+        });
+        weasisPatientBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                openWeasisByPatientId();
             }
         });
         
@@ -339,6 +384,49 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         }
         DicomViewer viewer = new DicomViewer();
         viewer.enter(entryList);
+    }
+    
+    // Weasisで開く
+    private void openWeasisByStudyUID() {
+        if (currentDicomObject == null) {
+            return;
+        }
+        String studyUID = currentDicomObject.getString(Tag.StudyInstanceUID);
+        StringBuilder sb = new StringBuilder();
+        sb.append("studyUID=");
+        sb.append(studyUID);
+        String param = sb.toString();
+        openWeasis(param);
+    }
+    
+    private void openWeasisByPatientId() {
+        String patientId = getContext().getPatient().getPatientId();
+        StringBuilder sb = new StringBuilder();
+        sb.append("patientID=");
+        sb.append(patientId);
+        String param = sb.toString();
+        openWeasis(param);
+    }
+    
+    private void openWeasis(String param) {
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append(weasisAddr);
+        sb.append(param);
+        String url = sb.toString();
+
+        if (Desktop.isDesktopSupported()) {
+            Desktop desktop = Desktop.getDesktop();
+            if (desktop.isSupported(Desktop.Action.BROWSE)) {
+                try {
+                    desktop.browse(new URI(url));
+                } catch (IOException ex) {
+                    //ex.printStackTrace(System.err);
+                } catch (URISyntaxException ex) {
+                    //ex.printStackTrace(System.err);
+                }
+            }
+        }
     }
 
     // listTableで現在選択されているstudyを記録する
