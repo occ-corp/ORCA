@@ -304,6 +304,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
     
     private String parseBundleNum(String str) {
         
+        str = str.substring(1);
         int len = str.length();
         int pos = str.indexOf("/");
         StringBuilder sb = new StringBuilder();
