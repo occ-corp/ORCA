@@ -377,6 +377,6 @@ public class KarteRenderer_2 {
     }
 
     private void debug(String msg) {
-        ClientContext.getBootLogger().debug(msg);
+        //ClientContext.getBootLogger().debug(msg);
     }
 }
