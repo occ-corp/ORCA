@@ -11,6 +11,7 @@ import java.net.MalformedURLException;
 import java.util.List;
 import java.util.*;
 import open.dolphin.client.ClientContext;
+import open.dolphin.client.StampRenderingHints;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import org.jdom.JDOMException;
@@ -62,6 +63,12 @@ public class KartePDFMaker extends AbstractPDFMaker {
     private List<DocumentModel> docList;
     private boolean ascending;
     private int bookmarkNumber;   // しおりの内部番号
+    
+    private StampRenderingHints hints;
+    
+    public KartePDFMaker() {
+        hints = StampRenderingHints.getInstance();
+    }
     
     @Override
     protected final String getPatientName() {
@@ -302,20 +309,6 @@ public class KartePDFMaker extends AbstractPDFMaker {
         return sb.toString();
     }
     
-    private String parseBundleNum(String str) {
-        
-        str = str.substring(1);
-        int len = str.length();
-        int pos = str.indexOf("/");
-        StringBuilder sb = new StringBuilder();
-        sb.append("回数：");
-        sb.append(str.substring(0, pos));
-        sb.append(" 実施日：");
-        sb.append(str.substring(pos + 1, len));
-        sb.append("日");
-
-        return sb.toString();
-    }
     
     private class KarteTable extends PdfPTable {
 
@@ -626,7 +619,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     // bundleNumber
                     String number = model.getBundleNumber();
                     if (number != null && number.startsWith("*")) {
-                        String str = parseBundleNum(number);
+                        String str = hints.parseBundleNum(number);
                         table.addCell(createStampCell(str, 3, false));
                     } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));
@@ -693,7 +686,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     // bundleNumber
                     String number = model.getBundleNumber();
                     if (number != null && number.startsWith("*")) {
-                        String str = parseBundleNum(number);
+                        String str = hints.parseBundleNum(number);
                         table.addCell(createStampCell(str, 3, false));
                     } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));

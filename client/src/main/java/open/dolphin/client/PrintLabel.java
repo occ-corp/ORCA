@@ -1,7 +1,7 @@
-
 package open.dolphin.client;
 
 import java.io.DataOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
@@ -12,6 +12,7 @@ import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.util.MMLDate;
+import open.dolphin.util.StringTool;
 
 /**
  * Brother QL-580Nで処方注射ラベルを印刷する
@@ -25,6 +26,7 @@ public class PrintLabel {
 
     // QL-580Nの全角最大桁数(全角32dot fontで半角換算の桁数)
     private static final int maxColumn = 42;
+    private static final String encoding = "JIS";
 
     // esc/pコマンド関連
     private static final byte[] escpInitialize = {0x1b, 0x40};
@@ -46,8 +48,12 @@ public class PrintLabel {
     private KartePane kartePane = new KartePane();
 
     private String date;
+    
+    private StampRenderingHints hints;
+    
 
     public PrintLabel() {
+        hints = StampRenderingHints.getInstance();
     }
 
     public void enter(KartePane kp) {
@@ -78,9 +84,12 @@ public class PrintLabel {
     }
 
     private void sendRawPrintData() {
-        String str = buildPrintString();
-        byte[] rawData = makeRawData(str);
-        sendData(rawData);
+        try {
+            String str = buildPrintString();
+            byte[] rawData = makeRawData(str);
+            sendData(rawData);
+        } catch (UnsupportedEncodingException ex) {
+        }
     }
 
     private void collectMedStampHolder() {
@@ -225,7 +234,7 @@ public class PrintLabel {
             // 入院注射、施行日
             String bundleNum = bundle.getBundleNumber();
             if (bundleNum.startsWith("*")) {
-                String itemName =parseBundleNum(bundleNum);
+                String itemName =hints.parseBundleNum(bundleNum);
                 lineData.add(new LineModel(itemName, "", "　"));
             }
         } else {
@@ -249,40 +258,28 @@ public class PrintLabel {
             }
         }
     }
+
     
-    private String parseBundleNum(String str) {
-        
-        int len = str.length();
-        int pos = str.indexOf("/");
-        StringBuilder sb = new StringBuilder();
-        sb.append("回数：");
-        sb.append(str.substring(0, pos));
-        sb.append(" 実施日：");
-        sb.append(str.substring(pos + 1, len));
-        sb.append("日");
-
-        return sb.toString();
-    }
-
-    private String buildPrintString() {
+    private String buildPrintString() throws UnsupportedEncodingException {
 
         StringBuilder sb = new StringBuilder();
 
         // 第２項目（数量）の桁数を基準に第１項目の桁数を決める
         for (LineModel model : lineData) {
             String item1 = model.getItemName();     // 薬剤名、患者名
-            String item2 = model.getNumDate();     // 数量、日付
-            String filler =model.getFiller();    // Filler
+            String item2 = model.getNumDate();      // 数量、日付
+            String filler =model.getFiller();       // Filler
+            int fillerLength = StringTool.getByteLength(filler);
 
             boolean firstLine = true;
             int linePosition = 0;
-            int item2Position = maxColumn - item2.getBytes().length - 1;
-
+            int item2Position = maxColumn - StringTool.getByteLength(item2) - 1;
+            
             for (int i = 0; i < item1.length(); ++i) {
                 if (linePosition < item2Position - 2) {
-                    String str = item1.substring(i, i + 1);
-                    sb.append(str);
-                    linePosition = linePosition + str.getBytes().length;
+                    char c = item1.charAt(i);
+                    sb.append(c);
+                    linePosition = linePosition + StringTool.getByteLength(c);
                 }
                 if (i == item1.length() - 1 || linePosition >= item2Position - 2) {
                     if ((linePosition & 1) == 1) {
@@ -294,13 +291,13 @@ public class PrintLabel {
                         // ここは項目区切りのSPCx2を含めてFillerで埋めるので(item2Position - 2 + 2)となる
                         while (linePosition < item2Position) {
                             sb.append(filler);
-                            linePosition = linePosition + filler.getBytes().length;
+                            linePosition = linePosition + fillerLength;
                         }
                         sb.append(item2);
                     } else {
                         while (linePosition < maxColumn) {
                             sb.append(filler);
-                            linePosition = linePosition + filler.getBytes().length;
+                            linePosition = linePosition + fillerLength;
                         }
                     }
                     sb.append("\n");
@@ -433,7 +430,7 @@ public class PrintLabel {
     }
 
 
-    private static class LineModel {
+    private class LineModel {
 
         private String itemName;
         private String numDate;

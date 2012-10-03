@@ -271,7 +271,7 @@ public class StampRenderingHints {
         return sb.toString();
     }
 
-    private String parseBundleNum(String str) {
+    public String parseBundleNum(String str) {
         
         str = str.substring(1);
         int len = str.length();

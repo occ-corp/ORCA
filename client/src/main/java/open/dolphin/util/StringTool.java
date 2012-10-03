@@ -227,5 +227,23 @@ public final class StringTool {
             return true;
         }
     }
+    
+    public static int getByteLength(String str) {
+        int length = 0;
+        for (int i = 0; i < str.length(); ++i) {
+            char c = str.charAt(i);
+            if (isZenkaku(c)) {
+                length += 2;
+            } else {
+                length++;
+            }
+        }
+        return length;
+    }
+    
+    public static int getByteLength(char c) {
+        return isZenkaku(c) ? 2 : 1;
+    }
+    
 //masuda$
 }
