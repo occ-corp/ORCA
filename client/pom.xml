@@ -145,7 +145,7 @@
         <dependency>
             <groupId>ch.randelshofer</groupId>
             <artifactId>quaqua</artifactId>
-            <version>6.3.1</version>
+            <version>6.3.1.1</version>
             <type>jar</type>
         </dependency>
     </dependencies>
