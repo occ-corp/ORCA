@@ -130,6 +130,12 @@ public final class SimpleCalendarPanel extends JPanel implements DragGestureList
                 }
             }
         });
+        
+//masuda^
+        // カラムのドラッグ・リサイズを不許可
+        table.getTableHeader().setResizingAllowed(false);
+        table.getTableHeader().setReorderingAllowed(false);
+//masuda$
 
         JPanel cmd = new JPanel(new FlowLayout(FlowLayout.CENTER));
         cmd.add(new JLabel(getCalendarTitle()));
