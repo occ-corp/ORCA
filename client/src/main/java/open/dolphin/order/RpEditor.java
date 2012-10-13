@@ -334,99 +334,107 @@ public final class RpEditor extends AbstractStampEditor {
     }
    
     @Override
-    public void setValue(IInfoModel[] value) {
+    public void setValue(final IInfoModel[] value) {
+        
+        SwingUtilities.invokeLater(new Runnable() {
 
-        // 連続して編集される場合があるのでテーブル内容等をクリアする
-        clear();
-        if (value == null) {
-            return;
-        }
-        setOldValue(value);
-        ModuleModel[] stamps = (ModuleModel[]) value;
-        // null であればリターンする
-        if (stamps == null || stamps.length == 0) {
-            return;
-        }
+            @Override
+            public void run() {
+                // 連続して編集される場合があるのでテーブル内容等をクリアする
+                clear();
+                if (value == null) {
+                    return;
+                }
+                setOldValue(value);
+                ModuleModel[] stamps = (ModuleModel[]) value;
+                // null であればリターンする
+                if (stamps == null || stamps.length == 0) {
+                    return;
+                }
 
-        // 院外処方かどうかのflag
-        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
+                // 院外処方かどうかのflag
+                boolean bOut = Project.getBoolean(Project.RP_OUT, true);
 
-        // 最初のスタンプからEntityを保存する
-        setEntity(stamps[0].getModuleInfoBean().getEntity());
-        // 最初のスタンプからスタンプ名を引き継ぐ
-        String stampName = stamps[0].getModuleInfoBean().getStampName();
-        boolean serialized = stamps[0].getModuleInfoBean().isSerialized();
-        if (!serialized && stampName.startsWith(FROM_EDITOR_STAMP_NAME)) {
-            stampName = DEFAULT_STAMP_NAME;
-        } else if (stampName.equals("")) {
-            stampName = DEFAULT_STAMP_NAME;
-        }
-        view.getStampNameField().setText(stampName);
+                // 最初のスタンプからEntityを保存する
+                setEntity(stamps[0].getModuleInfoBean().getEntity());
+                // 最初のスタンプからスタンプ名を引き継ぐ
+                String stampName = stamps[0].getModuleInfoBean().getStampName();
+                boolean serialized = stamps[0].getModuleInfoBean().isSerialized();
+                if (!serialized && stampName.startsWith(FROM_EDITOR_STAMP_NAME)) {
+                    stampName = DEFAULT_STAMP_NAME;
+                } else if (stampName.equals("")) {
+                    stampName = DEFAULT_STAMP_NAME;
+                }
+                view.getStampNameField().setText(stampName);
 
-        BundleMed med = (BundleMed) stamps[0].getModel();
-        if (med == null) {
-            return;
-        }
+                BundleMed med = (BundleMed) stamps[0].getModel();
+                if (med == null) {
+                    return;
+                }
 
-        // Memo
-        String memo = med.getMemo();
-        if (EXT_MEDICINE.equals(memo)) {
-            bOut= true;
-        }
-        view.getOutRadio().setSelected(bOut);
+                // Memo
+                String memo = med.getMemo();
+                if (EXT_MEDICINE.equals(memo)) {
+                    bOut = true;
+                }
+                view.getOutRadio().setSelected(bOut);
 
-        // 最初のスタンプがclassCodeが290（臨時）か、スタンプ名に臨時を含んでいたら臨時ボタンをセットする
-        if (med.getClassCode().startsWith(ClaimConst.RECEIPT_CODE_RINJI.substring(0, 2)) || stampName.contains(RINJI)) {
-            view.getRbRinji().setSelected(true);
-        } else {
-            view.getRbTeiki().setSelected(true);
-        }
-        // 最初のスタンプが包括ならば包括チェックボックスを設定する
-        if (med.getClassCode().endsWith("3")) {
-            view.getCbHoukatsu().setSelected(true);
-        }
-        // 最初のスタンプが入院ならば入院ラジオをセットする
-        if (NYUIN_MEDICINE.equals(med.getMemo())) {
-            view.getRbAdmission().setSelected(true);
-        } else if (NYUIN_MED_NC.equals(med.getMemo())) {
-            view.getRbAdmission().setSelected(true);
-            view.getCbNoCharge().setSelected(true);
-        }
+                // 最初のスタンプがclassCodeが290（臨時）か、スタンプ名に臨時を含んでいたら臨時ボタンをセットする
+                if (med.getClassCode().startsWith(ClaimConst.RECEIPT_CODE_RINJI.substring(0, 2)) || stampName.contains(RINJI)) {
+                    view.getRbRinji().setSelected(true);
+                } else {
+                    view.getRbTeiki().setSelected(true);
+                }
+                // 最初のスタンプが包括ならば包括チェックボックスを設定する
+                if (med.getClassCode().endsWith("3")) {
+                    view.getCbHoukatsu().setSelected(true);
+                }
+                // 最初のスタンプが入院ならば入院ラジオをセットする
+                if (NYUIN_MEDICINE.equals(med.getMemo())) {
+                    view.getRbAdmission().setSelected(true);
+                } else if (NYUIN_MED_NC.equals(med.getMemo())) {
+                    view.getRbAdmission().setSelected(true);
+                    view.getCbNoCharge().setSelected(true);
+                }
 
-        for (ModuleModel mm : stamps) {
-            med = (BundleMed) mm.getModel();
-            // ClaimItemをMasterItemへ変換してテーブルへ追加する
-            ClaimItem[] items = med.getClaimItem();
-            for (ClaimItem item : items) {
-                MasterItem mi = claimToMasterItem(item);
-                // classCodeに応じてMasterItemに薬剤区分を記録。あとでclaimClassCodeをきめるのに使用する
-                // これも毎回ORCAに問い合わせてもいいのだが
-                String ykzKbn = null;
-                if (med.getClassCode() != null) {
-                    String cCode = med.getClassCode();
-                    if (cCode.startsWith(ClaimConst.RECEIPT_CODE_GAIYO.substring(0, 2))) {       //外用
-                        ykzKbn = ClaimConst.YKZ_KBN_GAIYO;
-                    } else { //内服・臨時・頓服
-                        ykzKbn = ClaimConst.YKZ_KBN_NAIYO;
+                for (ModuleModel mm : stamps) {
+                    med = (BundleMed) mm.getModel();
+                    // ClaimItemをMasterItemへ変換してテーブルへ追加する
+                    ClaimItem[] items = med.getClaimItem();
+                    for (ClaimItem item : items) {
+                        MasterItem mi = claimToMasterItem(item);
+                        // classCodeに応じてMasterItemに薬剤区分を記録。あとでclaimClassCodeをきめるのに使用する
+                        // これも毎回ORCAに問い合わせてもいいのだが
+                        String ykzKbn = null;
+                        if (med.getClassCode() != null) {
+                            String cCode = med.getClassCode();
+                            if (cCode.startsWith(ClaimConst.RECEIPT_CODE_GAIYO.substring(0, 2))) {       //外用
+                                ykzKbn = ClaimConst.YKZ_KBN_GAIYO;
+                            } else { //内服・臨時・頓服
+                                ykzKbn = ClaimConst.YKZ_KBN_NAIYO;
+                            }
+                        }
+                        mi.setYkzKbn(ykzKbn);
+                        tableModel.addObject(mi);
+                    }
+
+                    // Save Administration
+                    if (med.getAdmin() != null) {
+                        MasterItem item = new MasterItem();
+                        item.setClassCode(ClaimConst.ADMIN);
+                        item.setCode(med.getAdminCode());
+                        item.setName(ADMIN_MARK + med.getAdmin());
+                        item.setDummy("X");
+                        String bNumber = med.getBundleNumber();
+                        bNumber = ZenkakuUtils.toHalfNumber(bNumber);
+                        item.setBundleNumber(bNumber);
+                        tableModel.addObject(item);
                     }
                 }
-                mi.setYkzKbn(ykzKbn);
-                tableModel.addObject(mi);
+                
             }
-
-            // Save Administration
-            if (med.getAdmin() != null) {
-                MasterItem item = new MasterItem();
-                item.setClassCode(ClaimConst.ADMIN);
-                item.setCode(med.getAdminCode());
-                item.setName(ADMIN_MARK + med.getAdmin());
-                item.setDummy("X");
-                String bNumber = med.getBundleNumber();
-                bNumber = ZenkakuUtils.toHalfNumber(bNumber);
-                item.setBundleNumber(bNumber);
-                tableModel.addObject(item);
-            }
-        }
+        });
+        
         checkValidation();
     }
 

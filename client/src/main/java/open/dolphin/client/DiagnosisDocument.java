@@ -631,8 +631,12 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                     case START_DATE_COL:
                     case END_DATE_COL:
                         String newDate = (String) value;
-                        newDate = convertToSeireki(newDate);  // 西暦に整形する
-
+                        try {
+                            newDate = convertToSeireki(newDate);  // 西暦に整形する
+                        } catch (Exception ex) {
+                            diagTable.getCellEditor(row, col).cancelCellEditing();
+                            break;
+                        }
                         selectedRows = diagTable.getSelectedRows();
                         for (int tableRow : selectedRows) {
                             RegisteredDiagnosisModel oldRd = (RegisteredDiagnosisModel) sorter.getObject(tableRow);
@@ -1870,7 +1874,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
     }
 
 //masuda^   和暦で入力したら変換する
-    private String convertToSeireki(String input) {
+    private String convertToSeireki(String input) throws Exception {
         final String separator = "[/\\.\\-]";
         final String mtsh = "[MmTtSsHh]";
 
@@ -1888,7 +1892,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
             StringBuilder sb = new StringBuilder();
             String str;
             if (nengo.matches(mtsh)) {
-                str  = "00" + ymd[0].replaceAll(mtsh, "");
+                str = "00" + ymd[0].replaceAll(mtsh, "");
                 sb.append(str.substring(str.length() - 2, str.length()));
                 sb.insert(0, nengo);
             } else {
@@ -1905,33 +1909,30 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         // 区切り文字[./-]はいったん消してしまう。
         output = output.replaceAll(separator, "");
 
-        try {
-            if (nengo.matches("[Mm]")) {
-                year = Integer.valueOf(output.substring(1, 3)) + 1867;
-                output = output.substring(3);
-            } else if (nengo.matches("[Tt]")) {
-                year = Integer.valueOf(output.substring(1, 3)) + 1911;
-                output = output.substring(3);
-            } else if (nengo.matches("[Ss]")) {
-                year = Integer.valueOf(output.substring(1, 3)) + 1925;
-                output = output.substring(3);
-            } else if (nengo.matches("[Hh]")) {
-                year = Integer.valueOf(output.substring(1, 3)) + 1988;
-                output = output.substring(3);
-            } else {
-                //どうやら西暦
-                year = Integer.valueOf(output.substring(0, 4));
-                output = output.substring(4);
-            }
-            output = Integer.toString(year) + "-" +
-                    output.substring(0, 2) + "-" + output.substring(2, 4);
-            //YYYY-MM-DDの型かチェック
-            if (!output.matches("\\d{4}\\-\\d{2}\\-\\d{2}")) {
-                output = null;
-            }
-        } catch (NumberFormatException e) {
+        if (nengo.matches("[Mm]")) {
+            year = Integer.valueOf(output.substring(1, 3)) + 1867;
+            output = output.substring(3);
+        } else if (nengo.matches("[Tt]")) {
+            year = Integer.valueOf(output.substring(1, 3)) + 1911;
+            output = output.substring(3);
+        } else if (nengo.matches("[Ss]")) {
+            year = Integer.valueOf(output.substring(1, 3)) + 1925;
+            output = output.substring(3);
+        } else if (nengo.matches("[Hh]")) {
+            year = Integer.valueOf(output.substring(1, 3)) + 1988;
+            output = output.substring(3);
+        } else {
+            //どうやら西暦
+            year = Integer.valueOf(output.substring(0, 4));
+            output = output.substring(4);
+        }
+        output = Integer.toString(year) + "-"
+                + output.substring(0, 2) + "-" + output.substring(2, 4);
+        //YYYY-MM-DDの型かチェック
+        if (!output.matches("\\d{4}\\-\\d{2}\\-\\d{2}")) {
             output = null;
         }
+
         return output;
     }
 //masuda$
