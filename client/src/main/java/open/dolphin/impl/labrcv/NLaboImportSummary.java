@@ -73,6 +73,13 @@ public class NLaboImportSummary {
         }
         return OTHER;
     }
+    
+    public boolean isOpened() {
+        if (patient != null) {
+            return patient.isOpened();
+        }
+        return false;
+    }
 //masuda$
     
     /**

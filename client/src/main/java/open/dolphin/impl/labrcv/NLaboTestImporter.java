@@ -657,10 +657,10 @@ public class NLaboTestImporter extends AbstractMainComponent {
                 this.setBackground(UNCONSTRAINED_COLOR);
             }
             
-            PatientModel pm = summary.getPatient();
-            if (pm != null && col == stateColumn) {
+            if (col == stateColumn) {
                 setHorizontalAlignment(JLabel.CENTER);
-                if (pm.isOpened()) {
+                if (summary.isOpened()) {
+                    PatientModel pm = summary.getPatient();
                     if (clientUUID.equals(pm.getOwnerUUID())) {
                         setIcon(OPEN_ICON);
                     } else {
@@ -693,7 +693,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                 for (int row = 0; row < list.size(); ++row) {
                     NLaboImportSummary nlab = list.get(row);
                     PatientModel pm = nlab.getPatient();
-                    if (ptPk == pm.getId()) {
+                    if (pm != null && ptPk == pm.getId()) {
                         sRow = row;
                         pm.setOwnerUUID(evt.getOwnerUUID());
                         break;
@@ -704,7 +704,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                 for (int row = 0; row < list.size(); ++row) {
                     NLaboImportSummary nlab = list.get(row);
                     PatientModel pm = nlab.getPatient();
-                    if (ptPk == pm.getId()) {
+                    if (pm != null && ptPk == pm.getId()) {
                         sRow = row;
                         nlab.setPatient(evt.getPatientModel());
                         break;
@@ -715,7 +715,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                 for (int row = 0; row < list.size(); ++row) {
                     NLaboImportSummary nlab = list.get(row);
                     PatientModel pm = nlab.getPatient();
-                    if (ptPk == pm.getId()) {
+                    if (pm != null && ptPk == pm.getId()) {
                         sRow = row;
                         nlab.setPatient(evt.getPatientVisitModel().getPatientModel());
                         break;
