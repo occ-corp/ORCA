@@ -681,7 +681,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEventModel evt) {
+    public void onEvent(ChartEventModel evt) throws Exception {
 
         int sRow = -1;
         long ptPk = evt.getPtPk();
