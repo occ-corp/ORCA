@@ -13,8 +13,10 @@ import javax.swing.text.*;
 public class KartePanelEditorKit extends StyledEditorKit {
 
     private static final Color COLOR = Color.GRAY;
-    private static final String CR = "↲";
-    private static final String EOF = "◀";
+    //private static final String CR = "↲";
+    //private static final String EOF = "◀";
+    private static final Image CR_ICON = ClientContext.getImageIcon("cr.png").getImage();
+    private static final Image EOF_ICON = ClientContext.getImageIcon("eof.png").getImage();
     private static final int crMargin = 20;
     private boolean showCr;
 
@@ -136,13 +138,15 @@ public class KartePanelEditorKit extends StyledEditorKit {
             try {
                 Shape paragraph = modelToView(getEndOffset(), a, Position.Bias.Backward);
                 Rectangle r = (paragraph == null) ? a.getBounds() : paragraph.getBounds();
-                int fontHeight = g.getFontMetrics().getHeight();
+                //int fontHeight = g.getFontMetrics().getHeight();
                 Color old = g.getColor();
                 g.setColor(COLOR);
                 if (getEndOffset() != getDocument().getEndPosition().getOffset()) {
-                    g.drawString(CR, r.x + 1, r.y + (r.height + fontHeight) / 2 - 2);
+                    //g.drawString(CR, r.x + 1, r.y + (r.height + fontHeight) / 2 - 2);
+                    g.drawImage(CR_ICON, r.x + 1, r.y + (r.height - 10) / 2 + 2, null);
                 } else {
-                    g.drawString(EOF, r.x + 1, r.y + (r.height + fontHeight) / 2 - 2);
+                    //g.drawString(EOF, r.x + 1, r.y + (r.height + fontHeight) / 2 - 2);
+                    g.drawImage(EOF_ICON, r.x + 1, r.y + (r.height - 10) / 2 + 2, null);
                 }
                 g.setColor(old);
             } catch (Exception e) {
