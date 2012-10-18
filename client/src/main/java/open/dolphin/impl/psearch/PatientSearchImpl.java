@@ -1104,7 +1104,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void onEvent(ChartEventModel evt) {
 
         int sRow = -1;
         long ptPk = evt.getPtPk();

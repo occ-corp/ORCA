@@ -1209,7 +1209,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // ChartEventListener
     // 待合リストを更新する
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void onEvent(ChartEventModel evt) {
 
         ChartEventModel.EVENT eventType = evt.getEventType();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();

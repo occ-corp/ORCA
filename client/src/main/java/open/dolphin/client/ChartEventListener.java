@@ -239,11 +239,7 @@ public class ChartEventListener {
             
             // まずは自クライアントを更新
             for (IChartEventListener listener : listeners) {
-                try {
-                    listener.onEvent(evt);
-                } catch (Exception ex) {
-                    ex.printStackTrace(System.err);
-                }
+                listener.onEvent(evt);
             }
 
             // サーバーに更新を通知
@@ -285,11 +281,7 @@ public class ChartEventListener {
             
             // 各リスナーで更新処理をする
             for (IChartEventListener listener : listeners) {
-                try {
-                    listener.onEvent(evt);
-                } catch (Exception ex) {
-                    ex.printStackTrace(System.err);
-                }
+                listener.onEvent(evt);
             }
         }
     }
