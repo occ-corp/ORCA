@@ -3,20 +3,26 @@ package open.dolphin.impl.lbtest;
 import java.awt.*;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
+import java.awt.print.PrinterException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import javax.swing.JTable.PrintMode;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractChartDocument;
 import open.dolphin.client.ClientContext;
+import open.dolphin.client.GUIConst;
 import open.dolphin.client.NameValuePair;
 import open.dolphin.delegater.LaboDelegater;
 import open.dolphin.helper.DBTask;
 import open.dolphin.infomodel.NLaboItem;
 import open.dolphin.infomodel.NLaboModule;
+import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.SampleDateComparator;
+import open.dolphin.project.Project;
 import open.dolphin.table.ListTableModel;
 import org.jfree.chart.ChartFactory;
 import org.jfree.chart.ChartPanel;
@@ -226,6 +232,32 @@ public class LaboTestBean extends AbstractChartDocument {
         // dataProvider
         tableModel.setDataProvider(dataProvider);
     }
+    
+    // 印刷
+    @Override
+    public void print() {
+
+        PatientModel pm = getContext().getPatient();
+        StringBuilder sb = new StringBuilder();
+        sb.append(pm.getPatientId());
+        sb.append(" ");
+        sb.append(pm.getFullName());
+        sb.append(" - ");
+        sb.append(Project.getUserModel().getFacilityModel().getFacilityName());
+        String footer = sb.toString();
+        
+        try {
+            table.print(PrintMode.FIT_WIDTH, null, new MessageFormat(footer));
+        } catch (PrinterException ex) {
+        }
+
+    }
+    
+    @Override
+    public void enter() {
+        super.enter();
+        getContext().enabledAction(GUIConst.ACTION_PRINT, true);
+    }
 //masuda$
 
 
@@ -372,6 +404,7 @@ public class LaboTestBean extends AbstractChartDocument {
         String value = pair.getValue();
         int firstResult = Integer.parseInt(value);
         searchLaboTest(firstResult);
+        enter();
     }
 
     @Override
