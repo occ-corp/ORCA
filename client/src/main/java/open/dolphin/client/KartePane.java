@@ -1282,6 +1282,11 @@ public class KartePane implements DocumentListener, MouseListener,
      */
     public void removeStamp(StampHolder sh) {
         //getDocument().removeStamp(sh.getStartPos(), 2);
+//masuda^   editableの場合のみ削除
+        if (!getTextPane().isEditable()) {
+            return;
+        }
+//masuda$
         KarteStyledDocument doc = getDocument();
         Element root = doc.getDefaultRootElement();
         deleteStamp(root, sh);
@@ -1304,6 +1309,11 @@ public class KartePane implements DocumentListener, MouseListener,
      * @param sh 削除するシェーマのホルダ
      */
     public void removeSchema(SchemaHolder sh) {
+//masuda^   editableの場合のみ削除
+        if (!getTextPane().isEditable()) {
+            return;
+        }
+//masuda$
         getDocument().removeStamp(sh.getStartPos(), 2);
     }
 
