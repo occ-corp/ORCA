@@ -564,6 +564,14 @@ public final class InstractionEditor extends AbstractStampEditor {
                 }
             }
         });
+        
+        view.getCommentBtn().addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doSearch(REGEXP_COMMENT_ALL, TT_CODE_SEARCH);
+            }
+        });
 //masuda$
         
         // 共通の設定
