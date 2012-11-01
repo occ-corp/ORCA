@@ -110,6 +110,7 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // 半角英数字を全角へ変換する
         name = StringTool.toZenkakuUpperLower(name);
+        String kana = StringTool.hiraganaToKatakana(name);
 
         // SQL 文
         boolean one = (name.length() == 1);
@@ -120,6 +121,7 @@ public final class SqlMasterDao extends SqlDaoBean {
             buf.append(QUERY_TENSU_BY_NAME);
             if (!partialMatch) {
                 name = "^" + name;
+                kana = "^" + kana;
             }
         }
         String sql = buf.toString();
@@ -132,7 +134,7 @@ public final class SqlMasterDao extends SqlDaoBean {
             con = getConnection();
             ps = con.prepareStatement(sql);
             ps.setString(1, name);
-            ps.setString(2, name);
+            ps.setString(2, kana);
             ps.setString(3, now);
             ps.setString(4, now);
             ps.setInt(5, hospNum);

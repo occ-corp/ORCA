@@ -1113,7 +1113,8 @@ public abstract class AbstractStampEditor extends StampEditorConst {
 
                     case TT_LETTER_SEARCH:
                         boolean pt = view.getPartialChk().isSelected();
-                        result = dao.getTensuMasterByName(StringTool.hiraganaToKatakana(text), d, pt);
+                        //result = dao.getTensuMasterByName(StringTool.hiraganaToKatakana(text), d, pt);
+                        result = dao.getTensuMasterByName(text, d, pt);
                         break;
                 }
 
