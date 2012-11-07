@@ -993,6 +993,9 @@ public abstract class AbstractStampEditor extends StampEditorConst {
             @Override
             public void actionPerformed(ActionEvent e) {
                 search(view.getSearchTextField().getText().trim(), true);
+//masuda^   検索後は全選択状態にする
+                searchTextField.selectAll();
+//masuda$
             }
         });
         searchTextField.addFocusListener(AutoKanjiListener.getInstance());
