@@ -447,41 +447,44 @@ public class StampDelegater extends BusinessDelegater {
                 infosToGet.add(info);
             }
         }
+        
+        if (!infosToGet.isEmpty()) {
 
-        String path = RES_STAMP + "list";
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (ModuleInfoBean info : infosToGet) {
-            if (!first) {
-                sb.append(CAMMA);
-            } else {
-                first = false;
+            String path = RES_STAMP + "list";
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (ModuleInfoBean info : infosToGet) {
+                if (!first) {
+                    sb.append(CAMMA);
+                } else {
+                    first = false;
+                }
+                sb.append(info.getStampId());
             }
-            sb.append(info.getStampId());
-        }
-        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", sb.toString());
+            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+            qmap.add("ids", sb.toString());
 
-        ClientResponse response = getResource(path, qmap)
-                .accept(MEDIATYPE_JSON_UTF8)
-                .get(ClientResponse.class);
+            ClientResponse response = getResource(path, qmap)
+                    .accept(MEDIATYPE_JSON_UTF8)
+                    .get(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            int status = response.getStatus();
+            String entityStr = response.getEntity(String.class);
 
-        debug(status, entityStr);
+            debug(status, entityStr);
 
-        if (status != HTTP200) {
-            return null;
-        }
-        
-       TypeReference typeRef = new TypeReference<List<StampModel>>(){};
-       List<StampModel> smList = (List<StampModel>)
-                getConverter().fromJson(entityStr, typeRef);
-        
-        // キャッシュに登録する
-        for (StampModel sm : smList) {
-            stampCache.put(sm.getId(), sm);
+            if (status != HTTP200) {
+                return null;
+            }
+
+            TypeReference typeRef = new TypeReference<List<StampModel>>(){};
+            List<StampModel> smList = (List<StampModel>)
+                        getConverter().fromJson(entityStr, typeRef);
+
+            // キャッシュに登録する
+            for (StampModel sm : smList) {
+                stampCache.put(sm.getId(), sm);
+            }
         }
         
         // キャッシュを参照してStampModel Listを返す
