@@ -24,6 +24,7 @@ public class StampHolderFunction {
     
     private static final String MED_TEIKI = "定期";
     private static final String MED_RINJI = "臨時";
+    private static final String MED_NYUIN = "入院";
     private static final String IN_MED_HOUKATSU = "院内包括";
     private static final String NYUIN_MEDICINE  = "入院処方";
     
@@ -428,6 +429,7 @@ public class StampHolderFunction {
 
         int teiki = 1;
         int rinji = 1;
+        int nyuin = 1;
         for (StampHolder sh : stampHolderList) {
             ModuleModel mm = sh.getStamp();
             boolean editable = sh.getKartePane().getTextPane().isEditable();
@@ -456,6 +458,11 @@ public class StampHolderFunction {
                     String newStampName = MED_RINJI + " - " + intToZenkaku(rinji);
                     info.setStampName(newStampName);
                     ++rinji;
+                }
+                if (stampName.contains(MED_NYUIN)) {
+                    String newStampName = MED_NYUIN + " - " + intToZenkaku(nyuin);
+                    info.setStampName(newStampName);
+                    ++nyuin;
                 }
                 mm.setModuleInfoBean(info);
                 setMyTextLater(sh);
