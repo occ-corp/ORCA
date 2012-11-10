@@ -6,7 +6,10 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import open.dolphin.project.Project;
 
 /**
@@ -32,6 +35,7 @@ public class SyskanriInfo extends SqlDaoBean {
     private Map<String, String> deptCodeDescMap;
     // ORCAに登録されている職員IDと氏名のマップ, 1010
     private Map<String, String> staffCodeNameMap;
+    private Map<String, String> orcaUserCodeIdMap;
     
     private static boolean initialized = false;
 
@@ -53,6 +57,7 @@ public class SyskanriInfo extends SqlDaoBean {
         syskanri1006 = new ArrayList<Integer>();
         deptCodeDescMap = new HashMap<String, String>();
         staffCodeNameMap = new HashMap<String, String>();
+        orcaUserCodeIdMap = new HashMap<String, String>();
         
         initialized = setHospNum();
         initialized &= setSyskanri1006();
@@ -104,23 +109,7 @@ public class SyskanriInfo extends SqlDaoBean {
     
     // ORCA職員名から職員IDを取得する
     public String getOrcaStaffCode(String userName) {
-        
-        String orcaStaffCode = "";
-        
-        if (userName == null || userName.isEmpty()) {
-            return orcaStaffCode;
-        }
-        
-        for(Iterator itr = staffCodeNameMap.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
-            String value = (String) entry.getValue();
-            if (userName.equals(value)) {
-                orcaStaffCode = (String) entry.getKey();
-                break;
-            }
-        }
-        
-        return orcaStaffCode;
+        return orcaUserCodeIdMap.get(userName);
     }
     
 //============================================================================//
@@ -314,6 +303,9 @@ public class SyskanriInfo extends SqlDaoBean {
                 // 職員名を取得
                 String value = map.get("SYS-1010-NAME");
                 staffCodeNameMap.put(kbncd, value);
+                // ORCA user IDとstaff code
+                value = map.get("SYS-1010-USERID");
+                orcaUserCodeIdMap.put(value, kbncd);
             } catch (UnsupportedEncodingException ex) {
                 success = false;
                 break;
