@@ -117,13 +117,21 @@ public class WatingListImpl extends AbstractMainComponent {
         ClientContext.getImageIcon("sinfo_16.gif"), 
         ClientContext.getImageIcon("flag_16.gif")};
     // State ComboBox
-    private Integer[] userBitArray = {0, 3, 4, 5, 6};
+    //private Integer[] userBitArray = {0, 3, 4, 5, 6};
+    private Integer[] userBitArray = {
+        0,
+        PatientVisitModel.BIT_TREATMENT,
+        PatientVisitModel.BIT_HURRY,
+        PatientVisitModel.BIT_GO_OUT,
+        PatientVisitModel.BIT_CANCEL,
+        PatientVisitModel.BIT_SAVE_CLAIM};
     private ImageIcon[] userIconArray = {
         null, 
         ClientContext.getImageIcon("apps_16.gif"), 
         ClientContext.getImageIcon("fastf_16.gif"), 
         ClientContext.getImageIcon("cart_16.gif"), 
-        ClientContext.getImageIcon("cancl_16.gif")};
+        ClientContext.getImageIcon("cancl_16.gif"),
+        ClientContext.getImageIcon("flag_16.gif")};
     private ImageIcon modifySendIcon;
     
     // Status　情報　メインウィンドウの左下に表示される内容
