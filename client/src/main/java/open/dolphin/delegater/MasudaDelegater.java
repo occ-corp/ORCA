@@ -100,7 +100,7 @@ public class MasudaDelegater extends BusinessDelegater {
     
     public void removeRoutineMedModel(RoutineMedModel model) {
 
-        String path = RES_BASE + "routineMed";
+        String path = RES_BASE + "routineMed/" + model.getId();
         
         ClientResponse response = getResource(path, null)
                     .accept(MEDIATYPE_TEXT_UTF8)
