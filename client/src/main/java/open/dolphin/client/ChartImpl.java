@@ -705,13 +705,13 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             @Override
             public void windowOpened(WindowEvent e) {
                 // Window がオープンされた時の処理を行う
-                windowOpened(ChartImpl.this);
+                chartWindowOpened(ChartImpl.this);
             }
 
             @Override
             public void windowClosed(WindowEvent e) {
                 // Window がクローズされた時の処理を行う
-                windowClosed(ChartImpl.this);
+                chartWindowClosed(ChartImpl.this);
             }
 
             @Override
@@ -2157,7 +2157,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      *
      * @param opened オープンした ChartPlugin
      */
-    public void windowOpened(ChartImpl opened) {
+    //public void windowOpened(ChartImpl opened) {
+    public void chartWindowOpened(ChartImpl opened) {
         // インスタンスを保持するリストへ追加する
         Dolphin.getInstance().getAllCharts().add(opened);
     }
@@ -2167,7 +2168,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      *
      * @param closed クローズした ChartPlugin
      */
-    public void windowClosed(ChartImpl closed) {
+    //public void windowClosed(ChartImpl closed) {
+    public void chartWindowClosed(ChartImpl closed) {
 
         // インスタンスリストから取り除く
         if (Dolphin.getInstance().getAllCharts().remove(closed)) {
