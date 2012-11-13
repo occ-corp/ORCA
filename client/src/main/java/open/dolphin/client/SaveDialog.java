@@ -456,7 +456,10 @@ public final class SaveDialog {
         //-------------------
         // CLAIM 送信
         //-------------------
-        model.setSendClaim(!temp && sendClaim.isSelected());
+//masuda^   仮保存でもClaim送信可能にする
+        //model.setSendClaim(!temp && sendClaim.isSelected());
+        model.setSendClaim(sendClaim.isSelected());
+//masuda$
         
         // 患者への参照許可を取得する
         boolean b = !temp && patientCheck.isSelected();

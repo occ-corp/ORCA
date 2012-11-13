@@ -1352,8 +1352,10 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                         //-------------------------------------
                         // 仮保存の場合 CLAIM 送信しない
                         //-------------------------------------
-//masuda    仮保存でもCLAIM送信しちゃう                        
-                        //sendClaim = false;    
+//masuda^   仮保存でもCLAIM送信しちゃう                        
+                        //sendClaim = false;
+                        sendClaim = params.isSendClaim();
+//masuda$
                         sendMml = false;
                         sendLabtest = false;
                         docInfo.setStatus(STATUS_TMP);
