@@ -227,6 +227,7 @@ public class ClaimSender implements IKarteSender {
                     
                     // それぞれの処方bundleをしらべる
                     boolean comment = ci.getCode().matches(ClaimConst.REGEXP_PRESCRIPTION_COMMENT);
+                    // 先頭がアスタリスクならば.980に分離しない
                     comment &= (ci.getName() != null && !ci.getName().startsWith("*") && !ci.getName().startsWith("＊"));
                     if (comment) {
                         commentItem.add(ci);    // コメントコード
