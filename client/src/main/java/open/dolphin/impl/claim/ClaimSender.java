@@ -7,6 +7,7 @@ import open.dolphin.infomodel.*;
 import open.dolphin.message.ClaimHelper;
 import open.dolphin.message.MessageBuilder;
 import open.dolphin.project.Project;
+import open.dolphin.util.BeanUtils;
 import open.dolphin.util.ZenkakuUtils;
 import org.apache.log4j.Level;
 
@@ -204,10 +205,15 @@ public class ClaimSender implements IKarteSender {
     }
     
 //masuda^
-    private void registToHelper(ClaimHelper helper, Collection<ModuleModel> modules){
+    private void registToHelper(ClaimHelper helper, Collection<ModuleModel> modules_src){
         // 保存する KarteModel の全モジュールをチェックしClaimBundleならヘルパーに登録
         // Orcaで受信できないような大きなClaimBundleを分割する
         // 処方のコメント項目は分離して、別に".980"として送信する
+
+        // 気持ちが悪いので複製をつかう
+        byte[] bytes = BeanUtils.getXMLBytes(modules_src);
+        Collection<ModuleModel> modules 
+                = (Collection<ModuleModel>) BeanUtils.xmlDecode(bytes);
         
         boolean admission = helper.getAdmitFlag();
         
@@ -216,6 +222,7 @@ public class ClaimSender implements IKarteSender {
         for (ModuleModel module : modules) {
 
             String entity = module.getModuleInfoBean().getEntity();
+            
             // 処方箋コメントを分離
             if (IInfoModel.ENTITY_MED_ORDER.equals(entity)) {
                 BundleMed bundle = (BundleMed) module.getModel();
@@ -249,7 +256,8 @@ public class ClaimSender implements IKarteSender {
                 if (clsCode != null && clsCode.startsWith("3") && clsCode.endsWith("1")) {
                     List<ClaimItem> ciList = new ArrayList<ClaimItem>();
                     for (ClaimItem ci : bundle.getClaimItem()) {
-                        if (!String.valueOf(ClaimConst.SYUGI).equals(ci.getClassCode())) {
+                        // int ClaimConst.SYUGI = 0
+                        if (!"0".equals(ci.getClassCode())) {
                             ciList.add(ci);
                         }
                     }
@@ -261,9 +269,9 @@ public class ClaimSender implements IKarteSender {
             IInfoModel m = module.getModel();
 
             if (m instanceof ClaimBundle) {
-                ClaimBundle cb = (ClaimBundle) m;
+                ClaimBundle bundle = (ClaimBundle) m;
                 // 文字置換
-                for (ClaimItem ci : cb.getClaimItem()) {
+                for (ClaimItem ci : bundle.getClaimItem()) {
                     String replaced = ZenkakuUtils.utf8Replace(ci.getName());
                     ci.setName(replaced);
                 }
@@ -272,10 +280,10 @@ public class ClaimSender implements IKarteSender {
                 // そうしないと項目によってはbundleNumberが不正になってしまう。
                 // ORCAの「仕様」とのこと…
                 List<ClaimBundle> cbList = new ArrayList<ClaimBundle>();
-                if (admission && ClaimConst.RECEIPT_CODE_LABO.equals(cb.getClassCode())) {
-                    cbList.addAll(divideBundleByHokatsuKbn(cb));
+                if (admission && ClaimConst.RECEIPT_CODE_LABO.equals(bundle.getClassCode())) {
+                    cbList.addAll(divideBundleByHokatsuKbn(bundle));
                 } else {
-                    cbList.add(cb);
+                    cbList.add(bundle);
                 }
                 
                 // ClaimItem数が20を超えないように分割する
