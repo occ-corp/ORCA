@@ -215,8 +215,9 @@ public class ClaimSender implements IKarteSender {
 
         for (ModuleModel module : modules) {
 
+            String entity = module.getModuleInfoBean().getEntity();
             // 処方箋コメントを分離
-            if ("medOrder".equals(module.getModuleInfoBean().getEntity())) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(entity)) {
                 BundleMed bundle = (BundleMed) module.getModel();
 
                 List<ClaimItem> nonCommentItem = new ArrayList<ClaimItem>();
@@ -240,7 +241,22 @@ public class ClaimSender implements IKarteSender {
                     bundle.setClaimItem(nonCommentItem.toArray(new ClaimItem[0]));
                 }
             }
-
+            
+            // 注射手技料なしの場合はClaim送信前に手技を抜く
+            if (IInfoModel.ENTITY_INJECTION_ORDER.equals(entity)) {
+                ClaimBundle bundle = (ClaimBundle) module.getModel();
+                String clsCode = bundle.getClassCode();
+                if (clsCode != null && clsCode.startsWith("3") && clsCode.endsWith("1")) {
+                    List<ClaimItem> ciList = new ArrayList<ClaimItem>();
+                    for (ClaimItem ci : bundle.getClaimItem()) {
+                        if (!String.valueOf(ClaimConst.SYUGI).equals(ci.getClassCode())) {
+                            ciList.add(ci);
+                        }
+                    }
+                    bundle.setClaimItem(ciList.toArray(new ClaimItem[0]));
+                }
+            }
+            
             // 20を超えるClaimItemを持つClaimBundleは分割して登録する
             IInfoModel m = module.getModel();
 
