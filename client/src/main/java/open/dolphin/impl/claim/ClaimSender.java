@@ -211,9 +211,11 @@ public class ClaimSender implements IKarteSender {
         // 処方のコメント項目は分離して、別に".980"として送信する
 
         // 気持ちが悪いので複製をつかう
-        byte[] bytes = BeanUtils.getXMLBytes(modules_src);
-        Collection<ModuleModel> modules 
-                = (Collection<ModuleModel>) BeanUtils.xmlDecode(bytes);
+        //byte[] bytes = BeanUtils.getXMLBytes(modules_src);
+        //Collection<ModuleModel> modules 
+        //        = (Collection<ModuleModel>) BeanUtils.xmlDecode(bytes);
+        Collection<ModuleModel> modules = 
+                (Collection<ModuleModel>) BeanUtils.deepCopy(modules_src);
         
         boolean admission = helper.getAdmitFlag();
         
