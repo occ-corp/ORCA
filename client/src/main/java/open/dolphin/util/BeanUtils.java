@@ -1,10 +1,7 @@
 package open.dolphin.util;
 
 import java.beans.*;
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.*;
 
 /**
  *
@@ -80,8 +77,26 @@ public class BeanUtils {
         return d.readObject();
     }
     
+    //public static Object deepCopy(Object src) {
+    //    return xmlDecode(getXMLBytes(src));
+    //}
+    
     public static Object deepCopy(Object src) {
-        return xmlDecode(getXMLBytes(src));
+        
+        Object ret = null;
+  
+        try {
+            ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
+            ObjectOutputStream out = new ObjectOutputStream(byteOut);
+            out.writeObject(src);
+            ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
+            ObjectInputStream in = new ObjectInputStream(byteIn);
+            ret = in.readObject();
+        } catch (ClassNotFoundException ex) {
+        } catch (IOException ex) {
+        }
+        
+        return ret;
     }
 
 //masuda^   http://forums.sun.com/thread.jspa?threadID=427879

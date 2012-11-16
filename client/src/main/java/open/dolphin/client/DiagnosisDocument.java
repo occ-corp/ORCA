@@ -1868,8 +1868,9 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
      */
     private RegisteredDiagnosisModel duplicateRd(RegisteredDiagnosisModel source){
 
-        byte[] bean = BeanUtils.xmlEncode(source);
-        RegisteredDiagnosisModel model = (RegisteredDiagnosisModel) BeanUtils.xmlDecode(bean);
+        //byte[] bean = BeanUtils.xmlEncode(source);
+        //RegisteredDiagnosisModel model = (RegisteredDiagnosisModel) BeanUtils.xmlDecode(bean);
+        RegisteredDiagnosisModel model = (RegisteredDiagnosisModel) BeanUtils.deepCopy(source);
         return model;
     }
 
