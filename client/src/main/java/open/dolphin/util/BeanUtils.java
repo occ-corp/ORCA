@@ -77,6 +77,7 @@ public class BeanUtils {
         return d.readObject();
     }
     
+//masuda^
     //public static Object deepCopy(Object src) {
     //    return xmlDecode(getXMLBytes(src));
     //}
@@ -98,6 +99,7 @@ public class BeanUtils {
         
         return ret;
     }
+//masuda$
 
 //masuda^   http://forums.sun.com/thread.jspa?threadID=427879
    private static class DatePersistenceDelegate extends PersistenceDelegate {
@@ -120,11 +122,5 @@ public class BeanUtils {
        }
    }
 //masuda$
-   
-//masuda^
-    public static Object getClonedObject(Object bean) {
-        byte[] beanBytes = xmlEncode(bean);
-        return xmlDecode(beanBytes);
-    }
-//masuda$
+
 }
