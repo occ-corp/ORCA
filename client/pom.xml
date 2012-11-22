@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.1.8.Final</version>
+            <version>4.1.7.Final</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -74,7 +74,7 @@
         <dependency>
             <groupId>com.sun.jersey</groupId>
             <artifactId>jersey-client</artifactId>
-            <version>1.14</version>
+            <version>1.15</version>
         </dependency>
         <dependency>
             <groupId>commons-codec</groupId>
