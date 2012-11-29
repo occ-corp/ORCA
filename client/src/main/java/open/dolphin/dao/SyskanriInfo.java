@@ -65,11 +65,6 @@ public class SyskanriInfo extends SqlDaoBean {
         initialized &= getSyskanri1005();
         initialized &= getSyskanri1010();
     }
-
-    
-    public String getOrcaVer() {
-        return orcaVer;
-    }
     
     public boolean isOrca46() {
         return ORCA46.equals(orcaVer);
@@ -162,11 +157,11 @@ public class SyskanriInfo extends SqlDaoBean {
             closeStatement(st);
             closeConnection(con);
         }
-        
-        if (ORCA_DB_VER46.equals(dbVersion)) {
-            orcaVer = ORCA46;
-        } else if (ORCA_DB_VER45.equals(dbVersion)) {
+
+        if (ORCA_DB_VER45.equals(dbVersion)) {
             orcaVer = ORCA45;
+        } else {
+            orcaVer = ORCA46;
         }
         return success;
     }
