@@ -20,6 +20,7 @@ import open.dolphin.client.BlockGlass;
 import open.dolphin.client.ClientContext;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.helper.ComponentMemory;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 
@@ -149,7 +150,7 @@ public class ImportOrcaMedicinePanel {
 
             @Override
             protected Object doInBackground() throws Exception {
-                return  dao.getOrcaVisit(patientId, startDate, endDate, descFlag, "medOrder");
+                return  dao.getOrcaVisit(patientId, startDate, endDate, descFlag, IInfoModel.ENTITY_MED_ORDER);
             }
 
             @Override

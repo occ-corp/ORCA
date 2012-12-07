@@ -21,7 +21,7 @@ public abstract class KartePanel extends Panel2 {
     
     private static enum DOC_TYPE {OUT_PATIENT, ADMISSION, SELF_INSURANCE, TEMP_KARTE};
     
-    private static final Color OUT_PATIENT_COLOR = new Color(0, 0, 0, 0);
+    private static final Color OUT_PATIENT_COLOR = null;    // new Color(0, 0, 0, 0);
     private static final Color SELF_INSURANCE_COLOR = new Color(255, 236, 103);
     private static final Color ADMISSION_COLOR = new Color(253, 202, 138);
     private static final Color TEMP_KARTE_COLOR = new Color(239, 156, 153);

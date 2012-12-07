@@ -381,7 +381,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
         List<StampHolder> list = stampHolder.getKartePane().getDocument().getStampHolders();
         for (StampHolder sh : list) {
-            if ("medOrder".equals(sh.getStamp().getModuleInfoBean().getEntity())) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(sh.getStamp().getModuleInfoBean().getEntity())) {
                 addEnterStampHolder(sh);
             }
         }

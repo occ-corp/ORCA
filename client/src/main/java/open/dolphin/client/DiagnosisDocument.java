@@ -998,9 +998,9 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         List<RegisteredDiagnosisModel> addedDiagnosis = new ArrayList<RegisteredDiagnosisModel>();
         // データベースにある変更した項目
         List<RegisteredDiagnosisModel> updatedDiagnosis = new ArrayList<RegisteredDiagnosisModel>();
-        // データベースから削除するRegisteredDiagnosisModelのId
-        List<Long> deletedRdId = new ArrayList<Long>();
-
+        // データベースから削除する項目
+        List<RegisteredDiagnosisModel> deletedDiagnosis = new ArrayList<RegisteredDiagnosisModel>();
+        
         for (RegisteredDiagnosisModel rd : allDiagnosis){
             String status = rd.getStatus();
             if (DIAGNOSIS_EDITED.equals(status)) {
@@ -1013,7 +1013,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 }
             // 新たに登録したもの(Idは負)はdeletedRdIdからは除外する
             } else if (DIAGNOSIS_DELETED.equals(status) && rd.getId() > 0){
-                deletedRdId.add(rd.getId());
+                deletedDiagnosis.add(rd);
             }
         }
 
@@ -1028,113 +1028,83 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 
         boolean go = true;
 
-        if (!addedDiagnosis.isEmpty()) {
+        for (RegisteredDiagnosisModel rd : addedDiagnosis) {
 
-            for (RegisteredDiagnosisModel rd : addedDiagnosis) {
+            logger.debug("added rd = " + rd.getDiagnosis());
+            logger.debug("id = " + rd.getId());
 
-                logger.debug("added rd = " + rd.getDiagnosis());
-                logger.debug("id = " + rd.getId());
+            // 開始日、終了日はテーブルから取得している
+            // TODO confirmed, recorded
+            rd.setId(0);    // Idは0にしておく
+            rd.setKarteBean(getContext().getKarte());           // Karte
+            rd.setUserModel(Project.getUserModel());          // Creator
+            rd.setConfirmed(confirmed);                     // 確定日
+            rd.setRecorded(confirmed);                      // 記録日
+            rd.setStatus(IInfoModel.STATUS_FINAL);
 
-                // 開始日、終了日はテーブルから取得している
-                // TODO confirmed, recorded
-                rd.setId(0);    // Idは0にしておく
-                rd.setKarteBean(getContext().getKarte());           // Karte
-                rd.setUserModel(Project.getUserModel());          // Creator
-                rd.setConfirmed(confirmed);                     // 確定日
-                rd.setRecorded(confirmed);                      // 記録日
-                rd.setStatus(IInfoModel.STATUS_FINAL);
+            // 開始日=適合開始日 not-null
+            if (rd.getStarted() == null) {
+                rd.setStarted(confirmed);
+            }
 
-                // 開始日=適合開始日 not-null
-                if (rd.getStarted() == null) {
-                    rd.setStarted(confirmed);
-                }
+            // TODO トラフィック
+            rd.setPatientLiteModel(getContext().getPatient().patientAsLiteModel());
+            rd.setUserLiteModel(Project.getUserModel().getLiteModel());
 
-                // TODO トラフィック
-                rd.setPatientLiteModel(getContext().getPatient().patientAsLiteModel());
-                rd.setUserLiteModel(Project.getUserModel().getLiteModel());
-
-                // 転帰をチェックする
-                if (!isValidOutcome(rd)) {
-                    go = false;
-                    break;
-                }
+            // 転帰をチェックする
+            if (!isValidOutcome(rd)) {
+                go = false;
+                break;
             }
         }
-
         if (!go) {
             return;
         }
 
-        if (!updatedDiagnosis.isEmpty()) {
+        for (RegisteredDiagnosisModel rd : updatedDiagnosis) {
 
-            for (RegisteredDiagnosisModel rd : updatedDiagnosis) {
-
-                logger.debug("updated rd = " + rd.getDiagnosis());
-                logger.debug("id = " + rd.getId());
+            logger.debug("updated rd = " + rd.getDiagnosis());
+            logger.debug("id = " + rd.getId());
 
 
-                // 現バージョンは上書きしている
-                rd.setUserModel(Project.getUserModel());
-                rd.setConfirmed(confirmed);
-                rd.setRecorded(confirmed);
-                rd.setStatus(IInfoModel.STATUS_FINAL);
+            // 現バージョンは上書きしている
+            rd.setUserModel(Project.getUserModel());
+            rd.setConfirmed(confirmed);
+            rd.setRecorded(confirmed);
+            rd.setStatus(IInfoModel.STATUS_FINAL);
 
-                // TODO トラフィック
-                rd.setPatientLiteModel(getContext().getPatient().patientAsLiteModel());
-                rd.setUserLiteModel(Project.getUserModel().getLiteModel());
+            // TODO トラフィック
+            rd.setPatientLiteModel(getContext().getPatient().patientAsLiteModel());
+            rd.setUserLiteModel(Project.getUserModel().getLiteModel());
 
-                // 転帰をチェックする
-                if (!isValidOutcome(rd)) {
-                    go = false;
-                    break;
-                }
+            // 転帰をチェックする
+            if (!isValidOutcome(rd)) {
+                go = false;
+                break;
             }
         }
-
         if (!go) {
             return;
+        }
+        
+        // 中途終了データ作成API(claim)(傷病名削除) (R201207-015)
+        // 転帰にdeleteを設定する
+        for (RegisteredDiagnosisModel rd : deletedDiagnosis) {
+            rd.setOutcome("delete");
+            // TODO トラフィック ??
+            rd.setPatientLiteModel(getContext().getPatient().patientAsLiteModel());
+            rd.setUserLiteModel(Project.getUserModel().getLiteModel());
         }
 
         final DocumentDelegater ddl = DocumentDelegater.getInstance();
-        DiagnosisPutTask task = new DiagnosisPutTask(getContext(), addedDiagnosis, updatedDiagnosis, sendDiagnosis, ddl);
+        DiagnosisPutTask task = new DiagnosisPutTask(
+                getContext(), 
+                addedDiagnosis, 
+                updatedDiagnosis, 
+                deletedDiagnosis,
+                sendDiagnosis, ddl);
         task.execute();
 
-        if (!deletedRdId.isEmpty()) {
-            // 削除も保存時に行う
-            final List<Long> removeList = new ArrayList<Long>(deletedRdId);
-
-            DBTask deleteTask = new DBTask<Void, Void>(getContext()) {
-
-                @Override
-                protected Void doInBackground() throws Exception {
-                    logger.debug("delete doInBackground");
-                    ddl.removeDiagnosis(removeList);
-                    return null;
-                }
-
-                @Override
-                protected void succeeded(Void result) {
-                    logger.debug("delete succeeded");
-                    
-                    for (Iterator<RegisteredDiagnosisModel> itr = allDiagnosis.iterator(); itr.hasNext();) {
-                        RegisteredDiagnosisModel rd = itr.next();
-                        if (DIAGNOSIS_DELETED.equals(rd.getStatus())) {
-                            itr.remove();
-                        }
-                    }
-                }
-            };
-
-            deleteTask.execute();
-        } else {
-            // データベースから削除する項目はなくてもテーブルからは削除
-            for (Iterator<RegisteredDiagnosisModel> itr = allDiagnosis.iterator(); itr.hasNext();) {
-                RegisteredDiagnosisModel rd = itr.next();
-                if (DIAGNOSIS_DELETED.equals(rd.getStatus())) {
-                    itr.remove();
-                }
-            }
-        }
         undoQue.clear();
         redoQue.clear();
         diagTable.clearSelection();
@@ -1410,7 +1380,8 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         
         tableModel.setDataProvider(new ArrayList<RegisteredDiagnosisModel>(rdList));
     }
-
+    
+//masuda^
     /**
      * DiagnosisPutTask
      */
@@ -1419,6 +1390,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         //private Chart chart;
         private List<RegisteredDiagnosisModel> added;
         private List<RegisteredDiagnosisModel> updated;
+        private List<RegisteredDiagnosisModel> deleted;
         private boolean sendClaim;
         private DocumentDelegater ddl;
 
@@ -1426,12 +1398,14 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 Chart chart,
                 List<RegisteredDiagnosisModel> added,
                 List<RegisteredDiagnosisModel> updated,
+                List<RegisteredDiagnosisModel> deleted,
                 boolean sendClaim,
                 DocumentDelegater ddl) {
 
             super(chart);
             this.added = added;
             this.updated = updated;
+            this.deleted = deleted;
             this.sendClaim = sendClaim;
             this.ddl = ddl;
         }
@@ -1463,49 +1437,45 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 }
 
             }
-
-            //
-            // 追加病名を CLAIM 送信する
-            //
-
-            // CLAIM 送信の sender を作成
-            //ClaimSender sender = new ClaimSender(((ChartImpl) getContext()).getCLAIMListener());
-            //sender.setPatientVisitModel(getContext().getPatientVisit());
-//masuda^
-/*
-            IDiagnosisSender sender = new DiagnosisSender();
-            sender.setContext(getContext());
             
-            if (sendClaim && added != null && !added.isEmpty()) {
-                logger.debug("sendClaim Diagnosis");
-                sender.prepare(added);
-                sender.send(added);
+            // 削除も保存時に行う
+            if (deleted != null && !deleted.isEmpty()) {
+                List<Long> removeList = new ArrayList<Long>();
+                for (RegisteredDiagnosisModel rd : deleted) {
+                    removeList.add(rd.getId());
+                }
+                ddl.removeDiagnosis(removeList);
             }
-            //
-            // 更新された病名を CLAIM 送信する
-            //
-            if (sendClaim && updated != null && !updated.isEmpty()) {
-                sender.prepare(updated);
-                sender.send(updated);
-            }
-*/
+
+            // CLAIM 送信する
             List<RegisteredDiagnosisModel> rdList = new ArrayList<RegisteredDiagnosisModel>();
             rdList.addAll(added);
             rdList.addAll(updated);
+            rdList.addAll(deleted);
             if (sendClaim && !rdList.isEmpty()) {
                 KarteContentSender sender = new KarteContentSender();
                 sender.sendDiagnosis(getContext(), rdList);
             }
-//masuda$
+
             return result;
         }
 
         @Override
         protected void succeeded(List<Long> list) {
+            
             logger.debug("DiagnosisPutTask succeeded");
+            
+            // データベースから削除する項目はなくてもテーブルからは削除
+            for (Iterator<RegisteredDiagnosisModel> itr = allDiagnosis.iterator(); itr.hasNext();) {
+                RegisteredDiagnosisModel rd = itr.next();
+                if (DIAGNOSIS_DELETED.equals(rd.getStatus())) {
+                    itr.remove();
+                }
+            }
         }
     }
-
+//masuda$
+    
 //masuda
     private class DolphinOrcaRenderer extends StripeTableCellRenderer {
 

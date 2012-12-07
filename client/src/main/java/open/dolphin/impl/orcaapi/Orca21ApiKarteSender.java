@@ -84,7 +84,7 @@ public class Orca21ApiKarteSender implements IKarteSender {
         for (ModuleModel module : modules) {
 
             // 処方箋コメントを分離
-            if ("medOrder".equals(module.getModuleInfoBean().getEntity())) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(module.getModuleInfoBean().getEntity())) {
                 BundleMed bundle = (BundleMed) module.getModel();
 
                 List<ClaimItem> nonCommentItem = new ArrayList<ClaimItem>();

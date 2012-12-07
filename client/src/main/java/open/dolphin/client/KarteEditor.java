@@ -1871,7 +1871,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                 }
             }
             // 薬剤のclaimClassCodeを院内・院外に応じて変更
-            if ("medOrder".equals(module.getModuleInfoBean().getEntity())) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(module.getModuleInfoBean().getEntity())) {
                 BundleMed bundle = (BundleMed) module.getModel();
                 String classCode = bundle.getClassCode();
                 if (classCode.endsWith("0")) {

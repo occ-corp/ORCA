@@ -1,6 +1,7 @@
 package open.dolphin.impl.labrcv;
 
 import open.dolphin.infomodel.LaboModuleValue;
+import open.dolphin.infomodel.NLaboItem;
 import open.dolphin.infomodel.NLaboModule;
 import open.dolphin.infomodel.PatientModel;
 
@@ -79,6 +80,26 @@ public class NLaboImportSummary {
             return patient.isOpened();
         }
         return false;
+    }
+    
+    public String getTextSummary() {
+        if (module == null) {
+            return null;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body>");
+        sb.append(module.getPatientId());
+        sb.append(" ");
+        sb.append(module.getPatientName());
+        sb.append("<br>");
+        for (NLaboItem item : module.getItems()) {
+            sb.append(item.getItemName());
+            sb.append(" ");
+            sb.append(item.getValue());
+            sb.append("<br>");
+        }
+        sb.append("</body></html>");
+        return sb.toString();
     }
 //masuda$
     

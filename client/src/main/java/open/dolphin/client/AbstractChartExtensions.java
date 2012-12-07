@@ -2,6 +2,7 @@ package open.dolphin.client;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -13,6 +14,7 @@ import open.dolphin.infomodel.AdmissionModel;
 import open.dolphin.infomodel.ModuleModel;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
+import open.dolphin.tr.StampHolderTransferHandler;
 
 /**
  * AbstractChartExtensions
@@ -94,7 +96,20 @@ public abstract class AbstractChartExtensions {
         if (editor == null) {
             return;
         }
+        
+        // 基本料スタンプがすでにあればそれを編集する
+        List<StampHolder> shList = editor.getPPane().getDocument().getStampHolders();
+        for (StampHolder sh : shList) {
+            String stampName = sh.getStamp().getModuleInfoBean().getStampName();
+            if (MakeBaseChargeStamp.BCS_TITLE_IN.equals(stampName) 
+                    || MakeBaseChargeStamp.BCS_TITLE_OUT.equals(stampName)){
+                StampHolderTransferHandler.getInstance().stampHolderSingleSelection(sh);
+                sh.edit();
+                return;
+            }
+        }
 
+        // 無い場合は新規に作成する
         MakeBaseChargeStamp mbcs = new MakeBaseChargeStamp();
         mbcs.enter(editor);
         if (mbcs.isModified()) {

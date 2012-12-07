@@ -98,7 +98,8 @@ public class PrintLabel {
         List<StampHolder> list = doc.getStampHolders();
         for (StampHolder sh : list) {
             String entity = sh.getStamp().getModuleInfoBean().getEntity();
-            if ("medOrder".equals(entity) || "injectionOrder".equals(entity)) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(entity) 
+                    || IInfoModel.ENTITY_INJECTION_ORDER.equals(entity)) {
                 stampHolders.add(sh);
             }
         }
@@ -123,7 +124,7 @@ public class PrintLabel {
         for (StampHolder sh : stampHolders) {
             ModuleModel stamp = sh.getStamp();
             String entity = stamp.getModuleInfoBean().getEntity();
-            if ("medOrder".equals(entity)) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(entity)) {
                 String rpName = stamp.getModuleInfoBean().getStampName();
                 // 順番に印刷するために定期臨時注射それぞれのArrayListに登録
                 if (rpName.indexOf("定期") != -1) {
@@ -171,7 +172,7 @@ public class PrintLabel {
     }
 
     private void addLineFromModule(ModuleModel stamp) {
-        if ("medOrder".equals(stamp.getModuleInfoBean().getEntity())) {
+        if (IInfoModel.ENTITY_MED_ORDER.equals(stamp.getModuleInfoBean().getEntity())) {
             // 処方の場合の処理
             BundleMed bundle = (BundleMed) stamp.getModel();
             ClaimItem[] ci = bundle.getClaimItem();

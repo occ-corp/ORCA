@@ -194,7 +194,10 @@ public class OrcaApiElement {
                     record.addContent(new Element("string").setAttribute("name", "Disease_StartDate").addContent(m.getStartDate()));
                     record.addContent(new Element("string").setAttribute("name", "Disease_EndDate").addContent(m.getEndDate()));
 
-                    if (m.getOutcome() != null && !m.getOutcome().equals("")) {
+                    // 転帰はdeleteなら'O 削除'、その他は'F 完治'、空白なら設定なし。
+                    if ("delete".equals(m.getOutcome())) {
+                        record.addContent(new Element("string").setAttribute("name", "Disease_Outcome").addContent("O"));
+                    } else if (!"".equals(m.getOutcome())) {
                         record.addContent(new Element("string").setAttribute("name", "Disease_Outcome").addContent("F"));
                     }
                     addContent(record);

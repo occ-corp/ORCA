@@ -61,7 +61,8 @@ public abstract class AbstractPDFMaker {
     private static final String USER_GOTHIC_FONT = "msgothic.ttc,1";    // MS-PGothic
     private static final String USER_MINCHO_FONT = "msmincho.ttc,1";    // MS-PMicho
     private static final String HEISEI_GO_W5 = "HeiseiKakuGo-W5";
-    private static final String DOC_FOOTER = "OpenDolphin, Japanese open source EHR. (c)Digital Globe, Inc.";
+    //private static final String DOC_FOOTER = "OpenDolphin, Japanese open source EHR. (c)Digital Globe, Inc.";
+    private static final String DOC_FOOTER = "OpenDolphin, Japanese open source EHR. (c)Life Sciences Computing Corp.";
     protected static final SimpleDateFormat FRMT_DATE_WITH_TIME = new SimpleDateFormat("yyyy/MM/dd HH:mm");
     protected static final SimpleDateFormat FRMT_FILE_DATE = new SimpleDateFormat("yyyyMMdd");
     protected static final SimpleDateFormat FRMT_SIMPLE_DATE =  new SimpleDateFormat("yyyy-MM-dd");

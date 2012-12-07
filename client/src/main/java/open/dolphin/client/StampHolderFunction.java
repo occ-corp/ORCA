@@ -270,7 +270,8 @@ public class StampHolderFunction {
 
             // 基本料スタンプなら基本料入力補助で編集 masuda
             String stampName = stamp.getModuleInfoBean().getStampName();
-            if ("基本料(院内)".equals(stampName) || "基本料(院外)".equals(stampName)){
+            if (MakeBaseChargeStamp.BCS_TITLE_IN.equals(stampName) 
+                    || MakeBaseChargeStamp.BCS_TITLE_OUT.equals(stampName)){
                 MakeBaseChargeStamp mbcs = new MakeBaseChargeStamp();
                 mbcs.enter2(selectedStampHolder);
                 if (mbcs.isModified() == true) {
@@ -281,7 +282,7 @@ public class StampHolderFunction {
             }
 
             String category = stamp.getModuleInfoBean().getEntity();
-            if ("medOrder".equals(category) && isAllMedicine()) {
+            if (IInfoModel.ENTITY_MED_ORDER.equals(category) && isAllMedicine()) {
                 List<StampHolder> stampHolderList = getSelectedStampHolder();
                 int s = stampHolderList.size();
                 ModuleModel[] stamps = new ModuleModel[s];
@@ -488,7 +489,7 @@ public class StampHolderFunction {
         List<StampHolder> stampHolderList = getSelectedStampHolder();
         for (StampHolder sh : stampHolderList) {
             String category = sh.getStamp().getModuleInfoBean().getEntity();
-            if (!"medOrder".equals(category)) {
+            if (!IInfoModel.ENTITY_MED_ORDER.equals(category)) {
                 allMedicine = false;
                 break;
             }

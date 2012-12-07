@@ -1,9 +1,10 @@
-
 package open.dolphin.impl.labrcv;
 
 import java.awt.BorderLayout;
 import java.awt.Font;
+import java.awt.event.MouseEvent;
 import javax.swing.*;
+import open.dolphin.table.ListTableModel;
 
 /**
  * NLabTestImportView改
@@ -40,7 +41,23 @@ public class NLabTestImportView extends JPanel {
         north.add(Box.createHorizontalGlue());
         north.add(countLbl);
 
-        table = new JTable();
+        table = new JTable(){
+
+            @Override
+            public String getToolTipText(MouseEvent e) {
+                int row = rowAtPoint(e.getPoint());
+                NLaboImportSummary lab = getTableModel().getObject(row);
+                if (lab != null) {
+                    return lab.getTextSummary();
+                }
+                return null;
+            }
+
+            private ListTableModel<NLaboImportSummary> getTableModel() {
+                return (ListTableModel<NLaboImportSummary>) getModel();
+            }
+        };
+        
         table.setToolTipText("検査結果をこのテーブルに Drag & Drop することもできます。");
         JScrollPane scroll = new JScrollPane(table);
 

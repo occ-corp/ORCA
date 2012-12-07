@@ -77,6 +77,9 @@ public class MakeBaseChargeStamp extends CheckSantei {
         "130", "140", "150",
         "160", "170", "180"};
     
+    public static final String BCS_TITLE_IN = "基本料(院内)";
+    public static final String BCS_TITLE_OUT = "基本料(院外)";
+    
     // EditorFrameのwizardボタンを押したときはここから入る
     public final void enter(KarteEditor editor) {
         start(editor, null);
