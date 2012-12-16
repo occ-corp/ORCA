@@ -277,6 +277,22 @@ public final class InstractionEditor extends AbstractStampEditor {
             updateMasterItems(tableModel.getDataProvider());
         }
 
+        // 院内・院外設定
+        String clsCode = bundle.getClassCode();
+        // 院外処方かどうかのflag
+        final boolean bOut = ClaimConst.RECEIPT_CODE_ZAITAKU_YAKUZAI_EXT.equals(clsCode)
+                || ClaimConst.RECEIPT_CODE_ZAITAKU_ZAIRYO_EXT.equals(clsCode);
+
+        SwingUtilities.invokeLater(new Runnable() {
+
+            @Override
+            public void run() {
+
+                view.getOutRadio().setSelected(bOut);
+                view.getInRadio().setSelected(!bOut);
+            }
+        });
+
         // Stateを変更する
         checkValidation();
     }
@@ -572,6 +588,16 @@ public final class InstractionEditor extends AbstractStampEditor {
                 doSearch(REGEXP_COMMENT_ALL, TT_CODE_SEARCH);
             }
         });
+        
+        // 院内、院外ボタン
+        JRadioButton inBtn = view.getInRadio();
+        JRadioButton outBtn = view.getOutRadio();
+        ButtonGroup g = new ButtonGroup();
+        g.add(inBtn);
+        g.add(outBtn);
+        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
+        view.getOutRadio().setSelected(bOut);
+        view.getInRadio().setSelected(!bOut);
 //masuda$
         
         // 共通の設定
