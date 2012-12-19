@@ -12,8 +12,6 @@ import javax.swing.border.Border;
 import javax.swing.plaf.basic.BasicTableUI;
 import javax.swing.table.DefaultTableCellRenderer;
 import open.dolphin.client.ClientContext;
-import open.dolphin.project.Project;
-import open.dolphin.setting.MiscSettingPanel;
 
 /**
  * ストライプテーブルのセルレンダラ
@@ -26,7 +24,7 @@ public class StripeTableCellRenderer extends DefaultTableCellRenderer {
     private static final Border emptyBorder = BorderFactory.createEmptyBorder();
     private static final Color DEFAULT_ODD_COLOR = ClientContext.getColor("color.odd");
     //private static final Color DEFAULT_EVEN_COLOR = ClientContext.getColor("color.even");
-    private static final Color DEFAULT_EVEN_COLOR = Project.getColor(MiscSettingPanel.ZEBRA_COLOR);
+    private static final Color DEFAULT_EVEN_COLOR = ClientContext.getZebraColor();
     private static final Color[] ROW_COLORS = {DEFAULT_EVEN_COLOR, DEFAULT_ODD_COLOR};
     private static final int ROW_HEIGHT = 18;
 

@@ -16,6 +16,7 @@ import open.dolphin.infomodel.DiagnosisCategoryModel;
 import open.dolphin.infomodel.DiagnosisOutcomeModel;
 import open.dolphin.infomodel.LicenseModel;
 import open.dolphin.project.Project;
+import open.dolphin.setting.MiscSettingPanel;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.apache.log4j.PropertyConfigurator;
@@ -719,5 +720,25 @@ public final class ClientContextStub {
             Font font = new Font("SansSerif", Font.PLAIN, 13);
             UIManager.put("TextPane.font", font);
         }
+    }
+    
+    public Color getZebraColor() {
+
+        Color c = getColor("color.even");
+        try {
+            String[] values = Project.getString(MiscSettingPanel.ZEBRA_COLOR).split(",");
+            int[] intValues = new int[values.length];
+            for (int i = 0; i < values.length; ++i) {
+                intValues[i] = Integer.valueOf(values[i]);
+            }
+
+            if (values.length == 3) {
+                c = new Color(intValues[0], intValues[1], intValues[2]);
+            } else if (values.length == 4) {
+                c = new Color(intValues[0], intValues[1], intValues[2], intValues[3]);
+            }
+        } catch (Exception e) {
+        }
+        return c;
     }
 }

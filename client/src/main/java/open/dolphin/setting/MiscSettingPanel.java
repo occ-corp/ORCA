@@ -126,8 +126,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final boolean DEFAULT_HIBERNATE_SEARCH = false;
     public static final double DEFAULT_PACS_GAMMA = 1;
     public static final boolean DEFAULT_PACS_SHOW_IMAGEINFO = true;
-    
-    public static final String DEFAULT_ZEBRA_COLOR = ClientContext.getString("color.even");
+
 
     // GUI staff
     private JTextField tf_lblPrtAddress;
@@ -1054,7 +1053,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             //useJms = Project.getBoolean(RP_OUT, DEFAULT_USE_JMS);
             
             // 色
-            zebraColor = Project.getString(ZEBRA_COLOR, DEFAULT_ZEBRA_COLOR);
+            zebraColor = Project.getString(ZEBRA_COLOR, ClientContext.getString("color.even"));
         }
 
         public void restore() {

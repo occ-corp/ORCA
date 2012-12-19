@@ -239,5 +239,9 @@ public class ClientContext {
         ImageIcon icon = stub.getImageIcon("dolphinIcon.png");
         window.setIconImage(icon.getImage());
     }
+    
+    public static Color getZebraColor() {
+        return stub.getZebraColor();
+    }
 //masuda$
 }

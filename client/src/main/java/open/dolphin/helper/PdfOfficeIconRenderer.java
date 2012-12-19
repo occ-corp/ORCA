@@ -8,8 +8,6 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.NameValuePair;
-import open.dolphin.project.Project;
-import open.dolphin.setting.MiscSettingPanel;
 
 /**
  *
@@ -21,7 +19,7 @@ public class PdfOfficeIconRenderer extends DefaultListCellRenderer {
     private static final ImageIcon ICON_OFFICE = ClientContext.getImageIcon("docs_16.png");
     private static final Color DEFAULT_ODD_COLOR = ClientContext.getColor("color.odd");
     //private static final Color DEFAULT_EVENN_COLOR = ClientContext.getColor("color.even");
-    private static final Color DEFAULT_EVENN_COLOR = Project.getColor(MiscSettingPanel.ZEBRA_COLOR);
+    private static final Color DEFAULT_EVENN_COLOR = ClientContext.getZebraColor();
     
     public PdfOfficeIconRenderer() {
         setOpaque(true);
