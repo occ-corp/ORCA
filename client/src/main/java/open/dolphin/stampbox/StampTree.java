@@ -17,6 +17,7 @@ import open.dolphin.delegater.StampDelegater;
 import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
+import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.util.GUIDGenerator;
 import org.apache.log4j.Logger;
 
@@ -1581,7 +1582,8 @@ public class StampTree extends JTree implements TreeModelListener {
 //masuda^   pns先生のStampTreeDropTargetListenerからコードを拝借
     
     private static final Color DEFAULT_ODD_COLOR = ClientContext.getColor("color.odd");
-    private static final Color DEFAULT_EVEN_COLOR = ClientContext.getColor("color.even");
+    //private static final Color DEFAULT_EVEN_COLOR = ClientContext.getColor("color.even");
+    private static final Color DEFAULT_EVEN_COLOR = Project.getColor(MiscSettingPanel.ZEBRA_COLOR);
     private static final Color[] ROW_COLORS = {DEFAULT_EVEN_COLOR, DEFAULT_ODD_COLOR};
     private static final Color UNLOCKED_COLOR = Color.black;
     private static final Color LOCKED_COLOR = Color.lightGray;

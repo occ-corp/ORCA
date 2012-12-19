@@ -20,6 +20,7 @@ import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.PublishedTreeModel;
 import open.dolphin.infomodel.SubscribedTreeModel;
 import open.dolphin.project.Project;
+import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 
@@ -43,7 +44,8 @@ public class StampImporter {
         120, 90, 170, 270, 40, 40
     };
     private static final Color ODD_COLOR = ClientContext.getColor("color.odd");
-    private static final Color EVEN_COLOR = ClientContext.getColor("color.even");
+    //private static final Color EVEN_COLOR = ClientContext.getColor("color.even");
+    private static final Color EVEN_COLOR = Project.getColor(MiscSettingPanel.ZEBRA_COLOR);
     private static final ImageIcon WEB_ICON = ClientContext.getImageIcon("web_16.gif");
     private static final ImageIcon HOME_ICON = ClientContext.getImageIcon("home_16.gif");
     private static final ImageIcon FLAG_ICON = ClientContext.getImageIcon("flag_16.gif");

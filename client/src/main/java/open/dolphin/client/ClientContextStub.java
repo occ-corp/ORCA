@@ -651,6 +651,7 @@ public final class ClientContextStub {
             if (!isMac()) {
                 Set<String> excludes = new HashSet<String>();
                 excludes.add("FileChooser");
+                excludes.add("ColorChooser");
                 QuaquaManager.setExcludedUIs(excludes);
             }
 

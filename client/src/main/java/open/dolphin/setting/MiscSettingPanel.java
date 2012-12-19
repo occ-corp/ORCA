@@ -1,6 +1,7 @@
 package open.dolphin.setting;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.Desktop;
 import java.awt.GridBagConstraints;
 import java.awt.event.ActionEvent;
@@ -29,6 +30,8 @@ import open.dolphin.project.Project;
  * @author masuda, Masuda Naika
  */
 public class MiscSettingPanel extends AbstractSettingPanel {
+    
+    private static final Color DEFAULT_EVEN_COLOR = ClientContext.getColor("color.even");
 
     private static final String ID = "miscSetting";
     private static final String TITLE = "その他";
@@ -76,6 +79,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final String USE_HIBERNATE_SEARCH = "useHibernateSearch";
     public static final String PACS_SHOW_IMAGEINFO = "pacsShowImageInfo";
     public static final String PACS_VIEWER_GAMMA = "pacsViewerGamma";
+    
+    public static final String ZEBRA_COLOR = "zebraColor";
 
     // preferencesのdefault
     public static final String DEFAULT_LBLPRT_ADDRESS = null;
@@ -121,6 +126,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final boolean DEFAULT_HIBERNATE_SEARCH = false;
     public static final double DEFAULT_PACS_GAMMA = 1;
     public static final boolean DEFAULT_PACS_SHOW_IMAGEINFO = true;
+    
+    public static final String DEFAULT_ZEBRA_COLOR = ClientContext.getString("color.even");
 
     // GUI staff
     private JTextField tf_lblPrtAddress;
@@ -186,6 +193,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     private JLabel lbl_localHost;
     private JLabel lbl_localPort;
     private JLabel lbl_localAE;
+    
+    private JTextField tf_zebra;
+    private JLabel lbl_color;
 
     /** 画面モデル */
     private MiscModel model;
@@ -582,6 +592,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(lbl_weasis, 0, row, GridBagConstraints.EAST);
         gbl.add(tf_weasis, 1, row, GridBagConstraints.WEST);
         JPanel weasis = gbl.getProduct();
+    
 
         // 全体レイアウト
         gbl = new GridBagBuilder();
@@ -591,11 +602,55 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(weasis, 0, 3, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         JPanel pacsSetting = gbl.getProduct();
 
+        
+        // 色
+        gbl = new GridBagBuilder("表ストライプの色");
+        tf_zebra = GUIFactory.createTextField(15, null, null, null);
+        //tf_zebra.setEditable(false);
+        JButton zebraBtn = new JButton("色選択");
+        zebraBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color color = stringToColor(tf_zebra.getText().trim());
+                color = JColorChooser.showDialog(getContext().getDialog(), "色選択", color);
+                if (color == null) {
+                    color = DEFAULT_EVEN_COLOR;
+                }
+                tf_zebra.setText(colorToString(color));
+                lbl_color.setBackground(color);
+            }
+        });
+        JButton defaultColorBtn = new JButton("デフォルト");
+        defaultColorBtn.addActionListener(new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                Color color = DEFAULT_EVEN_COLOR;
+                tf_zebra.setText(colorToString(color));
+                lbl_color.setBackground(color);
+            }
+        });
+        
+        lbl_color = new JLabel("            ");
+        lbl_color.setOpaque(true);
+        lbl_color.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+        gbl.add(lbl_color, 0, 0, GridBagConstraints.CENTER);
+        gbl.add(tf_zebra, 1, 0, GridBagConstraints.CENTER);
+        gbl.add(zebraBtn, 0, 1, GridBagConstraints.CENTER);
+        gbl.add(defaultColorBtn, 1, 1, GridBagConstraints.CENTER);
+        JPanel color = gbl.getProduct();
+        // 全体レイアウト
+        gbl = new GridBagBuilder();
+        gbl.add(color, 0, 0, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        JPanel colorSetting = gbl.getProduct();
+        
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("設定１", setting);
         tabbedPane.addTab("設定２", setting2);
         //tabbedPane.addTab("RS_Base", settingRSB);
         tabbedPane.addTab("PACS", pacsSetting);
+        tabbedPane.addTab("色", colorSetting);
 
         getUI().setLayout(new BorderLayout());
         getUI().add(tabbedPane);
@@ -824,6 +879,13 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         val = String.valueOf(model.weasisAddress);
         val = val != null ? val : "";
         tf_weasis.setText(val);
+        
+        // 色
+        val = String.valueOf(model.zebraColor);
+        val = val != null ? val : "";
+        tf_zebra.setText(val);
+        Color c = stringToColor(val);
+        lbl_color.setBackground(c);
     }
 
     /**
@@ -891,6 +953,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
         // Chart stateをサーバーと同期
         //model.useJms = cb_useJms.isSelected();
+        
+        // 色
+        model.zebraColor = tf_zebra.getText().trim();
     }
 
     /**
@@ -933,6 +998,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         private int localPort;
         private String localAE;
         private String weasisAddress;
+        
+        private String zebraColor;
 
         public void populate() {
 
@@ -985,6 +1052,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
             // Chart stateをサーバーと同期
             //useJms = Project.getBoolean(RP_OUT, DEFAULT_USE_JMS);
+            
+            // 色
+            zebraColor = Project.getString(ZEBRA_COLOR, DEFAULT_ZEBRA_COLOR);
         }
 
         public void restore() {
@@ -1032,6 +1102,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
             // Chart stateをサーバーと同期
             //Project.setBoolean(USE_JMS, useJms);
+            
+            // 色
+            Project.setString(ZEBRA_COLOR, zebraColor);
         }
     }
 
@@ -1136,5 +1209,33 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         }
         
         MasudaDelegater.getInstance().postUserProperties(userId, list);
+    }
+    
+    private String colorToString(Color c) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(String.valueOf(c.getRed())).append(",");
+        sb.append(String.valueOf(c.getGreen())).append(",");
+        sb.append(String.valueOf(c.getBlue())).append(",");
+        sb.append(String.valueOf(c.getAlpha()));
+        return sb.toString();
+    }
+    
+    private Color stringToColor(String str) {
+        Color c = DEFAULT_EVEN_COLOR;
+        try {
+            String[] values = str.split(",");
+            int[] intValues = new int[values.length];
+            for (int i = 0; i < values.length; ++i) {
+                intValues[i] = Integer.valueOf(values[i]);
+            }
+
+            if (values.length == 3) {
+                c = new Color(intValues[0], intValues[1], intValues[2]);
+            } else if (values.length == 4) {
+                c = new Color(intValues[0], intValues[1], intValues[2], intValues[3]);
+            }
+        } catch (Exception e) {
+        }
+        return c;
     }
 }
