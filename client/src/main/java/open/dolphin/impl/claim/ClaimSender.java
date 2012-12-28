@@ -22,12 +22,6 @@ public class ClaimSender implements IKarteSender {
     // Context
     private Chart context;
 
-    // CLAIM 送信リスナ
-    private ClaimMessageListener claimListener;
-
-    // DG UUID の変わりに保険情報モジュールを送信する
-    private PVTHealthInsuranceModel insuranceToApply;
-
     private boolean DEBUG;
     
 //masuda^    ClaimItemの最大数
@@ -48,6 +42,7 @@ public class ClaimSender implements IKarteSender {
         this.context = context;
     }
 
+/*
     @Override
     public void prepare(DocumentModel data) {
         if (data==null || (!data.getDocInfoModel().isSendClaim())) {
@@ -56,23 +51,34 @@ public class ClaimSender implements IKarteSender {
         insuranceToApply = context.getHealthInsuranceToApply(data.getDocInfoModel().getHealthInsuranceGUID());
         claimListener  = context.getCLAIMListener();
     }
-
+*/
+    
     /**
      * DocumentModel の CLAIM 送信を行う。
      */
     @Override
-    public void send(DocumentModel sendModel) {
+    public KarteSenderResult send(DocumentModel sendModel) {
 
-        if (sendModel == null
-                || sendModel.getDocInfoModel().isSendClaim() == false
-                || insuranceToApply == null
-                || claimListener == null) {
-            return;
+        if (sendModel == null 
+                || !sendModel.getDocInfoModel().isSendClaim()
+                || context == null) {
+            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用時はCLAIM送信しない
         if (Project.getBoolean(Project.USE_ORCA_API)) {
-            return;
+            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+        }
+        
+        // CLAIM 送信リスナ
+        ClaimMessageListener claimListener = context.getCLAIMListener();
+
+        // DG UUID の変わりに保険情報モジュールを送信する
+        PVTHealthInsuranceModel insuranceToApply 
+                = context.getHealthInsuranceToApply(sendModel.getDocInfoModel().getHealthInsuranceGUID());
+        
+        if (claimListener == null || insuranceToApply == null) {
+            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
         }
 
         // ヘルパークラスを生成しVelocityが使用するためのパラメータを設定する
@@ -196,6 +202,9 @@ public class ClaimSender implements IKarteSender {
         }
 
         claimListener.claimMessageEvent(cvt);
+        
+        // claim送信の場合は別スレッドなので、成功・不成功はわからんｗ
+        return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.NO_ERROR, null);
     }
 
     private void debug(String msg) {
@@ -300,17 +309,6 @@ public class ClaimSender implements IKarteSender {
                         helper.addClaimBundle(cb1);
                     }
                 }
-/*
-                int count = cb.getClaimItem().length;
-                if (count > maxClaimItemCount) {
-                    for (ClaimBundle cb1 : divideClaimBundle(cb)){
-                        helper.addClaimBundle(cb1);
-                    }
-                } else {
-                    // 20以下なら今までどおり
-                    helper.addClaimBundle(cb);
-                }
-*/
             }
         }
 

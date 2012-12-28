@@ -1,4 +1,3 @@
-
 package open.dolphin.impl.orcaapi;
 
 import java.util.Date;
@@ -24,6 +23,8 @@ public class MedicalModModel {
     private String departmentCode;
     
     private String physicianCode;
+    
+    private boolean admissionFlg;
     
     private PVTHealthInsuranceModel insModel;
     
@@ -70,6 +71,14 @@ public class MedicalModModel {
     
     public String getPhysicianCode() {
         return physicianCode;
+    }
+    
+    public void setAdmissionFlg(boolean flg) {
+        admissionFlg = flg;
+    }
+    
+    public boolean getAdmissonFlg() {
+        return admissionFlg;
     }
     
     public void setInsuranceModel(PVTHealthInsuranceModel insModel) {

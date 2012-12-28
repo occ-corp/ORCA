@@ -21,12 +21,6 @@ public class DiagnosisSender implements IDiagnosisSender {
 
     private Chart context;
 
-    // CLAIM 送信リスナ
-    private ClaimMessageListener claimListener;
-
-    // diagnosis では pvt が必要
-    private PatientVisitModel pvt;
-
     private boolean DEBUG;
 
     public DiagnosisSender() {
@@ -42,7 +36,7 @@ public class DiagnosisSender implements IDiagnosisSender {
     public void setContext(Chart context) {
         this.context = context;
     }
-
+/*
     @Override
     public void prepare(List<RegisteredDiagnosisModel> diagnoses) {
         if (diagnoses==null || diagnoses.isEmpty()) {
@@ -53,21 +47,33 @@ public class DiagnosisSender implements IDiagnosisSender {
         claimListener  = context.getCLAIMListener();
         pvt = context.getPatientVisit();
     }
-
+*/
+    
     /**
      * 診断名の CLAIM 送信
      * @param rd
      */
     @Override
-    public void send(List<RegisteredDiagnosisModel> diagnoses) {
+    public KarteSenderResult send(List<RegisteredDiagnosisModel> diagnoses) {
 
-        if (diagnoses == null || diagnoses.isEmpty() || pvt == null || claimListener == null) {
-            return;
+        if (diagnoses == null 
+                || diagnoses.isEmpty()
+                || context == null) {
+            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用時はCLAIM送信しない
         if (Project.getBoolean(Project.USE_ORCA_API)) {
-            return;
+            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+        }
+        
+        // CLAIM 送信リスナ
+        ClaimMessageListener claimListener = context.getCLAIMListener();
+        // diagnosis では pvt が必要
+        PatientVisitModel pvt = context.getPatientVisit();
+        
+        if (claimListener == null || pvt == null) {
+            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
         }
 
         // DocInfo & RD をカプセル化したアイテムを生成する
@@ -133,9 +139,10 @@ public class DiagnosisSender implements IDiagnosisSender {
             ClientContext.getClaimLogger().debug(event.getClaimInsutance());
         }
 
-        if (claimListener != null) {
-            claimListener.claimMessageEvent(event);
-        }
+        claimListener.claimMessageEvent(event);
+
+        // claim送信の場合は別スレッドなので、成功・不成功はわからんｗ
+        return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.NO_ERROR, null);
     }
 
     private void debug(String msg) {

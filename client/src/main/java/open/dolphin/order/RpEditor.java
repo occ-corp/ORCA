@@ -352,9 +352,6 @@ public final class RpEditor extends AbstractStampEditor {
                     return;
                 }
 
-                // 院外処方かどうかのflag
-                boolean bOut = Project.getBoolean(Project.RP_OUT, true);
-
                 // 最初のスタンプからEntityを保存する
                 setEntity(stamps[0].getModuleInfoBean().getEntity());
                 // 最初のスタンプからスタンプ名を引き継ぐ
@@ -373,11 +370,12 @@ public final class RpEditor extends AbstractStampEditor {
                 }
 
                 // Memo
+                // 院外処方かどうかのflag
+                boolean bOut = false;
                 String memo = med.getMemo();
                 if (EXT_MEDICINE.equals(memo)) {
                     bOut = true;
                 }
-                view.getOutRadio().setSelected(bOut);
 
                 // 最初のスタンプがclassCodeが290（臨時）か、スタンプ名に臨時を含んでいたら臨時ボタンをセットする
                 if (med.getClassCode().startsWith(ClaimConst.RECEIPT_CODE_RINJI.substring(0, 2)) || stampName.contains(RINJI)) {
@@ -390,13 +388,17 @@ public final class RpEditor extends AbstractStampEditor {
                     view.getCbHoukatsu().setSelected(true);
                 }
                 // 最初のスタンプが入院ならば入院ラジオをセットする
-                if (NYUIN_MEDICINE.equals(med.getMemo())) {
+                if (NYUIN_MEDICINE.equals(memo)) {
                     view.getRbAdmission().setSelected(true);
-                } else if (NYUIN_MED_NC.equals(med.getMemo())) {
+                    bOut = false;
+                } else if (NYUIN_MED_NC.equals(memo)) {
                     view.getRbAdmission().setSelected(true);
                     view.getCbNoCharge().setSelected(true);
+                    bOut = false;
                 }
 
+                view.getOutRadio().setSelected(bOut);
+                
                 for (ModuleModel mm : stamps) {
                     med = (BundleMed) mm.getModel();
                     // ClaimItemをMasterItemへ変換してテーブルへ追加する
@@ -851,6 +853,10 @@ public final class RpEditor extends AbstractStampEditor {
         ButtonGroup g = new ButtonGroup();
         g.add(inBtn);
         g.add(outBtn);
+        // 院外処方かどうかのflag
+        boolean bOut = Project.getBoolean(Project.RP_OUT, true);
+        outBtn.setSelected(bOut);
+        inBtn.setSelected(!bOut);
         
         // 包括チェックボックス
         view.getInRadio().addItemListener(new ItemListener() {

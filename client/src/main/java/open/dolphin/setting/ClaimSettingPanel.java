@@ -12,6 +12,7 @@ import open.dolphin.client.GUIFactory;
 import open.dolphin.client.RegexConstrainedDocument;
 import open.dolphin.dao.SyskanriInfo;
 import open.dolphin.helper.GridBagBuilder;
+import open.dolphin.impl.orcaapi.OrcaApiClient;
 import open.dolphin.project.Project;
 import open.dolphin.project.ProjectStub;
 
@@ -90,6 +91,13 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
     public void save() {
         bindViewToModel();
         model.restore(getProjectStub());
+        
+//masuda^
+        // ORCA APIを設定
+        if (model.isUseOrcaApi()) {
+            OrcaApiClient.getInstance().setup();
+        }
+//masuda$
     }
     
     /**

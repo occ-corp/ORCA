@@ -16,7 +16,7 @@ public class MMLSender implements IKarteSender {
     
     private Chart context;
     
-    private MmlMessageListener mmlListener;
+    //private MmlMessageListener mmlListener;
 
     @Override
     public Chart getContext() {
@@ -28,20 +28,27 @@ public class MMLSender implements IKarteSender {
         this.context = context;
     }
 
+/*
     @Override
     public void prepare(DocumentModel data) {
         if (data.getDocInfoModel().isSendMml()) {
             mmlListener = context.getMMLListener();
         }
     }
-
+*/
+    
     @Override
-    public void send(DocumentModel model) {
+    public KarteSenderResult send(DocumentModel model) {
 
-        if ((!model.getDocInfoModel().isSendMml()) || mmlListener==null) {
-            return;
+        if (!model.getDocInfoModel().isSendMml() || context == null) {
+            return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.SKIPPED, null);
         }
 
+        MmlMessageListener mmlListener = context.getMMLListener();
+        if (mmlListener == null) {
+            return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.SKIPPED, null);
+        }
+        
         // MML Message を生成する
         MMLHelper mb = new MMLHelper();
         mb.setDocument(model);
@@ -90,7 +97,9 @@ public class MMLSender implements IKarteSender {
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
+            return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.ERROR, e.getMessage());
         }
+        return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.NO_ERROR, null);
     }
 
 }

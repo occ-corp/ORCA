@@ -32,7 +32,6 @@ import open.dolphin.helper.MenuSupport;
 import open.dolphin.helper.SimpleWorker;
 import open.dolphin.helper.WindowSupport;
 import open.dolphin.impl.login.LoginDialog;
-import open.dolphin.impl.orcaapi.OrcaApi;
 import open.dolphin.impl.server.StandAlonePVTServer;
 import open.dolphin.impl.tempkarte.TempKarteCheckDialog;
 import open.dolphin.infomodel.*;
@@ -1077,9 +1076,6 @@ public class Dolphin implements MainWindow {
         
         // ChartStateListenerを中止する
         scl.stop();
-        
-        // ORCA apiを破棄する
-        OrcaApi.getInstance().dispose();
 //masuda$
         
         // Stamp 保存

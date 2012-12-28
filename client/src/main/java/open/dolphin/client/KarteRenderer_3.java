@@ -1,83 +1,61 @@
 package open.dolphin.client;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.StringTokenizer;
 import javax.swing.text.*;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import open.dolphin.infomodel.*;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
-
 
 /**
  * KarteRenderer_2 改
- *
- * @author Kazushi Minagawa, Digital Globe, Inc. 
- * @author modified by masuda, Masuda Naika
+ * 
+ * STAX使ってみた、速くもならない。ボツ
+ * @author masuda, Masuda Naika
  */
-public class KarteRenderer_2 {
-
+public class KarteRenderer_3 {
+    
     private static final String COMPONENT_ELEMENT_NAME = "component";
     private static final String STAMP_HOLDER = "stampHolder";
     private static final String SCHEMA_HOLDER = "schemaHolder";
-    private static final int TT_SECTION = 0;
-    private static final int TT_PARAGRAPH = 1;
-    private static final int TT_CONTENT = 2;
-    private static final int TT_ICON = 3;
-    private static final int TT_COMPONENT = 4;
-    private static final int TT_PROGRESS_COURSE = 5;
-    private static final String SECTION_NAME = "section";
-    private static final String PARAGRAPH_NAME = "paragraph";
-    private static final String CONTENT_NAME = "content";
-    private static final String COMPONENT_NAME = "component";
-    private static final String ICON_NAME = "icon";
     private static final String ALIGNMENT_NAME = "Alignment";
     private static final String FOREGROUND_NAME = "foreground";
     private static final String SIZE_NAME = "size";
     private static final String BOLD_NAME = "bold";
     private static final String ITALIC_NAME = "italic";
     private static final String UNDERLINE_NAME = "underline";
-    private static final String TEXT_NAME = "text";
     private static final String NAME_NAME = "name";
     private static final String LOGICAL_STYLE_NAME = "logicalStyle";
-    private static final String PROGRESS_COURSE_NAME = "kartePane";
     private static final String[] REPLACES = new String[]{"<", ">", "&", "'", "\""};
     private static final String[] MATCHES = new String[]{"&lt;", "&gt;", "&amp;", "&apos;", "&quot;"};
     
     private static final String NAME_STAMP_HOLDER = "name=\"stampHolder\"";
     
-    private static KarteRenderer_2 instance;
+    private enum ELEMENTS {paragraph, content, text, component, icon, kartePane, section, unknown}; 
+    
+    private static KarteRenderer_3 instance;
     
     static {
-        instance = new KarteRenderer_2();
+        instance = new KarteRenderer_3();
     }
     
-    private KarteRenderer_2() {
+    private KarteRenderer_3() {
     }
     
-    public static KarteRenderer_2 getInstance() {
+    public static KarteRenderer_3 getInstance() {
         return instance;
     }
-    
-/*
-    private KartePane soaPane;
-    private KartePane pPane;
 
-    public KarteRenderer_2(KartePane soaPane, KartePane pPane) {
-        this.soaPane = soaPane;
-        this.pPane = pPane;
-    }
-*/
     /**
      * DocumentModel をレンダリングする。
      *
      * @param model レンダリングする DocumentModel
      */
-    @SuppressWarnings("unchecked")
     public void render(DocumentModel model, KartePane soaPane, KartePane pPane) {
 
         List<ModuleModel> modules = model.getModules();
@@ -127,8 +105,8 @@ public class KarteRenderer_2 {
             }
 
         } else {
-            debug("Render SOA Pane");
-            debug("Module count = " + soaModules.size());
+            //debug("Render SOA Pane");
+            //debug("Module count = " + soaModules.size());
             new KartePaneRenderer().renderPane(soaSpec, soaModules, schemas, soaPane);
         }
 
@@ -139,8 +117,8 @@ public class KarteRenderer_2 {
                 pPane.stamp(mm);
             }
         } else {
-            debug("Render P Pane");
-            debug("Module count = " + pModules.size());
+            //debug("Render P Pane");
+            //debug("Module count = " + pModules.size());
             new KartePaneRenderer().renderPane(pSpec, pModules, schemas, pPane);
             // StampHolder直後の改行がない場合は補う
             pPane.getDocument().fixCrAfterStamp();
@@ -154,6 +132,12 @@ public class KarteRenderer_2 {
         private boolean logicalStyle;
         private List<ModuleModel> modules;
         private List<SchemaModel> schemas;
+        
+        private String foreground;
+        private String size;
+        private String bold;
+        private String italic;
+        private String underline;
 
         /**
          * TextPane Dump の XML を解析する。
@@ -162,102 +146,124 @@ public class KarteRenderer_2 {
          */
         private void renderPane(String xml, List<ModuleModel> modules, List<SchemaModel> schemas, KartePane kartePane) {
 
-            debug(xml);
+            //debug(xml);
+            
             this.modules = modules;
             this.schemas = schemas;
             this.kartePane = kartePane;
 
-            SAXBuilder docBuilder = new SAXBuilder();
-
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            StringReader stream = null;
+            XMLStreamReader reader = null;
+            
             try {
-                StringReader sr = new StringReader(xml);
-                Document doc = docBuilder.build(new BufferedReader(sr));
-                Element root = doc.getRootElement();
-                writeChildren(root);
+                stream = new StringReader(xml);
+                reader = factory.createXMLStreamReader(stream);
+                
+                while (reader.hasNext()) {
+                    int eventType = reader.next();
+                    switch (eventType) {
+                        case XMLStreamReader.START_ELEMENT:
+                            startElement(reader);
+                            break;
+                        case XMLStreamReader.END_ELEMENT:
+                            endElement(reader);
+                            break;
+                    }
+                }
+                
+            } catch (XMLStreamException ex) {
+                //System.err.println(ex);
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (XMLStreamException ex) {
+                    }
+                }
+                if (stream != null) {
+                    stream.close();
+                }
+            }
+        }
+        
+        private ELEMENTS getValue(String eName) {
+            ELEMENTS elm = ELEMENTS.unknown;
+            try {
+                elm = ELEMENTS.valueOf(eName);
+            } catch (IllegalArgumentException ex) {
+            }
+            return elm;
+        }
 
-            } // indicates a well-formedness error
-            catch (JDOMException e) {
-                e.printStackTrace(System.err);
-            } catch (IOException e) {
-                e.printStackTrace(System.err);
+        private void startElement(XMLStreamReader reader) throws XMLStreamException {
+            
+            String eName = reader.getName().getLocalPart();
+            ELEMENTS elm = getValue(eName);
+            
+            switch (elm) {
+                case paragraph:
+                    String lStyle = reader.getAttributeValue(null, LOGICAL_STYLE_NAME);
+                    String alignStr = reader.getAttributeValue(null, ALIGNMENT_NAME);
+                    startParagraph(lStyle, alignStr);
+                    break;
+                case content:
+                    foreground = reader.getAttributeValue(null, FOREGROUND_NAME);
+                    size = reader.getAttributeValue(null, SIZE_NAME);
+                    bold = reader.getAttributeValue(null, BOLD_NAME);
+                    italic = reader.getAttributeValue(null, ITALIC_NAME);
+                    underline = reader.getAttributeValue(null, UNDERLINE_NAME);
+                    break;
+                case text:
+                    String text = reader.getElementText();
+                    startContent(foreground, size, bold, italic, underline, text);
+                    break;
+                case component:
+                    String name = reader.getAttributeValue(null, NAME_NAME);
+                    String number = reader.getAttributeValue(null, COMPONENT_ELEMENT_NAME);
+                    startComponent(name, number);
+                    break;
+                case icon:
+                    startIcon();
+                    break;
+                case kartePane:
+                    startProgressCourse();
+                    break;
+                case section:
+                    startSection();
+                    break;
+                default:
+                    //debug("Other element:" + eName);
+                    break;
             }
         }
 
-        /**
-         * 子要素をパースする。
-         *
-         * @param current 要素
-         */
-        private void writeChildren(Element current) {
-
-            int eType = -1;
-            String eName = current.getName();
-
-            if (eName.equals(PARAGRAPH_NAME)) {
-                eType = TT_PARAGRAPH;
-                startParagraph(current.getAttributeValue(LOGICAL_STYLE_NAME),
-                        current.getAttributeValue(ALIGNMENT_NAME));
-
-            } else if (eName.equals(CONTENT_NAME) && (current.getChild(TEXT_NAME) != null)) {
-                eType = TT_CONTENT;
-                startContent(current.getAttributeValue(FOREGROUND_NAME),
-                        current.getAttributeValue(SIZE_NAME),
-                        current.getAttributeValue(BOLD_NAME),
-                        current.getAttributeValue(ITALIC_NAME),
-                        current.getAttributeValue(UNDERLINE_NAME),
-                        current.getChildText(TEXT_NAME));
-
-            } else if (eName.equals(COMPONENT_NAME)) {
-                eType = TT_COMPONENT;
-                startComponent(current.getAttributeValue(NAME_NAME), // compoenet=number
-                        current.getAttributeValue(COMPONENT_ELEMENT_NAME));
-
-            } else if (eName.equals(ICON_NAME)) {
-                eType = TT_ICON;
-                startIcon(current);
-
-            } else if (eName.equals(PROGRESS_COURSE_NAME)) {
-                eType = TT_PROGRESS_COURSE;
-                startProgressCourse();
-
-            } else if (eName.equals(SECTION_NAME)) {
-                eType = TT_SECTION;
-                startSection();
-
-            } else {
-                debug("Other element:" + eName);
-            }
-
-            // 子を探索するのはパラグフとトップ要素のみ
-            if (eType == TT_PARAGRAPH || eType == TT_PROGRESS_COURSE || eType == TT_SECTION) {
-
-                List children = current.getChildren();
-                Iterator iterator = children.iterator();
-
-                while (iterator.hasNext()) {
-                    Element child = (Element) iterator.next();
-                    writeChildren(child);
-                }
-            }
-
-            switch (eType) {
-                case TT_PARAGRAPH:
+        private void endElement(XMLStreamReader reader) {
+            
+            String eName = reader.getName().getLocalPart();
+            ELEMENTS elm = getValue(eName);
+            
+            switch (elm) {
+                case paragraph:
                     endParagraph();
                     break;
-                case TT_CONTENT:
+                case content:
                     endContent();
                     break;
-                case TT_ICON:
-                    endIcon();
-                    break;
-                case TT_COMPONENT:
+                case component:
                     endComponent();
                     break;
-                case TT_PROGRESS_COURSE:
+                case icon:
+                    endIcon();
+                    break;
+                case kartePane:
                     endProgressCourse();
                     break;
-                case TT_SECTION:
+                case section:
                     endSection();
+                    break;
+                default:
+                    //debug("Other element:" + eName);
                     break;
             }
         }
@@ -358,9 +364,9 @@ public class KarteRenderer_2 {
 
         private void startComponent(String name, String number) {
 
-            debug("Entering startComponent");
-            debug("Name = " + name);
-            debug("Number = " + number);
+            //debug("Entering startComponent");
+            //debug("Name = " + name);
+            //debug("Number = " + number);
 
             int index = Integer.valueOf(number);
             try {
@@ -377,21 +383,15 @@ public class KarteRenderer_2 {
 
         private void endComponent() {
         }
-
-        private void startIcon(Element current) {
-
-            String name = current.getChildTextTrim("name");
-
-            if (name != null) {
-                debug(name);
-            }
+        
+        private void startIcon() {
         }
 
         private void endIcon() {
         }
     }
 
-    private void debug(String msg) {
-        //ClientContext.getBootLogger().debug(msg);
-    }
+    //private void debug(String msg) {
+    //    //ClientContext.getBootLogger().debug(msg);
+    //}
 }

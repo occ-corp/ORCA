@@ -1,10 +1,10 @@
-
 package open.dolphin.impl.orcaapi;
 
 import java.util.Date;
 import java.util.List;
 import open.dolphin.client.Chart;
 import open.dolphin.client.IDiagnosisSender;
+import open.dolphin.client.KarteSenderResult;
 import open.dolphin.infomodel.RegisteredDiagnosisModel;
 import open.dolphin.project.Project;
 
@@ -27,20 +27,24 @@ public class Orca21ApiDiagnosisSender implements IDiagnosisSender {
         this.context = context;
     }
 
+/*
     @Override
     public void prepare(List<RegisteredDiagnosisModel> data) {
     }
-
+*/
+    
     @Override
-    public void send(List<RegisteredDiagnosisModel> rdList) {
+    public KarteSenderResult send(List<RegisteredDiagnosisModel> rdList) {
         
-        if (rdList == null || rdList.isEmpty() || context == null) {
-            return;
+        if (rdList == null 
+                || rdList.isEmpty() 
+                || context == null) {
+            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用しない場合はリターン
         if (!Project.getBoolean(Project.USE_ORCA_API)) {
-            return;
+            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
         }
         
         MedicalModModel modModel = new MedicalModModel();
@@ -50,7 +54,8 @@ public class Orca21ApiDiagnosisSender implements IDiagnosisSender {
         modModel.setPerformDate(new Date());
         modModel.setDiagnosisList(rdList);
         
-        OrcaApi.getInstance().send(modModel);
+        KarteSenderResult result = OrcaApiDelegater.getInstance().sendMedicalModModel(modModel);
+        return result;
     }
     
 }

@@ -5,7 +5,7 @@ import java.util.Date;
 import java.util.List;
 import open.dolphin.infomodel.*;
 import org.apache.commons.lang.StringUtils;
-import org.jdom.Element;
+import org.jdom2.Element;
 
 /**
  * Orca API 用の Element を JDOM で作成する
@@ -269,8 +269,9 @@ public class OrcaApiElement {
             Date performDate = model.getPerformDate();
             String medicalUid = model.getMedicalUid() != null ? model.getMedicalUid() : "";
             String[] date = ModelUtils.getDateTimeAsString(performDate).split("T");
-
+            String inOut = model.getAdmissonFlg() ? "I" : "O";
             setAttribute("name", getClass().getSimpleName());
+            addContent(new Element("string").setAttribute("name", "InOut").addContent(inOut));
             addContent(new Element("string").setAttribute("name", "Patient_ID").addContent(patientId));
             addContent(new Element("string").setAttribute("name", "Perform_Date").addContent(date[0]));
             addContent(new Element("string").setAttribute("name", "Perform_Time").addContent(date[1]));
