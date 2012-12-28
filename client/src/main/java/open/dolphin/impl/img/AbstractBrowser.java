@@ -402,10 +402,18 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
             return;
         }
 
-        File f = new File(entry.getPath());
+        // pathに空白があるとダメのworkaround
+        String path = entry.getPath();
+        path = path.replace(File.separator, "/");
+        path = path.replace(" ", "%20");
+        StringBuilder sb = new StringBuilder();
+        sb.append("file:/");
+        sb.append(path);
+        String uri = sb.toString();
         try {
+            File f = new File(new URI(uri));
             desktop.open(f);
-        } catch (IOException ex) {
+        } catch (Exception ex) {
             ClientContext.getBootLogger().warn(ex);
         }
     }
