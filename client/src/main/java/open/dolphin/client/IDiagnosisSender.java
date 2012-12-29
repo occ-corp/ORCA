@@ -10,8 +10,6 @@ import open.dolphin.infomodel.RegisteredDiagnosisModel;
  */
 public interface IDiagnosisSender {
     
-    public enum RESULT {NO_ERROR, ERROR, SKIPPED};
-
     public Chart getContext();
 
     public void setContext(Chart context);

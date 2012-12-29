@@ -403,13 +403,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         }
 
         // pathに空白があるとダメのworkaround
-        String path = entry.getPath();
-        path = path.replace(File.separator, "/");
-        path = path.replace(" ", "%20");
-        StringBuilder sb = new StringBuilder();
-        sb.append("file:/");
-        sb.append(path);
-        String uri = sb.toString();
+        String uri = "file:/" 
+                + entry.getPath().replace(File.separator, "/").replace(" ", "%20");
         try {
             File f = new File(new URI(uri));
             desktop.open(f);

@@ -9,8 +9,6 @@ import open.dolphin.infomodel.DocumentModel;
  */
 public interface IKarteSender {
 
-    public enum RESULT {NO_ERROR, ERROR, SKIPPED};
-    
     public Chart getContext();
 
     public void setContext(Chart context);
