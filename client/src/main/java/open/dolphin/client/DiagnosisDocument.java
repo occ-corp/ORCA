@@ -183,8 +183,10 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 
 //masuda     最終受診日を調べる。今日受診していたらpvtDate
         ChartImpl chart = (ChartImpl) getContext();
-        String visit = chart.getPatientVisit().getPvtDateTrimTime();
-        if (visit != null) {
+        PatientVisitModel pvt = chart.getPatientVisit();
+        String visit = pvt.getPvtDateTrimTime();
+        // fakePvtの場合はpvtId = 0
+        if (visit != null && pvt.getId() != 0) {
             lastVisit = visit;
         } else {
             final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
