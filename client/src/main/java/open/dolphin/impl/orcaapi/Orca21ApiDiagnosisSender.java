@@ -15,6 +15,7 @@ import open.dolphin.project.Project;
  */
 public class Orca21ApiDiagnosisSender implements IDiagnosisSender {
 
+    private static final String ORCA_API = "ORCA API";
     private Chart context;
     
     @Override
@@ -39,12 +40,12 @@ public class Orca21ApiDiagnosisSender implements IDiagnosisSender {
         if (rdList == null 
                 || rdList.isEmpty() 
                 || context == null) {
-            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用しない場合はリターン
         if (!Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
         }
         
         MedicalModModel modModel = new MedicalModModel();

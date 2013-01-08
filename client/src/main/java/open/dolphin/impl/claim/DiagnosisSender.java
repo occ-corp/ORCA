@@ -18,6 +18,8 @@ import org.apache.log4j.Level;
  * @author pns
  */
 public class DiagnosisSender implements IDiagnosisSender {
+    
+    private static final String CLAIM = "CLAIM";
 
     private Chart context;
 
@@ -59,12 +61,12 @@ public class DiagnosisSender implements IDiagnosisSender {
         if (diagnoses == null 
                 || diagnoses.isEmpty()
                 || context == null) {
-            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用時はCLAIM送信しない
         if (Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
         }
         
         // CLAIM 送信リスナ
@@ -73,7 +75,7 @@ public class DiagnosisSender implements IDiagnosisSender {
         PatientVisitModel pvt = context.getPatientVisit();
         
         if (claimListener == null || pvt == null) {
-            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
         }
 
         // DocInfo & RD をカプセル化したアイテムを生成する
@@ -142,7 +144,7 @@ public class DiagnosisSender implements IDiagnosisSender {
         claimListener.claimMessageEvent(event);
 
         // claim送信の場合は別スレッドなので、成功・不成功はわからんｗ
-        return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.NO_ERROR, null);
+        return new KarteSenderResult(CLAIM, KarteSenderResult.NO_ERROR, null);
     }
 
     private void debug(String msg) {

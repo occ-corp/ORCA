@@ -11,9 +11,10 @@ public class KarteSenderResult {
     public static final String ERROR = "XXX";    // unclassified errors
     public static final String SKIPPED = "skipped";
     
-    public static final String ORCA_API = "ORCA API";
-    public static final String CLAIM = "CLAIM";
-    public static final String MML = "MML";
+    //public static final String ORCA_API = "ORCA API";
+    //public static final String CLAIM = "CLAIM";
+    //public static final String MML = "MML";
+    //public static final String FALCO = "FALCO";
     
     private String type;
     private String code;

@@ -18,6 +18,8 @@ import org.apache.log4j.Level;
  * @author pns
  */
 public class ClaimSender implements IKarteSender {
+    
+    private static final String CLAIM = "CLAIM";
 
     // Context
     private Chart context;
@@ -62,12 +64,12 @@ public class ClaimSender implements IKarteSender {
         if (sendModel == null 
                 || !sendModel.getDocInfoModel().isSendClaim()
                 || context == null) {
-            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用時はCLAIM送信しない
         if (Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
         }
         
         // CLAIM 送信リスナ
@@ -78,7 +80,7 @@ public class ClaimSender implements IKarteSender {
                 = context.getHealthInsuranceToApply(sendModel.getDocInfoModel().getHealthInsuranceGUID());
         
         if (claimListener == null || insuranceToApply == null) {
-            return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
         }
 
         // ヘルパークラスを生成しVelocityが使用するためのパラメータを設定する
@@ -204,7 +206,7 @@ public class ClaimSender implements IKarteSender {
         claimListener.claimMessageEvent(cvt);
         
         // claim送信の場合は別スレッドなので、成功・不成功はわからんｗ
-        return new KarteSenderResult(KarteSenderResult.CLAIM, KarteSenderResult.NO_ERROR, null);
+        return new KarteSenderResult(CLAIM, KarteSenderResult.NO_ERROR, null);
     }
 
     private void debug(String msg) {

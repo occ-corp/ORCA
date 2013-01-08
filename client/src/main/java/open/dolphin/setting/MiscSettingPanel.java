@@ -81,6 +81,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final String PACS_VIEWER_GAMMA = "pacsViewerGamma";
     
     public static final String ZEBRA_COLOR = "zebraColor";
+    public static final String WAKAYAMA_HL7 = "wakayamaHL7";
 
     // preferencesのdefault
     public static final String DEFAULT_LBLPRT_ADDRESS = null;
@@ -126,7 +127,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final boolean DEFAULT_HIBERNATE_SEARCH = false;
     public static final double DEFAULT_PACS_GAMMA = 1;
     public static final boolean DEFAULT_PACS_SHOW_IMAGEINFO = true;
-
+    
+    public static final boolean DEFAULT_WAKAYAMA_HL7 = false;
 
     // GUI staff
     private JTextField tf_lblPrtAddress;
@@ -195,7 +197,13 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     
     private JTextField tf_zebra;
     private JLabel lbl_color;
+    
+    private JCheckBox cb_wakayamaHl7;
+    private JCheckBox cb_sendLaboTest;
+    private JTextField tf_falcoFacilityId;
+    private JTextField tf_falcoOutputPath;
 
+    
     /** 画面モデル */
     private MiscModel model;
     private StateMgr stateMgr;
@@ -277,7 +285,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         lbl_fev40Path = new JLabel("FEV-40のパス");
         tf_fev40Path = GUIFactory.createTextField(20, null, null, null);
         btn_openFEV = new JButton("開く");
-        MyBtnActionListener listener = new MyBtnActionListener(programFolder, tf_fev40Path);
+        MyBtnActionListener listener = new MyBtnActionListener(programFolder, tf_fev40Path, JFileChooser.FILES_ONLY);
         btn_openFEV.addActionListener(listener);
         gbl.add(lbl_fev40Path, 0, row, GridBagConstraints.EAST);
         gbl.add(tf_fev40Path, 1, row, GridBagConstraints.CENTER);
@@ -293,7 +301,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         lbl_winePath = new JLabel("Wineのパス");
         tf_winePath = GUIFactory.createTextField(20, null, null, null);
         btn_openWine = new JButton("開く");
-        listener = new MyBtnActionListener(userHome, tf_winePath);
+        listener = new MyBtnActionListener(userHome, tf_winePath, JFileChooser.FILES_ONLY);
         btn_openWine.addActionListener(listener);
         gbl.add(lbl_winePath, 0, row, GridBagConstraints.EAST);
         gbl.add(tf_winePath, 1, row, GridBagConstraints.CENTER);
@@ -601,6 +609,38 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(weasis, 0, 3, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         JPanel pacsSetting = gbl.getProduct();
 
+        // 設定３
+        // Labo
+        gbl = new GridBagBuilder("ラボ");
+        row = 0;
+        JLabel lbl_wakayamaHl7 = new JLabel("HL7データは和歌山市医師会フォーマットを使用する。");
+        cb_wakayamaHl7 = new JCheckBox();
+        gbl.add(cb_wakayamaHl7, 0, row, GridBagConstraints.EAST);
+        gbl.add(lbl_wakayamaHl7, 1, row, GridBagConstraints.WEST);
+        
+        row++;
+        JLabel lbl_sendFalco = new JLabel("FALCOラボオーダー出力する。");
+        cb_sendLaboTest = new JCheckBox();
+        gbl.add(cb_sendLaboTest, 0, row, GridBagConstraints.EAST);
+        gbl.add(lbl_sendFalco, 1, row, GridBagConstraints.WEST);
+        
+        row++;
+        JLabel lbl_falcoFacilityId = new JLabel("FALCO施設ID");
+        tf_falcoFacilityId = GUIFactory.createTextField(20, null, null, null);
+        gbl.add(lbl_falcoFacilityId, 0, row, GridBagConstraints.EAST);
+        gbl.add(tf_falcoFacilityId, 1, row, GridBagConstraints.WEST);
+        
+        row++;
+        JLabel lbl_falcoOutputPath = new JLabel("FALCO出力パス");
+        tf_falcoOutputPath = GUIFactory.createTextField(20, null, null, null);
+        JButton btn_openFalcoPath = new JButton("開く");
+        listener = new MyBtnActionListener(userHome, tf_falcoOutputPath, JFileChooser.DIRECTORIES_ONLY);
+        btn_openFalcoPath.addActionListener(listener);
+
+        gbl.add(lbl_falcoOutputPath, 0, row, GridBagConstraints.EAST);
+        gbl.add(tf_falcoOutputPath, 1, row, GridBagConstraints.WEST);
+        gbl.add(btn_openFalcoPath, 2, row, GridBagConstraints.WEST);
+        JPanel labo = gbl.getProduct();
         
         // 色
         gbl = new GridBagBuilder("表ストライプの色");
@@ -642,14 +682,15 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         // 全体レイアウト
         gbl = new GridBagBuilder();
         gbl.add(color, 0, 0, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
-        JPanel colorSetting = gbl.getProduct();
+        gbl.add(labo, 0, 1, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        JPanel setting3 = gbl.getProduct();
         
         JTabbedPane tabbedPane = new JTabbedPane();
         tabbedPane.addTab("設定１", setting);
         tabbedPane.addTab("設定２", setting2);
+        tabbedPane.addTab("設定３", setting3);
         //tabbedPane.addTab("RS_Base", settingRSB);
         tabbedPane.addTab("PACS", pacsSetting);
-        tabbedPane.addTab("色", colorSetting);
 
         getUI().setLayout(new BorderLayout());
         getUI().add(tabbedPane);
@@ -665,16 +706,18 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
         private JTextField tf;
         private String currentDirectory;
+        private int mode;
 
-        private MyBtnActionListener(String currentDirectory, JTextField tf) {
+        private MyBtnActionListener(String currentDirectory, JTextField tf, int mode) {
             this.tf = tf;
             this.currentDirectory = currentDirectory;
+            this.mode = mode;
         }
 
         @Override
         public void actionPerformed(ActionEvent e) {
             JFileChooser chooser = new JFileChooser(currentDirectory);
-            chooser.setFileSelectionMode(JFileChooser.FILES_ONLY);
+            chooser.setFileSelectionMode(mode);
             int returnVal = chooser.showOpenDialog(null);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
                 String path = chooser.getSelectedFile().getPath();
@@ -885,6 +928,16 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         tf_zebra.setText(val);
         Color c = stringToColor(val);
         lbl_color.setBackground(c);
+        
+        // labo
+        cb_wakayamaHl7.setSelected(model.wakayamaHl7);
+        cb_sendLaboTest.setSelected(model.sendLaboTest);
+        val = model.falcoFacilityId;
+        val = val != null ? val : "";
+        tf_falcoFacilityId.setText(val);
+        val = model.falcoOutputPath;
+        val = val != null ? val : "";
+        tf_falcoOutputPath.setText(val);
     }
 
     /**
@@ -955,6 +1008,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         
         // 色
         model.zebraColor = tf_zebra.getText().trim();
+        model.wakayamaHl7 = cb_wakayamaHl7.isSelected();
+        model.sendLaboTest = cb_sendLaboTest.isSelected();
+        model.falcoFacilityId = tf_falcoFacilityId.getText().trim();
+        model.falcoOutputPath = tf_falcoOutputPath.getText().trim();
     }
 
     /**
@@ -999,6 +1056,11 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         private String weasisAddress;
         
         private String zebraColor;
+        
+        private boolean sendLaboTest;
+        private boolean wakayamaHl7;
+        private String falcoOutputPath;
+        private String falcoFacilityId;
 
         public void populate() {
 
@@ -1054,6 +1116,12 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             
             // 色
             zebraColor = Project.getString(ZEBRA_COLOR, ClientContext.getString("color.even"));
+            
+            // labo
+            sendLaboTest = Project.getBoolean(Project.SEND_LABTEST, false);
+            wakayamaHl7 = Project.getBoolean(WAKAYAMA_HL7, DEFAULT_WAKAYAMA_HL7);
+            falcoFacilityId = Project.getString(Project.SEND_LABTEST_FACILITY_ID, "");
+            falcoOutputPath = Project.getString(Project.SEND_LABTEST_PATH, "");
         }
 
         public void restore() {
@@ -1104,6 +1172,12 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             
             // 色
             Project.setString(ZEBRA_COLOR, zebraColor);
+            
+            // labo
+            Project.setBoolean(WAKAYAMA_HL7, wakayamaHl7);
+            Project.setBoolean(Project.SEND_LABTEST, sendLaboTest);
+            Project.setString(Project.SEND_LABTEST_FACILITY_ID, falcoFacilityId);
+            Project.setString(Project.SEND_LABTEST_PATH, falcoOutputPath);
         }
     }
 

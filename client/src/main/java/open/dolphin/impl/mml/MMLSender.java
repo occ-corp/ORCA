@@ -15,7 +15,7 @@ import org.apache.velocity.app.Velocity;
 public class MMLSender implements IKarteSender {
     
     private Chart context;
-    
+    private static final String MML = "MML";
     //private MmlMessageListener mmlListener;
 
     @Override
@@ -41,12 +41,12 @@ public class MMLSender implements IKarteSender {
     public KarteSenderResult send(DocumentModel model) {
 
         if (!model.getDocInfoModel().isSendMml() || context == null) {
-            return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(MML, KarteSenderResult.SKIPPED, null);
         }
 
         MmlMessageListener mmlListener = context.getMMLListener();
         if (mmlListener == null) {
-            return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(MML, KarteSenderResult.SKIPPED, null);
         }
         
         // MML Message を生成する
@@ -97,9 +97,9 @@ public class MMLSender implements IKarteSender {
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.ERROR, e.getMessage());
+            return new KarteSenderResult(MML, KarteSenderResult.ERROR, e.getMessage());
         }
-        return new KarteSenderResult(KarteSenderResult.MML, KarteSenderResult.NO_ERROR, null);
+        return new KarteSenderResult(MML, KarteSenderResult.NO_ERROR, null);
     }
 
 }

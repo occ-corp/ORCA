@@ -33,6 +33,7 @@ public class OrcaApiDelegater implements IOrcaApi {
     private static final String CHARSET_UTF8 = "; charset=UTF-8";
     private static final String MEDIATYPE_XML_UTF8 = MediaType.APPLICATION_XML + CHARSET_UTF8;
     private static final int HTTP200 = 200;
+    private static final String ORCA_API = "ORCA API";
 
     private static final OrcaApiDelegater instance;
 
@@ -78,7 +79,7 @@ public class OrcaApiDelegater implements IOrcaApi {
         if (status != HTTP200) {
             String code = "HTTP" + String.valueOf(status);
             String msg = "接続を確認してください。";
-            return new KarteSenderResult(KarteSenderResult.ORCA_API, code, msg);
+            return new KarteSenderResult(ORCA_API, code, msg);
         }
         
         KarteSenderResult result;
@@ -86,11 +87,11 @@ public class OrcaApiDelegater implements IOrcaApi {
             Document res = builder.build(new StringReader(resXml));
             String code = getElementText(res, API_RESULT);
             String msg = getElementText(res, API_RESULT_MESSAGE);
-            result = new KarteSenderResult(KarteSenderResult.ORCA_API, code, msg);
+            result = new KarteSenderResult(ORCA_API, code, msg);
         } catch (JDOMException ex) {
-            result = new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.ERROR, ex.getMessage());
+            result = new KarteSenderResult(ORCA_API, KarteSenderResult.ERROR, ex.getMessage());
         } catch (IOException ex) {
-            result = new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.ERROR, ex.getMessage());
+            result = new KarteSenderResult(ORCA_API, KarteSenderResult.ERROR, ex.getMessage());
         }
 
         return result;

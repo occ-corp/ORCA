@@ -25,6 +25,7 @@ public class Orca21ApiKarteSender implements IKarteSender {
     
 //masuda^    ClaimItemの最大数
     private static final int maxClaimItemCount = 40;
+    private static final String ORCA_API = "ORCA API";
 //masuda$
     
     @Override
@@ -53,19 +54,19 @@ public class Orca21ApiKarteSender implements IKarteSender {
         if (sendModel == null 
                 || !sendModel.getDocInfoModel().isSendClaim() 
                 || context == null) {
-            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
         }
         
         // ORCA API使用しない場合はリターン
         if (!Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
         }
         
         PVTHealthInsuranceModel insuranceToApply
                 = context.getHealthInsuranceToApply(sendModel.getDocInfoModel().getHealthInsuranceGUID());
         
         if (insuranceToApply == null) {
-            return new KarteSenderResult(KarteSenderResult.ORCA_API, KarteSenderResult.SKIPPED, null);
+            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
         }
 
         DocInfoModel docInfo = sendModel.getDocInfoModel();

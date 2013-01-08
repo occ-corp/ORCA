@@ -1,5 +1,8 @@
 package open.dolphin.impl.labrcv;
 
+import open.dolphin.project.Project;
+import open.dolphin.setting.MiscSettingPanel;
+
 /**
  *
  * @author Kazushi Minagawa. Digital Globe, Inc.
@@ -17,8 +20,12 @@ public class LabParserFactory {
 
             } else if (key.toLowerCase().endsWith(".hl7")) {
 //masuda^
-                //clsName = "open.dolphin.impl.falco.HL7Falco";
-                clsName = "open.dolphin.impl.labrcv.Hl7Parser";
+                boolean wakayamaHl7 = Project.getBoolean(MiscSettingPanel.WAKAYAMA_HL7, MiscSettingPanel.DEFAULT_WAKAYAMA_HL7);
+                if (wakayamaHl7) {
+                    clsName = "open.dolphin.impl.labrcv.Hl7Parser";
+                } else {
+                    clsName = "open.dolphin.impl.falco.HL7Falco";
+                }
 //masuda$
 
             } else if (key.toLowerCase().endsWith(".txt")) {
