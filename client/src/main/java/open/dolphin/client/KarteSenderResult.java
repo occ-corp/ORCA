@@ -52,7 +52,7 @@ public class KarteSenderResult {
         sb.append(":");
         sb.append(code);
         sb.append(":");
-        sb.append(msg);
+        sb.append(msg == null ? "" : msg);
         return sb.toString();
     }
     
