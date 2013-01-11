@@ -20,8 +20,8 @@ public class LabParserFactory {
 
             } else if (key.toLowerCase().endsWith(".hl7")) {
 //masuda^
-                boolean wakayamaHl7 = Project.getBoolean(MiscSettingPanel.WAKAYAMA_HL7, MiscSettingPanel.DEFAULT_WAKAYAMA_HL7);
-                if (wakayamaHl7) {
+                String hl7Format = Project.getString(MiscSettingPanel.HL7_FORMAT, MiscSettingPanel.DEFAULT_HL7_FORMAT);
+                if ("wakayama".equals(hl7Format)) {
                     clsName = "open.dolphin.impl.labrcv.Hl7Parser";
                 } else {
                     clsName = "open.dolphin.impl.falco.HL7Falco";

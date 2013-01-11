@@ -1,15 +1,13 @@
 package open.dolphin.setting;
 
-import java.awt.BorderLayout;
-import java.awt.Color;
-import java.awt.Desktop;
-import java.awt.GridBagConstraints;
+import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.*;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
@@ -81,7 +79,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final String PACS_VIEWER_GAMMA = "pacsViewerGamma";
     
     public static final String ZEBRA_COLOR = "zebraColor";
-    public static final String WAKAYAMA_HL7 = "wakayamaHL7";
+    public static final String HL7_FORMAT = "hl7format";
 
     // preferencesのdefault
     public static final String DEFAULT_LBLPRT_ADDRESS = null;
@@ -128,7 +126,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final double DEFAULT_PACS_GAMMA = 1;
     public static final boolean DEFAULT_PACS_SHOW_IMAGEINFO = true;
     
-    public static final boolean DEFAULT_WAKAYAMA_HL7 = false;
+    public static final String DEFAULT_HL7_FORMAT = "falco";
 
     // GUI staff
     private JTextField tf_lblPrtAddress;
@@ -198,7 +196,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     private JTextField tf_zebra;
     private JLabel lbl_color;
     
-    private JCheckBox cb_wakayamaHl7;
+    private JRadioButton rb_falcoHl7;
+    private JRadioButton rb_wakayamaHl7;
     private JCheckBox cb_sendLaboTest;
     private JTextField tf_falcoFacilityId;
     private JTextField tf_falcoOutputPath;
@@ -613,10 +612,19 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         // Labo
         gbl = new GridBagBuilder("ラボ");
         row = 0;
-        JLabel lbl_wakayamaHl7 = new JLabel("HL7データは和歌山市医師会フォーマットを使用する。");
-        cb_wakayamaHl7 = new JCheckBox();
-        gbl.add(cb_wakayamaHl7, 0, row, GridBagConstraints.EAST);
-        gbl.add(lbl_wakayamaHl7, 1, row, GridBagConstraints.WEST);
+
+        rb_falcoHl7 = new JRadioButton("FALCO");
+        rb_wakayamaHl7 = new JRadioButton("和歌山市医師会");
+        JPanel pnlHl7 = new JPanel();
+        pnlHl7.setLayout(new FlowLayout());
+        pnlHl7.add(rb_falcoHl7);
+        pnlHl7.add(rb_wakayamaHl7);
+        ButtonGroup jbg = new ButtonGroup();
+        jbg.add(rb_falcoHl7);
+        jbg.add(rb_wakayamaHl7);
+        JLabel lbl_hl7 = new JLabel("HL7形式");
+        gbl.add(lbl_hl7, 0, row, GridBagConstraints.EAST);
+        gbl.add(pnlHl7, 1, row, GridBagConstraints.CENTER);
         
         row++;
         JLabel lbl_sendFalco = new JLabel("FALCOラボオーダー出力する。");
@@ -930,7 +938,13 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         lbl_color.setBackground(c);
         
         // labo
-        cb_wakayamaHl7.setSelected(model.wakayamaHl7);
+        val = model.hl7Format;
+        val = val != null ? val : "";
+        if ("wakayama".equals(val)) {
+            rb_wakayamaHl7.setSelected(true);
+        } else {
+            rb_falcoHl7.setSelected(true);
+        }
         cb_sendLaboTest.setSelected(model.sendLaboTest);
         val = model.falcoFacilityId;
         val = val != null ? val : "";
@@ -1008,7 +1022,11 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         
         // 色
         model.zebraColor = tf_zebra.getText().trim();
-        model.wakayamaHl7 = cb_wakayamaHl7.isSelected();
+        if (rb_wakayamaHl7.isSelected()) {
+            model.hl7Format = "wakayama";
+        } else {
+            model.hl7Format = "falco";
+        }
         model.sendLaboTest = cb_sendLaboTest.isSelected();
         model.falcoFacilityId = tf_falcoFacilityId.getText().trim();
         model.falcoOutputPath = tf_falcoOutputPath.getText().trim();
@@ -1058,7 +1076,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         private String zebraColor;
         
         private boolean sendLaboTest;
-        private boolean wakayamaHl7;
+        private String hl7Format;
         private String falcoOutputPath;
         private String falcoFacilityId;
 
@@ -1119,7 +1137,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             
             // labo
             sendLaboTest = Project.getBoolean(Project.SEND_LABTEST, false);
-            wakayamaHl7 = Project.getBoolean(WAKAYAMA_HL7, DEFAULT_WAKAYAMA_HL7);
+            hl7Format = Project.getString(HL7_FORMAT, DEFAULT_HL7_FORMAT);
             falcoFacilityId = Project.getString(Project.SEND_LABTEST_FACILITY_ID, "");
             falcoOutputPath = Project.getString(Project.SEND_LABTEST_PATH, "");
         }
@@ -1174,7 +1192,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             Project.setString(ZEBRA_COLOR, zebraColor);
             
             // labo
-            Project.setBoolean(WAKAYAMA_HL7, wakayamaHl7);
+            Project.setString(HL7_FORMAT, hl7Format);
             Project.setBoolean(Project.SEND_LABTEST, sendLaboTest);
             Project.setString(Project.SEND_LABTEST_FACILITY_ID, falcoFacilityId);
             Project.setString(Project.SEND_LABTEST_PATH, falcoOutputPath);
