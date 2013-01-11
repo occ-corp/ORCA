@@ -36,7 +36,10 @@ public class MasudaServiceBean {
     @SuppressWarnings("unchecked")
     public List<RoutineMedModel> getRoutineMedModels(long karteId, int firstResult, int maxResults) {
         
-        final String sql = "from RoutineMedModel r where r.karteId = :kId and r.bookmark = :bookmark";
+        // 橋本医院　加藤さま
+        // 【2. 薬歴を新しい順に表示するように修正】からインスパイヤ
+        final String sql = "from RoutineMedModel r where r.karteId = :kId and r.bookmark = :bookmark"
+                + " order by r.registDate desc";
         
         // bookmarkなしのものは指定した数だけ取得する
         List<RoutineMedModel> list1 =
@@ -68,7 +71,7 @@ public class MasudaServiceBean {
             fetchModuleModelList(model);
         }
 
-        Collections.sort(list1);
+        Collections.sort(list1, Collections.reverseOrder());
         
         return list1;
     }

@@ -815,9 +815,10 @@ public class DocumentHistory {
         // 文書種別変更
         contentCombo.addItemListener(EventHandler.create(ItemListener.class, this, "contentChanged", "stateChange"));
 
+//masuda^   後ろに移動
         // 抽出期間コンボボックスの選択を処理する
-        extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
-
+        //extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
+//masuda$
         // Preference から文書種別を設定する
         extractionComposite = KARTE + CAMMA + ALL;
 
@@ -854,9 +855,13 @@ public class DocumentHistory {
                 extractionIndexUpdated = true;
             }
         }
+
+        extractionCombo.setSelectedIndex(index);
+        
+        // 抽出期間コンボボックスの選択を処理する
+        extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
 //masuda$
         
-        extractionCombo.setSelectedIndex(index);
         GregorianCalendar today = new GregorianCalendar();
         today.add(GregorianCalendar.MONTH, past);
         today.clear(Calendar.HOUR_OF_DAY);
@@ -1010,7 +1015,15 @@ public class DocumentHistory {
      * @param extractionPeriod 抽出期間
      */
     public void setExtractionPeriod(Date extractionPeriod) {
-        this.extractionPeriod = extractionPeriod;
+        
+        // 橋本医院　加藤さま
+        //【3. カルテ表示範囲に「先月」を追加 (未完成)】からインスパイヤ
+        // 基準日を１日にしちゃう
+        GregorianCalendar gc = new GregorianCalendar();
+        gc.setTime(extractionPeriod);
+        gc.set(GregorianCalendar.DAY_OF_MONTH, 1);
+        this.extractionPeriod = gc.getTime();
+        
         // 束縛プロパティの通知を行う
         if (boundSupport != null) {
             boundSupport.firePropertyChange(HISTORY_UPDATED, false, true);

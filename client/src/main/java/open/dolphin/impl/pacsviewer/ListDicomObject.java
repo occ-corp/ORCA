@@ -22,14 +22,24 @@ public class ListDicomObject implements Comparable {
 
     public ListDicomObject(DicomObject obj) {
         object = obj;
-        ptId = object.getString(Tag.PatientID);
-        ptName = object.getString(Tag.PatientName).replace("^", " ");
-        ptSex = object.getString(Tag.PatientSex);
-        ptBirthDate = object.getString(Tag.PatientBirthDate);
-        modalities = object.getString(Tag.ModalitiesInStudy);
-        description = object.getString(Tag.StudyDescription);
-        studyDate = object.getString(Tag.StudyDate);
-        numberOfImage = object.getString(Tag.NumberOfStudyRelatedInstances);
+        ptId = getString(Tag.PatientID);
+        ptName = getString(Tag.PatientName).replace("^", " ");
+        ptSex = getString(Tag.PatientSex);
+        ptBirthDate = getString(Tag.PatientBirthDate);
+        modalities = getString(Tag.ModalitiesInStudy);
+        description = getString(Tag.StudyDescription);
+        studyDate = getString(Tag.StudyDate);
+        numberOfImage = getString(Tag.NumberOfStudyRelatedInstances);
+    }
+    
+    // 橋本医院　加藤さま
+    // 【1. Dicomサーバに患者名=""の画像があっても画像を表示出来るように修正】からパクリ
+    private String getString(int tag) {
+        if (object == null) {
+            return "";
+        }
+        String str = object.getString(tag);
+        return (str == null) ? "" : str;
     }
 
     public DicomObject getDicomObject() {
