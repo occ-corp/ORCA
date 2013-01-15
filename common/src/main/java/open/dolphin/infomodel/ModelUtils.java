@@ -14,7 +14,7 @@ import java.util.*;
  */
 public class ModelUtils implements IInfoModel {
     
-    public static final Date AD1800 = new Date(-5362016400000L);
+    //public static final Date AD1800 = new Date(-5362016400000L);
     
     public static String trimTime(String mmlDate) {
         

@@ -12,7 +12,7 @@ import javax.swing.event.ListSelectionListener;
 import open.dolphin.delegater.MasudaDelegater;
 import open.dolphin.infomodel.DocInfoModel;
 import open.dolphin.infomodel.ExamHistoryModel;
-import open.dolphin.infomodel.ModelUtils;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.table.ColumnSpecHelper;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
@@ -221,8 +221,9 @@ public class ExamHistory {
         
         // バックグラウンドで行う
         final long karteId = context.getKarte().getId();
-        final Date fromDate = docHistory.getExtractionPeriod();
-        final Date toDate = new Date();
+        ExtractionPeriod period = docHistory.getExtractionPeriod();
+        final Date fromDate = period.getFromDate();
+        final Date toDate = period.getToDate();
 
         final SwingWorker worker = new SwingWorker<List<ExamHistoryModel>, Void>() {
 
@@ -249,7 +250,7 @@ public class ExamHistory {
                     } else {
                         Collections.sort(list, Collections.reverseOrder(new ExamHistoryComparator()));
                     }
-                    Date lastExamDate = ModelUtils.AD1800;
+                    Date lastExamDate = IInfoModel.AD1800;
                     if (!list.isEmpty()) {
                         lastExamDate = asc 
                                 ? list.get(list.size() - 1).getExamDate()

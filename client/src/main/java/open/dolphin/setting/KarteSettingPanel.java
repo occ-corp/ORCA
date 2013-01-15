@@ -9,6 +9,8 @@ import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.beans.EventHandler;
 import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -22,6 +24,7 @@ import open.dolphin.util.ZenkakuUtils;
  * KarteSettingPanel
  *
  * @author Minagawa,Kazushi
+ * @author modified by masuda, Masuda Naika
  */
 public class KarteSettingPanel extends AbstractSettingPanel {
 
@@ -45,7 +48,8 @@ public class KarteSettingPanel extends AbstractSettingPanel {
     private JComboBox periodCombo;
     private JRadioButton vSc;
     private JRadioButton hSc;
-    private NameValuePair[] periodObjects;
+//masuda
+    private ExtractionPeriod[] periodObjects;
     
     // 病名関係
     private JRadioButton diagnosisAsc;
@@ -166,7 +170,13 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         //showModifiedCB = new JCheckBox("修正履歴表示");
 //masuda^        
         //periodObjects = ClientContext.getNameValuePair("docHistory.combo.period");
-        periodObjects = DocumentHistory.EXTRACTION_OBJECTS;
+        List<ExtractionPeriod> list = new ArrayList<ExtractionPeriod>();
+        for (ExtractionPeriod period : DocumentHistory.EXTRACTION_OBJECTS) {
+            if (period.getToMonth() == 1) {
+                list.add(period);
+            }
+        }
+        periodObjects = list.toArray(new ExtractionPeriod[0]);
 //masuda$  
         periodCombo = new JComboBox(periodObjects);
         vSc = new JRadioButton("垂直");
@@ -670,8 +680,10 @@ public class KarteSettingPanel extends AbstractSettingPanel {
 
         // 抽出期間
         int currentPeriod = model.getKarteExtractionPeriod();
-        periodCombo.setSelectedIndex(NameValuePair.getIndex(String.valueOf(currentPeriod), periodObjects));
-
+//masuda^
+        //periodCombo.setSelectedIndex(NameValuePair.getIndex(String.valueOf(currentPeriod), periodObjects));
+        periodCombo.setSelectedIndex(ExtractionPeriod.getFromDateIndex(currentPeriod, periodObjects));
+//masuda$
         // カルテの取得枚数
         spinner.setValue(new Integer(model.getFetchKarteCount()));
 
@@ -901,14 +913,18 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         model.setScrollKarteV(vSc.isSelected());
 
         // カルテの抽出期間
-        String code = ((NameValuePair) periodCombo.getSelectedItem()).getValue();
-        model.setKarteExtractionPeriod(Integer.parseInt(code));
+//masuda^
+        //String code = ((NameValuePair) periodCombo.getSelectedItem()).getValue();
+        //model.setKarteExtractionPeriod(Integer.parseInt(code));
+        ExtractionPeriod period = (ExtractionPeriod) periodCombo.getSelectedItem();
+        model.setKarteExtractionPeriod(period.getFromMonth());
+//masuda$ 
 
         // 病名の昇順表示
         model.setAscendingDiagnosis(diagnosisAsc.isSelected());
 
         // 病名の抽出期間
-        code = ((NameValuePair) diagnosisPeriodCombo.getSelectedItem()).getValue();
+        String code = ((NameValuePair) diagnosisPeriodCombo.getSelectedItem()).getValue();
         model.setDiagnosisExtractionPeriod(Integer.parseInt(code));
 
         // アクティブ病名のみ表示
@@ -1608,7 +1624,10 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         asc.setSelected(Project.getDefaultBoolean(Project.DOC_HISTORY_ASCENDING));
         desc.setSelected(!Project.getDefaultBoolean(Project.DOC_HISTORY_ASCENDING));
         spinner.setValue(new Integer(Project.getDefaultInt(Project.DOC_HISTORY_FETCHCOUNT)));
-        periodCombo.setSelectedIndex(NameValuePair.getIndex(String.valueOf(Project.getDefaultInt(Project.DOC_HISTORY_PERIOD)), periodObjects));
+//masuda^
+        //periodCombo.setSelectedIndex(NameValuePair.getIndex(String.valueOf(Project.getDefaultInt(Project.DOC_HISTORY_PERIOD)), periodObjects));
+        periodCombo.setSelectedIndex(ExtractionPeriod.getFromDateIndex(Project.getDefaultInt(Project.DOC_HISTORY_PERIOD), periodObjects));
+//masuda$
         vSc.setSelected(Project.getDefaultBoolean(Project.KARTE_SCROLL_DIRECTION));
 
         diagnosisAsc.setSelected(Project.getDefaultBoolean(Project.DIAGNOSIS_ASCENDING));

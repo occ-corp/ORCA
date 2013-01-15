@@ -23,6 +23,7 @@ import open.dolphin.util.MultiTaskExecutor;
  *
  * @author Kazushi Minagawa
  * @author modified by masuda, Masuda Naika
+ * @author modified by katoh, Hashimoto iin
  */
 public class  DocumentDelegater extends BusinessDelegater {
 
@@ -199,11 +200,13 @@ public class  DocumentDelegater extends BusinessDelegater {
         return null;
     }
     
+//katoh^
     private List<DocInfoModel> getKarteList(DocumentSearchSpec spec) {
 
         String path = "karte/docinfo/" + String.valueOf(spec.getKarteId());
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add("fromDate", REST_DATE_FRMT.format(spec.getFromDate()));
+        qmap.add("toDate", REST_DATE_FRMT.format(spec.getToDate()));
         qmap.add("includeModified", String.valueOf(spec.isIncludeModifid()));
 
         ClientResponse response = getResource(path, qmap)
@@ -225,7 +228,8 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         return list;
     }
-
+//katoh$
+    
     private List<DocInfoModel> getLetterList(DocumentSearchSpec spec) {
         
         String path = "odletter/list/" + String.valueOf(spec.getKarteId());

@@ -1317,7 +1317,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         if (past != 0) {
             GregorianCalendar today = new GregorianCalendar();
             today.add(GregorianCalendar.MONTH, past);
-            today.clear(Calendar.HOUR_OF_DAY);
+            today.set(Calendar.HOUR_OF_DAY, 0);
             today.clear(Calendar.MINUTE);
             today.clear(Calendar.SECOND);
             today.clear(Calendar.MILLISECOND);

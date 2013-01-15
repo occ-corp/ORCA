@@ -14,6 +14,7 @@ import open.dolphin.session.KarteServiceBean;
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
+ * @author modified by katoh, Hashimoto iin
  */
 @Path("karte")
 public class KarteResource extends AbstractResource {
@@ -44,23 +45,26 @@ public class KarteResource extends AbstractResource {
 
     //-------------------------------------------------------
 
+//katoh^
     @GET
     @Path("docinfo/{id}")
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getDocumentList(@PathParam("id") Long karteId, 
             @QueryParam("fromDate") String fromDateStr, 
+            @QueryParam("toDate") String toDateStr, 
             @QueryParam("includeModified") Boolean includeModified) {
 
         Date fromDate = parseDate(fromDateStr);
+        Date toDate = parseDate(toDateStr);
 
-        List<DocInfoModel> result = karteServiceBean.getDocumentList(karteId, fromDate, includeModified);
+        List<DocInfoModel> result = karteServiceBean.getDocumentList(karteId, fromDate, toDate, includeModified);
 
         String json = getConverter().toJson(result);
         debug(json);
 
         return json;
     }
-
+//katoh$
 
     @GET
     @Path("document")

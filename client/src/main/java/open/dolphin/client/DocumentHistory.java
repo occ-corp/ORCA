@@ -76,7 +76,8 @@ public class DocumentHistory {
     private String extractionComposite;
     
     // 抽出開始日 
-    private Date extractionPeriod;
+    //private Date extractionPeriod;
+    private ExtractionPeriod extractionPeriod;
     
     // 自動的に取得する文書数
     private int autoFetchCount;
@@ -90,7 +91,8 @@ public class DocumentHistory {
     // フラグ
     private boolean start;
     private NameValuePair[] contentObject;
-    private NameValuePair[] extractionObjects;
+    //private NameValuePair[] extractionObjects;
+    private ExtractionPeriod[] extractionObjects;
     
     // Key入力をブロックするリスナ
     private BlockKeyListener blockKeyListener;
@@ -131,22 +133,23 @@ public class DocumentHistory {
     private static final String CAMMA = ",";
     private static final String SELF_PREFIX = IInfoModel.INSURANCE_SELF_PREFIX;
     
-    public static final NameValuePair[] EXTRACTION_OBJECTS;
+    public static final ExtractionPeriod[] EXTRACTION_OBJECTS;
     public static final NameValuePair[] CONTENT_OBJECTS;
     
     // 全履歴はaddValue = 0にする
     static {
-        EXTRACTION_OBJECTS = new NameValuePair[]{
-            new NameValuePair("1ヶ月", "-1"),
-            new NameValuePair("3ヶ月", "-3"),
-            new NameValuePair("半年", "-6"),
-            new NameValuePair("1年", "-12"),
-            new NameValuePair("2年", "-24"),
-            new NameValuePair("3年", "-36"),
-            new NameValuePair("5年", "-60"),
-            new NameValuePair("10年", "-120"),
-            new NameValuePair("20年", "-240"),
-            new NameValuePair("全て", "0")
+        EXTRACTION_OBJECTS = new ExtractionPeriod[]{
+            new ExtractionPeriod("1ヶ月", -1, 1),
+            new ExtractionPeriod("先月", -1, 0),
+            new ExtractionPeriod("3ヶ月", -3, 1),
+            new ExtractionPeriod("半年", -6, 1),
+            new ExtractionPeriod("１年", -12, 1),
+            new ExtractionPeriod("２年", -24, 1),
+            new ExtractionPeriod("５年", -60, 1),
+            new ExtractionPeriod("-10年", -120, -60),
+            new ExtractionPeriod("-20年", -240, -120),
+            new ExtractionPeriod("-30年", -360, -240),
+            new ExtractionPeriod("全て", Integer.MIN_VALUE, 1)
         };
         CONTENT_OBJECTS = new NameValuePair[]{
             new NameValuePair(CMB_KARTE, KARTE + CAMMA + ALL),
@@ -278,6 +281,7 @@ public class DocumentHistory {
 //masuda^
         if (extractionIndexUpdated) {
             getDocumentHistory();
+            extractionIndexUpdated = false;
             return;
         }
 //masuda$        
@@ -302,7 +306,8 @@ public class DocumentHistory {
             DocumentSearchSpec spec = new DocumentSearchSpec();
             spec.setKarteId(context.getKarte().getId());	// カルテID
             spec.setDocType(docType);   			// 文書タイプ
-            spec.setFromDate(extractionPeriod);			// 抽出期間開始
+            spec.setFromDate(extractionPeriod.getFromDate());   // 抽出期間開始
+            spec.setToDate(extractionPeriod.getToDate());
             spec.setIncludeModifid(showModified);		// 修正履歴
             spec.setCode(DocumentSearchSpec.DOCTYPE_SEARCH);	// 検索タイプ
             spec.setAscending(ascending);
@@ -501,22 +506,10 @@ public class DocumentHistory {
     public void periodChanged(int state) {
         if (state == ItemEvent.SELECTED) {
             int index = extractionCombo.getSelectedIndex();
-            NameValuePair pair = extractionObjects[index];
-            String value = pair.getValue();
-            int addValue = Integer.parseInt(value);
-//masuda^   ほんとの全部に対応
-            GregorianCalendar today = new GregorianCalendar();
-            if (addValue != 0) {
-                today.add(GregorianCalendar.MONTH, addValue);
-                today.clear(GregorianCalendar.HOUR_OF_DAY);
-                today.clear(GregorianCalendar.MINUTE);
-                today.clear(GregorianCalendar.SECOND);
-                today.clear(GregorianCalendar.MILLISECOND);
-            } else {
-                today.clear();
-            }
+//masuda^       
+            ExtractionPeriod period = extractionObjects[index];
+            setExtractionPeriod(period);
 //masuda$
-            setExtractionPeriod(today.getTime());
         }
     }
 
@@ -700,8 +693,8 @@ public class DocumentHistory {
         extractionCombo = view.getExtractCombo();
         // extractionComboはextractionObjectsから再構成
         extractionCombo.removeAllItems();
-        for (NameValuePair nvp : EXTRACTION_OBJECTS) {
-            extractionCombo.addItem(nvp.getName());
+        for (ExtractionPeriod period : EXTRACTION_OBJECTS) {
+            extractionCombo.addItem(period.getName());
         }
         // contentComboはcontentObjectから再構成
         contentCombo.removeAllItems();
@@ -821,54 +814,26 @@ public class DocumentHistory {
 //masuda$
         // Preference から文書種別を設定する
         extractionComposite = KARTE + CAMMA + ALL;
-
-        // Preference から抽出期間を設定する
-        int past = Project.getInt(Project.DOC_HISTORY_PERIOD, -12);
-        int index = NameValuePair.getIndex(String.valueOf(past), extractionObjects);
         
 //masuda^   最終文書歴に合わせてExtraction Periodを設定する
+        // Preference から抽出期間を設定する
+        int past = Project.getInt(Project.DOC_HISTORY_PERIOD, -12);
+        int index = ExtractionPeriod.getFromDateIndex(past, extractionObjects);
+
         Date lastVisit = context.getKarte().getLastDocDate();
         if (lastVisit != null) {
-            GregorianCalendar today = new GregorianCalendar();
-            GregorianCalendar gc = new GregorianCalendar();
-            gc.add(GregorianCalendar.MONTH, past);
-            
-            if (lastVisit.before(gc.getTime())) {
-                
-                for (int i = index; i < EXTRACTION_OBJECTS.length; ++i) {
-                    int addValue = Integer.valueOf(EXTRACTION_OBJECTS[i].getValue());
-                    // extractionPeriod == 0（全部）になったらbreak
-                    if (addValue == 0) {
-                        index = i;
-                        break;
-                    }
-                    gc = new GregorianCalendar();
-                    gc.setTime(lastVisit);
-                    gc.add(GregorianCalendar.MONTH, -addValue);
-                    // extractionPeriodが最終文書を含むようになったらbreak
-                    if (gc.after(today)) {
-                        index = i;
-                        past = addValue;
-                        break;
-                    }
-                }
+            int index2 = ExtractionPeriod.getAppropriateIndex(lastVisit, extractionObjects);
+            if (index2 > index) {
                 extractionIndexUpdated = true;
+                index = index2;
             }
         }
-
         extractionCombo.setSelectedIndex(index);
+        setExtractionPeriod(extractionObjects[index]);
         
         // 抽出期間コンボボックスの選択を処理する
         extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
 //masuda$
-        
-        GregorianCalendar today = new GregorianCalendar();
-        today.add(GregorianCalendar.MONTH, past);
-        today.clear(Calendar.HOUR_OF_DAY);
-        today.clear(Calendar.MINUTE);
-        today.clear(Calendar.SECOND);
-        today.clear(Calendar.MILLISECOND);
-        setExtractionPeriod(today.getTime());
 
         // Preference から自動文書取得数を設定する
         autoFetchCount = Project.getInt(Project.DOC_HISTORY_FETCHCOUNT, 1);
@@ -1014,15 +979,10 @@ public class DocumentHistory {
      * 検索パラメータの抽出期間を設定する。
      * @param extractionPeriod 抽出期間
      */
-    public void setExtractionPeriod(Date extractionPeriod) {
+//masuda^
+    public void setExtractionPeriod(ExtractionPeriod extractionPeriod) {
         
-        // 橋本医院　加藤さま
-        //【3. カルテ表示範囲に「先月」を追加 (未完成)】からインスパイヤ
-        // 基準日を１日にしちゃう
-        GregorianCalendar gc = new GregorianCalendar();
-        gc.setTime(extractionPeriod);
-        gc.set(GregorianCalendar.DAY_OF_MONTH, 1);
-        this.extractionPeriod = gc.getTime();
+        this.extractionPeriod = extractionPeriod;
         
         // 束縛プロパティの通知を行う
         if (boundSupport != null) {
@@ -1030,12 +990,13 @@ public class DocumentHistory {
         }
         getDocumentHistory();
     }
-
+//masuda$
+    
     /**
      * 検索パラメータの抽出期間を返す。
      * @return 抽出期間
      */
-    public Date getExtractionPeriod() {
+    public ExtractionPeriod getExtractionPeriod() {
         return extractionPeriod;
     }
 

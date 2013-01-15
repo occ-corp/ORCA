@@ -13,6 +13,8 @@ import org.hibernate.search.jpa.Search;
 /**
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
+ * @author modified by katoh, Hashimoto iin
  */
 @Stateless
 public class KarteServiceBean {
@@ -81,9 +83,9 @@ public class KarteServiceBean {
     private static final String QUERY_APPOINTMENTS 
             = "from AppointmentModel a where a.karte.id = :karteId and a.started >= :fromDate";
     private static final String QUERY_DOCUMENT_INCLUDE_MODIFIED 
-            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate";
+            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate and d.started < :toDate";
     private static final String QUERY_DOCUMENT 
-            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate "
+            = "from DocumentModel d where d.karte.id=:karteId and d.started >= :fromDate and d.started < :toDate "
             + "and (d.status='F' or d.status='T')";
     private static final String QUERY_SUMMARY
             = "from DocumentModel d where d.karte.id=:karteId and d.docInfo.docType = "
@@ -296,27 +298,28 @@ public class KarteServiceBean {
      * @return DocInfo のコレクション
      */
     @SuppressWarnings("unchecked")
-    public List<DocInfoModel> getDocumentList(long karteId, Date fromDate, boolean includeModifid) {
+    public List<DocInfoModel> getDocumentList(long karteId, Date fromDate, Date toDate, boolean includeModifid) {
 
         List<DocumentModel> documents;
 
         if (includeModifid) {
-//masuda^
+//masuda, katoh^
             //documents = (List<DocumentModel>)em.createQuery(QUERY_DOCUMENT_INCLUDE_MODIFIED)
             documents = 
                     em.createQuery(QUERY_DOCUMENT_INCLUDE_MODIFIED)
                     .setParameter(KARTE_ID, karteId)
                     .setParameter(FROM_DATE, fromDate)
+                    .setParameter(TO_DATE, toDate)
                     .getResultList();
-//masuda
         } else {
             documents = 
                     em.createQuery(QUERY_DOCUMENT)
                     .setParameter(KARTE_ID, karteId)
                     .setParameter(FROM_DATE, fromDate)
+                    .setParameter(TO_DATE, toDate)
                     .getResultList();
         }
-//masuda^   最新のサマリーは必ず含める
+        // 最新のサマリーは必ず含める
         List<DocumentModel> summaries =
                 em.createQuery(QUERY_SUMMARY)
                 .setParameter(KARTE_ID, karteId)
@@ -335,7 +338,7 @@ public class KarteServiceBean {
             doc.toDetuch();
             result.add(doc.getDocInfoModel());
         }
-//masuda$
+//masuda, katoh$
         
         return result;
 }

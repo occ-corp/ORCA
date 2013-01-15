@@ -299,7 +299,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 int past = Project.getInt(Project.DOC_HISTORY_PERIOD, -12);
                 GregorianCalendar today = new GregorianCalendar();
                 today.add(GregorianCalendar.MONTH, past);
-                today.clear(Calendar.HOUR_OF_DAY);
+                //today.clear(Calendar.HOUR_OF_DAY);
+                today.set(Calendar.HOUR_OF_DAY, 0);
                 today.clear(Calendar.MINUTE);
                 today.clear(Calendar.SECOND);
                 today.clear(Calendar.MILLISECOND);
