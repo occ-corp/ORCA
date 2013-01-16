@@ -377,8 +377,31 @@ public class NLabServiceBean {
         module.setPatientId(patientId);
         module.setSampleDate(sampleDate);
         module.setItems(nLaboItems);
+        module.setReportFormat("MML");
+        module.setId(labo13.getId());
         
         return module;
+    }
+    
+    // 削除
+    public int deleteMmlModule(long id) {
+        
+        LaboModuleValue labo = em.find(LaboModuleValue.class, id);
+        if (labo != null) {
+            em.remove(labo);
+            return 1;
+        }
+        return 0;
+    }
+    
+    public int deleteNlaboModule(long id) {
+        
+        NLaboModule labo = em.find(NLaboModule.class, id);
+        if (labo != null) {
+            em.remove(labo);
+            return 1;
+        }
+        return 0;
     }
 //masuda$
     

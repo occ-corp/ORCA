@@ -76,6 +76,8 @@ public class LaboTestBean extends AbstractChartDocument {
     
 //masuda^
     private static final ImageIcon addIcon = ClientContext.getImageIcon("add_16.gif");
+    private int selectedColumn;
+    private int selectedRow;
 //masuda$
     
     public LaboTestBean() {
@@ -124,7 +126,7 @@ public class LaboTestBean extends AbstractChartDocument {
             setColumnWidth();
             return;
         }
-
+        
         // 検体採取日の降順なので昇順にソートする
         Collections.sort(modules, new SampleDateComparator());
 
@@ -169,6 +171,10 @@ public class LaboTestBean extends AbstractChartDocument {
                         value.setComment1(item.getComment1());
                         value.setComment2(item.getComment2());
                         rowObject.addLabTestValueObjectAt(moduleIndex, value);
+//masuda^   LabTestValueObjectにmodule.idをセットする。削除に利用
+                        value.setId(module.getId());
+                        value.setReportFormat(module.getReportFormat());
+//masuda$
                         break;
                     }
                 }
@@ -192,6 +198,11 @@ public class LaboTestBean extends AbstractChartDocument {
                     row.addLabTestValueObjectAt(moduleIndex, value);
                     //
                     rowObjectList.add(row);
+
+//masuda^   LabTestValueObjectにmodule.idをセットする。削除に利用
+                    value.setId(module.getId());
+                    value.setReportFormat(module.getReportFormat());
+//masuda$
                 }
             }
 
@@ -327,6 +338,15 @@ public class LaboTestBean extends AbstractChartDocument {
                 copyLatest();
             }
         };
+        
+//masuda^   削除
+        final AbstractAction deleteAction = new AbstractAction("削除") {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                deleteColumnData();
+            }
+        };
+//masuda$
 
         table.getInputMap().put(copy, "Copy");
         table.getActionMap().put("Copy", copyLatestAction);
@@ -358,11 +378,14 @@ public class LaboTestBean extends AbstractChartDocument {
                 JPopupMenu contextMenu = new JPopupMenu();
                 contextMenu.add(new JMenuItem(copyLatestAction));
                 contextMenu.add(new JMenuItem(copyAction));
-
+//masuda^   削除
+                contextMenu.add(new JMenuItem(deleteAction));
+                selectedRow = row;
+                selectedColumn = table.columnAtPoint(e.getPoint());
+//masuda$
                 contextMenu.show(e.getComponent(), e.getX(), e.getY());
             }
         });
-
 
         // グラフ表示のリスナを登録する
         ListSelectionModel m = table.getSelectionModel();
@@ -413,6 +436,49 @@ public class LaboTestBean extends AbstractChartDocument {
             tableModel.getDataProvider().clear();
         }
     }
+    
+//masuda^   データ削除
+    private void deleteColumnData() {
+        
+        try {
+            // 選択中のデータを取得
+            LabTestRowObject rObj = tableModel.getDataProvider().get(selectedRow);
+            LabTestValueObject vObj = rObj.getLabTestValueObjectAt(selectedColumn - 1);
+            long id = vObj.getId();
+            String frmt = vObj.getReportFormat();
+            if (id == 0 || frmt == null) {
+                return;
+            }
+            
+            // 削除確認
+            String dateStr = vObj.getSampleDate();
+            Toolkit.getDefaultToolkit().beep();
+            String[] options = {"取消", "削除"};
+            String msg = dateStr + "の検査データを削除しますか？";
+            int val = JOptionPane.showOptionDialog(getContext().getFrame(), msg, "検査削除",
+                    JOptionPane.DEFAULT_OPTION, JOptionPane.WARNING_MESSAGE, null, options, options[0]);
+            if (val != 1) {
+                // 取り消し
+                return;
+            }
+            
+            // データベースから削除
+            LaboDelegater del = LaboDelegater.getInstance();
+            if ("MML".equals(frmt)) {
+                del.deleteMmlLaboModule(id);
+            } else {
+                del.deleteNlaboModule(id);
+            }
+            
+            // 再表示
+            NameValuePair pair = (NameValuePair) extractionCombo.getSelectedItem();
+            int firstResult = Integer.parseInt(pair.getValue());
+            searchLaboTest(firstResult);
+            
+        } catch (Exception ex) {
+        }
+    }
+//masuda$
 
     /**
      * 選択されている行で直近のデータをコピーする。

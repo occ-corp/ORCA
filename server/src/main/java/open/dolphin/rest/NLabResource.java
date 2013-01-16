@@ -115,6 +115,28 @@ public class NLabResource extends AbstractResource {
 
         return ret;
     }
+    
+    @DELETE
+    @Path("module/id/{id}")
+    public void deleteNlaboModule(@PathParam("id") String idStr) {
+        
+        long id = Long.valueOf(idStr);
+
+        int cnt = nLabServiceBean.deleteNlaboModule(id);
+        String cntStr = String.valueOf(cnt);
+        debug(cntStr);
+    }
+    
+    @DELETE
+    @Path("mmlModule/id/{id}")
+    public void deleteMmlModule(@PathParam("id") String idStr) {
+        
+        long id = Long.valueOf(idStr);
+
+        int cnt = nLabServiceBean.deleteMmlModule(id);
+        String cntStr = String.valueOf(cnt);
+        debug(cntStr);
+    }
 //masuda$
     
     @Override

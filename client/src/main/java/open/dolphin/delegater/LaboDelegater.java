@@ -148,6 +148,37 @@ public class LaboDelegater extends BusinessDelegater {
         return patient;
     }
     
+    // 削除
+    public int deleteNlaboModule(long id) {
+        
+        String path = "lab/module/id/" + String.valueOf(id);
+        
+        ClientResponse response = getResource(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
+
+        int status = response.getStatus();
+        
+        debug(status, "delete response");
+
+        return 1;
+    }
+    
+    public int deleteMmlLaboModule(long id) {
+        
+        String path = "lab/mmlModule/id/" + String.valueOf(id);
+        
+        ClientResponse response = getResource(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
+
+        int status = response.getStatus();
+        
+        debug(status, "delete response");
+
+        return 1;
+    }
+
     @Override
     protected void debug(int status, String entity) {
         if (debug || DEBUG) {
