@@ -126,7 +126,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final double DEFAULT_PACS_GAMMA = 1;
     public static final boolean DEFAULT_PACS_SHOW_IMAGEINFO = true;
     
-    public static final String DEFAULT_HL7_FORMAT = "falco";
+    public static final String DEFAULT_HL7_FORMAT = "wakayama";
 
     // GUI staff
     private JTextField tf_lblPrtAddress;

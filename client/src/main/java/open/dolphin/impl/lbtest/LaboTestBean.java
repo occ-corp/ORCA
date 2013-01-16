@@ -444,8 +444,8 @@ public class LaboTestBean extends AbstractChartDocument {
             // 選択中のデータを取得
             LabTestRowObject rObj = tableModel.getDataProvider().get(selectedRow);
             LabTestValueObject vObj = rObj.getLabTestValueObjectAt(selectedColumn - 1);
-            long id = vObj.getId();
-            String frmt = vObj.getReportFormat();
+            final long id = vObj.getId();
+            final String frmt = vObj.getReportFormat();
             if (id == 0 || frmt == null) {
                 return;
             }
@@ -463,17 +463,28 @@ public class LaboTestBean extends AbstractChartDocument {
             }
             
             // データベースから削除
-            LaboDelegater del = LaboDelegater.getInstance();
-            if ("MML".equals(frmt)) {
-                del.deleteMmlLaboModule(id);
-            } else {
-                del.deleteNlaboModule(id);
-            }
-            
-            // 再表示
-            NameValuePair pair = (NameValuePair) extractionCombo.getSelectedItem();
-            int firstResult = Integer.parseInt(pair.getValue());
-            searchLaboTest(firstResult);
+            DBTask task = new DBTask<Void, Void>(getContext()) {
+
+                @Override
+                protected Object doInBackground() throws Exception {
+                    LaboDelegater del = LaboDelegater.getInstance();
+                    if ("MML".equals(frmt)) {
+                        del.deleteMmlLaboModule(id);
+                    } else {
+                        del.deleteNlaboModule(id);
+                    }
+                    return null;
+                }
+
+                @Override
+                protected void succeeded(Void result) {
+                    // 再表示
+                    NameValuePair pair = (NameValuePair) extractionCombo.getSelectedItem();
+                    int firstResult = Integer.parseInt(pair.getValue());
+                    searchLaboTest(firstResult);
+                }
+            };
+            task.execute();
             
         } catch (Exception ex) {
         }
