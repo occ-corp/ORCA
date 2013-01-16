@@ -379,7 +379,9 @@ public class LaboTestBean extends AbstractChartDocument {
                 contextMenu.add(new JMenuItem(copyLatestAction));
                 contextMenu.add(new JMenuItem(copyAction));
 //masuda^   削除
-                contextMenu.add(new JMenuItem(deleteAction));
+                if (e.isShiftDown()) {
+                    contextMenu.add(new JMenuItem(deleteAction));
+                }
                 selectedRow = row;
                 selectedColumn = table.columnAtPoint(e.getPoint());
 //masuda$
