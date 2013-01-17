@@ -77,7 +77,6 @@ public class LaboTestBean extends AbstractChartDocument {
 //masuda^
     private static final ImageIcon addIcon = ClientContext.getImageIcon("add_16.gif");
     private int selectedColumn;
-    private int selectedRow;
 //masuda$
     
     public LaboTestBean() {
@@ -171,10 +170,6 @@ public class LaboTestBean extends AbstractChartDocument {
                         value.setComment1(item.getComment1());
                         value.setComment2(item.getComment2());
                         rowObject.addLabTestValueObjectAt(moduleIndex, value);
-//masuda^   LabTestValueObjectにmodule.idをセットする。削除に利用
-                        value.setId(module.getId());
-                        value.setReportFormat(module.getReportFormat());
-//masuda$
                         break;
                     }
                 }
@@ -198,11 +193,6 @@ public class LaboTestBean extends AbstractChartDocument {
                     row.addLabTestValueObjectAt(moduleIndex, value);
                     //
                     rowObjectList.add(row);
-
-//masuda^   LabTestValueObjectにmodule.idをセットする。削除に利用
-                    value.setId(module.getId());
-                    value.setReportFormat(module.getReportFormat());
-//masuda$
                 }
             }
 
@@ -242,6 +232,12 @@ public class LaboTestBean extends AbstractChartDocument {
 
         // dataProvider
         tableModel.setDataProvider(dataProvider);
+        
+//masuda^   カラムにNLaboModuleを設定しておく
+        for (int i = 0; i < modules.size(); ++i) {
+            table.getColumnModel().getColumn(i + 1).setIdentifier(modules.get(i));
+        }
+//masuda$
     }
     
     // 印刷
@@ -382,7 +378,6 @@ public class LaboTestBean extends AbstractChartDocument {
                 if (e.isShiftDown()) {
                     contextMenu.add(new JMenuItem(deleteAction));
                 }
-                selectedRow = row;
                 selectedColumn = table.columnAtPoint(e.getPoint());
 //masuda$
                 contextMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -444,16 +439,16 @@ public class LaboTestBean extends AbstractChartDocument {
         
         try {
             // 選択中のデータを取得
-            LabTestRowObject rObj = tableModel.getDataProvider().get(selectedRow);
-            LabTestValueObject vObj = rObj.getLabTestValueObjectAt(selectedColumn - 1);
-            final long id = vObj.getId();
-            final String frmt = vObj.getReportFormat();
+            NLaboModule nlab = (NLaboModule) table.getColumnModel().getColumn(selectedColumn).getIdentifier();
+            
+            final long id = nlab.getId();
+            final String frmt = nlab.getReportFormat();
             if (id == 0 || frmt == null) {
                 return;
             }
             
             // 削除確認
-            String dateStr = vObj.getSampleDate();
+            String dateStr = nlab.getSampleDate();
             Toolkit.getDefaultToolkit().beep();
             String[] options = {"取消", "削除"};
             String msg = dateStr + "の検査データを削除しますか？";

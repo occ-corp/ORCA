@@ -16,25 +16,7 @@ public class LabTestValueObject {
 
     private String comment2;
     
-//masuda^
-    private long id;
-    private String reportFormat;
-    
-    public void setId(long id) {
-        this.id = id;
-    }
-    public long getId() {
-        return id;
-    }
-    
-    public void setReportFormat(String frmt) {
-        reportFormat = frmt;
-    }
-    public String getReportFormat() {
-        return reportFormat;
-    }
-//masuda$
-    
+
     /**
      * @return the value
      */
