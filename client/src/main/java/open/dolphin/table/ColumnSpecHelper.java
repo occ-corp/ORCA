@@ -11,6 +11,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TableColumnModelEvent;
 import javax.swing.event.TableColumnModelListener;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.TableColumn;
 import open.dolphin.project.Project;
 
@@ -155,6 +156,9 @@ public class ColumnSpecHelper {
             public void columnMoved(TableColumnModelEvent tcme) {
                 int from = tcme.getFromIndex();
                 int to = tcme.getToIndex();
+                if (from == to) {
+                    return;
+                }
                 ColumnSpec moved = columnSpecs.remove(from);
                 columnSpecs.add(to, moved);
             }
