@@ -131,6 +131,9 @@ public class HL7Falco implements LabResultParser {
                 curModule.setPatientSex(ret.sex);
                 curModule.setSampleDate(sampleDate);
                 allModules.add(curModule);
+//masuda^
+                curModule.setReportFormat(FALCO);
+//masuda$
                 currentKey = testKey;
             }
 

@@ -443,10 +443,11 @@ public class LaboTestBean extends AbstractChartDocument {
             
             final long id = nlab.getId();
             final String frmt = nlab.getReportFormat();
-            if (id == 0 || frmt == null) {
+//katoh^
+            if (id == 0) {// || frmt == null) {
                 return;
             }
-            
+//katoh$
             // 削除確認
             String dateStr = nlab.getSampleDate();
             Toolkit.getDefaultToolkit().beep();
