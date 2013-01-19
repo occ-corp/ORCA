@@ -82,7 +82,7 @@ public class RoutineMedUpdater extends AbstractUpdaterModule {
 
                 // msd_routinemed_modulelistテーブルを削除する
                 stmt = con.createStatement();
-                stmt.execute(sql3);
+                stmt.executeUpdate(sql3);
                 stmt.close();
                 updated = true;
             } catch (Exception ex) {
