@@ -34,10 +34,14 @@ public class RoutineMedModel implements Serializable, Comparable, Cloneable{
     private String memo;
     
     @JsonDeserialize(contentAs=ModuleModel.class)
-    @ElementCollection
-    @CollectionTable(name="msd_routineMed_moduleList")
-    @OneToMany(fetch=FetchType.LAZY)    // PostgresだとEAGERだめ。MySQLは大丈夫
+    //@ElementCollection
+    //@CollectionTable(name="msd_routineMed_moduleList")
+    //@OneToMany(fetch=FetchType.LAZY)    // PostgresだとEAGERだめ。MySQLは大丈夫
+    @Transient
     private List<ModuleModel> moduleList;
+    
+    // OneToManyだと重複を許してくれないので…　ダサいｗ
+    private String moduleIds;
     
     @JsonIgnore
     @Transient
@@ -70,6 +74,10 @@ public class RoutineMedModel implements Serializable, Comparable, Cloneable{
         return moduleList;
     }
     
+    public String getModuleIds() {
+        return moduleIds;
+    }
+    
     public void setId(long id) {
         this.id = id;
     }
@@ -92,6 +100,10 @@ public class RoutineMedModel implements Serializable, Comparable, Cloneable{
 
     public void setModuleList(List<ModuleModel> list) {
         moduleList = list;
+    }
+    
+    public void setModuleIds(String ids) {
+        moduleIds = ids;
     }
     
     // for display

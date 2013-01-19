@@ -67,6 +67,7 @@ public class MasudaServiceBean {
         // PostgresでFetchType.EAGERにすると
         // org.hibernate.HibernateException: cannot simultaneously fetch multiple bags
         // それゆえFetchType.LAZYにしたので… トホホ MySQLだとOKなんだよぅ
+        // トホホ２　OneToManyだと重複不可なんだよぅ
         for (RoutineMedModel model : list1) {
             fetchModuleModelList(model);
         }
@@ -82,6 +83,7 @@ public class MasudaServiceBean {
         return model;
     }
     
+/*
     private void fetchModuleModelList(RoutineMedModel model) {
 
         final String sql = "from ModuleModel m where m.id in (:ids)";
@@ -98,7 +100,30 @@ public class MasudaServiceBean {
                 .getResultList();
         model.setModuleList(mmList);
     }
+*/
+    private void fetchModuleModelList(RoutineMedModel model) {
 
+        final String sql = "from ModuleModel m where m.id in (:ids)";
+
+        String moduleIds = model.getModuleIds();
+        if (moduleIds == null || moduleIds.isEmpty()) {
+            return;
+        }
+        String[] ids = moduleIds.split(",");
+
+        List<Long> idList = new ArrayList<Long>();
+        for (String id : ids) {
+            idList.add(Long.valueOf(id));
+        }
+
+        @SuppressWarnings("unchecked")
+        List<ModuleModel> mmList =
+                em.createQuery(sql)
+                .setParameter("ids", idList)
+                .getResultList();
+        model.setModuleList(mmList);
+    }
+    
     public long removeRoutineMedModel(long id) {
         RoutineMedModel model = em.find(RoutineMedModel.class, id);
         if (model != null) {

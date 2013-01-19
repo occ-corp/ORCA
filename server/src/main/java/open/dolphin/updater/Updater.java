@@ -22,6 +22,7 @@ public class Updater {
         new DbSchemaUpdater(),  // Database Schemaを変更
         new LetterConverter(),  // Letterを新フォーマットに変換
         new PvtStateUpdater(),  // 今日の診察終了PvtStateを変換
+        new RoutineMedUpdater(),// RoutineMed修正
     };
 
     @PersistenceContext

@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.BorderLayout;
@@ -6,7 +5,6 @@ import java.awt.FlowLayout;
 import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.swing.*;
@@ -92,14 +90,26 @@ public class RoutineMedDialog {
         ModuleModel stamp1 = shList.get(0).getStamp();
         Date d = stamp1.getFirstConfirmed();
         long karteId = stamp1.getKarteBean().getId();
-        List<ModuleModel> mmList = new ArrayList<ModuleModel>();
+        
+        //List<ModuleModel> mmList = new ArrayList<ModuleModel>();
+        boolean first = true;
+        StringBuilder sb = new StringBuilder();
         for (StampHolder sh : shList) {
-            mmList.add(sh.getStamp());
+            //mmList.add(sh.getStamp());
+            if (!first) {
+                sb.append(",");
+            } else {
+                first = false;
+            }
+            sb.append(String.valueOf(sh.getStamp().getId()));
         }
+        String moduleIds = sb.toString();
+        
         final RoutineMedModel model = new RoutineMedModel();
         model.setRegistDate(d);
         model.setKarteId(karteId);
-        model.setModuleList(mmList);
+        //model.setModuleList(mmList);
+        model.setModuleIds(moduleIds);
         model.setMemo(memo);
         
         SwingWorker worker = new SwingWorker<Void, Void>() {
