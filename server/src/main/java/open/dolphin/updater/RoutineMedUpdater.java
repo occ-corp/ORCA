@@ -47,29 +47,34 @@ public class RoutineMedUpdater extends AbstractUpdaterModule {
             
             final String sql1 = "select RoutineMedModel_id, moduleList_id from msd_routinemed_modulelist";
             final String sql2 = "update msd_routinemed set moduleIds = ? where id = ?";
-            final String sql3 = "drop table msd_routinemed_modulelist";
+            final String sql3 = "delete from msd_routinemed where moduleIds is null";
+            final String sql4 = "drop table msd_routinemed_modulelist";
             
             Map<Long, String> map = new HashMap<Long, String>();
             
-            // ModuleModelのidリストを取得する
-            Statement stmt = con.createStatement();
-            ResultSet rs = stmt.executeQuery(sql1);
-            while (rs.next()) {
-                long routineMedId = rs.getLong(1);
-                long moduleId = rs.getLong(2);
-                String ids = map.get(routineMedId);
-                if (ids == null) {
-                    ids = String.valueOf(moduleId);
-                } else {
-                    ids += "," + String.valueOf(moduleId);
-                }
-                map.put(routineMedId, ids);
-            }
-            stmt.close();
-
+            Statement stmt = null;
+            PreparedStatement ps = null;
+            
             try {
+                // ModuleModelのidリストを取得する
+                stmt = con.createStatement();
+                ResultSet rs = stmt.executeQuery(sql1);
+                while (rs.next()) {
+                    long routineMedId = rs.getLong(1);
+                    long moduleId = rs.getLong(2);
+                    String ids = map.get(routineMedId);
+                    if (ids == null) {
+                        ids = String.valueOf(moduleId);
+                    } else {
+                        ids += "," + String.valueOf(moduleId);
+                    }
+                    map.put(routineMedId, ids);
+                }
+                rs.close();
+                stmt.close();
+
                 // msd_routinemedテーブルにidリストを記録する
-                PreparedStatement ps = con.prepareStatement(sql2);
+                ps = con.prepareStatement(sql2);
                 for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
                     Map.Entry entry = (Map.Entry) itr.next();
                     Long moduleId = (Long) entry.getKey();
@@ -79,14 +84,29 @@ public class RoutineMedUpdater extends AbstractUpdaterModule {
                     ps.executeUpdate();
                 }
                 ps.close();
-
-                // msd_routinemed_modulelistテーブルを削除する
+                
+                // ゾンビを削除
                 stmt = con.createStatement();
                 stmt.executeUpdate(sql3);
                 stmt.close();
+
+                // msd_routinemed_modulelistテーブルを削除する
+                stmt = con.createStatement();
+                stmt.executeUpdate(sql4);
+                stmt.close();
                 updated = true;
             } catch (Exception ex) {
+                System.err.println(ex);
                 updated = false;
+            } finally {
+                try {
+                    stmt.close();
+                } catch (Exception ex) {
+                }
+                try {
+                    ps.close();
+                } catch (Exception ex) {
+                }
             }
         }
     }

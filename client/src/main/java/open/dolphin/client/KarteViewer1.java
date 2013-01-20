@@ -32,6 +32,11 @@ public class KarteViewer1 extends KarteViewer {
 
         setKartePanel(kartePanel);
         setUI(kartePanel);
+        
+        // DocumentModelのstatusをKartePaneに保存しておく
+        // KarteViewerのpopup制御に利用
+        String status = getModel().getDocInfoModel().getStatus();
+        soaPane.setDocStatus(status);
     }
 
     /**

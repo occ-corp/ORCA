@@ -17,7 +17,6 @@ import open.dolphin.infomodel.DocumentModel;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.letter.KartePDFMaker;
 import open.dolphin.project.Project;
-//import open.dolphin.util.LapTimer;
 import open.dolphin.util.MultiTaskExecutor;
 import org.apache.log4j.Logger;
 

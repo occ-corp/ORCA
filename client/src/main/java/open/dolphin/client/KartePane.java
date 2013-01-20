@@ -103,6 +103,15 @@ public class KartePane implements DocumentListener, MouseListener,
     //private ComponentHolder[] drragedStamp;
     //private int draggedCount;
     //private int droppedCount;
+    
+    // DocumentModelのステータス, KarteViewerのポップアップ制御で利用
+    private String docStatus;
+    public String getDocStatus() {
+        return docStatus;
+    }
+    public void setDocStatus(String status) {
+        docStatus = status;
+    }
 //masuda$
     private Logger logger;
 

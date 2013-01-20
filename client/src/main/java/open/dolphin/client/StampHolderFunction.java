@@ -214,8 +214,8 @@ public class StampHolderFunction {
             }
         }
 
-        // KarteViewerのみ個人薬歴登録
-        if (kartePane.getParent() == null && isAllMedicine()) {
+        // KarteViewer、status finalのみ個人薬歴登録
+        if (IInfoModel.STATUS_FINAL.equals(kartePane.getDocStatus()) && isAllMedicine()) {
             // RoutineMed
             JMenuItem item = new JMenuItem(registRoutineMedAction);
             popup.add(item);
