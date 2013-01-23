@@ -1,9 +1,7 @@
 package open.dolphin.updater;
 
 import java.sql.*;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 import open.dolphin.infomodel.MsdUpdaterModel;
 import org.hibernate.Session;
 
@@ -56,6 +54,12 @@ public class RoutineMedUpdater extends AbstractUpdaterModule {
             PreparedStatement ps = null;
             
             try {
+                List<String> tblList = getTableList(con);
+                if (!tblList.contains("msd_routinemed_modulelist")) {
+                    updated = false;
+                    return;
+                }
+                
                 // ModuleModelのidリストを取得する
                 stmt = con.createStatement();
                 ResultSet rs = stmt.executeQuery(sql1);
@@ -108,6 +112,31 @@ public class RoutineMedUpdater extends AbstractUpdaterModule {
                 } catch (Exception ex) {
                 }
             }
+        }
+
+        private List<String> getTableList(Connection connection) throws SQLException {
+
+            List<String> result = new ArrayList<String>();
+            ResultSet rs = null;
+            try {
+                final String[] types = {"TABLE"};
+                DatabaseMetaData dbm = connection.getMetaData();
+                rs = dbm.getTables(null, null, null, types);
+                while (rs.next()) {
+                    String tblName = rs.getString("TABLE_NAME").toLowerCase();
+                    result.add(tblName);
+                }
+            } catch (SQLException e) {
+                throw e;
+            } finally {
+                if (rs != null) {
+                    try {
+                        rs.close();
+                    } catch (SQLException e) {
+                    }
+                }
+            }
+            return result;
         }
     }
 }
