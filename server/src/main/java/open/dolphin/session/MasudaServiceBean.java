@@ -399,7 +399,7 @@ public class MasudaServiceBean {
         final FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
         
         final Analyzer analyzer = fullTextEntityManager.getSearchFactory().getAnalyzer(DocumentModel.class);
-        final org.apache.lucene.util.Version ver = org.apache.lucene.util.Version.LUCENE_34;
+        final org.apache.lucene.util.Version ver = org.apache.lucene.util.Version.LUCENE_36;
         QueryParser parser =
                 new QueryParser(ver, "modules.beanBytes", analyzer);
         // http://lucene.jugem.jp/?eid=403
