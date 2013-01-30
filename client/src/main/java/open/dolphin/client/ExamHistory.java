@@ -60,7 +60,7 @@ public class ExamHistory {
         connect();
         
         // 初期化時に一度は取得しに行く
-        updateHistory();
+        //updateHistory();
     }
 
     /**

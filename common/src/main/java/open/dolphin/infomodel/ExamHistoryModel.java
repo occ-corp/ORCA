@@ -9,6 +9,9 @@ import java.util.Date;
  * @author masuda, Masuda Naika
  */
 public class ExamHistoryModel {
+    
+    private static final String CODE_PHYSIOLOGY = "16";
+    private static final String CODE_RADIOLOGY = "17";
 
     private long docPk;
     private Date examDate;
@@ -36,6 +39,10 @@ public class ExamHistoryModel {
     private boolean psg = false;
     @JsonIgnore
     private boolean fiber = false;
+    @JsonIgnore
+    private boolean ct = false;
+    @JsonIgnore
+    private boolean mri = false;
     
     public ExamHistoryModel() {
     }
@@ -74,11 +81,15 @@ public class ExamHistoryModel {
         if (examDate == null) {
             examDate = mm.getStarted();
         }
-
         docPk = mm.getDocumentModel().getId();
+        
         if (IInfoModel.ENTITY_PHYSIOLOGY_ORDER.equals(entity)) {
             ClaimBundle cb = (ClaimBundle) mm.getModel();
             for (ClaimItem ci : cb.getClaimItem()) {
+                String srycd = ci.getCode();
+                if (!srycd.startsWith(CODE_PHYSIOLOGY)) {
+                    continue;
+                }
                 String name = ci.getName();
                 if (!ecg
                         && name.contains("ＥＣＧ")) {
@@ -129,12 +140,29 @@ public class ExamHistoryModel {
                 }
             }
         } else if (IInfoModel.ENTITY_RADIOLOGY_ORDER.equals(entity)) {
-            xp = true;
+            ClaimBundle cb = (ClaimBundle) mm.getModel();
+            for (ClaimItem ci : cb.getClaimItem()) {
+                String srycd = ci.getCode();
+                if (!srycd.startsWith(CODE_RADIOLOGY)) {
+                    continue;
+                }
+                String name = ci.getName();
+                if (!ct && name.startsWith("ＣＴ")) {
+                    ct = true;
+                } else if (!mri && name.startsWith("ＭＲＩ")) {
+                    mri = true;
+                } else {
+                    xp = true;
+                }
+            }
         }
 
-        boolean ret = ecg || us || ucg || labo || xp || holter || abpm || pwv || hyozai || psg || fiber;
-        setTitle();
-
+        boolean ret = ecg || us || ucg || labo || xp || holter || abpm 
+                || pwv || hyozai || psg || fiber || ct || mri;
+        if (ret) {
+            setTitle();
+        }
+        
         return ret;
     }
 
@@ -172,6 +200,12 @@ public class ExamHistoryModel {
         }
         if (fiber) {
             sb.append("EF・");
+        }
+        if (ct) {
+            sb.append("CT・");
+        }
+        if (mri) {
+            sb.append("MRI・");
         }
         String str = sb.toString();
         // 最後の「・」を削る

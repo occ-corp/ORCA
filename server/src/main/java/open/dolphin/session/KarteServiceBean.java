@@ -195,7 +195,8 @@ public class KarteServiceBean {
                 }
                 karte.setWeights(physicals);
             }
-
+//masuda^   使わない
+/*
             // 直近の来院日エントリーを取得しカルテに設定する
             @SuppressWarnings("unchecked")
             List<PatientVisitModel> latestVisits = 
@@ -213,6 +214,7 @@ public class KarteServiceBean {
                 karte.setPatientVisits(visits);
             }
 
+//masuda    後で取得する
             // 文書履歴エントリーを取得しカルテに設定する
             @SuppressWarnings("unchecked")
             List<DocumentModel> documents = 
@@ -229,7 +231,8 @@ public class KarteServiceBean {
                 }
                 karte.setDocInfoList(c);
             }
-
+*/
+//masuda$
             // 患者Memoを取得する
             @SuppressWarnings("unchecked")
             List<PatientMemoModel> memo = 

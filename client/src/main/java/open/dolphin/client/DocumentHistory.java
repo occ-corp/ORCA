@@ -9,7 +9,10 @@ import java.awt.event.*;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
@@ -88,8 +91,6 @@ public class DocumentHistory {
     // 修正版も表示するかどうかのフラグ
     private boolean showModified;
     
-    // フラグ
-    private boolean start;
     private NameValuePair[] contentObject;
     //private NameValuePair[] extractionObjects;
     private ExtractionPeriod[] extractionObjects;
@@ -119,9 +120,6 @@ public class DocumentHistory {
     public int getAutoFetchCount() {
         return defaultAutoFetchCount;
     }
-
-    // デフォルトのextractionPeriodから変更されたかどうか
-    private boolean extractionIndexUpdated;
     
     // 定数類
     private static final String ALL = "ALL";
@@ -165,6 +163,20 @@ public class DocumentHistory {
         ALL, PUBLIC, SELF
     }
     private List<DocInfoModel> docInfoList;
+    
+    // extractionComboイベントブロックフラグ
+    private boolean blockExtractionPeriodEvent;
+    
+    // ChartImplからKarteBean取得後に呼ばれる
+    public void setExtractionPeriodComboIndex(int index) {
+        extractionCombo.setSelectedIndex(index);
+        extractionPeriod = extractionObjects[index];
+        // 束縛プロパティの通知を行う
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(HISTORY_UPDATED, false, true);
+        }
+        blockExtractionPeriodEvent = false;
+    }
 //masuda$
     
 //pns^  全部のカルテを選択する command-A を押すと，KarteDocumentViewer の selectAll が呼ばれて，そこからここが呼ばれる
@@ -192,7 +204,7 @@ public class DocumentHistory {
         this.context = context;
         initComponent();
         connect();
-        start = true;
+        blockExtractionPeriodEvent = true;
     }
 
     /**
@@ -278,13 +290,7 @@ public class DocumentHistory {
      * 文書履歴を Karte から取得し表示する。
      */
     public void showHistory() {
-//masuda^
-        if (extractionIndexUpdated) {
-            getDocumentHistory();
-            extractionIndexUpdated = false;
-            return;
-        }
-//masuda$        
+       
         //List<DocInfoModel> list = (List<DocInfoModel>)context.getKarte().getEntryCollection("docInfo");
         List<DocInfoModel> list = context.getKarte().getDocInfoList();
         updateHistory(list);
@@ -298,7 +304,7 @@ public class DocumentHistory {
      */
     public void getDocumentHistory() {
 
-        if (start && extractionPeriod != null && extractionComposite != null) {
+        if (extractionPeriod != null && extractionComposite != null) {
             
             String docType = getExtractionDocType();
 
@@ -504,9 +510,9 @@ public class DocumentHistory {
      * 抽出期間を変更し再検索する。
      */
     public void periodChanged(int state) {
-        if (state == ItemEvent.SELECTED) {
+//masuda^         
+        if (!blockExtractionPeriodEvent && state == ItemEvent.SELECTED) {
             int index = extractionCombo.getSelectedIndex();
-//masuda^       
             ExtractionPeriod period = extractionObjects[index];
             setExtractionPeriod(period);
 //masuda$
@@ -808,33 +814,12 @@ public class DocumentHistory {
         // 文書種別変更
         contentCombo.addItemListener(EventHandler.create(ItemListener.class, this, "contentChanged", "stateChange"));
 
-//masuda^   後ろに移動
         // 抽出期間コンボボックスの選択を処理する
-        //extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
-//masuda$
+        extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
+
         // Preference から文書種別を設定する
         extractionComposite = KARTE + CAMMA + ALL;
         
-//masuda^   最終文書歴に合わせてExtraction Periodを設定する
-        // Preference から抽出期間を設定する
-        int past = Project.getInt(Project.DOC_HISTORY_PERIOD, -12);
-        int index = ExtractionPeriod.getFromDateIndex(past, extractionObjects);
-
-        Date lastVisit = context.getKarte().getLastDocDate();
-        if (lastVisit != null) {
-            int index2 = ExtractionPeriod.getAppropriateIndex(lastVisit, extractionObjects);
-            if (index2 > index) {
-                extractionIndexUpdated = true;
-                index = index2;
-            }
-        }
-        extractionCombo.setSelectedIndex(index);
-        setExtractionPeriod(extractionObjects[index]);
-        
-        // 抽出期間コンボボックスの選択を処理する
-        extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
-//masuda$
-
         // Preference から自動文書取得数を設定する
         autoFetchCount = Project.getInt(Project.DOC_HISTORY_FETCHCOUNT, 1);
 //masuda^   autoFetchCountを保存しておく

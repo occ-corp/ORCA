@@ -19,6 +19,7 @@ import javax.swing.event.ListSelectionListener;
 import net.sf.jooreports.templates.DocumentTemplate;
 import net.sf.jooreports.templates.DocumentTemplateFactory;
 import open.dolphin.delegater.DocumentDelegater;
+import open.dolphin.dto.DocumentSearchSpec;
 import open.dolphin.helper.*;
 import open.dolphin.infomodel.*;
 import open.dolphin.plugin.PluginLister;
@@ -287,8 +288,12 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
     @Override
     public void start() {
+        
+        
 
         final SimpleWorker worker = new SimpleWorker<KarteBean, Void>() {
+            
+            private int periodComboIndex;
 
             @Override
             protected KarteBean doInBackground() throws Exception {
@@ -304,11 +309,35 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 today.clear(Calendar.MINUTE);
                 today.clear(Calendar.SECOND);
                 today.clear(Calendar.MILLISECOND);
-//masuda^   シングルトン化
-                //DocumentDelegater ddl = new DocumentDelegater();
+                
+//masuda^       // KarteBeanを取得
                 DocumentDelegater ddl = DocumentDelegater.getInstance();
-//masuda$
-                KarteBean karteBean = ddl.getKarte(getPatientVisit().getPatientModel().getId(), today.getTime());
+                long patientId = getPatientVisit().getPatientModel().getId();
+                KarteBean karteBean = ddl.getKarte(patientId, today.getTime());
+ 
+                // 最終文書歴に合わせてExtraction Periodを設定する
+                Date lastDocDate = karteBean.getLastDocDate();
+                periodComboIndex = ExtractionPeriod.getFromDateIndex(past, DocumentHistory.EXTRACTION_OBJECTS);
+                if (lastDocDate != null) {
+                    int index = ExtractionPeriod.getAppropriateIndex(lastDocDate, DocumentHistory.EXTRACTION_OBJECTS);
+                    if (index > periodComboIndex) {
+                        periodComboIndex = index;
+                    }
+                }
+                ExtractionPeriod period = DocumentHistory.EXTRACTION_OBJECTS[periodComboIndex];
+                
+                // DocInfoModelは別に取得する
+                DocumentSearchSpec spec = new DocumentSearchSpec();
+                spec.setKarteId(karteBean.getId());                 // カルテID
+                spec.setDocType(IInfoModel.DOCTYPE_KARTE);          // 文書タイプ
+                spec.setFromDate(period.getFromDate());             // 抽出期間開始
+                spec.setToDate(period.getToDate());
+                spec.setIncludeModifid(false);                      // 修正履歴
+                spec.setCode(DocumentSearchSpec.DOCTYPE_SEARCH);    // 検索タイプ
+                spec.setAscending(false);
+                List<DocInfoModel> docList = ddl.getDocumentList(spec);
+                karteBean.setDocInfoList(docList);
+//masuda$                
                 return karteBean;
             }
 
@@ -328,6 +357,9 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                     @Override
                     public void run() {
                         getDocumentHistory().showHistory();
+//masuda^   抽出期間コンボ設定・ブロック解除
+                        getDocumentHistory().setExtractionPeriodComboIndex(periodComboIndex);
+//masuda$
                     }
                 });
             }
