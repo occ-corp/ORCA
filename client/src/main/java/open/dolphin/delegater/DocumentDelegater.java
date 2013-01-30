@@ -8,7 +8,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.concurrent.ExecutionException;
 import javax.swing.ImageIcon;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ImageEntry;
@@ -142,10 +141,8 @@ public class  DocumentDelegater extends BusinessDelegater {
         // タスクリストを実行する
         MultiTaskExecutor exec = new MultiTaskExecutor(taskList);
         try {
-            exec.executeWaitCompletion();
+            exec.execute();
         } catch (InterruptedException ex) {
-            logger.debug(ex);
-        } catch (ExecutionException ex) {
             logger.debug(ex);
         }
         
