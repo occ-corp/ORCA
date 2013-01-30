@@ -51,6 +51,16 @@ public class MultiTaskExecutor<T> {
         List<Future<T>> futures = exec.invokeAll(taskList);
         return futures;
     }
+    
+    public void executeWaitCompletion() throws InterruptedException, ExecutionException {
+        
+        List<Future<T>> futures = execute();
+        if (futures != null) {
+            for (Future<T> future : futures) {
+                future.get();
+            }
+        }
+    }
 
     public void dispose() {
         try {
