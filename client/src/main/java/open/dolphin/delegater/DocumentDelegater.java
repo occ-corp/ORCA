@@ -3,6 +3,7 @@ package open.dolphin.delegater;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -119,9 +120,10 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-
-        debug(status, entityStr);
+        //String entityStr = response.getEntity(String.class);
+        InputStream is = response.getEntityInputStream();
+        
+        //debug(status, entityStr);
 
         if (status != HTTP200) {
             return null;
@@ -129,7 +131,8 @@ public class  DocumentDelegater extends BusinessDelegater {
         
         TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
         List<DocumentModel> list = (List<DocumentModel>)
-                getConverter().fromJson(entityStr, typeRef);
+                //getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         // マルチスレッド化
         // タスクリストを準備する

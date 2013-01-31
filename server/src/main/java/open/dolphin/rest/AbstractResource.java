@@ -1,9 +1,13 @@
 package open.dolphin.rest;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.JsonConverter;
 
@@ -53,9 +57,19 @@ public class AbstractResource {
         sb.append(pid);
         return sb.toString();
     }
+    
+    protected StreamingOutput getStreamingOutput(final Object obj) {
+        StreamingOutput so = new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream os) throws IOException, WebApplicationException {
+                getConverter().writeToStream(os, obj);
+            }
+        };
+        return so;
+    }
 
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
     }
-
 }

@@ -11,6 +11,8 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.*;
 
 /**
@@ -62,6 +64,20 @@ public class JsonConverter {
         }
         return null;
     }
+
+    public void writeToStream(OutputStream os, Object obj) {
+        try {
+            objectMapper.writeValue(os, obj);
+        } catch (JsonGenerationException ex) {
+            processException(ex);
+        } catch (JsonMappingException ex) {
+            processException(ex);
+        } catch (IOException ex) {
+            processException(ex);
+        } catch (Exception ex) {
+            processException(ex);
+        }
+    }
     
     public Object fromJson(String json, Class clazz) {
         try {
@@ -96,6 +112,22 @@ public class JsonConverter {
         return null;
     }
     
+    public Object fromJson(InputStream is, TypeReference typeRef) {
+        try {
+            //debug(json);
+            return objectMapper.readValue(is, typeRef);
+        } catch (JsonParseException ex) {
+            processException(ex);
+        } catch (JsonMappingException ex) {
+            processException(ex);
+        } catch (IOException ex) {
+            processException(ex);
+        } catch (Exception ex) {
+            processException(ex);
+        }
+        return null;
+    }
+
     private void processException(Exception ex) {
         ex.printStackTrace(System.err);
     }

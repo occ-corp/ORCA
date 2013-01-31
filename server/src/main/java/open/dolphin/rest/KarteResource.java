@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.*;
 import open.dolphin.session.KarteServiceBean;
 
@@ -65,7 +66,7 @@ public class KarteResource extends AbstractResource {
         return json;
     }
 //katoh$
-
+/*
     @GET
     @Path("document")
     @Produces(MEDIATYPE_JSON_UTF8)
@@ -80,7 +81,20 @@ public class KarteResource extends AbstractResource {
         
         return json;
     }
+*/
+    @GET
+    @Path("document")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public StreamingOutput getDocuments(@QueryParam("ids") String ids) {
 
+        List<Long> list = getConverter().toLongList(ids);
+
+        final List<DocumentModel> result = karteServiceBean.getDocuments(list);
+
+        StreamingOutput so = getStreamingOutput(result);
+
+        return so;
+    }
 
     @POST
     @Path("document")
