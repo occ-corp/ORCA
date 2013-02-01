@@ -62,6 +62,9 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     private List<KarteViewer> viewerList;
     
     private Logger logger;
+    
+    // CompletionServce
+    private MultiTaskExecutor exec;
 
 //pns^ 表示されているカルテの中身を検索する modified by masuda
     private FindAndView findAndView = new FindAndView();
@@ -179,6 +182,13 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         karteViewerMap = null;
         viewerList.clear();
         viewerList = null;
+        
+        // CompletionServceを片づけ
+        try {
+            exec.dispose();
+            exec = null;
+        } catch (Exception ex) {
+        }
 
         // ScrollerPanelの後片付け
         scrollerPanel.dispose();
@@ -786,7 +796,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             DocumentDelegater ddl = DocumentDelegater.getInstance();
             
             // CompletionServceを使ってみる
-            MultiTaskExecutor exec = new MultiTaskExecutor();
+            exec = new MultiTaskExecutor();
             exec.setupCompletionSerivce();
             
             int fromIndex = 0;
@@ -824,6 +834,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             }
             // 後片付け
             exec.dispose();
+            exec = null;
 
             logger.debug("doInBackground noErr, return result");
             
