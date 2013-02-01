@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.*;
 import open.dolphin.session.KarteServiceBean;
@@ -91,7 +92,7 @@ public class KarteResource extends AbstractResource {
 
         final List<DocumentModel> result = karteServiceBean.getDocuments(list);
 
-        StreamingOutput so = getStreamingOutput(result);
+        StreamingOutput so = getJsonOutStream(result);
 
         return so;
     }

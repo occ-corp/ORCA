@@ -48,6 +48,8 @@ public class JsonConverter {
         return instance;
     }
     
+    
+    // Object to JSON
     public String toJson(Object obj) {
         try {
             String json =objectMapper.writeValueAsString(obj);
@@ -65,7 +67,7 @@ public class JsonConverter {
         return null;
     }
 
-    public void writeToStream(OutputStream os, Object obj) {
+    public void toJson(Object obj, OutputStream os) {
         try {
             objectMapper.writeValue(os, obj);
         } catch (JsonGenerationException ex) {
@@ -79,6 +81,8 @@ public class JsonConverter {
         }
     }
     
+    
+    // JSON to Object
     public Object fromJson(String json, Class clazz) {
         try {
             debug(json);
@@ -112,9 +116,24 @@ public class JsonConverter {
         return null;
     }
     
+    // JSON InputStream to Object
+    public Object fromJson(InputStream is, Class clazz) {
+        try {
+            return objectMapper.readValue(is, clazz);
+        } catch (JsonParseException ex) {
+            processException(ex);
+        } catch (JsonMappingException ex) {
+            processException(ex);
+        } catch (IOException ex) {
+            processException(ex);
+        } catch (Exception ex) {
+            processException(ex);
+        }
+        return null;
+    }
+    
     public Object fromJson(InputStream is, TypeReference typeRef) {
         try {
-            //debug(json);
             return objectMapper.readValue(is, typeRef);
         } catch (JsonParseException ex) {
             processException(ex);

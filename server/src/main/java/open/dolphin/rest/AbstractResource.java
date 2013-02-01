@@ -58,17 +58,17 @@ public class AbstractResource {
         return sb.toString();
     }
     
-    protected StreamingOutput getStreamingOutput(final Object obj) {
+    protected StreamingOutput getJsonOutStream(final Object obj) {
         StreamingOutput so = new StreamingOutput() {
 
             @Override
             public void write(OutputStream os) throws IOException, WebApplicationException {
-                getConverter().writeToStream(os, obj);
+                getConverter().toJson(obj, os);
             }
         };
         return so;
     }
-
+    
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
     }
