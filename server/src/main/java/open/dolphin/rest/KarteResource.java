@@ -86,7 +86,7 @@ public class KarteResource extends AbstractResource {
     @GET
     @Path("document")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public StreamingOutput getDocuments(@QueryParam("ids") String ids) {
+    public Response getDocuments(@QueryParam("ids") String ids) {
 
         List<Long> list = getConverter().toLongList(ids);
 
@@ -94,7 +94,7 @@ public class KarteResource extends AbstractResource {
 
         StreamingOutput so = getJsonOutStream(result);
 
-        return so;
+        return Response.ok(so).build();
     }
 
     @POST

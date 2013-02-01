@@ -9,6 +9,7 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import javax.swing.ImageIcon;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ImageEntry;
@@ -134,16 +135,17 @@ public class  DocumentDelegater extends BusinessDelegater {
                 //getConverter().fromJson(entityStr, typeRef);
                 getConverter().fromJson(is, typeRef);
 
-        // マルチスレッド化
-        // タスクリストを準備する
-        List<Callable<Void>> taskList = new ArrayList<Callable<Void>>();
+        // マルチスレッド化　ここもCompletionService使っちゃう！
+        CompletionService service = DocTaskExecutor.getInstance().createCompletionService();
         for (DocumentModel docModel : list) {
             Callable<Void> task = new DocModelDecodeTask(docModel);
-            taskList.add(task);
+            service.submit(task);
         }
-        // タスクリストを実行する
+        // タスク終了を待つ
         try {
-            DocTaskExecutor.getInstance().execute(taskList);
+            for (int i = 0; i < list.size(); ++i) {
+                service.take();
+            }
         } catch (InterruptedException ex) {
             logger.debug(ex);
         }
