@@ -801,6 +801,9 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         public KarteTask(Chart ctx, List<Long> docIdList) {
             super(ctx);
             this.docIdList = docIdList;
+            // CompletionServceを使ってみる
+            exec = new MultiTaskExecutor();
+            exec.setupCompletionSerivce();
         }
 
         @Override
@@ -812,11 +815,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             logger.debug("KarteTask doInBackground");
             
             DocumentDelegater ddl = DocumentDelegater.getInstance();
-            
-            // CompletionServceを使ってみる
-            exec = new MultiTaskExecutor();
-            exec.setupCompletionSerivce();
-            
+
             int fromIndex = 0;
             int idListSize = docIdList.size();
             boolean ret = false;
@@ -850,9 +849,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                     logger.debug(ex);
                 }
             }
-            // 後片付け
-            exec.dispose();
-            exec = null;
 
             logger.debug("doInBackground noErr, return result");
             
@@ -864,10 +860,21 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         @Override
         protected void succeeded(Boolean success) {
             logger.debug("KarteTask succeeded");
+            // 後片付け
+            exec.dispose();
+            exec = null;
             if (success) {
                 // KarteViewersを表示する
                 showKarteViewers();
             }
+        }
+
+        @Override
+        protected void failed(Throwable e) {
+            logger.debug(e.getMessage());
+            // 後片付け
+            exec.dispose();
+            exec = null;
         }
     }
 
