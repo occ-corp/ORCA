@@ -663,6 +663,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
      *
      * @param models KarteModel
      */
+/*
     private void addKarteViewer(List<DocumentModel> models) {
 
         if (models == null) {
@@ -702,6 +703,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
 
         //timer.stop("KarteRendering");
     }
+*/
     
     private class MakeViewerTask implements Callable {
 
@@ -763,9 +765,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     /**
      * 文書をデータベースから取得するタスククラス。
      */
-    private final class KarteTask extends DBTask<List<DocumentModel>, Void> {
+    private final class KarteTask extends DBTask<Boolean, Void> {
 
         private List<Long> docIdList;
+        private static final int fetchSize = 200;
 
         public KarteTask(Chart ctx, List<Long> docIdList) {
             super(ctx);
@@ -773,31 +776,66 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         }
 
         @Override
-        protected List<DocumentModel> doInBackground() {
+        protected Boolean doInBackground() {
             
             //LapTimer timer = new LapTimer();
             //timer.start();
             
             logger.debug("KarteTask doInBackground");
+            
             DocumentDelegater ddl = DocumentDelegater.getInstance();
-            List<DocumentModel> result = ddl.getDocuments(docIdList);
+            
+            // CompletionServceを使ってみる
+            MultiTaskExecutor exec = new MultiTaskExecutor();
+            exec.setupCompletionSerivce();
+            
+            int fromIndex = 0;
+            int idListSize = docIdList.size();
+            boolean ret = false;
+            
+            // 分割してサーバーから取得する
+            while (fromIndex < idListSize) {
+                int toIndex = Math.min(fromIndex + fetchSize, idListSize);
+                List<Long> ids = docIdList.subList(fromIndex, toIndex);
+                List<DocumentModel> result = ddl.getDocuments(ids);
+                if (result != null && !result.isEmpty()) {
+                    for (DocumentModel model : result) {
+                        // Executorに登録していく
+                        MakeViewerTask task = new MakeViewerTask(model);
+                        exec.submitToCompletionService(task);
+                    }
+                    //addKarteViewer(result);
+                    ret = true;
+                }
+                fromIndex += fetchSize;
+            }
+            
+            // 出来上がったものからkarteViewerMapに登録していく
+            for (int i = 0; i < idListSize; ++i) {
+                try {
+                    Future<KarteViewer> future = exec.takeFuture();
+                    KarteViewer viewer = future.get();
+                    karteViewerMap.put(viewer.getModel().getId(), viewer);
+                } catch (ExecutionException ex) {
+                    logger.debug(ex);
+                } catch (InterruptedException ex) {
+                    logger.debug(ex);
+                }
+            }
+            // 後片付け
+            exec.dispose();
+
             logger.debug("doInBackground noErr, return result");
             
             //timer.stop("Database access");
-            
-            if (result != null && !result.isEmpty()) {
-                // KarteViewerを追加
-                addKarteViewer(result);
-            }
-            return result;
+
+            return ret;
         }
 
         @Override
-        protected void succeeded(List<DocumentModel> result) {
+        protected void succeeded(Boolean success) {
             logger.debug("KarteTask succeeded");
-            if (result != null && !result.isEmpty()) {
-                // KarteViewerを追加
-                //addKarteViewer(result);
+            if (success) {
                 // KarteViewersを表示する
                 showKarteViewers();
             }

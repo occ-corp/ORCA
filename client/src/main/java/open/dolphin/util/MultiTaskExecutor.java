@@ -18,6 +18,7 @@ public class MultiTaskExecutor<T> {
     
     private ExecutorService exec;
     private List<Callable<T>> taskList;
+    private CompletionService completionService;
 
     public MultiTaskExecutor() {
     }
@@ -62,7 +63,25 @@ public class MultiTaskExecutor<T> {
             exec.shutdownNow();
         } catch (NullPointerException ex) {
         }
+        completionService = null;
         exec = null;
         taskList = null;
+    }
+
+    // CompletionService
+    public void setupCompletionSerivce() {
+        
+        if (exec == null) {
+            exec = Executors.newFixedThreadPool(numOfThreads);
+        }
+        completionService = new ExecutorCompletionService<T>(exec);
+    }
+
+    public void submitToCompletionService(Callable<T> task) {
+        completionService.submit(task);
+    }
+
+    public Future<T> takeFuture() throws InterruptedException {
+        return completionService.take();
     }
 }
