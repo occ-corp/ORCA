@@ -17,7 +17,7 @@ import open.dolphin.dto.ImageSearchSpec;
 import open.dolphin.dto.ModuleSearchSpec;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
-import open.dolphin.util.MultiTaskExecutor;
+import open.dolphin.util.DocTaskExecutor;
 
 /**
  * Session と Document の送受信を行う Delegater クラス。
@@ -142,15 +142,11 @@ public class  DocumentDelegater extends BusinessDelegater {
             taskList.add(task);
         }
         // タスクリストを実行する
-        MultiTaskExecutor exec = new MultiTaskExecutor(taskList);
         try {
-            exec.execute();
+            DocTaskExecutor.getInstance().execute(taskList);
         } catch (InterruptedException ex) {
             logger.debug(ex);
         }
-        
-        //後片付け
-        exec.dispose();
         
         return list;
     }

@@ -7,6 +7,7 @@ import java.awt.Rectangle;
 import java.awt.event.*;
 import java.util.*;
 import java.util.concurrent.Callable;
+import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import javax.swing.*;
@@ -17,7 +18,7 @@ import open.dolphin.infomodel.DocumentModel;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.letter.KartePDFMaker;
 import open.dolphin.project.Project;
-import open.dolphin.util.MultiTaskExecutor;
+import open.dolphin.util.DocTaskExecutor;
 import org.apache.log4j.Logger;
 
 /**
@@ -62,9 +63,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     private List<KarteViewer> viewerList;
     
     private Logger logger;
-    
-    // CompletionServce
-    private MultiTaskExecutor exec;
     
     // Common MouseListener
     private MouseListener mouseListener;
@@ -212,13 +210,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         karteViewerMap = null;
         viewerList.clear();
         viewerList = null;
-        
-        // CompletionServceを片づけ
-        try {
-            exec.dispose();
-            exec = null;
-        } catch (Exception ex) {
-        }
 
         // ScrollerPanelの後片付け
         scrollerPanel.dispose();
@@ -794,16 +785,17 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
      * 文書をデータベースから取得するタスククラス。
      */
     private final class KarteTask extends DBTask<Boolean, Void> {
-
-        private List<Long> docIdList;
+        
         private static final int fetchSize = 200;
+        private List<Long> docIdList;
+        private CompletionService service;
+        
 
         public KarteTask(Chart ctx, List<Long> docIdList) {
             super(ctx);
             this.docIdList = docIdList;
             // CompletionServceを使ってみる
-            exec = new MultiTaskExecutor();
-            exec.setupCompletionSerivce();
+            service = DocTaskExecutor.getInstance().createCompletionService();
         }
 
         @Override
@@ -829,7 +821,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                     for (DocumentModel model : result) {
                         // Executorに登録していく
                         MakeViewerTask task = new MakeViewerTask(model);
-                        exec.submitToCompletionService(task);
+                        service.submit(task);
                     }
                     //addKarteViewer(result);
                     ret = true;
@@ -840,7 +832,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             // 出来上がったものからkarteViewerMapに登録していく
             for (int i = 0; i < idListSize; ++i) {
                 try {
-                    Future<KarteViewer> future = exec.takeFuture();
+                    Future<KarteViewer> future = service.take();
                     KarteViewer viewer = future.get();
                     karteViewerMap.put(viewer.getModel().getId(), viewer);
                 } catch (ExecutionException ex) {
@@ -860,21 +852,17 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         @Override
         protected void succeeded(Boolean success) {
             logger.debug("KarteTask succeeded");
-            // 後片付け
-            exec.dispose();
-            exec = null;
             if (success) {
                 // KarteViewersを表示する
                 showKarteViewers();
             }
+            service = null;
         }
 
         @Override
         protected void failed(Throwable e) {
             logger.debug(e.getMessage());
-            // 後片付け
-            exec.dispose();
-            exec = null;
+            service = null;
         }
     }
 
