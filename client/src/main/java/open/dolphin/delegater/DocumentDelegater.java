@@ -150,6 +150,8 @@ public class  DocumentDelegater extends BusinessDelegater {
             logger.debug(ex);
         }
         
+        service = null;
+        
         return list;
     }
    
