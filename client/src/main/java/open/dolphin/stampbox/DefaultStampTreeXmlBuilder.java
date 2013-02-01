@@ -6,6 +6,7 @@ import java.io.StringWriter;
 import java.util.LinkedList;
 import open.dolphin.client.ClientContext;
 import open.dolphin.infomodel.ModuleInfoBean;
+import open.dolphin.util.XmlUtils;
 import org.apache.log4j.Level;
 
 
@@ -15,10 +16,6 @@ import org.apache.log4j.Level;
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
 public class DefaultStampTreeXmlBuilder {
-    
-    private static final String[] MATCHES = new String[] { "<", ">", "&", "'","\""};
-    
-    private static final String[] REPLACES = new String[] { "&lt;", "&gt;", "&amp;" ,"&apos;", "&quot;"};
     
     /** Control staffs */
     private LinkedList<StampTreeNode> linkedList;
@@ -203,9 +200,6 @@ public class DefaultStampTreeXmlBuilder {
      * 特殊文字を変換する。
      */
     private String toXmlText(String text) {
-        for (int i = 0; i < REPLACES.length; i++) {
-            text = text.replaceAll(MATCHES[i], REPLACES[i]);
-        }
-        return text;
+        return XmlUtils.toXml(text);
     }
 }

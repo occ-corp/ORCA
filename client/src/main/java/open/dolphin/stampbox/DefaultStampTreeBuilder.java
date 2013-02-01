@@ -6,6 +6,7 @@ import java.util.List;
 import open.dolphin.client.ClientContext;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.ModuleInfoBean;
+import open.dolphin.util.XmlUtils;
 import org.apache.log4j.Level;
 
 /**
@@ -14,12 +15,6 @@ import org.apache.log4j.Level;
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
 public class DefaultStampTreeBuilder extends AbstractStampTreeBuilder {
-    
-    /** XML文書で置換が必要な文字 */
-    private static final String[] REPLACES = new String[] { "<", ">", "&", "'" ,"\""};
-    
-    /** 置換文字 */
-    private static final String[] MATCHES = new String[] { "&lt;", "&gt;", "&amp;", "&apos;", "&quot;" };
     
     /** エディタから発行のスタンプ名 */
     private static final String FROM_EDITOR = "エディタから発行...";
@@ -115,7 +110,7 @@ public class DefaultStampTreeBuilder extends AbstractStampTreeBuilder {
         //------------------------------------
         // Node を生成し現在のノードに加える
         //------------------------------------
-        node = new StampTreeNode(toXmlText(name));
+        node = new StampTreeNode(fromXmlText(name));
         getCurrentNode().add(node);
         
         //------------------------------------
@@ -160,14 +155,14 @@ public class DefaultStampTreeBuilder extends AbstractStampTreeBuilder {
         // StampInfo を生成する
         //------------------------------------
         info = new ModuleInfoBean();
-        info.setStampName(toXmlText(name));
+        info.setStampName(fromXmlText(name));
         info.setStampRole(role);
         info.setEntity(entity);
         if (editable != null) {
             info.setEditable(Boolean.valueOf(editable).booleanValue());
         }
         if (memo != null) {
-            info.setStampMemo(toXmlText(memo));
+            info.setStampMemo(fromXmlText(memo));
         }
         if ( id != null ) {
             info.setStampId(id);
@@ -287,10 +282,7 @@ public class DefaultStampTreeBuilder extends AbstractStampTreeBuilder {
     /**
      * 特殊文字を変換する。
      */
-    private String toXmlText(String text) {
-        for (int i = 0; i < REPLACES.length; i++) {
-            text = text.replaceAll(MATCHES[i], REPLACES[i]);
-        }
-        return text;
+    private String fromXmlText(String xml) {
+        return XmlUtils.fromXml(xml);
     }
 }

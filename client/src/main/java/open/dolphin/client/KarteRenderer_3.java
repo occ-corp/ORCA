@@ -11,6 +11,7 @@ import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import open.dolphin.infomodel.*;
+import open.dolphin.util.XmlUtils;
 
 /**
  * KarteRenderer_2 改
@@ -31,8 +32,6 @@ public class KarteRenderer_3 {
     private static final String UNDERLINE_NAME = "underline";
     private static final String NAME_NAME = "name";
     private static final String LOGICAL_STYLE_NAME = "logicalStyle";
-    private static final String[] REPLACES = new String[]{"<", ">", "&", "'", "\""};
-    private static final String[] MATCHES = new String[]{"&lt;", "&gt;", "&amp;", "&apos;", "&quot;"};
     
     private static final String NAME_STAMP_HOLDER = "name=\"stampHolder\"";
     
@@ -320,9 +319,7 @@ public class KarteRenderer_3 {
                 String text) {
 
             // 特殊文字を戻す
-            for (int i = 0; i < REPLACES.length; i++) {
-                text = text.replaceAll(MATCHES[i], REPLACES[i]);
-            }
+            text = XmlUtils.fromXml(text);
 
             // このコンテントに設定する AttributeSet
             MutableAttributeSet atts = new SimpleAttributeSet();

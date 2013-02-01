@@ -10,6 +10,7 @@ import open.dolphin.infomodel.ModuleInfoBean;
 import open.dolphin.infomodel.StampModel;
 import open.dolphin.project.Project;
 import open.dolphin.util.HexBytesTool;
+import open.dolphin.util.XmlUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -21,10 +22,6 @@ import org.apache.log4j.Logger;
 
 public class ExtendedStampTreeBuilder {
 
-    /** XML文書で置換が必要な文字 */
-    private static final String[] REPLACES = new String[] { "<", ">", "&", "'" ,"\""};
-    /** 置換文字 */
-    private static final String[] MATCHES = new String[] { "&lt;", "&gt;", "&amp;", "&apos;", "&quot;" };
     /** エディタから発行のスタンプ名 */
     private static final String FROM_EDITOR = "エディタから発行...";
     /** rootノードの名前 */
@@ -93,7 +90,7 @@ public class ExtendedStampTreeBuilder {
             logger.debug("Node=" + name);
         }
         // Node を生成し現在のノードに加える
-        node = new StampTreeNode(toXmlText(name));
+        node = new StampTreeNode(fromXmlText(name));
         getCurrentNode().add(node);
         // このノードを first に加える
         linkedList.addFirst(node);
@@ -136,14 +133,14 @@ public class ExtendedStampTreeBuilder {
 
         // StampInfo を生成する
         info = new ModuleInfoBean();
-        info.setStampName(toXmlText(name));
+        info.setStampName(fromXmlText(name));
         info.setStampRole(role);
         info.setEntity(entity);
         if (editable != null) {
             info.setEditable(Boolean.valueOf(editable).booleanValue());
         }
         if (memo != null) {
-            info.setStampMemo(toXmlText(memo));
+            info.setStampMemo(fromXmlText(memo));
         }
         if ( id != null ) {
             StampDelegater del = StampDelegater.getInstance();
@@ -249,11 +246,8 @@ public class ExtendedStampTreeBuilder {
     }
 
     // 特殊文字を変換する。
-    private String toXmlText(String text) {
-        for (int i = 0; i < REPLACES.length; i++) {
-            text = text.replaceAll(MATCHES[i], REPLACES[i]);
-        }
-        return text;
+    private String fromXmlText(String xml) {
+        return XmlUtils.fromXml(xml);
     }
 
     private String getEntity(String rootName) {

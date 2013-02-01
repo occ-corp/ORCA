@@ -557,7 +557,8 @@ public class PatientInfoDocument extends AbstractChartDocument {
                     case 9:
                         ret = patient.contactAddress();
                         if (ret != null) {
-                            ret = ret.replaceAll("　", " ");
+                            //ret = ret.replaceAll("　", " ");
+                            ret = ret.replace("　", " ");
                         }
                         break;
                         

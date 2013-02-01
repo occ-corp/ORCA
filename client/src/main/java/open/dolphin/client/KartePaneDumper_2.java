@@ -13,6 +13,7 @@ import javax.swing.text.DefaultStyledDocument;
 import javax.swing.text.StyleConstants;
 import open.dolphin.infomodel.ModuleModel;
 import open.dolphin.infomodel.SchemaModel;
+import open.dolphin.util.XmlUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -21,10 +22,6 @@ import org.apache.log4j.Logger;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  */
 public final class KartePaneDumper_2 {
-    
-    private static final String[] MATCHES = new String[] { "<", ">", "&", "'","\""};
-    
-    private static final String[] REPLACES = new String[] { "&lt;", "&gt;", "&amp;" ,"&apos;", "&quot;"};
     
     private ArrayList<ModuleModel> moduleList;
     
@@ -219,9 +216,7 @@ public final class KartePaneDumper_2 {
             logger.debug("text = " + text);
             
             // 特定の文字列を置換する
-            for (int i = 0; i < REPLACES.length; i++) {
-                text = text.replaceAll(MATCHES[i], REPLACES[i]);
-            }
+            text = XmlUtils.toXml(text);
             writer.write(text);
             writer.write("</text>");
 

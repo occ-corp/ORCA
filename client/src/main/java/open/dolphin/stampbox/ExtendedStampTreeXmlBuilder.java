@@ -12,6 +12,7 @@ import open.dolphin.infomodel.ModuleInfoBean;
 import open.dolphin.infomodel.StampModel;
 import open.dolphin.project.Project;
 import open.dolphin.util.HexBytesTool;
+import open.dolphin.util.XmlUtils;
 import org.apache.log4j.Logger;
 
 /**
@@ -22,9 +23,6 @@ import org.apache.log4j.Logger;
  */
 
 public class ExtendedStampTreeXmlBuilder {
-
-    private static final String[] MATCHES = new String[] { "<", ">", "&", "'","\""};
-    private static final String[] REPLACES = new String[] { "&lt;", "&gt;", "&amp;" ,"&apos;", "&quot;"};
 
     /** Control staffs */
     private LinkedList<StampTreeNode> linkedList;
@@ -241,10 +239,7 @@ public class ExtendedStampTreeXmlBuilder {
      * 特殊文字を変換する。
      */
     private String toXmlText(String text) {
-        for (int i = 0; i < REPLACES.length; i++) {
-            text = text.replaceAll(MATCHES[i], REPLACES[i]);
-        }
-        return text;
+        return XmlUtils.toXml(text);
     }
 
 }

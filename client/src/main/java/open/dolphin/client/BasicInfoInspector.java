@@ -66,7 +66,8 @@ public class BasicInfoInspector {
         if (address != null) {
             String adr = address.getAddress();
             if (adr != null) {
-                adr = adr.replaceAll("　", " ");
+                //adr = adr.replaceAll("　", " ");
+                adr = adr.replace("　", " ");
             }
             addressLabel.setText(adr);
         } else {

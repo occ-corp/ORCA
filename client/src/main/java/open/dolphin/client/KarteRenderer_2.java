@@ -7,6 +7,7 @@ import java.io.StringReader;
 import java.util.*;
 import javax.swing.text.*;
 import open.dolphin.infomodel.*;
+import open.dolphin.util.XmlUtils;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
@@ -45,8 +46,6 @@ public class KarteRenderer_2 {
     private static final String NAME_NAME = "name";
     private static final String LOGICAL_STYLE_NAME = "logicalStyle";
     private static final String PROGRESS_COURSE_NAME = "kartePane";
-    private static final String[] REPLACES = new String[]{"<", ">", "&", "'", "\""};
-    private static final String[] MATCHES = new String[]{"&lt;", "&gt;", "&amp;", "&apos;", "&quot;"};
     
     private static final String NAME_STAMP_HOLDER = "name=\"stampHolder\"";
     
@@ -314,9 +313,7 @@ public class KarteRenderer_2 {
                 String text) {
 
             // 特殊文字を戻す
-            for (int i = 0; i < REPLACES.length; i++) {
-                text = text.replaceAll(MATCHES[i], REPLACES[i]);
-            }
+            text = XmlUtils.fromXml(text);
 
             // このコンテントに設定する AttributeSet
             MutableAttributeSet atts = new SimpleAttributeSet();

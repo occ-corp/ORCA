@@ -14,6 +14,7 @@ import open.dolphin.client.ClientContext;
 import open.dolphin.client.StampRenderingHints;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
+import open.dolphin.util.XmlUtils;
 import org.jdom2.JDOMException;
 import org.jdom2.input.SAXBuilder;
 
@@ -50,8 +51,6 @@ public class KartePDFMaker extends AbstractPDFMaker {
     private static final String TEXT_NAME = "text";
     private static final String NAME_NAME = "name";
     private static final String PROGRESS_COURSE_NAME = "kartePane";
-    private static final String[] REPLACES = new String[]{"<", ">", "&", "'", "\""};
-    private static final String[] MATCHES = new String[]{"&lt;", "&gt;", "&amp;", "&apos;", "&quot;"};
 
     private static final int KARTE_FONT_SIZE = 9;
     private static final int STAMP_FONT_SIZE = 8;
@@ -463,9 +462,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
                 String text) {
 
             // 特殊文字を戻す
-            for (int i = 0; i < REPLACES.length; i++) {
-                text = text.replaceAll(MATCHES[i], REPLACES[i]);
-            }
+            text = XmlUtils.fromXml(text);
 
             Font font = theParagraph.getFont();
             // foreground 属性を設定する
