@@ -65,6 +65,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     
     // CompletionServce
     private MultiTaskExecutor exec;
+    
+    // Common MouseListener
+    private MouseListener mouseListener;
+    
 
 //pns^ 表示されているカルテの中身を検索する modified by masuda
     private FindAndView findAndView = new FindAndView();
@@ -137,6 +141,32 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         vsc = Project.getBoolean(Project.KARTE_SCROLL_DIRECTION, true);
         scrollerPanel = new KarteScrollerPanel(this);
         logger = ClientContext.getBootLogger();
+        
+        // MouseListener を生成して KarteViewer の Pane にアタッチする
+        mouseListener = new MouseAdapter() {
+
+            @Override
+            public void mouseClicked(MouseEvent e) {
+
+                Object src = e.getSource();
+                if (!(src instanceof JTextPane)) {
+                    return;
+                }
+
+                JTextPane pane = (JTextPane) src;
+                KarteViewer viewer = (KarteViewer) pane.getClientProperty("KarteViewer");
+                if (viewer != null) {
+                    int cnt = e.getClickCount();
+                    if (cnt == 2) {
+                        // 選択した Karte を EditoFrame で開く
+                        setSelectedKarte(viewer);
+                        openKarte();
+                    } else if (cnt == 1) {
+                        setSelectedKarte(viewer);
+                    }
+                }
+            }
+        };
     }
 
     // KarteViewerのリストを返す。ScrollerPanelから参照
@@ -193,6 +223,9 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         // ScrollerPanelの後片付け
         scrollerPanel.dispose();
         scrollerPanel = null;
+        
+        // mouseListenerも
+        mouseListener = null;
     }
 
     @Override
@@ -743,22 +776,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             viewer.start();
 
             // ダブルクリックされたカルテを別画面で表示する
-            // MouseListener を生成して KarteViewer の Pane にアタッチする
-            final MouseListener ml = new MouseAdapter() {
-
-                @Override
-                public void mouseClicked(MouseEvent e) {
-                    int cnt = e.getClickCount();
-                    if (cnt == 2) {
-                        // 選択した Karte を EditoFrame で開く
-                        setSelectedKarte(viewer);
-                        openKarte();
-                    } else if (cnt == 1) {
-                        setSelectedKarte(viewer);
-                    }
-                }
-            };
-            viewer.addMouseListener(ml);
+            viewer.addMouseListener(mouseListener);
 
             // KarteViewerのJTextPaneにKarteScrollerPanelのActionMapを設定する
             // これをしないとJTextPaneにフォーカスがあるとキーでスクロールできない
