@@ -45,7 +45,7 @@ public class CalendarCardPanel extends JPanel  {
     private HashMap<String, Color> colorTable;
     private List<SimpleDate> markList;
 
-    private PropertyChangeSupport boundSupport = new PropertyChangeSupport(this);
+    private PropertyChangeSupport boundSupport; // = new PropertyChangeSupport(this);
     private PropertyChangeListener calendarListener;
 
     private static final int TITLE_ALIGN = SwingConstants.CENTER;
@@ -172,6 +172,8 @@ public class CalendarCardPanel extends JPanel  {
             }
         });
         this.putClientProperty("fixedHeight", true);
+        
+        boundSupport = new PropertyChangeSupport(this);
     }
     
     private void fixHeight(JPanel panel, int height) {
@@ -191,11 +193,17 @@ public class CalendarCardPanel extends JPanel  {
 
     @Override
     public void addPropertyChangeListener(String prop, PropertyChangeListener l) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
         boundSupport.addPropertyChangeListener(prop, l);
     }
 
     @Override
     public void removePropertyChangeListener(String prop, PropertyChangeListener l) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
         boundSupport.removePropertyChangeListener(prop, l);
     }
 

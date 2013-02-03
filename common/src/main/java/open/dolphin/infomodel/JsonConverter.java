@@ -120,8 +120,6 @@ public class JsonConverter {
     public Object fromJson(InputStream is, Class clazz) {
         try {
             Object obj = objectMapper.readValue(is, clazz);
-            is.close();
-            is = null;
             return obj;
         } catch (JsonParseException ex) {
             processException(ex);
@@ -131,6 +129,11 @@ public class JsonConverter {
             processException(ex);
         } catch (Exception ex) {
             processException(ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+            }
         }
         return null;
     }
@@ -138,8 +141,6 @@ public class JsonConverter {
     public Object fromJson(InputStream is, TypeReference typeRef) {
         try {
             Object obj = objectMapper.readValue(is, typeRef);
-            is.close();
-            is = null;
             return obj;
         } catch (JsonParseException ex) {
             processException(ex);
@@ -149,6 +150,11 @@ public class JsonConverter {
             processException(ex);
         } catch (Exception ex) {
             processException(ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+            }
         }
         return null;
     }

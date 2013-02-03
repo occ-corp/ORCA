@@ -8,6 +8,7 @@ import javax.servlet.AsyncListener;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.Response;
 import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.ChartEventServiceBean;
@@ -106,11 +107,11 @@ public class ChartEventResource extends AbstractResource {
     @GET
     @Path("dispatch")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String deliverChartEvent() {
+    public Response deliverChartEvent() {
         
         ChartEventModel msg = (ChartEventModel) servletReq.getAttribute(KEY_NAME);
         String json = getConverter().toJson(msg);
-        return json;
+        return Response.ok(json).build();
     }
 
     @Override

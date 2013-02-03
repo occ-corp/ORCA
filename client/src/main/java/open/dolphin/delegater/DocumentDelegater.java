@@ -5,11 +5,8 @@ import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.concurrent.CompletionService;
 import javax.swing.ImageIcon;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ImageEntry;
@@ -18,7 +15,6 @@ import open.dolphin.dto.ImageSearchSpec;
 import open.dolphin.dto.ModuleSearchSpec;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
-import open.dolphin.util.DocTaskExecutor;
 
 /**
  * Session と Document の送受信を行う Delegater クラス。
@@ -134,7 +130,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         List<DocumentModel> list = (List<DocumentModel>)
                 //getConverter().fromJson(entityStr, typeRef);
                 getConverter().fromJson(is, typeRef);
-
+/*
         // マルチスレッド化　ここもCompletionService使っちゃう！
         CompletionService service = DocTaskExecutor.getInstance().createCompletionService();
         for (DocumentModel docModel : list) {
@@ -151,10 +147,11 @@ public class  DocumentDelegater extends BusinessDelegater {
         }
         
         service = null;
-        
+*/
         return list;
     }
-   
+
+/*
     private class DocModelDecodeTask implements Callable {
         
         private DocumentModel docModel;
@@ -184,7 +181,8 @@ public class  DocumentDelegater extends BusinessDelegater {
             return null;
         }
     }
-
+*/
+    
     /**
      * 文書履歴を検索して返す。
      * @param spec DocumentSearchSpec 検索仕様

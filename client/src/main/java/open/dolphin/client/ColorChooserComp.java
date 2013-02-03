@@ -28,7 +28,7 @@ public class ColorChooserComp extends JComponent implements MouseListener, Mouse
     
     private int strokeWidth = 2;
     
-    private PropertyChangeSupport boundSupport = new PropertyChangeSupport(this);
+    private PropertyChangeSupport boundSupport;// = new PropertyChangeSupport(this);
     
     private Color selected;
     
@@ -46,6 +46,8 @@ public class ColorChooserComp extends JComponent implements MouseListener, Mouse
         this.addMouseListener(ColorChooserComp.this);
         this.addMouseMotionListener(ColorChooserComp.this);
         this.setCursor(new Cursor(Cursor.DEFAULT_CURSOR));
+        
+        boundSupport = new PropertyChangeSupport(this);
     }
     
     /**
@@ -62,11 +64,17 @@ public class ColorChooserComp extends JComponent implements MouseListener, Mouse
     
     @Override
     public void addPropertyChangeListener(String prop, PropertyChangeListener l) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
         boundSupport.addPropertyChangeListener(prop, l);
     }
     
     @Override
     public void removePropertyChangeListener(String prop, PropertyChangeListener l) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
         boundSupport.removePropertyChangeListener(prop, l);
     }
     

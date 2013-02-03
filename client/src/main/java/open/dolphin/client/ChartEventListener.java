@@ -1,5 +1,8 @@
 package open.dolphin.client;
 
+import com.sun.jersey.api.client.ClientResponse;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -188,7 +191,7 @@ public class ChartEventListener {
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
-        private Future<String> future;
+        private Future<ClientResponse> future;
         
         private boolean isRunning;
         
@@ -212,11 +215,9 @@ public class ChartEventListener {
                 try {
                     future = ChartEventDelegater.getInstance().subscribe();
                     //System.out.println("time = " + String.valueOf(System.currentTimeMillis() - t1));
-                    String json = future.get();
+                    ClientResponse response = future.get();
                     //t1 = System.currentTimeMillis();
-                    if (json != null) {
-                        exec.execute(new RemoteOnEventTask(json));
-                    }
+                    exec.execute(new RemoteOnEventTask(response));
                     //System.out.println("ChartEvent= " + json);
                 } catch (Exception e) {
                     //System.out.println(e.toString());
@@ -256,17 +257,30 @@ public class ChartEventListener {
     // 状態変化通知メッセージをデシリアライズし各リスナに処理を分配する
     private class RemoteOnEventTask implements Runnable {
         
-        private String json;
+        private ClientResponse response;
         
-        private RemoteOnEventTask(String json) {
-            this.json = json;
+        private RemoteOnEventTask(ClientResponse response) {
+            this.response = response;
         }
 
         @Override
         public void run() {
+            
+            int status = response.getStatus();
+            
+            if (status != 200) {
+                return;
+            }
+            
+            InputStream is = response.getEntityInputStream();
         
             ChartEventModel evt = (ChartEventModel) 
-                    JsonConverter.getInstance().fromJson(json, ChartEventModel.class);
+                    JsonConverter.getInstance().fromJson(is, ChartEventModel.class);
+            
+            try {
+                is.close();
+            } catch (IOException ex) {
+            }
             
             if (evt == null) {
                 return;

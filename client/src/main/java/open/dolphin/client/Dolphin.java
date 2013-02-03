@@ -43,7 +43,6 @@ import open.dolphin.server.PVTServer;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.setting.ProjectSettingDialog;
 import open.dolphin.stampbox.StampBoxPlugin;
-import open.dolphin.util.DocTaskExecutor;
 
 /**
  * アプリケーションのメインウインドウクラス。
@@ -1229,10 +1228,7 @@ public class Dolphin implements MainWindow {
             myFrame.setVisible(false);
             myFrame.dispose();
         }
-        
-        // DocTaskExecutorを破棄
-        DocTaskExecutor.getInstance().dispose();
-        
+
         ClientContext.getBootLogger().debug("アプリケーションを終了します");
         System.exit(0);
     }

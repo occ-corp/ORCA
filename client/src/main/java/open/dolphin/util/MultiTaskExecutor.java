@@ -4,32 +4,20 @@ import java.util.List;
 import java.util.concurrent.*;
 
 /**
- * DocTaskExecutor
- * KarteDocumentViewerとDocumentDelegaterのタスクを一元管理して
- * スレッドを作りすぎないように
+ * MultiTaskExecutor
  * @author masuda, Masuda Naika
  */
-public class DocTaskExecutor<T> {
+public class MultiTaskExecutor<T> {
 
     private static final int NUM_THREADS = 2;   // ３以上だと苦しそうｗ
     private static final int SHUTDOWN_WAIT = 1000;
     
     private ExecutorService exec;
 
-    private static DocTaskExecutor instance;
-    
-    static {
-        instance = new DocTaskExecutor();
-    }
-    
-    private DocTaskExecutor() {
+    public MultiTaskExecutor() {
         exec = Executors.newFixedThreadPool(NUM_THREADS);
     }
-
-    public static DocTaskExecutor getInstance() {
-        return instance;
-    }
-
+    
     public List<Future<T>> execute(List<Callable<T>> taskList) throws InterruptedException {
 
         if (taskList == null || taskList.isEmpty()) {

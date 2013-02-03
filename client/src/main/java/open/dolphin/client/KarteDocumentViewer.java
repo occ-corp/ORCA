@@ -13,12 +13,11 @@ import java.util.concurrent.Future;
 import javax.swing.*;
 import open.dolphin.delegater.DocumentDelegater;
 import open.dolphin.helper.DBTask;
-import open.dolphin.infomodel.DocInfoModel;
-import open.dolphin.infomodel.DocumentModel;
-import open.dolphin.infomodel.IInfoModel;
+import open.dolphin.infomodel.*;
 import open.dolphin.letter.KartePDFMaker;
 import open.dolphin.project.Project;
-import open.dolphin.util.DocTaskExecutor;
+import open.dolphin.util.BeanUtils;
+import open.dolphin.util.MultiTaskExecutor;
 import org.apache.log4j.Logger;
 
 /**
@@ -750,6 +749,23 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         @Override
         public KarteViewer call() throws Exception {
             
+            // DocumentDelegaterから移動
+            Collection<ModuleModel> mc = docModel.getModules();
+            if (mc != null && !mc.isEmpty()) {
+                for (ModuleModel module : mc) {
+                    module.setModel((InfoModel) BeanUtils.xmlDecode(module.getBeanBytes()));
+                }
+            }
+
+            // JPEG byte をアイコンへ戻す
+            Collection<SchemaModel> sc = docModel.getSchema();
+            if (sc != null && !sc.isEmpty()) {
+                for (SchemaModel schema : sc) {
+                    ImageIcon icon = new ImageIcon(schema.getJpegByte());
+                    schema.setIcon(icon);
+                }
+            }
+            
             // DocumentModelにDocInfoModelを設定する
             for (DocInfoModel info : docInfoArray) {
                 if (docModel.getId() == info.getDocPk()) {
@@ -789,13 +805,15 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         private static final int fetchSize = 200;
         private List<Long> docIdList;
         private CompletionService service;
+        private MultiTaskExecutor exec;
         
 
         public KarteTask(Chart ctx, List<Long> docIdList) {
             super(ctx);
             this.docIdList = docIdList;
             // CompletionServceを使ってみる
-            service = DocTaskExecutor.getInstance().createCompletionService();
+            exec = new MultiTaskExecutor();
+            service = exec.createCompletionService();
         }
 
         @Override
@@ -857,12 +875,14 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 showKarteViewers();
             }
             service = null;
+            exec.dispose();
         }
 
         @Override
         protected void failed(Throwable e) {
             logger.debug(e.getMessage());
             service = null;
+            exec.dispose();
         }
     }
 
