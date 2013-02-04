@@ -800,7 +800,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     /**
      * 文書をデータベースから取得するタスククラス。
      */
-    private final class KarteTask extends DBTask<Boolean, Void> {
+    private final class KarteTask extends DBTask<Integer, Void> {
         
         private static final int fetchSize = 200;
         private List<Long> docIdList;
@@ -817,7 +817,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         }
 
         @Override
-        protected Boolean doInBackground() {
+        protected Integer doInBackground() {
             
             //LapTimer timer = new LapTimer();
             //timer.start();
@@ -828,7 +828,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
 
             int fromIndex = 0;
             int idListSize = docIdList.size();
-            boolean ret = false;
+            int taskCount=  0;
             
             // 分割してサーバーから取得する
             while (fromIndex < idListSize) {
@@ -840,15 +840,14 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                         // Executorに登録していく
                         MakeViewerTask task = new MakeViewerTask(model);
                         service.submit(task);
+                       ++taskCount;
                     }
-                    //addKarteViewer(result);
-                    ret = true;
                 }
                 fromIndex += fetchSize;
             }
             
             // 出来上がったものからkarteViewerMapに登録していく
-            for (int i = 0; i < idListSize; ++i) {
+            for (int i = 0; i < taskCount; ++i) {
                 try {
                     Future<KarteViewer> future = service.take();
                     KarteViewer viewer = future.get();
@@ -864,13 +863,13 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             
             //timer.stop("Database access");
 
-            return ret;
+            return taskCount;
         }
 
         @Override
-        protected void succeeded(Boolean success) {
+        protected void succeeded(Integer taskCount) {
             logger.debug("KarteTask succeeded");
-            if (success) {
+            if (taskCount > 0) {
                 // KarteViewersを表示する
                 showKarteViewers();
             }
