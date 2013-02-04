@@ -250,7 +250,10 @@ public final class PVTBuilder {
                 model.setFirstInsurance(bean.toString());
             }
         }
-            
+        
+//pns^  ORCA から送られてきた「診療内容」を pvt にセット
+        model.setMemo(pvtClaim.getClaimAppMemo());
+//pns$
 //masuda^   患者登録のみのとき
         if (pvtClaim == null || "info".equals(pvtClaim.getClaimStatus())) {
             model.setPvtDate(null);
@@ -656,6 +659,12 @@ public final class PVTBuilder {
         
         // insuranceUid
         pvtClaim.setInsuranceUid(claimInfo.getAttributeValue(insuranceUid, claim));
+        
+//pns^  「診療内容」情報受け取り
+        Element appoint = claimInfo.getChild("appoint", claim);
+        Element memo = appoint.getChild("memo", claim);
+        pvtClaim.setClaimAppMemo(memo.getText().trim());
+//pns$
         
         // DEBUG 出力
         debug("担当医ID = " + pvtClaim.getAssignedDoctorId());
