@@ -15,7 +15,6 @@ import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractChartDocument;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.GUIConst;
-import open.dolphin.client.NameValuePair;
 import open.dolphin.delegater.LaboDelegater;
 import open.dolphin.helper.DBTask;
 import open.dolphin.infomodel.NLaboItem;
@@ -37,6 +36,7 @@ import org.jfree.ui.Layer;
  * LaboTestBean
  * 
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author modified by masuda, Masuda Naika
  *
  */
 public class LaboTestBean extends AbstractChartDocument {
@@ -51,32 +51,29 @@ public class LaboTestBean extends AbstractChartDocument {
     private static final String X_AXIS_LABEL_LINUX = "Sampled Date";
     private static final int FONT_SIZE_WIN = 12;
     private static final String FONT_MS_GOTHIC = "MSGothic";
-    //private static final int MAX_RESULT = 5;
-    //private static final String[] EXTRACTION_MENU = new String[]{"5回分", "0", "6~10回分", "5"};
     private static final int MAX_RESULT = 6;
-    private static final String[] EXTRACTION_MENU = new String[]{"6回分", "0", "7~12回分", "6"};
 
     private ListTableModel<LabTestRowObject> tableModel;
     private JTable table;
     private JPanel graphPanel;
 
-    private JComboBox extractionCombo;
     private JTextField countField;
-    private LaboDelegater ldl;
     private int dividerWidth;
     private int dividerLoc;
 
     // １回の検索で得る抽出件数
     private int maxResult = MAX_RESULT;
 
-    // 抽出メニュー
-    private String[] extractionMenu = EXTRACTION_MENU;
-
     private boolean widthAdjusted;
     
 //masuda^
     private static final ImageIcon addIcon = ClientContext.getImageIcon("add_16.gif");
+    private static final ImageIcon backIcon = ClientContext.getImageIcon("back_16.gif");
+    private static final ImageIcon forwdIcon = ClientContext.getImageIcon("forwd_16.gif");
     private int selectedColumn;
+    
+    private JTextField tf_period;
+    private int firstResult = 0;
 //masuda$
     
     public LaboTestBean() {
@@ -89,14 +86,6 @@ public class LaboTestBean extends AbstractChartDocument {
 
     public void setMaxResult(int maxResult) {
         this.maxResult = maxResult;
-    }
-
-    public String[] getExtractionMenu() {
-        return extractionMenu;
-    }
-
-    public void setExtractionMenu(String[] extractionMenu) {
-        this.extractionMenu = extractionMenu;
     }
 
 //masuda^   検体種別を表示したいのと要望    
@@ -420,10 +409,7 @@ public class LaboTestBean extends AbstractChartDocument {
     @Override
     public void start() {
         initialize();
-        NameValuePair pair = (NameValuePair) extractionCombo.getSelectedItem();
-        String value = pair.getValue();
-        int firstResult = Integer.parseInt(value);
-        searchLaboTest(firstResult);
+        searchLaboTest();
         enter();
     }
 
@@ -477,9 +463,7 @@ public class LaboTestBean extends AbstractChartDocument {
                 @Override
                 protected void succeeded(Void result) {
                     // 再表示
-                    NameValuePair pair = (NameValuePair) extractionCombo.getSelectedItem();
-                    int firstResult = Integer.parseInt(pair.getValue());
-                    searchLaboTest(firstResult);
+                    searchLaboTest();
                 }
             };
             task.execute();
@@ -530,20 +514,18 @@ public class LaboTestBean extends AbstractChartDocument {
     /**
      * LaboTest の検索タスクをコールする。
      */
-    private void searchLaboTest(final int firstResult) {
-
+    //private void searchLaboTest(final int firstResult) {
+    private void searchLaboTest() {
+        
         final String pid = getContext().getPatient().getPatientId();
-//masuda^   シングルトン化
-        //ldl = new LaboDelegater();
-        ldl = LaboDelegater.getInstance();
-//masuda$
 
         DBTask task = new DBTask<List<NLaboModule>, Void>(getContext()) {
 
             @Override
             protected List<NLaboModule> doInBackground() throws Exception {
 
-                List<NLaboModule> modules = ldl.getLaboTest(pid, firstResult, getMaxResult());
+                List<NLaboModule> modules = LaboDelegater.getInstance()
+                        .getLaboTest(pid, firstResult, getMaxResult());
                 return modules;
             }
 
@@ -552,6 +534,7 @@ public class LaboTestBean extends AbstractChartDocument {
                 int moduleCount = modules != null ? modules.size() : 0;
                 countField.setText(String.valueOf(moduleCount));
                 createTable(modules);
+                updateTfPeriod();
             }
         };
 
@@ -687,7 +670,8 @@ public class LaboTestBean extends AbstractChartDocument {
      * 抽出期間パネルを返す
      */
     private JPanel createControlPanel() {
-
+        
+/*
         String[] menu = getExtractionMenu();
         int cnt = menu.length / 2;
         NameValuePair[] periodObject = new NameValuePair[cnt];
@@ -719,10 +703,45 @@ public class LaboTestBean extends AbstractChartDocument {
         });
         JPanel comboPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         comboPanel.add(extractionCombo);
+*/
+        JPanel p = new JPanel();
+        p.setLayout(new BoxLayout(p, BoxLayout.X_AXIS));
+        p.add(Box.createHorizontalStrut(7));
 
-        p.add(comboPanel);
+        JButton backBtn = new JButton(backIcon);
+        backBtn.addActionListener(new ActionListener(){
+            
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                firstResult += getMaxResult();
+                searchLaboTest();
+            }
+        });
+        p.add(backBtn);
+
+        tf_period = new JTextField();
+        tf_period.setEditable(false);
+        updateTfPeriod();
+        Dimension d = tf_period.getPreferredSize();
+        tf_period.setMaximumSize(d);
+        p.add(tf_period);
         
-//masuda^   院内検査登録ボタン
+        JButton forwdBtn = new JButton(forwdIcon);
+        forwdBtn.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int old = firstResult;
+                firstResult = Math.max(0, firstResult - getMaxResult());
+                if (old != firstResult) {
+                    searchLaboTest();
+                }
+            }
+        });
+        p.add(forwdBtn);
+        p.add(Box.createHorizontalStrut(10));
+        
+        // 院内検査登録ボタン
         JButton addBtn = new JButton("院内検査追加", addIcon);
         addBtn.addActionListener(new ActionListener(){
 
@@ -732,9 +751,7 @@ public class LaboTestBean extends AbstractChartDocument {
                 fLabo.setContext(LaboTestBean.this.getContext());
                 boolean toUpdate = fLabo.start();
                 if (toUpdate) {
-                    NameValuePair pair = (NameValuePair) extractionCombo.getSelectedItem();
-                    int firstResult = Integer.parseInt(pair.getValue());
-                    searchLaboTest(firstResult);
+                    searchLaboTest();
                 }
             }
         });
@@ -757,5 +774,15 @@ public class LaboTestBean extends AbstractChartDocument {
         p.add(Box.createHorizontalStrut(7));
 
         return p;
+    }
+    
+    private void updateTfPeriod() {
+        StringBuilder sb = new StringBuilder();
+        sb.append("過去:");
+        sb.append(String.valueOf(firstResult + 1));
+        sb.append(" - ");
+        sb.append(String.valueOf(firstResult + getMaxResult()));
+        sb.append("件");
+        tf_period.setText(sb.toString());
     }
 }
