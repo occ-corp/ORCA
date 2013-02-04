@@ -1865,7 +1865,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
             StringBuilder sb = new StringBuilder();
             String str;
             if (nengo.matches(mtsh)) {
-                str = "00" + ymd[0].replace(mtsh, "");
+                str = "00" + ymd[0].replaceAll(mtsh, "");
                 sb.append(str.substring(str.length() - 2, str.length()));
                 sb.insert(0, nengo);
             } else {
@@ -1880,7 +1880,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         }
 
         // 区切り文字[./-]はいったん消してしまう。
-        output = output.replace(separator, "");
+        output = output.replaceAll(separator, "");
 
         if (nengo.matches("[Mm]")) {
             year = Integer.valueOf(output.substring(1, 3)) + 1867;
