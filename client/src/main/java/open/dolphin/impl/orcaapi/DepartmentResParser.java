@@ -10,13 +10,22 @@ import org.jdom2.Element;
  * 
  * @author masuda, Masuda Naika
  */
-public class DepartmentResParser implements IOrcaApi {
+public class DepartmentResParser extends AbstractOrcaApiParser {
     
     private enum ATTRIBUTE {
             Code, WholeName, Name1, Name2, Name3, Receipt_Code, other
     };
+
     
-    public List<DepartmentInfo> getList(Document doc) {
+    public DepartmentResParser(Document doc) {
+        super(doc);
+    }
+    
+    public List<DepartmentInfo> getList() {
+        return xml2 ? getList2() : getList1();
+    }
+    
+    private List<DepartmentInfo> getList1() {
         
         List<DepartmentInfo> list = new ArrayList<DepartmentInfo>();
         Element arrayElm = doc.getRootElement().getChild(RECORD).getChild(RECORD).getChild(ARRAY);
@@ -63,7 +72,7 @@ public class DepartmentResParser implements IOrcaApi {
         return list;
     }
     
-    public List<DepartmentInfo> getList2(Document doc) {
+    private List<DepartmentInfo> getList2() {
 
         Element record = doc.getRootElement().getChild("departmentres");
         if (record == null) {

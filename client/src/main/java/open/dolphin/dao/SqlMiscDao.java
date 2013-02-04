@@ -414,17 +414,16 @@ public final class SqlMiscDao extends SqlDaoBean {
         if (srycdList == null || srycdList.isEmpty()) {
             return Collections.emptyList();
         }
-
+        String selectSql = SyskanriInfo.getInstance().isOrca45()
+                ? SELECT_TBL_BYOMEI.replace("icd10_1", "icd10")
+                : SELECT_TBL_BYOMEI;
+        
         StringBuilder sb = new StringBuilder();
-        sb.append(SELECT_TBL_BYOMEI);
+        sb.append(selectSql);
         sb.append("where byomeicd in (");
         sb.append(getCodes(srycdList));
         sb.append(")");
         String sql = sb.toString();
-
-        if (SyskanriInfo.getInstance().isOrca46()) {
-            sql = sql.replace("icd10", "icd10_1");
-        }
 
         Connection con = null;
         List<DiseaseEntry> collection = null;

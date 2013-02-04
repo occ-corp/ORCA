@@ -8,11 +8,11 @@ import org.apache.commons.lang.StringUtils;
 import org.jdom2.Element;
 
 /**
- * Orca API 用の Element を JDOM で作成する
- * @author pns
+ * Orca API2 用の Element を JDOM で作成する
+ * @author pns (original)
  * @author modified by masuda, Masuda Naika
  */
-public class OrcaApiElement implements IOrcaApi {
+public class OrcaApiElement2 implements IOrcaApi {
     
     /**
      * 中途終了データ作成（/api21/medicalmod）
@@ -21,9 +21,8 @@ public class OrcaApiElement implements IOrcaApi {
 
         public MedicalMod(MedicalModModel model) {
             super(DATA);
-            Element record = new Element(RECORD);
-            record.addContent(new medicalreq(model));
-            addContent(record);
+            Element medicalReq = new Medicalreq(model);
+            addContent(medicalReq);
         }
     }
     
@@ -35,17 +34,17 @@ public class OrcaApiElement implements IOrcaApi {
         //private static final long serialVersionUID = 1L;
         
         public PublicInsurance_Information(PVTPublicInsuranceItemModel[] models) {
-            super(ARRAY);
-            setAttribute(NAME, getClass().getSimpleName());
+            super("PublicInsurance_Information");
+            setAttribute(TYPE, ARRAY);
             
             for(PVTPublicInsuranceItemModel m : models) {
-                Element record = new Element(RECORD);
-                //record.addContent(new Element("string").setAttribute("name", "PublicInsurance_Class").addContent(""));
-                record.addContent(new Element(STRING).setAttribute(NAME, "PublicInsurance_Name").addContent(m.getProviderName()));
-                record.addContent(new Element(STRING).setAttribute(NAME, "PublicInsurer_Number").addContent(m.getProvider()));
-                record.addContent(new Element(STRING).setAttribute(NAME, "PublicInsuredPerson_Number").addContent(m.getRecipient()));
-                record.addContent(new Element(STRING).setAttribute(NAME, "Certificate_IssuedDate").addContent(m.getStartDate()));
-                record.addContent(new Element(STRING).setAttribute(NAME, "Certificate_ExpiredDate").addContent(m.getExpiredDate()));
+                Element record = new Element("PublicInsurance_Information_child").setAttribute(TYPE, RECORD);
+                //record.addContent(new Element("PublicInsurance_Class").setAttribute(TYPE, STRING).addContent(""));
+                record.addContent(new Element("PublicInsurance_Name").setAttribute(TYPE, STRING).addContent(m.getProviderName()));
+                record.addContent(new Element("PublicInsurer_Number").setAttribute(TYPE, STRING).addContent(m.getProvider()));
+                record.addContent(new Element("PublicInsuredPerson_Number").setAttribute(TYPE, STRING).addContent(m.getRecipient()));
+                record.addContent(new Element("Certificate_IssuedDate").setAttribute(TYPE, STRING).addContent(m.getStartDate()));
+                record.addContent(new Element("Certificate_ExpiredDate").setAttribute(TYPE, STRING).addContent(m.getExpiredDate()));
                 addContent(record);
             }
         }
@@ -60,18 +59,19 @@ public class OrcaApiElement implements IOrcaApi {
         
         public HealthInsurance_Information(PVTHealthInsuranceModel model) {
             
-            super(RECORD);
-            setAttribute(NAME, getClass().getSimpleName());
+            super("HealthInsurance_Information");
+            setAttribute(TYPE, RECORD);
+            
             if (model != null) {
                 String orcaInsuranceClassCode = convertToOrcaInsuranceClassCode(model.getInsuranceClassCode());
-                addContent(new Element(STRING).setAttribute(NAME, "InsuranceProvider_Class").addContent(orcaInsuranceClassCode));
-                addContent(new Element(STRING).setAttribute(NAME, "InsuranceProvider_Number").addContent(model.getInsuranceNumber()));
-                addContent(new Element(STRING).setAttribute(NAME, "InsuranceProvider_WholeName").addContent(model.getInsuranceClass()));
-                addContent(new Element(STRING).setAttribute(NAME, "HealthInsuredPerson_Symbol").addContent(model.getClientGroup()));
-                addContent(new Element(STRING).setAttribute(NAME, "HealthInsuredPerson_Number").addContent(model.getClientNumber()));
-                addContent(new Element(STRING).setAttribute(NAME, "RelationToInsuredPerson").addContent(Boolean.valueOf(model.getFamilyClass()) ? "1" : "2"));
-                addContent(new Element(STRING).setAttribute(NAME, "Certificate_IssuedDate").addContent(model.getStartDate()));
-                addContent(new Element(STRING).setAttribute(NAME, "Certificate_ExpiredDate").addContent(model.getExpiredDate()));
+                addContent(new Element("InsuranceProvider_Class").setAttribute(TYPE, STRING).addContent(orcaInsuranceClassCode));
+                addContent(new Element("InsuranceProvider_Number").setAttribute(TYPE, STRING).addContent(model.getInsuranceNumber()));
+                addContent(new Element("InsuranceProvider_WholeName").setAttribute(TYPE, STRING).addContent(model.getInsuranceClass()));
+                addContent(new Element("HealthInsuredPerson_Symbol").setAttribute(TYPE, STRING).addContent(model.getClientGroup()));
+                addContent(new Element("HealthInsuredPerson_Number").setAttribute(TYPE, STRING).addContent(model.getClientNumber()));
+                addContent(new Element("RelationToInsuredPerson").setAttribute(TYPE, STRING).addContent(Boolean.valueOf(model.getFamilyClass()) ? "1" : "2"));
+                addContent(new Element("Certificate_IssuedDate").setAttribute(TYPE, STRING).addContent(model.getStartDate()));
+                addContent(new Element("Certificate_ExpiredDate").setAttribute(TYPE, STRING).addContent(model.getExpiredDate()));
                 PVTPublicInsuranceItemModel[] publicInsuranceModels = model.getPVTPublicInsuranceItem();
                 if (publicInsuranceModels != null) {
                     addContent(new PublicInsurance_Information(publicInsuranceModels));
@@ -114,14 +114,14 @@ public class OrcaApiElement implements IOrcaApi {
         private static final long serialVersionUID = 1L;
 
         public Medication_info(ClaimItem[] items) {
-            super(ARRAY);
-            setAttribute(NAME, getClass().getSimpleName());
+            super("Medication_info");
+            setAttribute(TYPE, ARRAY);
 
             for (ClaimItem i : items) {
-                Element record = new Element(RECORD);
-                record.addContent(new Element(STRING).setAttribute(NAME, "Medication_Code").addContent(i.getCode()));
-                record.addContent(new Element(STRING).setAttribute(NAME, "Medication_Name").addContent(i.getName()));
-                record.addContent(new Element(STRING).setAttribute(NAME, "Medication_Number").addContent(i.getNumber()));
+                Element record = new Element("Medication_info_child").setAttribute(TYPE, RECORD);
+                record.addContent(new Element("Medication_Code").setAttribute(TYPE, STRING).addContent(i.getCode()));
+                record.addContent(new Element("Medication_Name").setAttribute(TYPE, STRING).addContent(i.getName()));
+                record.addContent(new Element("Medication_Number").setAttribute(TYPE, STRING).addContent(i.getNumber()));
                 addContent(record);
             }
         }
@@ -132,20 +132,20 @@ public class OrcaApiElement implements IOrcaApi {
      */
     public static class Medical_Information extends Element {
 
-        private static final long serialVersionUID = 1L;
+        //private static final long serialVersionUID = 1L;
 
         public Medical_Information(Collection<ClaimBundle> models) {
             
-            super(ARRAY);
-            setAttribute(NAME, getClass().getSimpleName());
+            super("Medical_Information");
+            setAttribute(TYPE, ARRAY);
             
             if (models != null && !models.isEmpty()) {
                 for (ClaimBundle cb : models) {
 
-                    Element record = new Element(RECORD);
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Medical_Class").addContent(cb.getClassCode()));
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Medical_Class_Name").addContent(cb.getClassName()));
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Medical_Class_Number").addContent(cb.getBundleNumber()));
+                    Element record = new Element("Medical_Information_child").setAttribute(TYPE, RECORD);
+                    record.addContent(new Element("Medical_Class").setAttribute(TYPE, STRING).addContent(cb.getClassCode()));
+                    record.addContent(new Element("Medical_Class_Name").setAttribute(TYPE, STRING).addContent(cb.getClassName()));
+                    record.addContent(new Element("Medical_Class_Number").setAttribute(TYPE, STRING).addContent(cb.getBundleNumber()));
 
                     ClaimItem[] claimItems = cb.getClaimItem();
                     Medication_info medicationInfo = null;
@@ -157,9 +157,9 @@ public class OrcaApiElement implements IOrcaApi {
 
                     // admin がある場合は Medication_info にくっつけることになっている
                     if (cb.getAdmin() != null && medicationInfo != null) {
-                        Element admin = new Element(RECORD);
-                        admin.addContent(new Element(STRING).setAttribute(NAME, "Medication_Code").addContent(cb.getAdminCode()));
-                        admin.addContent(new Element(STRING).setAttribute(NAME, "Medication_Name").addContent(cb.getAdmin()));
+                        Element admin = new Element("Medication_info_child").setAttribute(TYPE, RECORD);
+                        admin.addContent(new Element("Medication_Code").setAttribute(TYPE, STRING).addContent(cb.getAdminCode()));
+                        admin.addContent(new Element("Medication_Name").setAttribute(TYPE, STRING).addContent(cb.getAdmin()));
                         medicationInfo.addContent(admin);
                     }
                 }
@@ -176,31 +176,32 @@ public class OrcaApiElement implements IOrcaApi {
 
         public Disease_Information(List<RegisteredDiagnosisModel> models) {
             
-            super(ARRAY);
-            setAttribute(NAME, getClass().getSimpleName());
+            super("Disease_Information");
+            setAttribute(TYPE, ARRAY);
 
             if (models != null && !models.isEmpty()) {
 
                 for (RegisteredDiagnosisModel m : models) {
-                    Element record = new Element(RECORD);
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Disease_Code").addContent(convertToOrcaByomei(m.getDiagnosisCode())));
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Disease_Name").addContent(m.getDiagnosis()));
+                    Element record = new Element("Disease_Information_child").setAttribute(TYPE, RECORD);
+                    
+                    record.addContent(new Element("Disease_Code").setAttribute(TYPE, STRING).addContent(convertToOrcaByomei(m.getDiagnosisCode())));
+                    record.addContent(new Element("Disease_Name").setAttribute(TYPE, STRING).addContent(m.getDiagnosis()));
 
                     String category = m.getCategory();
                     if ("mainDiagnosis".equals(category)) {
-                        record.addContent(new Element(STRING).setAttribute(NAME, "Disease_Category").addContent("PD"));
+                        record.addContent(new Element("Disease_Category").setAttribute(TYPE, STRING).addContent("PD"));
                     } else if ("suspectedDiagnosis".equals(category)) {
-                        record.addContent(new Element(STRING).setAttribute(NAME, "Disease_SuspectedFlag").addContent("S"));
+                        record.addContent(new Element("Disease_SuspectedFlag").setAttribute(TYPE, STRING).addContent("S"));
                     }
 
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Disease_StartDate").addContent(m.getStartDate()));
-                    record.addContent(new Element(STRING).setAttribute(NAME, "Disease_EndDate").addContent(m.getEndDate()));
+                    record.addContent(new Element("Disease_StartDate").setAttribute(TYPE, STRING).addContent(m.getStartDate()));
+                    record.addContent(new Element("Disease_EndDate").setAttribute(TYPE, STRING).addContent(m.getEndDate()));
 
                     // 転帰はdeleteなら'O 削除'、その他は'F 完治'、空白なら設定なし。
                     if ("delete".equals(m.getOutcome())) {
-                        record.addContent(new Element(STRING).setAttribute(NAME, "Disease_Outcome").addContent("O"));
+                        record.addContent(new Element("Disease_Outcome").setAttribute(TYPE, STRING).addContent("O"));
                     } else if (!"".equals(m.getOutcome())) {
-                        record.addContent(new Element(STRING).setAttribute(NAME, "Disease_Outcome").addContent("F"));
+                        record.addContent(new Element("Disease_Outcome").setAttribute(TYPE, STRING).addContent("F"));
                     }
                     addContent(record);
                 }
@@ -232,11 +233,12 @@ public class OrcaApiElement implements IOrcaApi {
      */
     public static class Diagnosis_Information extends Element {
 
-        private static final long serialVersionUID = 1L;
+        //private static final long serialVersionUID = 1L;
 
         public Diagnosis_Information(MedicalModModel model) {
             
-            super(RECORD);
+            super("Diagnosis_Information");
+            setAttribute(TYPE, RECORD);
             
             addCommonContent(model.getDepartmentCode(), model.getPhysicianCode());
             // 保険
@@ -248,19 +250,19 @@ public class OrcaApiElement implements IOrcaApi {
         }
 
         private void addCommonContent(String departmentCode, String physicianCode) {
-            setAttribute(NAME, getClass().getSimpleName());
-            addContent(new Element(STRING).setAttribute(NAME, "Department_Code").addContent(departmentCode));
-            addContent(new Element(STRING).setAttribute(NAME, "Physician_Code").addContent(physicianCode));
+            addContent(new Element("Department_Code").setAttribute(TYPE, STRING).addContent(departmentCode));
+            addContent(new Element("Physician_Code").setAttribute(TYPE, STRING).addContent(physicianCode));
         }
     }
     
     /**
      * medicalreq Element
      */
-    public static class medicalreq extends Element {
+    public static class Medicalreq extends Element {
 
-        public medicalreq(MedicalModModel model) {
-            super(RECORD);
+        public Medicalreq(MedicalModModel model) {
+            super("medicalreq");
+            setAttribute(TYPE, RECORD);
             addCommonContent(model);
             addContent(new Diagnosis_Information(model));
         }
@@ -272,12 +274,12 @@ public class OrcaApiElement implements IOrcaApi {
             String medicalUid = model.getMedicalUid() != null ? model.getMedicalUid() : "";
             String[] date = ModelUtils.getDateTimeAsString(performDate).split("T");
             String inOut = model.getAdmissonFlg() ? "I" : "O";
-            setAttribute(NAME, getClass().getSimpleName());
-            addContent(new Element(STRING).setAttribute(NAME, "InOut").addContent(inOut));
-            addContent(new Element(STRING).setAttribute(NAME, "Patient_ID").addContent(patientId));
-            addContent(new Element(STRING).setAttribute(NAME, "Perform_Date").addContent(date[0]));
-            addContent(new Element(STRING).setAttribute(NAME, "Perform_Time").addContent(date[1]));
-            addContent(new Element(STRING).setAttribute(NAME, "Medical_Uid").addContent(medicalUid));
+
+            addContent(new Element("Patient_ID").setAttribute(TYPE, STRING).addContent(patientId));
+            addContent(new Element("Perform_Date").setAttribute(TYPE, STRING).addContent(date[0]));
+            addContent(new Element("Perform_Time").setAttribute(TYPE, STRING).addContent(date[1]));
+            addContent(new Element("Medical_Uid").setAttribute(TYPE, STRING).addContent(medicalUid));
+            addContent(new Element("InOut").setAttribute(TYPE, STRING).addContent(inOut));
         }
     }
 }

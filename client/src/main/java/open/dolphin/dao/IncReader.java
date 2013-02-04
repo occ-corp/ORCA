@@ -25,6 +25,9 @@ public class IncReader {
     public IncReader(String kanricd, String orcaVer) {
         this.kanricd = kanricd;
         this.orcaVer = orcaVer.toLowerCase();
+        if ("orca47".equals(orcaVer)) {
+            this.orcaVer = "orca46";
+        }
     }
     
     public Map<String, String> getMap(String data) throws UnsupportedEncodingException, IOException {

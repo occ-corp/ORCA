@@ -7,19 +7,18 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import java.util.Iterator;
 import java.util.List;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.KarteSenderResult;
+import open.dolphin.dao.SyskanriInfo;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
 import org.jdom2.JDOMException;
-import org.jdom2.filter.ElementFilter;
 import org.jdom2.input.SAXBuilder;
 import org.jdom2.output.XMLOutputter;
 
@@ -44,6 +43,8 @@ public class OrcaApiDelegater implements IOrcaApi {
     private List<PhysicianInfo> physicianList;
     private List<DepartmentInfo> deptList;
     
+    private boolean xml2;
+    
     static {
         instance = new OrcaApiDelegater();
     }
@@ -56,17 +57,23 @@ public class OrcaApiDelegater implements IOrcaApi {
         DEBUG = (ClientContext.getBootLogger().getLevel()==Level.DEBUG);
         outputter = new XMLOutputter();
         builder = new SAXBuilder();
+        xml2 = SyskanriInfo.getInstance().isOrca47();
     }
     
     public KarteSenderResult sendMedicalModModel(MedicalModModel model) {
         
-        final String path = "/api21/medicalmod";
+        final String path = xml2
+                ? "/api21/medicalmodv2"
+                : "/api21/medicalmod";
+        
+        final Document post = xml2
+                ? new Document(new OrcaApiElement2.MedicalMod(model))
+                : new Document(new OrcaApiElement.MedicalMod(model));
+        final String xml = outputter.outputString(post);
+
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add(CLASS, "01");
-        
-        Document post = new Document(new OrcaApiElement.MedicalMod(model));
-        String xml = outputter.outputString(post);
-        
+
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_XML_UTF8)
                 .type(MEDIATYPE_XML_UTF8)
@@ -85,8 +92,9 @@ public class OrcaApiDelegater implements IOrcaApi {
         KarteSenderResult result;
         try {
             Document res = builder.build(new StringReader(resXml));
-            String code = getElementText(res, API_RESULT);
-            String msg = getElementText(res, API_RESULT_MESSAGE);
+            MedicalreqResParser parser = new MedicalreqResParser(res);
+            String code = parser.getApiResult();
+            String msg = parser.getApiResultMessage();
             result = new KarteSenderResult(ORCA_API, code, msg);
         } catch (JDOMException ex) {
             result = new KarteSenderResult(ORCA_API, KarteSenderResult.ERROR, ex.getMessage());
@@ -99,11 +107,16 @@ public class OrcaApiDelegater implements IOrcaApi {
     
     private void getDepartmentInfo() {
         
-        final String path = "/api01r/system01lst";
+        final String path = xml2
+                ? "/api01rv2/system01lstv2"
+                : "/api01r/system01lst";
+        
+        final String xml = xml2
+                ? createSystem01ManagereqXml2()
+                : createSystem01ManagereqXml();
+        
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add(CLASS, "01");
-        
-        String xml = createSystem01ManagereqXml();
         
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_XML_UTF8)
@@ -120,55 +133,30 @@ public class OrcaApiDelegater implements IOrcaApi {
         
         try {
             Document res = builder.build(new StringReader(resXml));
-            String resResultCode = getElementText(res, API_RESULT);
-            if (!API_NO_ERROR.equals(resResultCode)) {
-                deptList = new DepartmentResParser().getList(res);
+            DepartmentResParser parser = new DepartmentResParser(res);
+            String code = parser.getApiResult();
+            String msg = parser.getApiResultMessage();
+            if (!API_NO_ERROR.equals(code)) {
+                deptList = parser.getList();
             }
         } catch (JDOMException ex) {
         } catch (IOException ex) {
         }
     }
-    
-    private void getDepartmentInfo2() {
-        
-        final String path = "/api01rv2/system01lstv2";
-        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add(CLASS, "01");
-        
-        String xml = createSystem01ManagereqXml2();
-        
-        ClientResponse response = getResource(path, qmap)
-                .accept(MEDIATYPE_XML_UTF8)
-                .type(MEDIATYPE_XML_UTF8)
-                .post(ClientResponse.class, xml);
-        
-        int status = response.getStatus();
-        String resXml = response.getEntity(String.class);
-        debug(status, resXml);
-        
-        if (status != HTTP200) {
-            return;
-        }
-        
-        try {
-            Document res = builder.build(new StringReader(resXml));
-            String resResultCode = getElementText2(res, API_RESULT);
-            if (!API_NO_ERROR.equals(resResultCode)) {
-                deptList = new DepartmentResParser().getList2(res);
-            }
-        } catch (JDOMException ex) {
-        } catch (IOException ex) {
-        }
-    }
-    
+
     private void getPhysicianInfo() {
 
-        final String path = "/api01r/system01lst";
+        final String path = xml2
+                ? "/api01rv2/system01lstv2t"
+                : "/api01r/system01lst";
+        
+        final String xml = xml2
+                ? createSystem01ManagereqXml2()
+                : createSystem01ManagereqXml();
+        
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
         qmap.add(CLASS, "02");
 
-        String xml = createSystem01ManagereqXml();
-        
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_XML_UTF8)
                 .type(MEDIATYPE_XML_UTF8)
@@ -184,41 +172,11 @@ public class OrcaApiDelegater implements IOrcaApi {
         
         try {
             Document res = builder.build(new StringReader(resXml));
-            String resResultCode = getElementText(res, API_RESULT);
-            if (!API_NO_ERROR.equals(resResultCode)) {
-                physicianList = new PhysicianResParser().getList(res);
-            }
-        } catch (JDOMException ex) {
-        } catch (IOException ex) {
-        }
-    }
-    
-    private void getPhysicianInfo2() {
-
-        final String path = "/api01rv2/system01lstv2t";
-        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add(CLASS, "02");
-
-        String xml = createSystem01ManagereqXml2();
-        
-        ClientResponse response = getResource(path, qmap)
-                .accept(MEDIATYPE_XML_UTF8)
-                .type(MEDIATYPE_XML_UTF8)
-                .post(ClientResponse.class, xml);
-        
-        int status = response.getStatus();
-        String resXml = response.getEntity(String.class);
-        debug(status, resXml);
-        
-        if (status != HTTP200) {
-            return;
-        }
-        
-        try {
-            Document res = builder.build(new StringReader(resXml));
-            String resResultCode = getElementText2(res, API_RESULT);
-            if (!API_NO_ERROR.equals(resResultCode)) {
-                physicianList = new PhysicianResParser().getList2(res);
+            PhysicianResParser parser = new PhysicianResParser(res);
+            String code = parser.getApiResult();
+            String msg = parser.getApiResultMessage();
+            if (!API_NO_ERROR.equals(code)) {
+                physicianList = parser.getList();
             }
         } catch (JDOMException ex) {
         } catch (IOException ex) {
@@ -263,47 +221,6 @@ public class OrcaApiDelegater implements IOrcaApi {
 
     private WebResource.Builder getResource(String path, MultivaluedMap<String, String> qmap) {
         return OrcaApiClient.getInstance().getResource(path, qmap);
-    }
-    
-    /**
-     * JDOM Document から，指定した attribute を持つ最初の Element を返す
-     * @param doc
-     * @param attr
-     * @return 
-     */
-    private Element getElement(Document doc, String attr) {
-        Element ret = null;
-        
-        Iterator iter = doc.getDescendants(new ElementFilter("string"));        
-        while(iter.hasNext()) {
-            
-            Element e = (Element) iter.next();
-            Attribute a = e.getAttribute("name");
-            
-            if (a != null && attr.equals(a.getValue())) {
-                ret = e;
-                break;
-            }
-        }
-        return ret;
-    }
-    
-    private String getElementText(Document doc, String attr) {
-        
-        Element elm = getElement(doc, attr);
-        if (elm == null) {
-            return null;
-        }
-        return elm.getText();
-    }
-    
-    private String getElementText2(Document doc, String name) {
-        Iterator itr = doc.getDescendants(new ElementFilter(name));
-        while(itr.hasNext()) {
-            Element elm = (Element) itr.next();
-            return elm.getText();
-        }
-        return null;
     }
     
     private void debug(int status, String entity) {

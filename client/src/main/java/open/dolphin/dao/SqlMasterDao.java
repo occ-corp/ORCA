@@ -40,14 +40,14 @@ public final class SqlMasterDao extends SqlDaoBean {
     private static final String QUERY_DISEASE_BY_NAME = SELECT_TBL_BYOMEI
             + "where (byomei ~ ? or byomeikana ~ ?) and haisiymd >= ?";
     
-    private static final String QUERY_DISEASE_BY_NAME_46 =
-            QUERY_DISEASE_BY_NAME.replace("icd10", "icd10_1");
+    private static final String QUERY_DISEASE_BY_NAME_45 =
+            QUERY_DISEASE_BY_NAME.replace("icd10_1", "icd10");
     
     private static final String QUERY_DISEASE_BY_CODE = SELECT_TBL_BYOMEI
             + "where byomeicd ~ ? and haisiymd >= ?";
     
-    private static final String QUERY_DISEASE_BY_CODE_46 = 
-            QUERY_DISEASE_BY_CODE.replace("icd10", "icd10_1");
+    private static final String QUERY_DISEASE_BY_CODE_45 = 
+            QUERY_DISEASE_BY_CODE.replace("icd10_1", "icd10");
     
     
     private static final SqlMasterDao instance;
@@ -255,8 +255,8 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
 //masuda^ Version46 対応
-        String sql = SyskanriInfo.getInstance().isOrca46()
-                ? QUERY_DISEASE_BY_NAME_46
+        String sql = SyskanriInfo.getInstance().isOrca45()
+                ? QUERY_DISEASE_BY_NAME_45
                 : QUERY_DISEASE_BY_NAME;
 //masuda$
 
@@ -301,8 +301,8 @@ public final class SqlMasterDao extends SqlDaoBean {
 
         // SQL 文
 //masuda^ Version46 対応
-        String sql = SyskanriInfo.getInstance().isOrca46()
-                ? QUERY_DISEASE_BY_CODE_46
+        String sql = SyskanriInfo.getInstance().isOrca45()
+                ? QUERY_DISEASE_BY_CODE_45
                 : QUERY_DISEASE_BY_CODE;
 //masuda$
 

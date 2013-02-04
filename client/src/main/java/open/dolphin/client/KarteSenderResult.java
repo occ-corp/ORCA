@@ -8,6 +8,7 @@ package open.dolphin.client;
 public class KarteSenderResult {
     
     public static final String NO_ERROR = "00";
+    public static final String REPLACED = "80";
     public static final String ERROR = "XXX";    // unclassified errors
     public static final String SKIPPED = "skipped";
     
@@ -57,7 +58,9 @@ public class KarteSenderResult {
     }
     
     public boolean isError() {
-        if (NO_ERROR.equals(code) || SKIPPED.equals(code)) {
+        if (NO_ERROR.equals(code) 
+                || REPLACED.equals(code)
+                || SKIPPED.equals(code)) {
             return false;
         }
         return true;

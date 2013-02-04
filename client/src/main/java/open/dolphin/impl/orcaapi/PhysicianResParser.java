@@ -10,7 +10,7 @@ import org.jdom2.Element;
  * 
  * @author masuda, Mausda Naika
  */
-public class PhysicianResParser implements IOrcaApi {
+public class PhysicianResParser extends AbstractOrcaApiParser {
     
     private enum ATTRIBUTE {
             Code, WholeName, WholeName_inKana, Physician_Permission_Id, 
@@ -19,7 +19,15 @@ public class PhysicianResParser implements IOrcaApi {
             other
     };
     
-    public List<PhysicianInfo> getList(Document doc) {
+    public PhysicianResParser(Document doc) {
+        super(doc);
+    }
+    
+    public List<PhysicianInfo> getList() {
+        return xml2 ? getList2() : getList1();
+    }
+    
+    private List<PhysicianInfo> getList1() {
         
         List<PhysicianInfo> list = new ArrayList<PhysicianInfo>();
         Element arrayElm = doc.getRootElement().getChild(RECORD).getChild(RECORD).getChild(ARRAY);
@@ -79,7 +87,7 @@ public class PhysicianResParser implements IOrcaApi {
         return list;
     }
     
-    public List<PhysicianInfo> getList2(Document doc) {
+    private List<PhysicianInfo> getList2() {
 
         Element record = doc.getRootElement().getChild("physicianres");
         if (record == null) {

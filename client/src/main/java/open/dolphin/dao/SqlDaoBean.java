@@ -47,6 +47,7 @@ public class SqlDaoBean extends DaoBean {
 //masuda^
     protected static final String ORCA_DB_VER45 = "040500-1";
     protected static final String ORCA_DB_VER46 = "040600-1";
+    protected static final String ORCA_DB_VER47 = "040700-1";
 
     protected static final String SELECT_TBL_TENSU =
             "select srycd,name,kananame,taniname,tensikibetu,"
@@ -61,7 +62,7 @@ public class SqlDaoBean extends DaoBean {
             + "from tbl_tensu t ";
     
     protected static final String SELECT_TBL_BYOMEI =
-            "select byomeicd,byomei,byomeikana,icd10,haisiymd,tokskncd "
+            "select byomeicd,byomei,byomeikana,icd10_1,haisiymd,tokskncd "
             + "from tbl_byomei ";
 
     protected static final String HOSPNUM_SRYCD = " and hospnum = ? order by srycd";

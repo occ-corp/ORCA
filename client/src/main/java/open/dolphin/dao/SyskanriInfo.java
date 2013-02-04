@@ -22,6 +22,7 @@ public class SyskanriInfo extends SqlDaoBean {
 
     public static final String ORCA46 = "orca46";
     public static final String ORCA45 = "orca45";
+    public static final String ORCA47 = "orca47";
     
     private String orcaVer;     // "orca46" or "orca45"
     
@@ -65,9 +66,17 @@ public class SyskanriInfo extends SqlDaoBean {
         initialized &= getSyskanri1005();
         initialized &= getSyskanri1010();
     }
+
+    public boolean isOrca45() {
+        return ORCA45.equals(orcaVer);
+    }
     
     public boolean isOrca46() {
         return ORCA46.equals(orcaVer);
+    }
+    
+    public boolean isOrca47() {
+        return ORCA47.equals(orcaVer);
     }
     
     public final int getHospNumFromSysKanriInfo() {
@@ -160,8 +169,10 @@ public class SyskanriInfo extends SqlDaoBean {
 
         if (ORCA_DB_VER45.equals(dbVersion)) {
             orcaVer = ORCA45;
-        } else {
+        } else if (ORCA_DB_VER46.equals(dbVersion)) {
             orcaVer = ORCA46;
+        } else {
+            orcaVer = ORCA47;
         }
         return success;
     }
