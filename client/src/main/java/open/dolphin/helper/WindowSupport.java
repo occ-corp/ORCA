@@ -2,20 +2,27 @@ package open.dolphin.helper;
 
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
-import open.dolphin.client.ChartFrame;
+import open.dolphin.client.ClientContext;
 
 /**
  * Window Menu をサポートするためのクラス。
  * Factory method で WindowMenu をもつ JFrame を生成する。
  *
  * @author Minagawa,Kazushi
+ * @author modified by masuda, Masuda Naika
  */
 public class WindowSupport implements MenuListener {
     
-    private static ArrayList<WindowSupport> allWindows = new ArrayList<WindowSupport>(5);
+    private static List<WindowSupport> allWindows;
+    
+    // JFrameとChartMediatorのマップ　フォーカス処理に使用
+    private static Map<JFrame, Object> mediatorMap;
     
     private static final String WINDOW_MWNU_NAME = "ウインドウ";
     
@@ -32,6 +39,16 @@ public class WindowSupport implements MenuListener {
     // Window Action
     private Action windowAction;
     
+    // ChartMediator
+    private Object mediator;
+    
+    private static final ImageIcon icon = ClientContext.getClientContextStub().getImageIcon("dolphinIcon.png");
+    
+    static {
+        allWindows = new ArrayList<WindowSupport>();
+        mediatorMap = new HashMap<JFrame, Object>();
+    }
+    
     /**
      * WindowSupportを生成する。
      * @param title フレームタイトル
@@ -40,10 +57,10 @@ public class WindowSupport implements MenuListener {
     public static WindowSupport create(String title) {
         
         // フレームを生成する
-//masuda^
-        //final JFrame frame = new JFrame(title);
-        final JFrame frame = new ChartFrame(title);
-//masuda$
+        final JFrame frame = new JFrame(title);
+        // dolphinアイコンをセット
+        frame.setIconImage(icon.getImage());
+
         // メニューバーを生成する
         JMenuBar menuBar = new JMenuBar();
         
@@ -89,18 +106,26 @@ public class WindowSupport implements MenuListener {
         return ret;
     }
     
-    public static ArrayList getAllWindows() {
+    public static Object getRelatedMediator(JFrame frame) {
+        return mediatorMap.get(frame);
+    }
+    
+    public static List<WindowSupport> getAllWindows() {
         return allWindows;
     }
     
     public static void windowOpened(WindowSupport opened) {
         // リストに追加する
         allWindows.add(opened);
+        // mediatorMapに追加する
+        mediatorMap.put(opened.getFrame(), opened.getMediator());
     }
     
     public static void windowClosed(WindowSupport closed) {
         // リストから削除する
         allWindows.remove(closed);
+        // mediatorMapから削除する
+        mediatorMap.remove(closed.getFrame());
     }
     
     public static boolean contains(WindowSupport toCheck) {
@@ -130,6 +155,14 @@ public class WindowSupport implements MenuListener {
     
     public Action getWindowAction() {
         return windowAction;
+    }
+    
+    // ChartMediator(MainWindowの場合はMediator)をセットする
+    public void setMediator(Object mediator) {
+        this.mediator = mediator;
+    }
+    public Object getMediator() {
+        return mediator;
     }
     
     /**

@@ -457,17 +457,16 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         JMenuBar myMenuBar = windowSupport.getMenuBar();
 
         // チャートの JFrame オブジェクトを得る
-//masuda^   拡張JFrameを使う
-        //JFrame frame = windowSupport.getFrame();
-        ChartFrame frame = (ChartFrame) windowSupport.getFrame();
-//masdua$
+        JFrame frame = windowSupport.getFrame();
+
         frame.setName("chartFrame");
 
         // ChartMediator を生成する
         mediator = new ChartMediator(this);
 
 //masuda^
-        frame.setChartMediator(mediator);
+        // windowSupportにmediatorを登録する
+        windowSupport.setMediator(mediator);
 
         // 患者インスペクタを生成する
         inspector = new PatientInspector(this);
@@ -2215,12 +2214,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 //masuda^
     // ChartDocumentの別ウィンドウを開く
     private HashMap<ChartDocument, JFrame> inactiveProvidersMap;  // 別ウィンドウで開いているChartDocumentとそのJFrame
-    // 別ウィンドウを記録させるためだけの空クラス
-    private class ChartImplWindow extends ChartFrame {
-        private ChartImplWindow(String title) {
-            super(title);
-        }
-    }
 
     public AdmissionModel getAdmissionModel() {
         PatientModel pm = getPatientVisit().getPatientModel();
@@ -2348,8 +2341,11 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         sb.append(" - ");
         sb.append(doc.getTitle());
         sb.append(" - 別ウィンドウ");
-        ChartImplWindow frame = new ChartImplWindow(sb.toString());
-        frame.setChartMediator(getChartMediator());
+        WindowSupport ws = WindowSupport.create(sb.toString());
+        JFrame frame = ws.getFrame();
+        frame.setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        ws.setMediator(getChartMediator());
+        
         frame.setContentPane(doc.getUI());
         frame.pack();
         // ウィンドウサイズを記録

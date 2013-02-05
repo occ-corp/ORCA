@@ -17,6 +17,7 @@ import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import open.dolphin.client.*;
 import open.dolphin.exception.DolphinException;
+import open.dolphin.helper.WindowSupport;
 import open.dolphin.tr.AbstractImagePanelTransferHandler;
 import open.dolphin.tr.FileListTransferable;
 
@@ -69,12 +70,16 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
             JPopupMenu contextMenu = new JPopupMenu();
             JMenuItem micp = new JMenuItem("コピー");
             Container c = imagePanel.getTopLevelAncestor();
-            if (c instanceof ChartFrame) {
-                ChartMediator mediator = ((ChartFrame) c).getChartMediator();
-                Action copy = mediator.getAction(GUIConst.ACTION_COPY);
-                copy.setEnabled(imageLabel != null);
-                micp.setAction(copy);
-                contextMenu.add(micp);
+            if (c instanceof JFrame) {
+                JFrame frame = (JFrame) c;
+                Object objMediator = WindowSupport.getRelatedMediator(frame);
+                if (objMediator != null && objMediator instanceof ChartMediator) {
+                    ChartMediator mediator = (ChartMediator) objMediator;
+                    Action copy = mediator.getAction(GUIConst.ACTION_COPY);
+                    copy.setEnabled(imageLabel != null);
+                    micp.setAction(copy);
+                    contextMenu.add(micp);
+                }
             }
             contextMenu.show(imagePanel, e.getX(), e.getY());
         }

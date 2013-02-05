@@ -427,6 +427,10 @@ public class Dolphin implements MainWindow {
         appMenu.setMenuSupports(mediator, null);
         appMenu.build(myMenuBar);
         mediator.registerActions(appMenu.getActionMap());
+        
+//masuda^   windowSupportにmediatorを登録する
+        windowSupport.setMediator(mediator);
+//masuda$
 
         // mainWindowのコンテントを生成しFrameに追加する
         StringBuilder sb = new StringBuilder();

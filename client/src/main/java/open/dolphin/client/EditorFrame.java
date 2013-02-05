@@ -296,18 +296,16 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         
         JMenuBar myMenuBar = windowSupport.getMenuBar();
         
-//masuda^   拡張JFrameを使う
-        //JFrame frame = windowSupport.getFrame();
-        ChartFrame frame = (ChartFrame) windowSupport.getFrame();
-//masuda$
+        JFrame frame = windowSupport.getFrame();
         
         frame.setName("editorFrame");
         content = new JPanel(new BorderLayout());
         
         // Mediator が変更になる
         mediator = new ChartMediator(this);
-//masuda^   ChartFrameにmediatorを登録する
-        frame.setChartMediator(mediator);
+        
+//masuda^   windowSupportにmediatorを登録する
+        windowSupport.setMediator(mediator);
 //masuda$
         
         //  MenuBar を生成する

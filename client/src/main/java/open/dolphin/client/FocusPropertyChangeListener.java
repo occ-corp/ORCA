@@ -5,8 +5,10 @@ import java.awt.KeyboardFocusManager;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
+import javax.swing.JFrame;
 import javax.swing.TransferHandler;
 import javax.swing.text.JTextComponent;
+import open.dolphin.helper.WindowSupport;
 import open.dolphin.tr.IKarteTransferHandler;
 
 /**
@@ -70,36 +72,44 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
         if (newComp == null || newComp == oldComp) {
             return;
         }
-        
-        // focusOwnerになるのはJTextComponent とComponentHolder
+
+        // focusOwnerになるのはJTextComponent とComponentHolderとImagePanel
         // native, numbusはコレしないとダメ。ボタンなどもfocus取ってしまう
-        if (!(newComp instanceof JTextComponent || newComp instanceof ComponentHolder)) {
+        if (!(newComp instanceof JTextComponent 
+                || newComp instanceof ComponentHolder 
+                || newComp instanceof ImagePanel)) {
+            return;
+        }
+
+        // get Mediator from focused JFrame
+        Container parent = newComp.getTopLevelAncestor();
+        if (!(parent instanceof JFrame)) {
+            return;
+        }
+
+        JFrame frame = (JFrame) parent;
+        Object objMediator = WindowSupport.getRelatedMediator(frame);
+        if (objMediator == null) {
             return;
         }
         
-        // ChartMediator is always in ChartFrame.class
-        Container parent = newComp.getTopLevelAncestor();
-        if (parent instanceof ChartFrame) {
-
+        if (objMediator instanceof ChartMediator) {
+            ChartMediator mediator = (ChartMediator) objMediator;
             // exit old focused component
-            if (oldComp != null) {
+            if (oldComp != null) { 
                 TransferHandler tr = oldComp.getTransferHandler();
                 if (tr != null && tr instanceof IKarteTransferHandler) {
                     IKarteTransferHandler handler = (IKarteTransferHandler) tr;
                     handler.exit(oldComp);
                 }
             }
-
-            // enter new focused karte compositor
-            ChartFrame frame = (ChartFrame) parent;
-            // get ChartMediator from ChartFrame
-            ChartMediator mediator = frame.getChartMediator();
-            if (mediator != null) {
-                mediator.setCurrentFocusOwner(newComp);
-            }
-
-            oldComp = newComp;
-            modifiersEx = 0;
+            mediator.setCurrentFocusOwner(newComp);
+            
+        } else if (objMediator instanceof open.dolphin.client.Dolphin.Mediator) {
+            // do nothing
         }
+
+        oldComp = newComp;
+        modifiersEx = 0;
     }
 }

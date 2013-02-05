@@ -7,6 +7,7 @@ import java.awt.event.MouseEvent;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
 import javax.swing.TransferHandler;
+import open.dolphin.client.GUIConst;
 
 /**
  * AbstractImagePanelTransferHandler
@@ -46,6 +47,9 @@ public abstract class AbstractImagePanelTransferHandler extends TransferHandler 
 
     @Override
     public void enter(JComponent jc, ActionMap map) {
+        map.get(GUIConst.ACTION_COPY).setEnabled(true);
+        map.get(GUIConst.ACTION_CUT).setEnabled(false);
+        map.get(GUIConst.ACTION_PASTE).setEnabled(false);
     }
 
     @Override

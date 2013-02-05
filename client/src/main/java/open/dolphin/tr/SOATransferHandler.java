@@ -292,6 +292,7 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
             }
         } catch (UnsupportedFlavorException ex) {
         } catch (IOException ex) {
+        } catch (NullPointerException ex) {
         }
         return false;
     }
