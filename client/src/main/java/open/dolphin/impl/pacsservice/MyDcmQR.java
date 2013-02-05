@@ -63,6 +63,8 @@ public class MyDcmQR extends DcmQR {
         for (int tag : STUDY_RETURN_KEYS) {
             getKeys().putNull(tag, null);
         }
+        // SpecificCharacterは必ず取得する
+        getKeys().putNull(Tag.SpecificCharacterSet, VR.CS);
     }
 
     // 画像取得
