@@ -1,6 +1,11 @@
 package open.dolphin.server.pvt;
 
-import java.io.*;
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.infomodel.PatientVisitModel;
 
@@ -41,22 +46,22 @@ public class FEV70Exporter {
             if (!oldBD.equals(newBD) || !oldName.equals(newName) || !oldGender.equals(newGender)) {
                 makeFile(pvt);
             }
-        } catch (FileNotFoundException ex) {
         } catch (IOException ex) {
         }
     }
 
-    private void makeFile(PatientVisitModel model) throws FileNotFoundException, IOException {
+    private void makeFile(PatientVisitModel model) throws IOException {
 
         if (!sharePath.endsWith(File.separator)) {
             sharePath = sharePath + File.separator;
         }
 
-        File folder = new File(sharePath);
-        if (!folder.exists()) {
-            folder.mkdir();
+        FileSystem fs = FileSystems.getDefault();
+        Path folder = fs.getPath(sharePath);
+        if (!Files.exists(folder)) {
+            Files.createDirectories(folder);
         }
-
+        
         String patientId = model.getPatientId();
         String patientName = model.getPatientName();
         String patientSex = "1";
@@ -74,26 +79,16 @@ public class FEV70Exporter {
         sb.append(",");
         sb.append(patientBD);
         sb.append(",,,,,,,,\n");
+        
+        byte[] content = sb.toString().getBytes("SJIS");
 
         String fileName = sharePath + "ID_" + patientId;
-        File oldFile = new File(fileName + ".cs_");
-        if (oldFile.exists()) {
-            oldFile.delete();
-        }
-
-        FileOutputStream fos = new FileOutputStream(fileName + ".cs_");
-        OutputStreamWriter osw = new OutputStreamWriter(fos);
-        BufferedWriter bw = new BufferedWriter(osw);
-        bw.write(sb.toString());
-        bw.close();
-        osw.close();
-
-        oldFile = new File(fileName + ".csv");
-        if (oldFile.exists()) {
-            oldFile.delete();
-        }
-
-        File objFile = new File(fileName + ".cs_");
-        objFile.renameTo(new File(fileName + ".csv"));
+        Path cs_File = fs.getPath(fileName + ".cs_");
+        Path csvFile = fs.getPath(fileName + ".csv");
+        
+        Files.deleteIfExists(cs_File);
+        Files.write(cs_File, content);
+        Files.deleteIfExists(csvFile);
+        Files.move(cs_File, csvFile);
     }
 }
