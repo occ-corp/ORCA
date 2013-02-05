@@ -61,7 +61,14 @@ public class FEV70Exporter {
         if (!Files.exists(folder)) {
             Files.createDirectories(folder);
         }
-
+        
+/*  for JDK6
+        File folder = new File(sharePath);
+        if (!folder.exists()) {
+            folder.mkdir();
+        }
+*/
+        
         String patientId = model.getPatientId();
         String patientName = model.getPatientName();
         String patientSex = "1";
@@ -90,5 +97,28 @@ public class FEV70Exporter {
         Files.write(cs_File, content);
         Files.deleteIfExists(csvFile);
         Files.move(cs_File, csvFile);
+        
+/*  for JDK6
+        String fileName = sharePath + "ID_" + patientId;
+        File oldFile = new File(fileName + ".cs_");
+        if (oldFile.exists()) {
+            oldFile.delete();
+        }
+
+        FileOutputStream fos = new FileOutputStream(fileName + ".cs_");
+        OutputStreamWriter osw = new OutputStreamWriter(fos);
+        BufferedWriter bw = new BufferedWriter(osw);
+        bw.write(sb.toString());
+        bw.close();
+        osw.close();
+
+        oldFile = new File(fileName + ".csv");
+        if (oldFile.exists()) {
+            oldFile.delete();
+        }
+
+        File objFile = new File(fileName + ".cs_");
+        objFile.renameTo(new File(fileName + ".csv"));
+*/
     }
 }
