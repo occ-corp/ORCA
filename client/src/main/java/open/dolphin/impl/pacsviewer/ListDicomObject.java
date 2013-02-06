@@ -41,11 +41,12 @@ public class ListDicomObject implements Comparable {
         if (object == null) {
             return "";
         }
-        String str;
-        if (charSet == null) {
-            str = object.getString(tag);
-        } else {
-            str = charSet.decode(object.getBytes(tag));
+        String str = object.getString(tag);
+        if (charSet != null) {
+            try {
+                str = charSet.decode(object.getBytes(tag));
+            } catch (Exception ex) {
+            }
         }
         return (str == null) ? "" : str;
     }
