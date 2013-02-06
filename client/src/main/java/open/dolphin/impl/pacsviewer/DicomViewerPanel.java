@@ -12,6 +12,10 @@ import java.awt.image.RasterFormatException;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import javax.swing.JPanel;
 import open.dolphin.util.ImageTool;
 
@@ -55,7 +59,9 @@ public class DicomViewerPanel extends JPanel {
     private final static DecimalFormat frmt = new DecimalFormat("0.0");
     
     private DicomViewer viewer;
-
+    private LazyRepainter lazy;
+    
+    
     public DicomViewerPanel(DicomViewer viewer) {
         this.viewer = viewer;
         measure = new ArrayList<PointPair>();
@@ -64,6 +70,50 @@ public class DicomViewerPanel extends JPanel {
         this.addMouseWheelListener(adapter);
         this.addMouseListener(adapter);
         this.addMouseMotionListener(adapter);
+        lazy = new LazyRepainter();
+    }
+    
+    public void dispose() {
+        lazy.shutdownExecutor();
+    }
+    
+    private class LazyRepainter {
+
+        private ExecutorService exec;
+        private Future future;
+
+        private LazyRepainter() {
+            exec = Executors.newSingleThreadExecutor();
+        }
+
+        private void lazyRepaint() {
+            try {
+                 future.cancel(true);
+            } catch (Exception ex) {
+            }
+
+            future = exec.submit(new Runnable() {
+
+                @Override
+                public void run() {
+                    repaint();
+                }
+            });
+        }
+        
+        private void shutdownExecutor() {
+
+            try {
+                exec.shutdown();
+                if (!exec.awaitTermination(5, TimeUnit.SECONDS)) {
+                    exec.shutdownNow();
+                }
+            } catch (InterruptedException ex) {
+                exec.shutdownNow();
+            } catch (NullPointerException ex) {
+            }
+            exec = null;
+        }
     }
 
     // AffineTransformとLookup Tableを適応した画像を表示
@@ -143,7 +193,8 @@ public class DicomViewerPanel extends JPanel {
     public void setImage(BufferedImage image) {
         this.image = image;
         resetImage2();
-        repaint();
+        //repaint();
+        lazy.lazyRepaint();
     }
 
     // 移動・拡大を初期値に戻し、計測を消去。
@@ -161,7 +212,8 @@ public class DicomViewerPanel extends JPanel {
         measure.clear();
         setScale();
         setAffineTransform();
-        repaint();
+        //repaint();
+        lazy.lazyRepaint();
     }
 
     // 画像情報を設定する
@@ -172,7 +224,8 @@ public class DicomViewerPanel extends JPanel {
     // 画像情報を表示するかのフラグ
     public void setShowInfo(boolean b) {
         showInfo = b;
-        repaint();
+        //repaint();
+        lazy.lazyRepaint();
     }
 
     // 画像のPixel spacingを設定する
@@ -190,7 +243,8 @@ public class DicomViewerPanel extends JPanel {
     public void setGamma(double d) {
         gamma = d;
         setLUT();
-        repaint();
+        //repaint();
+        lazy.lazyRepaint();
     }
 
     public double getGamma() {
@@ -294,7 +348,8 @@ public class DicomViewerPanel extends JPanel {
                     // マウスカーソルが中心になるようにbasePointを移動させる
                     setBasePosAfterZoom(e.getPoint(), oldScale);
                     setAffineTransform();
-                    repaint();
+                    //repaint();
+                    lazy.lazyRepaint();
                 }
             } else {
                 if (count > 0) {
@@ -356,7 +411,8 @@ public class DicomViewerPanel extends JPanel {
                         }
                         measure.set(0, new PointPair(startP, endP));
                     }
-                    repaint();
+                    //repaint();
+                    lazy.lazyRepaint();
                     break;
                 case MouseEvent.BUTTON3:
                     // Window width / level
@@ -373,7 +429,8 @@ public class DicomViewerPanel extends JPanel {
                         windowLevel = maxWL;
                     }
                     setLUT();
-                    repaint();
+                    //repaint();
+                    lazy.lazyRepaint();
                     break;
             }
         }

@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import open.dolphin.delegater.ChartEventDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
@@ -38,7 +39,7 @@ public class ChartEventListener {
     private Thread thread;
     
     // 状態変化を各listenerに通知するタスク
-    private Executor exec;
+    private ExecutorService exec;
     
     private static final ChartEventListener instance;
 
@@ -146,14 +147,29 @@ public class ChartEventListener {
     }
 
     public void stop() {
-        
+
         listenTask.stop();
         thread.interrupt();
         thread = null;
+        shutdownExecutor();
+    }
+
+    private void shutdownExecutor() {
+
+        try {
+            exec.shutdown();
+            if (!exec.awaitTermination(5, TimeUnit.SECONDS)) {
+                exec.shutdownNow();
+            }
+        } catch (InterruptedException ex) {
+            exec.shutdownNow();
+        } catch (NullPointerException ex) {
+        }
+        exec = null;
     }
     
 /*
-    // Commetでサーバーと同期するスレッド
+    // Cometでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
         private boolean isRunning;

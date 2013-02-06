@@ -92,6 +92,10 @@ public class DicomViewer {
         thumbnailTableModel = null;
         frame = null;
         
+        // ViewerPanelを始末
+        viewerPanel.dispose();
+        viewerPanel = null;
+        
         try {
             exec.shutdown();
             if (!exec.awaitTermination(10, TimeUnit.MILLISECONDS)) {
