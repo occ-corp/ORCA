@@ -85,6 +85,8 @@ public class KarteScrollerPanel extends JPanel {
         scrollTimer.stop();
         scrollTimer = null;
         scrollAdapter = null;
+        // memory leak?
+        removeAll();
     }
 
     // スクロールはKarteViewer毎にするMouseWheelListener

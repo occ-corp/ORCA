@@ -97,6 +97,8 @@ public class KarteViewer2 extends KarteViewer {
         soaPane = null;
         pPane.clear();
         pPane = null;
+        // memory leak?
+        dispose();
     }
 
     /**

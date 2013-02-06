@@ -14,7 +14,7 @@ public class KarteViewer1 extends KarteViewer {
 
     // SOA Pane
     private KartePane soaPane;
-
+    
     private void initialize() {
 
         KartePanel kartePanel = KartePanel.createKartePanel(KartePanel.MODE.SINGLE_VIEWER, false);
@@ -74,6 +74,8 @@ public class KarteViewer1 extends KarteViewer {
     public void stop() {
         soaPane.clear();
         soaPane = null;
+        // memory leak?
+        dispose();
     }
 
     /**

@@ -149,6 +149,12 @@ public abstract class KarteViewer extends AbstractChartDocument {
     protected final void setKartePanel(KartePanel kartePanel) {
         this.kartePanel = kartePanel;
     }
+    
+    // memory leak?
+    protected final void dispose() {
+        kartePanel.removeAll();
+        kartePanel = null;
+    }
 
     public final String getDocType() {
 
