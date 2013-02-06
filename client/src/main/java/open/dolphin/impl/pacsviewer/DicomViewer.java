@@ -93,7 +93,6 @@ public class DicomViewer {
         frame = null;
         
         // ViewerPanelを始末
-        viewerPanel.dispose();
         viewerPanel = null;
         
         try {
