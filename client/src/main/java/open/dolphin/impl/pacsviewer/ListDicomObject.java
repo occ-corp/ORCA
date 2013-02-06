@@ -1,5 +1,6 @@
 package open.dolphin.impl.pacsviewer;
 
+import java.io.UnsupportedEncodingException;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.SpecificCharacterSet;
 import org.dcm4che2.data.Tag;
@@ -11,6 +12,8 @@ import org.dcm4che2.data.Tag;
  */
 public class ListDicomObject implements Comparable {
 
+    private static final String[] jisCharsets = {"ISO 2022 IR 13","ISO 2022 IR 87","ISO 2022 IR 159"};
+    
     private DicomObject object;
     private String ptId;
     private String ptName;
@@ -43,12 +46,28 @@ public class ListDicomObject implements Comparable {
         }
         String str = object.getString(tag);
         if (charSet != null) {
+            byte[] bytes = object.getBytes(tag);
             try {
-                str = charSet.decode(object.getBytes(tag));
+                str = charSet.decode(bytes);
             } catch (Exception ex) {
+                if (isJis(object.getString(Tag.SpecificCharacterSet))) {
+                    try {
+                        str = new String(bytes, "JIS");
+                    } catch (UnsupportedEncodingException ex1) {
+                    }
+                }
             }
         }
         return (str == null) ? "" : str;
+    }
+    
+    private boolean isJis(String charSets) {
+        for (String str : jisCharsets) {
+            if (charSets.contains(str)) {
+                return true;
+            }
+        }
+        return false;
     }
 
     public DicomObject getDicomObject() {
