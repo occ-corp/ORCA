@@ -33,7 +33,7 @@ public class ListDicomObject implements Comparable {
         ptSex = getString(Tag.PatientSex);
         ptBirthDate = getString(Tag.PatientBirthDate);
         modalities = getString(Tag.ModalitiesInStudy);
-        description = getString(Tag.StudyDescription);
+        description = getString2(Tag.StudyDescription);
         studyDate = getString(Tag.StudyDate);
         numberOfImage = getString(Tag.NumberOfStudyRelatedInstances);
     }
@@ -45,6 +45,18 @@ public class ListDicomObject implements Comparable {
             return "";
         }
         String str = object.getString(tag);
+        return (str == null) ? "" : str;
+    }
+    
+    // 泥沼ｗ
+    private String getString2(int tag) {
+        
+        if (object == null) {
+            return "";
+        }
+        
+        String str = object.getString(tag);
+        
         if (charSet != null) {
             byte[] bytes = object.getBytes(tag);
             try {
@@ -62,6 +74,11 @@ public class ListDicomObject implements Comparable {
     }
     
     private boolean isJis(String charSets) {
+        
+        if (charSets == null || charSets.isEmpty()) {
+            return false;
+        }
+        
         for (String str : jisCharsets) {
             if (charSets.contains(str)) {
                 return true;
