@@ -115,9 +115,16 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
 
     @Override
     public void stop() {
+        
         listTableModel = null;
         entryList.clear();
         entryList = null;
+        
+        // memory leak?
+        if (imagePanel != null) {
+            imagePanel.removeAll();
+            imagePanel = null;
+        }
         
         shutdownExecutor();
         

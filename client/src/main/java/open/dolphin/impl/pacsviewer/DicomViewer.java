@@ -6,7 +6,6 @@ import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.IOException;
 import java.text.DecimalFormat;
 import java.util.List;
 import java.util.concurrent.ExecutorService;
@@ -89,6 +88,8 @@ public class DicomViewer {
         boolean b = showInfoCb.isSelected();
         Project.setBoolean(MiscSettingPanel.PACS_SHOW_IMAGEINFO, b);
         
+        // memory leak?
+        thumbnailTableModel.clear();
         thumbnailTableModel = null;
         frame = null;
         
@@ -368,18 +369,17 @@ public class DicomViewer {
 
             int row = imageIndex % columnCount;
             int column = imageIndex / columnCount;
+            try {
             DicomImageEntry entry = (DicomImageEntry) thumbnailTableModel.getValueAt(row, column);
             DicomObject object = entry.getDicomObject();
             boolean isCR = "CR".equals(object.getString(Tag.Modality));
             gammaBtn.setSelected(isCR);
-
-            try {
                 setStudyInfoLabel(object);
                 BufferedImage image = ImageTool.getDicomImage(object);
                 viewerPanel.setPixelSpacing(object.getDoubles(Tag.PixelSpacing));
                 viewerPanel.setInfo(new DicomImageInfo(object));
                 viewerPanel.setImage(image);
-            } catch (IOException ex) {
+            } catch (Exception ex) {
             }
         }
     }

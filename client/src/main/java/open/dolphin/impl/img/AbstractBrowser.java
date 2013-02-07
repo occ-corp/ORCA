@@ -8,7 +8,9 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
@@ -245,17 +247,20 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
             return;
         }
 
-        SwingWorker worker = new SwingWorker<List<ImageEntry>, Void>() {
+        //SwingWorker worker = new SwingWorker<List<ImageEntry>, Void>() {
+        SwingWorker worker = new SwingWorker<Void, Void>() {
 
             @Override
-            protected List<ImageEntry> doInBackground() throws Exception {
+            //protected List<ImageEntry> doInBackground() throws Exception {
+            protected Void doInBackground() throws Exception {
 
-                List<ImageEntry> imageList = new ArrayList<ImageEntry>();
+                //List<ImageEntry> imageList = new ArrayList<ImageEntry>();
 
                 File[] imageFiles = imageDirectory.listFiles();
 
                 if (imageFiles == null || imageFiles.length == 0) {
-                    return imageList;
+                    //return imageList;
+                    return null;
                 }
 
                 // Sort
@@ -342,7 +347,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                     entry.setPath(path);
                     entry.setFileName(fileName);
                     entry.setLastModified(last);
-                    imageList.add(entry);
+                    //imageList.add(entry);
                     setImageIcon(entry);
                     
                     String lblName = displayIsFilename() ? entry.getFileName() : SDF.format(entry.getLastModified());
@@ -352,7 +357,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                     imagePanel.add(lbl);
                     imagePanel.revalidate();
                 }
-                return imageList;
+                //return imageList;
+                return null;
             }
         };
 
@@ -421,6 +427,11 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 
     @Override
     public void stop() {
+        // memory leak?
+        if (imagePanel != null) {
+            imagePanel.removeAll();
+            imagePanel = null;
+        }
     }
 
     protected boolean valueIsNullOrEmpty(String test) {
