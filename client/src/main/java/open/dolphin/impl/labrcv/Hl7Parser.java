@@ -7,6 +7,7 @@ import java.util.List;
 import open.dolphin.client.ClientContext;
 import open.dolphin.infomodel.NLaboItem;
 import open.dolphin.infomodel.NLaboModule;
+import open.dolphin.util.CharsetDetector;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -790,7 +791,10 @@ class Hl7 {
 
         try {
 //masuda^
-            String encoding = CharsetDetector.getEncoding(fname);
+            String encoding = CharsetDetector.getFileEncoding(fname);
+            if (!(CharsetDetector.UTF8.equals(encoding))) {
+                encoding = CharsetDetector.SJIS;
+            }
             FileInputStream is = new FileInputStream(fname);
             InputStreamReader in = new InputStreamReader(is, encoding);
             br = new BufferedReader(in);

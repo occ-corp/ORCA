@@ -1,8 +1,8 @@
 package open.dolphin.impl.pacsviewer;
 
 import java.io.UnsupportedEncodingException;
+import open.dolphin.util.CharsetDetector;
 import org.dcm4che2.data.DicomObject;
-import org.dcm4che2.data.SpecificCharacterSet;
 import org.dcm4che2.data.Tag;
 
 /**
@@ -11,8 +11,6 @@ import org.dcm4che2.data.Tag;
  * @author masuda, Masuda Naika
  */
 public class ListDicomObject implements Comparable {
-
-    private static final String[] jisCharsets = {"ISO 2022 IR 13","ISO 2022 IR 87","ISO 2022 IR 159"};
     
     private DicomObject object;
     private String ptId;
@@ -23,11 +21,10 @@ public class ListDicomObject implements Comparable {
     private String description;
     private String studyDate;
     private String numberOfImage;
-    private SpecificCharacterSet charSet;
+
 
     public ListDicomObject(DicomObject obj) {
         object = obj;
-        charSet = obj.getSpecificCharacterSet();
         ptId = getString(Tag.PatientID);
         ptName = getString(Tag.PatientName).replace("^", " ");
         ptSex = getString(Tag.PatientSex);
@@ -48,45 +45,27 @@ public class ListDicomObject implements Comparable {
         return (str == null) ? "" : str;
     }
     
-    // 泥沼ｗ
+    // Descriptionの文字化け対策
     private String getString2(int tag) {
         
         if (object == null) {
             return "";
         }
         
-        String str = object.getString(tag);
-        
-        if (charSet != null) {
-            byte[] bytes = object.getBytes(tag);
+        byte[] bytes = object.getBytes(tag);
+        String encoding = CharsetDetector.getStringEncoding(bytes);
+
+        if (encoding != null) {
             try {
-                str = charSet.decode(bytes);
-            } catch (Exception ex) {
-                if (isJis(object.getString(Tag.SpecificCharacterSet))) {
-                    try {
-                        str = new String(bytes, "JIS");
-                    } catch (UnsupportedEncodingException ex1) {
-                    }
-                }
+                return new String(bytes, encoding);
+            } catch (UnsupportedEncodingException ex) {
             }
         }
-        return (str == null) ? "" : str;
-    }
-    
-    private boolean isJis(String charSets) {
         
-        if (charSets == null || charSets.isEmpty()) {
-            return false;
-        }
-        
-        for (String str : jisCharsets) {
-            if (charSets.contains(str)) {
-                return true;
-            }
-        }
-        return false;
+        return object.getString(tag);
     }
 
+    
     public DicomObject getDicomObject() {
         return object;
     }

@@ -1,5 +1,4 @@
-
-package open.dolphin.impl.labrcv;
+package open.dolphin.util;
 
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -10,10 +9,14 @@ import org.mozilla.universalchardet.UniversalDetector;
  * @author masuda, Masuda Naika
  */
 public class CharsetDetector {
+    
+    public static final String SJIS = "Shift_JIS";
+    public static final String JIS = "ISO-2022-JP";
+    public static final String UTF8 = "UTF-8";
+    public static final String LATIN = "ISO-8859-1";
 
-    public static String getEncoding(String fileName) {
+    public static String getFileEncoding(String fileName) {
         
-        final String SJIS = "SJIS";
         String encoding = null;
         FileInputStream fis = null;
         try {
@@ -34,7 +37,17 @@ public class CharsetDetector {
             } catch (IOException ex) {
             }
         }
+        return encoding;
+    }
+    
+    public static String getStringEncoding(byte[] bytes) {
+
+        UniversalDetector detector = new UniversalDetector(null);
+        detector.handleData(bytes, 0, bytes.length);
+        detector.dataEnd();
+        String encoding = detector.getDetectedCharset();
+        detector.reset();
         
-        return ("UTF-8".equals(encoding)) ? encoding : SJIS;
+        return encoding;
     }
 }
