@@ -54,15 +54,19 @@ public class ListDicomObject implements Comparable {
         
         byte[] bytes = object.getBytes(tag);
         String encoding = CharsetDetector.getStringEncoding(bytes);
+        String str;
 
         if (encoding != null) {
             try {
-                return new String(bytes, encoding);
+                str = new String(bytes, encoding);
             } catch (UnsupportedEncodingException ex) {
+                str = object.getString(tag);
             }
+        } else {
+            str = object.getString(tag);
         }
         
-        return object.getString(tag);
+        return (str == null) ? "" : str;
     }
 
     
