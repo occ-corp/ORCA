@@ -53,7 +53,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/" + String.valueOf(patientPK);
         MultivaluedMap<String, String> qmap= new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
 
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -206,8 +206,8 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/docinfo/" + String.valueOf(spec.getKarteId());
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(spec.getFromDate()));
-        qmap.add("toDate", REST_DATE_FRMT.format(spec.getToDate()));
+        qmap.add("fromDate", toRestFormat(spec.getFromDate()));
+        qmap.add("toDate", toRestFormat(spec.getToDate()));
         qmap.add("includeModified", String.valueOf(spec.isIncludeModifid()));
 
         ClientResponse response = getResource(path, qmap)
@@ -346,7 +346,7 @@ public class  DocumentDelegater extends BusinessDelegater {
             if (i != 0) {
                 sb.append(CAMMA);
             }
-            sb.append(REST_DATE_FRMT.format(froms[i]));
+            sb.append(toRestFormat(froms[i]));
         }
         qmap.add("froms", sb.toString());
         
@@ -356,7 +356,7 @@ public class  DocumentDelegater extends BusinessDelegater {
             if (i != 0) {
                 sb.append(CAMMA);
             }
-            sb.append(REST_DATE_FRMT.format(tos[i]));
+            sb.append(toRestFormat(tos[i]));
         }
         qmap.add("tos", sb.toString());
         qmap.add("entity", spec.getEntity());
@@ -558,7 +558,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         String path = "karte/diagnosis/" + String.valueOf(karteId);
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
         qmap.add("activeOnly", String.valueOf(activeOnly));
 
         ClientResponse response = getResource(path, qmap)
@@ -652,7 +652,7 @@ public class  DocumentDelegater extends BusinessDelegater {
             if (i != 0) {
                 sb.append(CAMMA);
             }
-            sb.append(REST_DATE_FRMT.format(froms[i]));
+            sb.append(toRestFormat(froms[i]));
         }
         qmap.add("froms", sb.toString());
         
@@ -662,7 +662,7 @@ public class  DocumentDelegater extends BusinessDelegater {
             if (i != 0) {
                 sb.append(CAMMA);
             }
-            sb.append(REST_DATE_FRMT.format(tos[i]));
+            sb.append(toRestFormat(tos[i]));
         }
         qmap.add("tos", sb.toString());
 

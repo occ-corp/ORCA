@@ -17,7 +17,6 @@ import open.dolphin.infomodel.ModelUtils;
 public class LetterHelper {
 
     protected static final String SIMPLE_DATE_FORMAT = "yyyy-MM-dd";
-    protected static final SimpleDateFormat SDF = new SimpleDateFormat(SIMPLE_DATE_FORMAT);
 
     protected static void setModelValue(JTextField tf, String value) {
         if (value != null) {
@@ -72,7 +71,8 @@ public class LetterHelper {
 
     protected static Date getSimpleDateFromString(String dateStr) {
         try {
-            Date ret = SDF.parse(dateStr);
+            SimpleDateFormat sdf = new SimpleDateFormat(SIMPLE_DATE_FORMAT);
+            Date ret = sdf.parse(dateStr);
             return ret;
         } catch (ParseException ex) {
             Logger.getLogger(LetterHelper.class.getName()).log(Level.SEVERE, null, ex);

@@ -282,8 +282,8 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String path = RES_BASE + "moduleSearch/" + String.valueOf(karteId);
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
-        qmap.add("toDate", REST_DATE_FRMT.format(toDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
+        qmap.add("toDate", toRestFormat(toDate));
         qmap.add("entities", getConverter().fromList(entities));
 
         ClientResponse response = getResource(path, qmap)
@@ -452,8 +452,8 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String path = RES_BASE + "examHistory/" + String.valueOf(karteId);
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
-        qmap.add("toDate", REST_DATE_FRMT.format(toDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
+        qmap.add("toDate", toRestFormat(toDate));
         
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)
@@ -479,8 +479,8 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String path = RES_BASE + "outOfMed";
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
-        qmap.add("toDate", REST_DATE_FRMT.format(toDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
+        qmap.add("toDate", toRestFormat(toDate));
         qmap.add("yoyuu", String.valueOf(yoyuu));
 
         ClientResponse response = getResource(path, qmap)
@@ -593,8 +593,8 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String path = RES_BASE + "santeiHistory/" + String.valueOf(karteId);
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
-        qmap.add("toDate", REST_DATE_FRMT.format(toDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
+        qmap.add("toDate", toRestFormat(toDate));
         if (srycds != null) {
             qmap.add("srycds", getConverter().fromList(srycds));
         }
@@ -623,8 +623,8 @@ public class MasudaDelegater extends BusinessDelegater {
         
         String path = RES_BASE + "rpHistory/list/" + String.valueOf(karteId);
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
-        qmap.add("toDate", REST_DATE_FRMT.format(toDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
+        qmap.add("toDate", toRestFormat(toDate));
         qmap.add("lastOnly", String.valueOf(lastOnly));
         
         ClientResponse response = getResource(path, qmap)
@@ -690,7 +690,7 @@ public class MasudaDelegater extends BusinessDelegater {
         String path = RES_BASE + "tempKarte/" + String.valueOf(userPk);
         
         MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("fromDate", REST_DATE_FRMT.format(fromDate));
+        qmap.add("fromDate", toRestFormat(fromDate));
         
         ClientResponse response = getResource(path, qmap)
                 .accept(MEDIATYPE_JSON_UTF8)

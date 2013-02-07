@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringReader;
 import java.net.MalformedURLException;
+import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
 import open.dolphin.client.ClientContext;
@@ -122,10 +123,11 @@ public class KartePDFMaker extends AbstractPDFMaker {
             writer.setViewerPreferences(PdfWriter.PageModeUseOutlines);
 
             // フッターに名前とIDを入れる
+            SimpleDateFormat sdf = new SimpleDateFormat(FRMT_DATE_WITH_TIME);
             StringBuilder sb = new StringBuilder();
             sb.append(getPatientId()).append(" ");
             sb.append(getPatientName()).append(" 様 ");
-            sb.append(FRMT_DATE_WITH_TIME.format(new Date()));
+            sb.append(sdf.format(new Date()));
             sb.append("  Page ");
             HeaderFooter footer = new HeaderFooter(new Phrase(sb.toString(), font), true);
             footer.setAlignment(Element.ALIGN_CENTER);
@@ -220,8 +222,9 @@ public class KartePDFMaker extends AbstractPDFMaker {
         Font font = new Font(baseFont, titleFontSize);
         String title = createTitle(model);
         // しおりのタイトルは日付とDocInfo.tilte
+        SimpleDateFormat sdf = new SimpleDateFormat(FRMT_DATE_WITH_TIME);
         StringBuilder sb = new StringBuilder();
-        sb.append(FRMT_DATE_WITH_TIME.format(model.getDocInfoModel().getFirstConfirmDate()));
+        sb.append(sdf.format(model.getDocInfoModel().getFirstConfirmDate()));
         sb.append("\n");
         sb.append(model.getDocInfoModel().getTitle());
         String bookmark = sb.toString();

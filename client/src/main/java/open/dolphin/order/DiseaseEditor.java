@@ -3,6 +3,7 @@ package open.dolphin.order;
 import java.awt.Window;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -355,7 +356,9 @@ public final class DiseaseEditor extends AbstractStampEditor {
             protected List<DiseaseEntry> doInBackground() throws Exception {
 
                 SqlMasterDao dao = SqlMasterDao.getInstance();
-                String d = effectiveFormat.format(new Date());
+                SimpleDateFormat sdf = new SimpleDateFormat(effectiveFormat);
+                String d = sdf.format(new Date());
+
                 boolean b = view.getPartialChk().isSelected();
                 List<DiseaseEntry> result;
 //masuda    修飾語ボタンの処理

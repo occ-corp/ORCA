@@ -20,8 +20,6 @@ public abstract class AbstractUpdaterModule {
     
     protected static final Logger logger = Logger.getLogger("open.dolphin.updater");
     
-    protected static final SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-
     public abstract MsdUpdaterModel start();
 
     public abstract String getVersionDateStr();
@@ -37,6 +35,8 @@ public abstract class AbstractUpdaterModule {
     }
 
     protected MsdUpdaterModel getResult(String memo) {
+        
+        SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
         
         String moduleName = getModuleName();
         Date versionDate = getVersionDate();

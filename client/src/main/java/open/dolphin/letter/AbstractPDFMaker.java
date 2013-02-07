@@ -8,7 +8,6 @@ import java.awt.Desktop;
 import java.awt.Window;
 import java.io.File;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import javax.swing.SwingWorker;
 import open.dolphin.client.Chart;
@@ -63,9 +62,10 @@ public abstract class AbstractPDFMaker {
     private static final String HEISEI_GO_W5 = "HeiseiKakuGo-W5";
     //private static final String DOC_FOOTER = "OpenDolphin, Japanese open source EHR. (c)Digital Globe, Inc.";
     private static final String DOC_FOOTER = "OpenDolphin, Japanese open source EHR. (c)Life Sciences Computing Corp.";
-    protected static final SimpleDateFormat FRMT_DATE_WITH_TIME = new SimpleDateFormat("yyyy/MM/dd HH:mm");
-    protected static final SimpleDateFormat FRMT_FILE_DATE = new SimpleDateFormat("yyyyMMdd");
-    protected static final SimpleDateFormat FRMT_SIMPLE_DATE =  new SimpleDateFormat("yyyy-MM-dd");
+    //protected static final SimpleDateFormat FRMT_DATE_WITH_TIME = new SimpleDateFormat("yyyy/MM/dd HH:mm");
+    //protected static final SimpleDateFormat FRMT_FILE_DATE = new SimpleDateFormat("yyyyMMdd");
+    //protected static final SimpleDateFormat FRMT_SIMPLE_DATE =  new SimpleDateFormat("yyyy-MM-dd");
+    protected static final String FRMT_DATE_WITH_TIME = "yyyy/MM/dd HH:mm";
     
     protected Chart context;
     

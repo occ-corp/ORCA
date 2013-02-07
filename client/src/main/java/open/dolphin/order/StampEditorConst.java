@@ -1,7 +1,4 @@
-
 package open.dolphin.order;
-
-import java.text.SimpleDateFormat;
 
 /**
  * StampEditorで使う定数群
@@ -151,7 +148,7 @@ public class StampEditorConst {
     protected static final String BUTTON_TYPE_IS_ITEXT = "text";
 
     // ORCA 有効期限用のDF
-    protected static final SimpleDateFormat effectiveFormat = new SimpleDateFormat("yyyyMMdd");
+    protected static final String effectiveFormat = "yyyyMMdd";
     
     protected static final String CLAIM_007 = "Claim007";
     protected static final String CLAIM_003 = "Claim003";

@@ -3,6 +3,7 @@ package open.dolphin.delegater;
 import com.sun.jersey.api.client.WebResource;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
+import java.util.Date;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ClientContext;
@@ -23,8 +24,6 @@ public class BusinessDelegater {
     protected static final String CAMMA = ",";
     
 //masuda^
-    private static final String DATE_TIME_FORMAT_REST = "yyyy-MM-dd HH:mm:ss";
-    protected static final SimpleDateFormat REST_DATE_FRMT = new SimpleDateFormat(DATE_TIME_FORMAT_REST);
     private static final String CHARSET_UTF8 = "; charset=UTF-8";
     protected static final String MEDIATYPE_JSON_UTF8 = MediaType.APPLICATION_JSON + CHARSET_UTF8;
     protected static final String MEDIATYPE_TEXT_UTF8 = MediaType.TEXT_PLAIN + CHARSET_UTF8;
@@ -57,8 +56,17 @@ public class BusinessDelegater {
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
     }
-    
 
+    protected String toRestFormat(Date date) {
+        try {
+            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.ISO_DF_FORMAT);
+            return frmt.format(date);
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+        return null;
+    }
+    
     /**
      * バイナリの健康保険データをオブジェクトにデコードする。
      */

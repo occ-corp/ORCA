@@ -7,6 +7,7 @@ import java.awt.Window;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
@@ -1092,8 +1093,9 @@ public abstract class AbstractStampEditor extends StampEditorConst {
             protected List<TensuMaster> doInBackground() throws Exception {
 
                 SqlMasterDao dao = SqlMasterDao.getInstance();
-
-                String d = effectiveFormat.format(new Date());
+                
+                SimpleDateFormat sdf = new SimpleDateFormat(effectiveFormat);
+                String d = sdf.format(new Date());
                 List<TensuMaster> result = null;
 
                 switch (searchType) {

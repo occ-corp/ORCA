@@ -5,6 +5,7 @@ import java.awt.event.*;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
@@ -477,7 +478,8 @@ public final class RpEditor extends AbstractStampEditor {
                 }
                 SqlMasterDao dao = SqlMasterDao.getInstance();
 //masuda$
-                String d = effectiveFormat.format(new Date());
+                SimpleDateFormat sdf = new SimpleDateFormat(effectiveFormat);
+                String d = sdf.format(new Date());
                 
                 List<TensuMaster> result = dao.getTensuMasterByCode(regExp, d);
 
