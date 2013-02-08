@@ -27,7 +27,10 @@ public class HexBytesTool {
 
         StringBuilder sb = new StringBuilder();
         for (byte b : bytes) {
-            sb.append(String.format("%02x", b));
+            //sb.append(String.format("%02x", b));
+            sb.append(Integer.toHexString((b & 0xF0) >> 4));
+            sb.append(Integer.toHexString(b & 0xF));
+
         }
         return sb.toString();
     }
