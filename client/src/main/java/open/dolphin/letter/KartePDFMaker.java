@@ -620,7 +620,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     // bundleNumber
                     String number = model.getBundleNumber();
                     if (number != null && number.startsWith("*")) {
-                        String str = hints.parseBundleNum(number);
+                        String str = hints.parseBundleNum(model);
                         table.addCell(createStampCell(str, 3, false));
                     } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));
@@ -687,7 +687,7 @@ public class KartePDFMaker extends AbstractPDFMaker {
                     // bundleNumber
                     String number = model.getBundleNumber();
                     if (number != null && number.startsWith("*")) {
-                        String str = hints.parseBundleNum(number);
+                        String str = hints.parseBundleNum(model);
                         table.addCell(createStampCell(str, 3, false));
                     } else if (number != null && !number.trim().isEmpty() && !"1".equals(number)) {
                         table.addCell(createStampCell("・回数", 1, false));

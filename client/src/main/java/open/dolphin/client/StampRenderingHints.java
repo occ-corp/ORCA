@@ -1,8 +1,15 @@
 package open.dolphin.client;
 
 import java.awt.Color;
-import open.dolphin.infomodel.*;
+import java.io.StringWriter;
+import open.dolphin.infomodel.BundleDolphin;
+import open.dolphin.infomodel.BundleMed;
+import open.dolphin.infomodel.ClaimConst;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.project.Project;
+import open.dolphin.util.TemplateLoader;
+import org.apache.velocity.Template;
+import org.apache.velocity.VelocityContext;
 
 /**
  * StampRenderingHints
@@ -20,260 +27,93 @@ public class StampRenderingHints {
     private int cellSpacing = 1;    //masuda 0 -> 1 to avoid unexpected line wrap
     private int cellPadding = 0;    //masuda 3 -> 0 to make slim
 
- //masuda^
-    private static final String TR_S = "<TR>";
-    private static final String TR_E = "</TR>";
-    private static final String TD_S = "<TD>";
-    private static final String TD_E = "</TD>";
-    private static final String TD_NOWRAP = "<TD NOWRAP>";
-    private static final String TD_NOWRAP_ALIGN_R = "<TD NOWRAP ALIGN=\"RIGHT\">";
-    private static final String TD_NOWRAP_COLSPAN2= "<TD NOWRAP COLSPAN=\"2\">";
-    private static final String TD_NOWRAP_COLSPAN2_ALIGN_R= "<TD NOWRAP COLSPAN=\"2\" ALIGN=\"RIGHT\">";
-    private static final String TD_NOWRAP_COLSPAN3 = "<TD NOWRAP COLSPAN=\"3\">";
-    private static final String TD_COLSPAN2 = "<TD COLSPAN=\"2\">";
-    private static final String TD_COLSPAN3 = "<TD COLSPAN=\"3\">";
-    private static final String END_OF_HTML = "</TABLE></BODY></HTML>";
+    private static final String KEY_MODEL = "model";
+    private static final String KEY_STAMP_NAME = "stampName";
+    private static final String KEY_HINTS = "hints";
+    private static final String DOT_VM = ".vm";
     
     private static final StampRenderingHints instance;
+    
+    private Template medTemplate;
+    private Template dolphinTemplate;
+    private Template laboTemplate;
 
     static {
         instance = new StampRenderingHints();
-        int cp = Project.getInt("stampHolderCellPadding", 0);
-        instance.setCellPadding(cp);
     }
 
     private StampRenderingHints() {
+        int cp = Project.getInt("stampHolderCellPadding", 0);
+        setCellPadding(cp);
+        prepareTemplates();
     }
 
     public static StampRenderingHints getInstance() {
         return instance;
     }
     
-    public String getRegExpCommnentCode() {
-        return ClaimConst.REGEXP_COMMENT_MED;
+    private void prepareTemplates() {
+        medTemplate = TemplateLoader.newTemplate(BundleMed.class.getName() + DOT_VM);
+        dolphinTemplate = TemplateLoader.newTemplate(BundleDolphin.class.getName() + DOT_VM);
+        laboTemplate = TemplateLoader.newTemplate("labo.vm");
     }
     
-    // velocityを使わずにレンダリングする。速度うｐを目指したが大したことなかったorz
-    public String getHtmlText(ModuleModel stamp) {
+    public String getStampHtml(StampHolder sh) {
 
         // entityを取得
-        String entity =stamp.getModuleInfoBean().getEntity();
+        String entity = sh.getStamp().getModuleInfoBean().getEntity();
         
-        // entityに応じてHTMLを作成
+        // entityに応じてテンプレートを選択
+        Template template;        
         if (IInfoModel.ENTITY_MED_ORDER.equals(entity)) {
-            return getBundleMedHtml(stamp);
-        } else if (IInfoModel.ENTITY_LABO_TEST.equals(entity) && Project.getBoolean("laboFold", true)) {
-            return getLaboFoldHtml(stamp);
+            template = medTemplate;
+        } else if (IInfoModel.ENTITY_LABO_TEST.equals(entity) 
+                && Project.getBoolean("laboFold", true)) {
+            template = laboTemplate;
         } else {
-            return getBundleDolphinHtml(stamp);
+            template = dolphinTemplate;
         }
+        
+        VelocityContext context = new VelocityContext();
+        context.put(KEY_HINTS, sh.getHints());
+        context.put(KEY_MODEL, sh.getStamp().getModel());
+        context.put(KEY_STAMP_NAME, sh.getStamp().getModuleInfoBean().getStampName());
+            
+        StringWriter sw = new StringWriter();
+        template.merge(context, sw);
+
+        String text = sw.toString();
+        
+        return text;
     }
     
-    private boolean isNewStamp(ModuleModel stamp) {
-        String stampName = stamp.getModuleInfoBean().getStampName();
+    // velocityから使う↓
+    public boolean isNewStamp(String stampName) {
         return "新規スタンプ".equals(stampName) 
                 || "エディタから発行...".equals(stampName) 
                 || "チェックシート".equals(stampName);
     }
-    
-    private String getStartOfHtml() {
-        
-        StringBuilder sb = new StringBuilder();
-        sb.append("<HTML><BODY><TT>");
-        sb.append("<FONT SIZE=\"").append(getFontSize()).append("\" ");
-        sb.append("COLOR=\"").append(getBackgroundAs16String()).append("\">");
-        sb.append("<TABLE BORDER=\"").append(getBorder()).append("\" ");
-        sb.append("CELLSPACING=\"").append(getCellSpacing()).append("\" ");
-        sb.append("CELLPADDING=\"").append(getCellPadding()).append("\">");
-        return sb.toString();
+
+    public boolean isCommentCode(String code) {
+        return code.matches(ClaimConst.REGEXP_COMMENT_MED);
     }
     
-    // 処方スタンプのhtmlを取得
-    private String getBundleMedHtml(ModuleModel stamp) {
-        
-        BundleMed model = (BundleMed) stamp.getModel();
+    public String getMedTypeAndCode(BundleDolphin model) {
         StringBuilder sb = new StringBuilder();
-        
-        // 全体書式
-        sb.append(getStartOfHtml());
-        
-        // タイトル
-        sb.append("<TR BGCOLOR=\"").append(getLabelColorAs16String()).append("\">");
-        if (isNewStamp(stamp)) {
-            sb.append(TD_NOWRAP).append("RP) ").append(TD_E);
-        } else {
-            sb.append(TD_NOWRAP).append("RP) ").append(stamp.getModuleInfoBean().getStampName()).append(TD_E);
-        }
-        sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R);
-        sb.append(model.getMemo().replace("処方", "")).append("/").append(model.getClassCode()).append(TD_E);
-        sb.append(TR_E);
-        
-        // 項目
-        for (ClaimItem ci : model.getClaimItem()) {
-            sb.append(TR_S);
-            // コメントコードなら"・"と"x"は表示しない
-            if (ci.getCode().matches(ClaimConst.REGEXP_COMMENT_MED)) {
-                sb.append(TD_COLSPAN3).append(ci.getName()).append(TD_E);
-            } else {
-                sb.append(TD_S).append("・").append(ci.getName()).append(TD_E);
-                sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(ci.getNumber()).append(TD_E);
-                String unit = ci.getUnit();
-                if (unit != null && !unit.isEmpty()) {
-                    sb.append(TD_NOWRAP).append(" ").append(ci.getUnit().replace("カプセル", "Ｃ")).append(TD_E);
-                } else {
-                    sb.append(TD_NOWRAP).append(" ").append(TD_E);
-                }
-            }
-            sb.append(TR_E);
-        }
-        
-        // 用法
-        sb.append(TR_S);
-        sb.append(TD_COLSPAN3).append(model.getAdminDisplayString()).append(TD_E);
-        sb.append(TR_E);
-        
-        // 用法メモ
-        String memo = model.getAdminMemo();
-        if (memo != null && !memo.isEmpty()) {
-            sb.append(TR_S);
-            sb.append(TD_COLSPAN3).append(memo).append(TD_E);
-            sb.append(TR_E);
-        }
-        
-        // End of StampHolder
-        sb.append(END_OF_HTML);
-        
+        sb.append(model.getMemo().replace("処方", "")).append("/");
+        sb.append(model.getClassCode());
         return sb.toString();
     }
     
-    // 折り返しラボのhtmlを取得する
-    private String getLaboFoldHtml(ModuleModel stamp) {
-
-        BundleDolphin model = (BundleDolphin) stamp.getModel();
-        StringBuilder sb = new StringBuilder();
-
-        // 全体書式
-        sb.append(getStartOfHtml());
-        
-        // タイトル
-        sb.append("<TR BGCOLOR=\"").append(getLabelColorAs16String()).append("\">");
-        if (isNewStamp(stamp)) {
-            sb.append(TD_NOWRAP).append(model.getOrderName()).append(TD_E);
-        } else {
-            sb.append(TD_NOWRAP).append(model.getOrderName());
-            sb.append("(").append(stamp.getModuleInfoBean().getStampName()).append(")").append(TD_E);
+    public String getUnit(String unit) {
+        if (unit == null) {
+            return null;
         }
-        sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R).append(model.getClassCode()).append(TD_E);
-        sb.append(TR_E);
-
-        // 項目
-        sb.append(TR_S);
-        sb.append(TD_COLSPAN3).append("・").append(model.getItemNames()).append(TD_E);
-        sb.append(TR_E);
-
-        // メモ
-        String memo = model.getMemo();
-        if (memo != null && !memo.isEmpty()) {
-            sb.append(TR_S);
-            sb.append(TD_COLSPAN3).append(memo).append(TD_E);
-            sb.append(TR_E);
-        }
-        
-        // バンドル数量
-        String bundleNum = model.getBundleNumber();
-        // 入院対応
-        if (bundleNum != null && bundleNum.startsWith("*")) {
-            sb.append(TR_S);
-            sb.append(TD_COLSPAN3);
-            sb.append(parseBundleNum(bundleNum));
-            sb.append(TD_E);
-            sb.append(TR_E);
-        } else if (bundleNum != null && !"1".equals(bundleNum)) {
-            sb.append(TR_S);
-            sb.append(TD_S).append("・回数").append(TD_E);
-            sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(bundleNum).append(TD_E);
-            sb.append(TD_NOWRAP).append(" 回").append(TD_E);
-            sb.append(TR_E);
-        }
-        
-        // End of StampHolder
-        sb.append(END_OF_HTML);
-        
-        return sb.toString();
+        return unit.replace("カプセル", "Ｃ");
     }
 
-    // その他スタンプのhtmlを取得する
-    private String getBundleDolphinHtml(ModuleModel stamp) {
-        
-        BundleDolphin model = (BundleDolphin) stamp.getModel();
-        StringBuilder sb = new StringBuilder();
-        
-        // 全体書式
-        sb.append(getStartOfHtml());
-        
-        // タイトル
-        sb.append("<TR BGCOLOR=\"").append(getLabelColorAs16String()).append("\">");
-        if (isNewStamp(stamp)) {
-            sb.append(TD_NOWRAP).append(model.getOrderName()).append(TD_E);
-        } else {
-            sb.append(TD_NOWRAP).append(model.getOrderName());
-            sb.append("(").append(stamp.getModuleInfoBean().getStampName()).append(")").append(TD_E);
-        }
-        sb.append(TD_NOWRAP_COLSPAN2_ALIGN_R).append(model.getClassCode()).append(TD_E);
-        sb.append(TR_E);
-        
-        // 項目
-        for (ClaimItem ci : model.getClaimItem()) {
-            sb.append(TR_S);
-            String num = ci.getNumber();
-            if (num != null && !num.isEmpty()) {
-                sb.append(TD_S).append("・").append(ci.getName()).append(TD_E);
-                sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(ci.getNumber()).append(TD_E);
-                String unit = ci.getUnit();
-                if (unit != null && !unit.isEmpty()) {
-                    sb.append(TD_NOWRAP).append(" ").append(ci.getUnit()).append(TD_E);
-                } else {
-                    sb.append(TD_NOWRAP).append(" ").append(TD_E);
-                }
-            } else {
-                sb.append(TD_COLSPAN3).append("・").append(ci.getName()).append(TD_E);
-            }
-            sb.append(TR_E);
-        }
-        
-        // メモ
-        String memo = model.getMemo();
-        if (memo != null && !memo.isEmpty()) {
-            sb.append(TR_S);
-            sb.append(TD_COLSPAN3).append(memo).append(TD_E);
-            sb.append(TR_E);
-        }
-        
-        // バンドル数量
-        String bundleNum = model.getBundleNumber();
-        if (bundleNum != null && bundleNum.startsWith("*")) {
-            sb.append(TR_S);
-            sb.append(TD_COLSPAN3);
-            sb.append(parseBundleNum(bundleNum));
-            sb.append(TD_E);
-            sb.append(TR_E);
-        } else  if (bundleNum != null && !"1".equals(bundleNum)) {
-            sb.append(TR_S);
-            sb.append(TD_S).append("・回数").append(TD_E);
-            sb.append(TD_NOWRAP_ALIGN_R).append(" x ").append(bundleNum).append(TD_E);
-            sb.append(TD_NOWRAP).append(" 回").append(TD_E);
-            sb.append(TR_E);
-        }
-        
-        // End of StampHolder
-        sb.append(END_OF_HTML);
-        
-        return sb.toString();
-    }
-
-    public String parseBundleNum(String str) {
-        
-        str = str.substring(1);
+    public String parseBundleNum(BundleDolphin model) {
+        String str = model.getBundleNumber().substring(1);
         int len = str.length();
         int pos = str.indexOf("/");
         StringBuilder sb = new StringBuilder();
@@ -282,11 +122,11 @@ public class StampRenderingHints {
         sb.append("　実施日：");
         sb.append(str.substring(pos + 1, len));
         sb.append("日");
-
         return sb.toString();
     }
-//masuda$
+    // velocityから使う↑
 
+    
     public int getFontSize() {
         return fontSize;
     }
@@ -331,7 +171,7 @@ public class StampRenderingHints {
         return cellPadding;
     }
 
-    public void setCellPadding(int cellPadding) {
+    public final void setCellPadding(int cellPadding) {
         this.cellPadding = cellPadding;
     }
 

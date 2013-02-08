@@ -521,7 +521,7 @@ public class StampHolderFunction {
             return;
         }
 
-        String text = sh.getHints().getHtmlText(sh.getStamp());
+        String text = sh.getHints().getStampHtml(sh);
         sh.setText(ZenkakuUtils.toHalfNumber(text));
 
         // カルテペインへ展開された時広がるのを防ぐ

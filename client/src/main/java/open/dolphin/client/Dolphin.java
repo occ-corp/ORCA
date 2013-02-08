@@ -1077,9 +1077,6 @@ public class Dolphin implements MainWindow {
 
         // FocusProperetyChangeListenerを破棄する
         FocusPropertyChangeListener.getInstance().dispose();
-        
-        // ChartStateListenerを中止する
-        scl.stop();
 //masuda$
         
         // Stamp 保存
@@ -1231,6 +1228,11 @@ public class Dolphin implements MainWindow {
             JFrame myFrame = windowSupport.getFrame();
             myFrame.setVisible(false);
             myFrame.dispose();
+        }
+        
+        // ChartStateListenerを中止する
+        if (scl != null) {
+            scl.stop();
         }
 
         ClientContext.getBootLogger().debug("アプリケーションを終了します");

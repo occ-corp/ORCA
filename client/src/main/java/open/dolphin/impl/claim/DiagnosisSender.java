@@ -126,7 +126,7 @@ public class DiagnosisSender implements IDiagnosisSender {
         dhl.setFacilityName(Project.getUserModel().getFacilityModel().getFacilityName());
         //------------------------------------ DG
 
-        MessageBuilder mb = new MessageBuilder();
+        MessageBuilder mb = MessageBuilder.getInstance();
         String claimMessage = mb.build(dhl);
         ClaimMessageEvent event = new ClaimMessageEvent(this);
         event.setPatientId(patient.getPatientId());

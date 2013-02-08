@@ -182,7 +182,7 @@ public class ClaimSender implements IKarteSender {
         }
 */
 //masuda$
-        MessageBuilder mb = new MessageBuilder();
+        MessageBuilder mb = MessageBuilder.getInstance();
         String claimMessage = mb.build(helper);
         ClaimMessageEvent cvt = new ClaimMessageEvent(this);
         cvt.setClaimInstance(claimMessage);

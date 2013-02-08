@@ -4,41 +4,33 @@
 ##-------------------------------------
 <HTML><BODY><TT><FONT SIZE="${hints.getFontSize()}" COLOR="${hints.getBackgroundAs16String()}">
 <TABLE BORDER="${hints.getBorder()}" CELLSPACING="${hints.getCellSpacing()}" CELLPADDING="${hints.getCellPadding()}">
-
+### タイトル ###
+#if ($hints.isNewStamp($stampName))
 <TR BGCOLOR="${hints.getLabelColorAs16String()}">
-#if ($stampName == "新規スタンプ" || $stampName == "エディタから発行..." || $stampName == "チェックシート")
-     <TD NOWRAP COLSPAN="3">RP</TD>
+<TD NOWRAP>RP) </TD>
+<TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${hints.getMedTypeAndCode($model)}</TD></TR>
 #else
-    ## 院内・院外処方は１行目の右端に表示する
-    <TD NOWRAP>RP) $stampName</TD>
-    <TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${model.getMemo().replace("処方", "")}/${model.getClassCode()}</TD>
+## 院内・院外処方は１行目の右端に表示する
+<TR BGCOLOR="${hints.getLabelColorAs16String()}">
+<TD NOWRAP>RP) ${stampName}</TD>
+<TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${hints.getMedTypeAndCode($model)}</TD></TR>
 #end
-</TR>
-
+### 項目 ###
 #foreach ($item in $model.getClaimItem())
 ## コメントコードなら"・"と"x"は表示しない
-#if (!$item.getCode().matches($hints.getRegExpCommnentCode()))
-<TR>
-    <TD>・${item.getName()}</TD>
-    <TD NOWRAP ALIGN="RIGHT"> x ${item.getNumber()}</TD>
-    <TD NOWRAP> $!{item.getUnit().replace("カプセル", "Ｃ")}</TD>
-</TR>
+#if ($hints.isCommentCode($item.getCode()))
+<TR><TD COLSPAN="3">${item.getName()}</TD></TR>
 #else
-<TR>
-    <TD>${item.getName()}</TD>
-</TR>
+<TR><TD>・${item.getName()}</TD>
+<TD NOWRAP ALIGN="RIGHT"> x ${item.getNumber()}</TD>
+<TD NOWRAP> ${hints.getUnit($item.getUnit())}</TD></TR>
 #end
 #end
-
-<TR>
-    <TD COLSPAN="3">${model.getAdminDisplayString()}</TD>
-</TR>
-
+### 用法 ###
+<TR><TD COLSPAN="3">${model.getAdminDisplayString()}</TD></TR>
+### 用法メモ ###
 #if ($model.getAdminMemo())
-<TR>
-    <TD>${model.getAdminMemo()}</TD>
-</TR>
+<TR><TD>${model.getAdminMemo()}</TD></TR>
 #end
-
-</TABLE>
-</BODY></HTML>
+### おわり ###
+</TABLE></FONT></TT></BODY></HTML>

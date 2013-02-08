@@ -4,25 +4,29 @@
 ##-------------------------------------
 <HTML><BODY><TT><FONT SIZE="${hints.getFontSize()}" COLOR="${hints.getBackgroundAs16String()}">
 <TABLE BORDER="${hints.getBorder()}" CELLSPACING="${hints.getCellSpacing()}" CELLPADDING="${hints.getCellPadding()}">
-
+### タイトル ###
+#if ($hints.isNewStamp($stampName))
 <TR BGCOLOR="${hints.getLabelColorAs16String()}">
-#if ($stampName == "新規スタンプ" || $stampName == "エディタから発行..." || $stampName == "チェックシート")
-    <TD NOWRAP>${model.getOrderName()}</TD>
+<TD NOWRAP>${model.getOrderName()}</TD>
+<TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${model.getClassCode()}</TD></TR>
 #else
-    <TD NOWRAP>${model.getOrderName()}($stampName)</TD>
+<TR BGCOLOR="${hints.getLabelColorAs16String()}">
+<TD NOWRAP>${model.getOrderName()}($stampName)</TD>
+<TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${model.getClassCode()}</TD></TR>
 #end
-    <TD NOWRAP ALIGN="RIGHT">${model.getClassCode()}</TD>
-</TR>
-
-<TR>
-    <TD COLSPAN="2">・${model.getItemNames()}</TD>
-</TR>
-
+### 項目 ###
+<TR><TD COLSPAN="3">・${model.getItemNames()}</TD></TR>
+### メモ ###
 #if ($model.getMemo())
-<TR>
-    <TD COLSPAN="2">$!{model.getMemo()}</TD>
-</TR>
+<TR><TD COLSPAN="3">$!{model.getMemo()}</TD></TR>
 #end
-
-</TABLE>
-</BODY></HTML>
+### バンドル数量 ###
+#if ($model.getBundleNumber().startsWith("*"))
+<TR><TD COLSPAN="3">・${hints.parseBundleNum($model)}</TD></TR>
+#elseif ($model.getBundleNumber() != "1")
+<TR><TD>・回数</TD>
+<TD NOWRAP ALIGN="RIGHT"> x ${model.getBundleNumber()}</TD>
+<TD> 回</TD></TR>
+#end
+### おわり ###
+</TABLE></FONT></TT></BODY></HTML>

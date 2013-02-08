@@ -235,7 +235,7 @@ public class PrintLabel {
             // 入院注射、施行日
             String bundleNum = bundle.getBundleNumber();
             if (bundleNum.startsWith("*")) {
-                String itemName =hints.parseBundleNum(bundleNum);
+                String itemName =hints.parseBundleNum(bundle);
                 lineData.add(new LineModel(itemName, "", "　"));
             }
         } else {
