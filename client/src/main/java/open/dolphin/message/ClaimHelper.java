@@ -92,13 +92,6 @@ public final class ClaimHelper implements IMessageHelper {
     public boolean isUseDefaultDept() {
         return useDefaultDept;
     }
-    
-    private static final String TEMPLATE = "claimHelper";
-    
-    @Override
-    public String getTemplateName() {
-        return TEMPLATE;
-    }
 //masuda$
     
     

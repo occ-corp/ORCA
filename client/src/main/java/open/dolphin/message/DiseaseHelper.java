@@ -31,13 +31,6 @@ public final class DiseaseHelper implements IMessageHelper {
     public boolean isUseDefaultDept() {
         return useDefaultDept;
     }
-    
-    private static final String TEMPLATE = "diseaseHelper";
-    
-    @Override
-    public String getTemplateName() {
-        return TEMPLATE;
-    }
 //masuda$
     
     public String getPatientId() {

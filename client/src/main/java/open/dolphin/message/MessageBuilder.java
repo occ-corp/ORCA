@@ -45,16 +45,16 @@ public class MessageBuilder {
         
         logger.debug("MessageBuilder build");
         
-        String name = helper.getTemplateName();
         Template template = null;
-        if ("claimHelper".equals(name)) {
-            template = claimTemplate;
-        } else if ("diseaseHelper".equals(name)) {
-            template = diseaseTemplate;
-        }
-        
         VelocityContext context = new VelocityContext();
-        context.put(name, helper);
+        
+        if (helper instanceof ClaimHelper) {
+            template = claimTemplate;
+            context.put("claimHelper", helper);
+        } else if (helper instanceof DiseaseHelper) {
+            template = diseaseTemplate;
+            context.put("diseaseHelper", helper);
+        }
         
         StringWriter sw = new StringWriter();
         template.merge(context, sw);

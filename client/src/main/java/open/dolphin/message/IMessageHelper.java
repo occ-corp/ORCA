@@ -5,7 +5,4 @@ package open.dolphin.message;
  * @author masuda, Mausda Naika
  */
 public interface IMessageHelper {
-    
-    public String getTemplateName();
-    
 }
