@@ -38,10 +38,6 @@ public class ClaimIOHandler {
             ex.printStackTrace(System.err);
         }
     }
-    
-    public ClaimMessageEvent getClaimEvent() {
-        return evt;
-    }
 
     public boolean isNoError() {
         return ClaimException.ERROR_CODE.NO_ERROR == errorCode;
@@ -118,12 +114,11 @@ public class ClaimIOHandler {
         } finally {
             try {
                 channel.close();
-                if (ClaimException.ERROR_CODE.NO_ERROR != errorCode) {
-                    throw new ClaimException(errorCode, evt);
-                }
             } catch (IOException ex) {
                 throw new ClaimException(ClaimException.ERROR_CODE.IO_ERROR, evt);
             }
         }
+        // ClaimExceptionを投げて通信終了する
+        throw new ClaimException(errorCode, evt);
     }
 }

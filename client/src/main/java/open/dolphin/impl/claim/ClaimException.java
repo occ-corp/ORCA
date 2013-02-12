@@ -10,7 +10,7 @@ public class ClaimException extends Exception {
 
     public static enum ERROR_CODE {
 
-        NO_ERROR, CONNECTION_REJECT, IO_ERROR, NAK_SIGNAL, QUEUE_NOT_EMPTY
+        NO_ERROR, CONNECTION_REJECT, IO_ERROR, NAK_SIGNAL
     };
     
     private ERROR_CODE code;

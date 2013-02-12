@@ -1,5 +1,7 @@
 package open.dolphin.impl.orcaapi;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import open.dolphin.client.Chart;
 import open.dolphin.client.IKarteSender;
@@ -19,6 +21,8 @@ public class Orca21ApiKarteSender implements IKarteSender {
 
     // Context
     private Chart context;
+    private DocumentModel sendModel;
+    private PropertyChangeSupport boundSupport;
 
     // DG UUID の変わりに保険情報モジュールを送信する
     //private PVTHealthInsuranceModel insuranceToApply;
@@ -37,36 +41,57 @@ public class Orca21ApiKarteSender implements IKarteSender {
     public void setContext(Chart context) {
         this.context = context;
     }
-
-/*
     @Override
-    public void prepare(DocumentModel data) {
-        if (data==null || (!data.getDocInfoModel().isSendClaim())) {
-            return;
-        }
-        insuranceToApply = context.getHealthInsuranceToApply(data.getDocInfoModel().getHealthInsuranceGUID());
+    public void setModel(DocumentModel sendModel) {
+        this.sendModel = sendModel;
     }
-*/
+
+    @Override
+    public void addListener(PropertyChangeListener listener) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
+        boundSupport.addPropertyChangeListener(KarteSenderResult.PROP_KARTE_SENDER_RESULT, listener);
+    }
     
     @Override
-    public KarteSenderResult send(DocumentModel sendModel) {
+    public void removeListeners() {
+        if (boundSupport != null) {
+            for (PropertyChangeListener listener : boundSupport.getPropertyChangeListeners()) {
+                boundSupport.removePropertyChangeListener(listener);
+            }
+        }
+    }
+
+    @Override
+    public void fireResult(KarteSenderResult result) {
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(KarteSenderResult.PROP_KARTE_SENDER_RESULT, null, result);
+        }
+    }
+    
+    @Override
+    public void send() {
         
         if (sendModel == null 
                 || !sendModel.getDocInfoModel().isSendClaim() 
                 || context == null) {
-            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         // ORCA API使用しない場合はリターン
         if (!Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         PVTHealthInsuranceModel insuranceToApply
                 = context.getHealthInsuranceToApply(sendModel.getDocInfoModel().getHealthInsuranceGUID());
         
         if (insuranceToApply == null) {
-            return new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(ORCA_API, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
 
         DocInfoModel docInfo = sendModel.getDocInfoModel();
@@ -85,7 +110,8 @@ public class Orca21ApiKarteSender implements IKarteSender {
         modModel.setAdmissionFlg(admissionFlg);
         
         KarteSenderResult result = OrcaApiDelegater.getInstance().sendMedicalModModel(modModel);
-        return result;
+        result.setKarteSender(this);
+        fireResult(result);
     }
 
     private List<ClaimBundle> getClaimBundleList(Collection<ModuleModel> modules_src, boolean admission){

@@ -1,5 +1,6 @@
 package open.dolphin.client;
 
+import java.beans.PropertyChangeListener;
 import java.util.List;
 import open.dolphin.infomodel.RegisteredDiagnosisModel;
 
@@ -13,10 +14,14 @@ public interface IDiagnosisSender {
     public Chart getContext();
 
     public void setContext(Chart context);
+    
+    public void setModel(List<RegisteredDiagnosisModel> rdModel);
 
-    //public void prepare(List<RegisteredDiagnosisModel> data);
+    public void send();
 
-    //public void send(List<RegisteredDiagnosisModel> data);
-    public KarteSenderResult send(List<RegisteredDiagnosisModel> rdModel);
-
+    public void addListener(PropertyChangeListener listener);
+    
+    public void removeListeners();
+    
+    public void fireResult(KarteSenderResult result);
 }

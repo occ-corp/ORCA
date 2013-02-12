@@ -1,5 +1,7 @@
 package open.dolphin.impl.claim;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
 import java.util.List;
 import open.dolphin.client.*;
@@ -22,6 +24,8 @@ public class DiagnosisSender implements IDiagnosisSender {
     private static final String CLAIM = "CLAIM";
 
     private Chart context;
+    private List<RegisteredDiagnosisModel> rdList;
+    private PropertyChangeSupport boundSupport;
 
     private boolean DEBUG;
 
@@ -38,35 +42,53 @@ public class DiagnosisSender implements IDiagnosisSender {
     public void setContext(Chart context) {
         this.context = context;
     }
-/*
     @Override
-    public void prepare(List<RegisteredDiagnosisModel> diagnoses) {
-        if (diagnoses==null || diagnoses.isEmpty()) {
-            claimListener = null;
-            pvt = null;
-            return;
-        }
-        claimListener  = context.getCLAIMListener();
-        pvt = context.getPatientVisit();
+    public void setModel(List<RegisteredDiagnosisModel> rdList) {
+        this.rdList = rdList;
     }
-*/
+    
+    @Override
+    public void addListener(PropertyChangeListener listener) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
+        boundSupport.addPropertyChangeListener(KarteSenderResult.PROP_DIAG_SENDER_RESULT, listener);
+    }
+    
+    @Override
+    public void removeListeners() {
+        if (boundSupport != null) {
+            for (PropertyChangeListener listener : boundSupport.getPropertyChangeListeners()) {
+                boundSupport.removePropertyChangeListener(listener);
+            }
+        }
+    }
+
+    @Override
+    public void fireResult(KarteSenderResult result) {
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(KarteSenderResult.PROP_DIAG_SENDER_RESULT, null, result);
+        }
+    }
     
     /**
      * 診断名の CLAIM 送信
      * @param rd
      */
     @Override
-    public KarteSenderResult send(List<RegisteredDiagnosisModel> diagnoses) {
+    public void send() {
 
-        if (diagnoses == null 
-                || diagnoses.isEmpty()
+        if (rdList == null 
+                || rdList.isEmpty()
                 || context == null) {
-            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         // ORCA API使用時はCLAIM送信しない
         if (Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         // CLAIM 送信リスナ
@@ -75,13 +97,14 @@ public class DiagnosisSender implements IDiagnosisSender {
         PatientVisitModel pvt = context.getPatientVisit();
         
         if (claimListener == null || pvt == null) {
-            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
 
         // DocInfo & RD をカプセル化したアイテムを生成する
         List<DiagnosisModuleItem> moduleItems = new ArrayList<DiagnosisModuleItem>();
 
-        for (RegisteredDiagnosisModel rd : diagnoses) {
+        for (RegisteredDiagnosisModel rd : rdList) {
             DocInfoModel docInfo = new DocInfoModel();
             docInfo.setDocId(GUIDGenerator.generate(docInfo));
             docInfo.setTitle(IInfoModel.DEFAULT_DIAGNOSIS_TITLE);
@@ -96,8 +119,8 @@ public class DiagnosisSender implements IDiagnosisSender {
         }
 
         // ヘルパー用の値を生成する
-        String confirmDate = diagnoses.get(0).getConfirmDate();
-        PatientLiteModel patient = diagnoses.get(0).getPatientLiteModel();
+        String confirmDate = rdList.get(0).getConfirmDate();
+        PatientLiteModel patient = rdList.get(0).getPatientLiteModel();
 
         // ヘルパークラスを生成する
         DiseaseHelper dhl = new DiseaseHelper();
@@ -142,9 +165,6 @@ public class DiagnosisSender implements IDiagnosisSender {
         }
 
         claimListener.claimMessageEvent(event);
-
-        // claim送信の場合は別スレッドなので、成功・不成功はわからんｗ
-        return new KarteSenderResult(CLAIM, KarteSenderResult.NO_ERROR, null);
     }
 
     private void debug(String msg) {

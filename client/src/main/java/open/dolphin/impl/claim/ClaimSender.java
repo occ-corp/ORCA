@@ -1,5 +1,7 @@
 package open.dolphin.impl.claim;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.util.*;
 import open.dolphin.client.*;
 import open.dolphin.dao.SqlMiscDao;
@@ -23,6 +25,8 @@ public class ClaimSender implements IKarteSender {
 
     // Context
     private Chart context;
+    private DocumentModel sendModel;
+    private PropertyChangeSupport boundSupport;
 
     private boolean DEBUG;
     
@@ -43,33 +47,53 @@ public class ClaimSender implements IKarteSender {
     public void setContext(Chart context) {
         this.context = context;
     }
-
-/*
-    @Override
-    public void prepare(DocumentModel data) {
-        if (data==null || (!data.getDocInfoModel().isSendClaim())) {
-            return;
-        }
-        insuranceToApply = context.getHealthInsuranceToApply(data.getDocInfoModel().getHealthInsuranceGUID());
-        claimListener  = context.getCLAIMListener();
-    }
-*/
     
+    @Override
+    public void setModel(DocumentModel sendModel) {
+        this.sendModel = sendModel;
+    }
+
+    @Override
+    public void addListener(PropertyChangeListener listener) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
+        boundSupport.addPropertyChangeListener(KarteSenderResult.PROP_KARTE_SENDER_RESULT, listener);
+    }
+    
+    @Override
+    public void removeListeners() {
+        if (boundSupport != null) {
+            for (PropertyChangeListener listener : boundSupport.getPropertyChangeListeners()) {
+                boundSupport.removePropertyChangeListener(listener);
+            }
+        }
+    }
+
+    @Override
+    public void fireResult(KarteSenderResult result) {
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(KarteSenderResult.PROP_KARTE_SENDER_RESULT, null, result);
+        }
+    }
+
     /**
      * DocumentModel の CLAIM 送信を行う。
      */
     @Override
-    public KarteSenderResult send(DocumentModel sendModel) {
+    public void send() {
 
         if (sendModel == null 
                 || !sendModel.getDocInfoModel().isSendClaim()
                 || context == null) {
-            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         // ORCA API使用時はCLAIM送信しない
         if (Project.getBoolean(Project.USE_ORCA_API)) {
-            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         // CLAIM 送信リスナ
@@ -80,7 +104,8 @@ public class ClaimSender implements IKarteSender {
                 = context.getHealthInsuranceToApply(sendModel.getDocInfoModel().getHealthInsuranceGUID());
         
         if (claimListener == null || insuranceToApply == null) {
-            return new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(CLAIM, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
 
         // ヘルパークラスを生成しVelocityが使用するためのパラメータを設定する
@@ -204,9 +229,6 @@ public class ClaimSender implements IKarteSender {
         }
 
         claimListener.claimMessageEvent(cvt);
-        
-        // claim送信の場合は別スレッドなので、成功・不成功はわからんｗ
-        return new KarteSenderResult(CLAIM, KarteSenderResult.NO_ERROR, null);
     }
 
     private void debug(String msg) {

@@ -1,5 +1,7 @@
 package open.dolphin.impl.mml;
 
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.*;
 import open.dolphin.client.*;
 import open.dolphin.infomodel.DocumentModel;
@@ -15,6 +17,9 @@ import org.apache.velocity.app.Velocity;
 public class MMLSender implements IKarteSender {
     
     private Chart context;
+    private DocumentModel sendModel;
+    private PropertyChangeSupport boundSupport;
+    
     private static final String MML = "MML";
     //private MmlMessageListener mmlListener;
 
@@ -28,30 +33,52 @@ public class MMLSender implements IKarteSender {
         this.context = context;
     }
 
-/*
     @Override
-    public void prepare(DocumentModel data) {
-        if (data.getDocInfoModel().isSendMml()) {
-            mmlListener = context.getMMLListener();
-        }
+    public void setModel(DocumentModel sendModel) {
+        this.sendModel = sendModel;
     }
-*/
+
+    @Override
+    public void addListener(PropertyChangeListener listener) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
+        boundSupport.addPropertyChangeListener(KarteSenderResult.PROP_KARTE_SENDER_RESULT, listener);
+    }
     
     @Override
-    public KarteSenderResult send(DocumentModel model) {
+    public void removeListeners() {
+        if (boundSupport != null) {
+            for (PropertyChangeListener listener : boundSupport.getPropertyChangeListeners()) {
+                boundSupport.removePropertyChangeListener(listener);
+            }
+        }
+    }
 
-        if (!model.getDocInfoModel().isSendMml() || context == null) {
-            return new KarteSenderResult(MML, KarteSenderResult.SKIPPED, null);
+    @Override
+    public void fireResult(KarteSenderResult result) {
+        if (boundSupport != null) {
+            boundSupport.firePropertyChange(KarteSenderResult.PROP_KARTE_SENDER_RESULT, null, result);
+        }
+    }
+    
+    @Override
+    public void send() {
+
+        if (!sendModel.getDocInfoModel().isSendMml() || context == null) {
+            fireResult(new KarteSenderResult(MML, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
 
         MmlMessageListener mmlListener = context.getMMLListener();
         if (mmlListener == null) {
-            return new KarteSenderResult(MML, KarteSenderResult.SKIPPED, null);
+            fireResult(new KarteSenderResult(MML, KarteSenderResult.SKIPPED, null, this));
+            return;
         }
         
         // MML Message を生成する
         MMLHelper mb = new MMLHelper();
-        mb.setDocument(model);
+        mb.setDocument(sendModel);
         mb.setUser(Project.getUserModel());
         mb.setPatientId(context.getPatient().getPatientId());
         mb.buildText();
@@ -97,9 +124,10 @@ public class MMLSender implements IKarteSender {
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
-            return new KarteSenderResult(MML, KarteSenderResult.ERROR, e.getMessage());
+            fireResult(new KarteSenderResult(MML, KarteSenderResult.ERROR, e.getMessage(), this));
+            return;
         }
-        return new KarteSenderResult(MML, KarteSenderResult.NO_ERROR, null);
+        fireResult(new KarteSenderResult(MML, KarteSenderResult.NO_ERROR, null, this));
     }
 
 }

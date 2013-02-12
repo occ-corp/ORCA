@@ -1,5 +1,6 @@
 package open.dolphin.client;
 
+import java.beans.PropertyChangeListener;
 import open.dolphin.infomodel.DocumentModel;
 
 /**
@@ -12,10 +13,14 @@ public interface IKarteSender {
     public Chart getContext();
 
     public void setContext(Chart context);
+    
+    public void setModel(DocumentModel docModel);
 
-    //public void prepare(DocumentModel data);
-
-    //public void send(DocumentModel data);
-    public KarteSenderResult send(DocumentModel docModel);
-
+    public void send();
+    
+    public void addListener(PropertyChangeListener listener);
+    
+    public void removeListeners();
+    
+    public void fireResult(KarteSenderResult result);
 }

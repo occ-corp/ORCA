@@ -1638,8 +1638,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                     }
                     ddl.postDocument(model);
 
-                    KarteContentSender sender = new KarteContentSender();
-                    sender.sendKarte(chart, model);
+                    KarteContentSender.getInstance().sendKarte(chart, model);
 //masuda$ 
                     return null;
                 }

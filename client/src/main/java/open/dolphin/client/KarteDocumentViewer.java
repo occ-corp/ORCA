@@ -121,8 +121,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         claimSender.prepare(model);
         claimSender.send(model);
 */
-        KarteContentSender sender = new KarteContentSender();
-        sender.sendKarte(getContext(), model);
+        KarteContentSender.getInstance().sendKarte(getContext(), model);
     }
 //pns$
 
