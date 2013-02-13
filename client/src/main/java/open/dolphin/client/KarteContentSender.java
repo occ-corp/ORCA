@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import javax.swing.SwingWorker;
 import open.dolphin.infomodel.DocumentModel;
 import open.dolphin.infomodel.RegisteredDiagnosisModel;
 import open.dolphin.plugin.PluginLoader;
@@ -31,32 +32,50 @@ public class KarteContentSender implements PropertyChangeListener {
         return instance;
     }
 
-    public void sendKarte(Chart chart, DocumentModel model) {
+    public void sendKarte(final Chart chart, final DocumentModel model) {
 
-        PluginLoader<IKarteSender> loader = PluginLoader.load(IKarteSender.class);
-        Iterator<IKarteSender> iter = loader.iterator();
+        SwingWorker worker = new SwingWorker<Void, Void>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                PluginLoader<IKarteSender> loader = PluginLoader.load(IKarteSender.class);
+                Iterator<IKarteSender> iter = loader.iterator();
+
+                while (iter.hasNext()) {
+                    IKarteSender sender = iter.next();
+                    sender.setContext(chart);
+                    sender.setModel(model);
+                    sender.addListener(instance);
+                    sender.send();
+                }
+                return null;
+            }
+        };
         
-        while (iter.hasNext()) {
-            IKarteSender sender = iter.next();
-            sender.setContext(chart);
-            sender.setModel(model);
-            sender.addListener(this);
-            sender.send();
-        }
+        worker.execute();
     }
 
-    public void sendDiagnosis(Chart chart, List<RegisteredDiagnosisModel> rdList) {
+    public void sendDiagnosis(final Chart chart, final List<RegisteredDiagnosisModel> rdList) {
+
+        SwingWorker worker = new SwingWorker<Void, Void>() {
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                PluginLoader<IDiagnosisSender> loader = PluginLoader.load(IDiagnosisSender.class);
+                Iterator<IDiagnosisSender> iter = loader.iterator();
+
+                while (iter.hasNext()) {
+                    IDiagnosisSender sender = iter.next();
+                    sender.setContext(chart);
+                    sender.setModel(rdList);
+                    sender.addListener(instance);
+                    sender.send();
+                }
+                return null;
+            }
+        };
         
-        PluginLoader<IDiagnosisSender> loader = PluginLoader.load(IDiagnosisSender.class);
-        Iterator<IDiagnosisSender> iter = loader.iterator();
-        
-        while (iter.hasNext()) {
-            IDiagnosisSender sender = iter.next();
-            sender.setContext(chart);
-            sender.setModel(rdList);
-            sender.addListener(this);
-            sender.send();
-        }
+        worker.execute();
     }
 
     @Override

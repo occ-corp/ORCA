@@ -201,6 +201,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     private JCheckBox cb_sendLaboTest;
     private JTextField tf_falcoFacilityId;
     private JTextField tf_falcoOutputPath;
+    
+    private JButton btn_hsInit;
 
     
     /** 画面モデル */
@@ -687,10 +689,26 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         gbl.add(zebraBtn, 0, 1, GridBagConstraints.CENTER);
         gbl.add(defaultColorBtn, 1, 1, GridBagConstraints.CENTER);
         JPanel color = gbl.getProduct();
+        
+        // HibernateSearch
+        gbl = new GridBagBuilder("HibernateSearch");
+        btn_hsInit = new JButton("初期インデックス作成");
+        btn_hsInit.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                InitHibernateSearchIndex ihsi = new InitHibernateSearchIndex();
+                ihsi.start(getContext());
+            }
+        });
+        gbl.add(btn_hsInit, 0, 0, GridBagConstraints.CENTER);
+        JPanel hs = gbl.getProduct();
+        
         // 全体レイアウト
         gbl = new GridBagBuilder();
         gbl.add(color, 0, 0, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         gbl.add(labo, 0, 1, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        gbl.add(hs, 0, 2, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         JPanel setting3 = gbl.getProduct();
         
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -826,6 +844,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             btn_openBase.setEnabled(false);
             btn_loadProp.setEnabled(false);
             btn_saveProp.setEnabled(false);
+            btn_hsInit.setEnabled(false);
         }
     }
 
