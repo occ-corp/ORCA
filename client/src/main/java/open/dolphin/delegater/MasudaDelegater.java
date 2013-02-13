@@ -441,8 +441,10 @@ public class MasudaDelegater extends BusinessDelegater {
                 getConverter().fromJson(entityStr, SearchResultModel.class);
         
         // 忘れてたｗ
-        List<PatientModel> list = model.getResultList();
-        decodePmHealthInsurance(list);
+        if (model != null) {
+            List<PatientModel> list = model.getResultList();
+            decodePmHealthInsurance(list);
+        }
         
         return model;
     }
