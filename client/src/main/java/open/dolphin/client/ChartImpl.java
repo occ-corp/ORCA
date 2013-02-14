@@ -2087,9 +2087,19 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         mediator.dispose();
         inspector.dispose();
         Project.setRectangle(PROP_FRMAE_BOUNDS, getFrame().getBounds());
+        disposeTabbedPane();    // memory leak? 
         getFrame().setVisible(false);
         getFrame().setJMenuBar(null);
         getFrame().dispose();
+    }
+    
+    private void disposeTabbedPane() {
+        ChangeListener[] listeners = tabbedPane.getChangeListeners();
+        for (ChangeListener listener : listeners) {
+            tabbedPane.removeChangeListener(listener);
+        }
+        tabbedPane.removeAll();     // memory leak?
+        tabbedPane = null;
     }
 
     protected abstract class ChartState {
