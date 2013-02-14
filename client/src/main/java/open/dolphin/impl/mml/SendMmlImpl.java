@@ -3,14 +3,9 @@ package open.dolphin.impl.mml;
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.util.ArrayList;
-import java.util.LinkedList;
+import java.io.IOException;
 import java.util.List;
-import java.util.concurrent.*;
-import open.dolphin.client.ClientContext;
-import open.dolphin.client.MainWindow;
-import open.dolphin.client.MmlMessageEvent;
-import open.dolphin.client.MmlMessageListener;
+import open.dolphin.client.*;
 import open.dolphin.infomodel.SchemaModel;
 import open.dolphin.project.Project;
 import org.apache.log4j.Logger;
@@ -20,7 +15,6 @@ import org.apache.log4j.Logger;
  * MML 送信サービス。
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
- * @author modified by masuda, Masuda Naika こりゃ失敗ｗ
  */
 public class SendMmlImpl implements MmlMessageListener {
     
@@ -31,58 +25,49 @@ public class SendMmlImpl implements MmlMessageListener {
     // MML Encoding
     private String encoding;
     
-    // Work Queue
-    private final List<MmlMessageEvent> queue;
-    private ExecutorService exec;
-
-
     private MainWindow context;
     
     private String name;
     
     private Logger logger;
-
     
-    /**
-     * Creates new SendMmlService
-     */
+    private static final String MML = "MML";
+    
+    /** Creates new SendMmlService */
     public SendMmlImpl() {
-        queue = new LinkedList<MmlMessageEvent>();
-        exec = Executors.newSingleThreadExecutor();
         logger = ClientContext.getMmlLogger();
-        encoding = "UTF-8";
     }
-
+    
     @Override
     public String getName() {
         return name;
     }
-
+    
     @Override
     public void setName(String name) {
         this.name = name;
     }
-
+    
     @Override
     public MainWindow getContext() {
         return context;
     }
-
+    
     @Override
     public void setContext(MainWindow context) {
         this.context = context;
     }
-
+    
     @Override
     public String getCSGWPath() {
         return csgwPath;
     }
-
+    
     @Override
     public void setCSGWPath(String val) {
         csgwPath = val;
         File directory = new File(csgwPath);
-        if (!directory.exists()) {
+        if (! directory.exists()) {
             if (directory.mkdirs()) {
                 logger.debug("MMLファイル出力先のディレクトリを作成しました");
             } else {
@@ -90,112 +75,28 @@ public class SendMmlImpl implements MmlMessageListener {
             }
         }
     }
-
+    
     @Override
-    public synchronized void stop() {
-        shutdownExecutor();
-        logDump();
+    public void stop() {
     }
-
+    
     @Override
     public void start() {
-
+        
         // CSGW 書き込みパスを設定する
         setCSGWPath(Project.getCSGWPath());
-
-        // 送信スレッドを開始する
-        if (exec != null) {
-            shutdownExecutor();
-        }
-        exec = Executors.newSingleThreadExecutor();
-
-        logger.info("Send MML statered with CSGW = " + getCSGWPath());
+        encoding = Project.getString(Project.MML_ENCODING);
     }
-
+    
     @Override
-    public synchronized void mmlMessageEvent(MmlMessageEvent e) {
-        queue.add(e);
-        processQueue();
-    }
-
-    private void processQueue() {
+    public void mmlMessageEvent(MmlMessageEvent mevt) {
         
-        if (queue == null || queue.isEmpty()) {
-            return;
-        }
-        
-        List<Callable<MmlMessageEvent>> taskList = new ArrayList<Callable<MmlMessageEvent>>();
-        for (MmlMessageEvent mmlEvent : queue) {
-            Callable task = new MmlOutputTask(mmlEvent);
-            taskList.add(task);
-        }
-        try {
-            List<Future<MmlMessageEvent>> futures = exec.invokeAll(taskList);
-            for (Future<MmlMessageEvent> future : futures) {
-                // 成功したらqueueから除去
-                MmlMessageEvent result;
-                try {
-                    result = future.get();
-                    queue.remove(result);
-                } catch (ExecutionException e) {
-                    e.printStackTrace(System.err);
-                    logger.warn(e.getMessage());
-                }
-            }
-        } catch (InterruptedException e) {
-            e.printStackTrace(System.err);
-            logger.warn(e.getMessage());
-        }
-    }
-
-    private void logDump() {
-
-        for (MmlMessageEvent event : queue) {
-            logger.warn(event.getMmlInstance());
-        }
-        queue.clear();
-    }
-
-    private void shutdownExecutor() {
+        MMLSender sender = (MMLSender) mevt.getSource();
 
         try {
-            exec.shutdown();
-            if (!exec.awaitTermination(5, TimeUnit.SECONDS)) {
-                exec.shutdownNow();
-            }
-        } catch (InterruptedException ex) {
-            exec.shutdownNow();
-        } catch (NullPointerException ex) {
-        }
-        exec = null;
-    }
-
-    private String getCSGWPathname(String fileName, String ext) {
-        StringBuilder buf = new StringBuilder();
-        buf.append(csgwPath);
-        buf.append(File.separator);
-        buf.append(fileName);
-        buf.append(".");
-        buf.append(ext);
-        return buf.toString();
-    }
-
-    private class MmlOutputTask implements Callable {
-
-        private MmlMessageEvent mmlEvent;
-
-        private MmlOutputTask(MmlMessageEvent mmlEvent) {
-            this.mmlEvent = mmlEvent;
-        }
-
-        @Override
-        public MmlMessageEvent call() throws Exception {
-
-            // MML パッケージを取得
-            //getLogger().debug("MMLファイルをコンシュームしました");
-            String groupId = mmlEvent.getGroupId();
-            String instance = mmlEvent.getMmlInstance();
-            List<SchemaModel> schemas = mmlEvent.getSchema();
+            String groupId = mevt.getGroupId();
+            String instance = mevt.getMmlInstance();
+            List<SchemaModel> schemas = mevt.getSchema();
 
             // ファイル名を生成する
             String dest = getCSGWPathname(groupId, "xml");
@@ -229,7 +130,27 @@ public class SendMmlImpl implements MmlMessageListener {
                     logger.debug("画像ファイルを書き込みました");
                 }
             }
-            return mmlEvent;
+
+        } catch (IOException e) {
+            e.printStackTrace(System.err);
+            String errMsg = e.getMessage();
+            logger.warn(errMsg);
+            sender.fireResult(new KarteSenderResult(MML, KarteSenderResult.ERROR, errMsg, sender));
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            String errMsg = e.getMessage();
+            logger.warn(errMsg);
+            sender.fireResult(new KarteSenderResult(MML, KarteSenderResult.ERROR, errMsg, sender));
         }
+    }
+    
+    private String getCSGWPathname(String fileName, String ext) {
+        StringBuilder buf = new StringBuilder();
+        buf.append(csgwPath);
+        buf.append(File.separator);
+        buf.append(fileName);
+        buf.append(".");
+        buf.append(ext);
+        return buf.toString();
     }
 }

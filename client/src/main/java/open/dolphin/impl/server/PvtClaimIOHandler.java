@@ -17,9 +17,9 @@ import open.dolphin.client.ClientContext;
  */
 public class PvtClaimIOHandler implements IHandler {
     
-    private static final int EOT = 0x04;
-    private static final int ACK = 0x06;
-    //private static final int NAK = 0x15;
+    private static final byte EOT = 0x04;
+    private static final byte ACK = 0x06;
+    //private static final byte NAK = 0x15;
 
     private static final int bufferSize = 8192;
     private ByteBuffer byteBuffer;
@@ -56,8 +56,8 @@ public class PvtClaimIOHandler implements IHandler {
         try {
             byteBuffer.clear();
             int readLen = channel.read(byteBuffer);
-            int c = byteBuffer.get(readLen - 1);
-            if (c == EOT) {
+            byte b = byteBuffer.get(readLen - 1);
+            if (b == EOT) {
                 // EOTを除いて書き出す
                 bos.write(byteBuffer.array(), 0, readLen - 1);
                 // writableにしてACKを返せるようにする

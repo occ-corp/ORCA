@@ -14,33 +14,27 @@ import open.dolphin.client.ClaimMessageEvent;
 public class ClaimIOHandler {
  
     // Socket constants
-    private static final int EOT = 0x04;
-    private static final int ACK = 0x06;
-    private static final int NAK = 0x15;
+    private static final byte EOT = 0x04;
+    private static final byte ACK = 0x06;
+    private static final byte NAK = 0x15;
     
     private ClaimMessageEvent evt;
-    private String encoding;
     private ByteBuffer writeBuffer;
-    private ClaimException.ERROR_CODE errorCode;
-    
+
     
     public ClaimIOHandler(ClaimMessageEvent evt, String encoding) {
+        
         this.evt = evt;
-        this.encoding = encoding;
 
         try {
             byte[] bytes = evt.getClaimInsutance().getBytes(encoding);
             writeBuffer = ByteBuffer.allocate(bytes.length + 1);
             writeBuffer.put(bytes);
-            writeBuffer.put((byte) EOT);
+            writeBuffer.put(EOT);
             writeBuffer.flip();
         } catch (UnsupportedEncodingException ex) {
             ex.printStackTrace(System.err);
         }
-    }
-
-    public boolean isNoError() {
-        return ClaimException.ERROR_CODE.NO_ERROR == errorCode;
     }
     
     public void handle(SelectionKey key) throws ClaimException {
@@ -90,15 +84,16 @@ public class ClaimIOHandler {
     // 返事を受け取る
     private void doRead(SelectionKey key) throws ClaimException {
 
+        ClaimException.ERROR_CODE errorCode;
         SocketChannel channel = (SocketChannel) key.channel();
 
         try {
             ByteBuffer byteBuffer = ByteBuffer.allocate(1);
             channel.read(byteBuffer);
             byteBuffer.flip();
-            int c = byteBuffer.get();
+            byte b = byteBuffer.get();
 
-            switch (c) {
+            switch (b) {
                 case ACK:
                     errorCode = ClaimException.ERROR_CODE.NO_ERROR;
                     break;
@@ -110,12 +105,12 @@ public class ClaimIOHandler {
                     break;
             }
         } catch (IOException ex) {
-            throw new ClaimException(ClaimException.ERROR_CODE.IO_ERROR, evt);
+            errorCode = ClaimException.ERROR_CODE.IO_ERROR;
         } finally {
             try {
                 channel.close();
             } catch (IOException ex) {
-                throw new ClaimException(ClaimException.ERROR_CODE.IO_ERROR, evt);
+                //errorCode = ClaimException.ERROR_CODE.IO_ERROR;
             }
         }
         // ClaimExceptionを投げて通信終了する

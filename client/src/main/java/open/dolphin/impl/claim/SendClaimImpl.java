@@ -156,7 +156,7 @@ public class SendClaimImpl implements ClaimMessageListener {
                     try {
                         key.channel().close();
                     } catch (IOException ex) {
-                        ex.printStackTrace(System.err);
+                        //ex.printStackTrace(System.err);
                     }
                 }
             } catch (ClosedSelectorException ex) {
@@ -164,6 +164,7 @@ public class SendClaimImpl implements ClaimMessageListener {
             try {
                 selector.close();
             } catch (IOException ex) {
+                //ex.printStackTrace(System.err);
             }
         }
     }
