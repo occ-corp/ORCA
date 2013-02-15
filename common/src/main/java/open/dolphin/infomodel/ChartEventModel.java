@@ -1,7 +1,5 @@
 package open.dolphin.infomodel;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-
 /**
  * Chart event通知用のモデル
  *
@@ -24,9 +22,6 @@ public class ChartEventModel {
     
     private long ptPk;
     private PatientModel patient;
-    
-    @JsonIgnore
-    private boolean localOnly;
     
     public static enum EVENT {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
     
@@ -90,9 +85,6 @@ public class ChartEventModel {
     public void setFacilityId(String fid) {
         facilityId = fid;
     }
-    public void setLocalOnly(boolean b) {
-        localOnly = b;
-    }
     
     public EVENT getEventType() {
         return eventType;
@@ -129,8 +121,5 @@ public class ChartEventModel {
     }
     public String getFacilityId() {
         return facilityId;
-    }
-    public boolean isLocalOnly() {
-        return localOnly;
     }
 }

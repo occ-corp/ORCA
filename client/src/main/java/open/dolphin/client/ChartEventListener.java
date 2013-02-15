@@ -1,6 +1,8 @@
 package open.dolphin.client;
 
 import com.sun.jersey.api.client.ClientResponse;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -22,6 +24,9 @@ import open.dolphin.util.BeanUtils;
  */
 public class ChartEventListener {
     
+    // propName
+    private static final String CHART_EVENT_PROP = "chartEvent";
+    
      // このクライアントのパラメーター類
     private String clientUUID;
     private String orcaId;
@@ -32,7 +37,7 @@ public class ChartEventListener {
     private String jmariCode;
     private String facilityId;
 
-    private List<IChartEventListener> listeners;
+    private PropertyChangeSupport boundSupport;
     
     // スレッド
     private EventListenTask listenTask;
@@ -64,21 +69,26 @@ public class ChartEventListener {
         userId = Project.getUserModel().getUserId();
         jmariCode = Project.getString(Project.JMARI_CODE);
         facilityId = Project.getFacilityId();
-        listeners = new ArrayList<IChartEventListener>(); 
     }
     
     public String getClientUUID() {
         return clientUUID;
     }
-   
-    public void addListener(IChartEventListener listener) {
-        listeners.add(listener);
+
+    public void addPropertyChangeListener(PropertyChangeListener l) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
+        boundSupport.addPropertyChangeListener(CHART_EVENT_PROP, l);
     }
 
-    public void removeListener(IChartEventListener listener) {
-        listeners.remove(listener);
+    public void removePropertyChangeListener(PropertyChangeListener l) {
+        if (boundSupport == null) {
+            boundSupport = new PropertyChangeSupport(this);
+        }
+        boundSupport.removePropertyChangeListener(CHART_EVENT_PROP, l);
     }
-    
+
     // 状態変更処理の共通入り口
     private void publish(ChartEventModel evt) {
         exec.execute(new LocalOnEventTask(evt));
@@ -167,42 +177,7 @@ public class ChartEventListener {
         }
         exec = null;
     }
-    
-/*
-    // Cometでサーバーと同期するスレッド
-    private class EventListenTask implements Runnable {
-        
-        private boolean isRunning;
-        
-        private EventListenTask() {
-            isRunning = true;
-        }
 
-        private void stop() {
-            isRunning = false;
-        }
-        
-        @Override
-        public void run() {
-
-            //long t1 = System.currentTimeMillis();
-            
-            while (isRunning) {
-                try {
-                    //System.out.println("time = " + String.valueOf(System.currentTimeMillis() - t1));
-                    String json = ChartEventDelegater.getInstance().subscribe();
-                    //t1 = System.currentTimeMillis();
-                    if (json != null) {
-                        exec.execute(new RemoteOnEventTask(json));
-                    }
-                    //System.out.println("ChartEvent= " + json);
-                } catch (Exception e) {
-                    //System.out.println(e.toString());
-                }
-            }
-        }
-    }
-*/
     
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
@@ -255,18 +230,11 @@ public class ChartEventListener {
         public void run() {
             
             // まずは自クライアントを更新
-            for (IChartEventListener listener : listeners) {
-                try {
-                    listener.onEvent(evt);
-                } catch (Exception ex) {
-                }
-            }
+            boundSupport.firePropertyChange(CHART_EVENT_PROP, null, evt);
 
             // サーバーに更新を通知
-            if (!evt.isLocalOnly()) {
-                ChartEventDelegater del = ChartEventDelegater.getInstance();
-                del.putChartEvent(evt);
-            }
+            ChartEventDelegater del = ChartEventDelegater.getInstance();
+            del.putChartEvent(evt);
         }
     }
     
@@ -313,12 +281,7 @@ public class ChartEventListener {
             }
             
             // 各リスナーで更新処理をする
-            for (IChartEventListener listener : listeners) {
-                try {
-                    listener.onEvent(evt);
-                } catch (Exception ex) {
-                }
-            }
+            boundSupport.firePropertyChange(CHART_EVENT_PROP, null, evt);
         }
     }
     

@@ -94,7 +94,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removeListener(this);
+        cel.removePropertyChangeListener(this);
     }
 
     private void setup() {
@@ -422,7 +422,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         // ColumnHelperでカラム変更関連イベントを設定する
         columnHelper.connect();
         // ChartEventListenerに登録する
-        cel.addListener(this);
+        cel.addPropertyChangeListener(this);
         
         // ファイル選択ボタン
         view.getFileBtn().addActionListener(new ActionListener() {
@@ -681,7 +681,9 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void propertyChange(PropertyChangeEvent e) {
+        
+        ChartEventModel evt = (ChartEventModel) e.getNewValue();
 
         int sRow = -1;
         long ptPk = evt.getPtPk();

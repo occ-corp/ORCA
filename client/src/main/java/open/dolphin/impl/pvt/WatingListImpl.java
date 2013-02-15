@@ -7,6 +7,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.beans.EventHandler;
+import java.beans.PropertyChangeEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -482,7 +483,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getFullPvt();
-        cel.addListener(this);
+        cel.addPropertyChangeListener(this);
         timerTask = new UpdatePvtInfoTask();
         restartTimer();
         enter();
@@ -532,7 +533,7 @@ public class WatingListImpl extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removeListener(this);
+        cel.removePropertyChangeListener(this);
     }
 
 
@@ -1217,7 +1218,9 @@ public class WatingListImpl extends AbstractMainComponent {
     // ChartEventListener
     // 待合リストを更新する
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void propertyChange(PropertyChangeEvent e) {
+        
+        ChartEventModel evt = (ChartEventModel) e.getNewValue();
 
         ChartEventModel.EVENT eventType = evt.getEventType();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();

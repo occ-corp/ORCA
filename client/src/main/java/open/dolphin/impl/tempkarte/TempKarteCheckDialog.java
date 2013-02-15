@@ -4,6 +4,7 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
 import java.util.GregorianCalendar;
 import java.util.List;
 import javax.swing.*;
@@ -249,9 +250,9 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
             return;
         }
         if (b) {
-            cel.addListener(instance);
+            cel.addPropertyChangeListener(instance);
         } else {
-            cel.removeListener(instance);
+            cel.removePropertyChangeListener(instance);
             setModal(false);
         }
         super.setVisible(b);
@@ -276,8 +277,11 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
         return (PatientModel) sorter.getObject(selectedRow);
     }
 
+    // ChartEventListener
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void propertyChange(PropertyChangeEvent e) {
+        
+        ChartEventModel evt = (ChartEventModel) e.getNewValue();
         
         int sRow = -1;
         long ptPk = evt.getPtPk();

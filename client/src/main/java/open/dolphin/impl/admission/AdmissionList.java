@@ -4,6 +4,7 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -103,7 +104,7 @@ public class AdmissionList extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removeListener(this);
+        cel.removePropertyChangeListener(this);
     }
     /**
      * メインウインドウのタブで受付リストに切り替わった時 コールされる。
@@ -179,7 +180,7 @@ public class AdmissionList extends AbstractMainComponent {
         // ColumnHelperでカラム変更関連イベントを設定する
         columnHelper.connect();
         // ChartEventListenerに登録する
-        cel.addListener(this);
+        cel.addPropertyChangeListener(this);
         
         // 来院リストテーブル 選択
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -477,8 +478,9 @@ public class AdmissionList extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void propertyChange(PropertyChangeEvent e) {
         
+        ChartEventModel evt = (ChartEventModel) e.getNewValue();
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();

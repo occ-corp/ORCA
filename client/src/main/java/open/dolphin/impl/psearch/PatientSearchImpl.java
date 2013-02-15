@@ -5,6 +5,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.beans.EventHandler;
+import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -123,7 +124,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removeListener(this);
+        cel.removePropertyChangeListener(this);
     }
 
     public PatientModel getSelectedPatient() {
@@ -429,7 +430,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         // ColumnHelperでカラム変更関連イベントを設定する
         columnHelper.connect();
         // ChartEventListenerに登録する
-        cel.addListener(this);
+        cel.addPropertyChangeListener(this);
 
         EventAdapter adp = new EventAdapter(view.getKeywordFld(), view.getTable());
 
@@ -1104,7 +1105,9 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void onEvent(ChartEventModel evt) throws Exception {
+    public void propertyChange(PropertyChangeEvent e) {
+        
+        ChartEventModel evt = (ChartEventModel) e.getNewValue();
 
         int sRow = -1;
         long ptPk = evt.getPtPk();
