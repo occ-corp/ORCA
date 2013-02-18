@@ -64,6 +64,9 @@ public class UserModel extends InfoModel {
     private List<RoleModel> roles;
 
     private String orcaId;
+    
+    // raw password
+    private String passwd;
 
     /**
      * UserModelオブジェクトを生成する。
@@ -227,6 +230,14 @@ public class UserModel extends InfoModel {
 
     public void setOrcaId(String orcaId) {
         this.orcaId = orcaId;
+    }
+    
+    public String getPasswd() {
+        return passwd;
+    }
+    
+    public void setPasswd(String passwd) {
+        this.passwd = passwd;
     }
     
     @Override

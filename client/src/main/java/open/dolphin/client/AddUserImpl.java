@@ -888,6 +888,10 @@ public class AddUserImpl extends AbstractMainTool implements AddUser {
         private String idPassPattern;
         private String usersRole; // user に与える role 名
         
+//masuda^   生パスワードを記録するかどうか
+        private JCheckBox chk_rawPass;
+//masuda$
+        
         public AddUserPanel() {
             
             userIdLength = ClientContext.getIntArray("addUser.userId.length");
@@ -1022,6 +1026,10 @@ public class AddUserImpl extends AbstractMainTool implements AddUser {
             label = new JLabel("確認:", SwingConstants.RIGHT);
             constrain(content, label, x + 2, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.EAST);
             constrain(content, userPassword2, x + 3, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST);
+//masuda^   生パスワード
+            chk_rawPass = new JCheckBox("生Pass登録");
+            constrain(content, chk_rawPass, x + 4, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST);
+//masuda$
             
             x = 0;
             y += 1;
@@ -1105,6 +1113,13 @@ public class AddUserImpl extends AbstractMainTool implements AddUser {
             user.setSirName(sn.getText().trim());
             user.setGivenName(givenName.getText().trim());
             user.setCommonName(user.getSirName() + " " + user.getGivenName());
+//masuda^   生パスワード
+            if (chk_rawPass.isSelected()) {
+                user.setPasswd(pass);
+            } else {
+                user.setPasswd(null);
+            }
+//masuda$
             
             // 施設情報
             // 管理者のものを使用する
