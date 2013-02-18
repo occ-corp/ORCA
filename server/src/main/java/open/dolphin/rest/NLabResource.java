@@ -2,9 +2,7 @@ package open.dolphin.rest;
 
 import java.util.List;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.*;
 import open.dolphin.session.NLabServiceBean;
 
@@ -22,8 +20,6 @@ public class NLabResource extends AbstractResource {
     @Inject
     private NLabServiceBean nLabServiceBean;
     
-    @Context
-    private HttpServletRequest servletReq;
     
     public NLabResource() {
     }
@@ -35,7 +31,11 @@ public class NLabResource extends AbstractResource {
             @QueryParam("firstResult") Integer firstResult,
             @QueryParam("maxResult") Integer maxResult) {
 
-        String fidPid = getFidPid(servletReq.getRemoteUser(), pid);
+        StringBuilder sb = new StringBuilder();
+        sb.append(getRemoteFacility());
+        sb.append(IInfoModel.COMPOSITE_KEY_MAKER);
+        sb.append(pid);
+        String fidPid = sb.toString();
 
         List<NLaboModule> list = nLabServiceBean.getLaboTest(fidPid, firstResult, maxResult);
 
@@ -50,7 +50,7 @@ public class NLabResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getConstrainedPatients(@QueryParam("ids") String ids) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         List<String> idList = getConverter().toStrList(ids);
 
@@ -68,7 +68,7 @@ public class NLabResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String postNLaboTest(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
 
         NLaboModule module = (NLaboModule) 
@@ -89,7 +89,7 @@ public class NLabResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String postMmlLaboTest(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         LaboModuleValue module = (LaboModuleValue)
                 getConverter().fromJson(json, LaboModuleValue.class);

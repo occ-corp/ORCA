@@ -2,10 +2,7 @@ package open.dolphin.rest;
 
 import java.util.List;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
-import open.dolphin.infomodel.RoleModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.mbean.UserCache;
 import open.dolphin.session.UserServiceBean;
@@ -28,8 +25,6 @@ public class UserResource extends AbstractResource {
     @Inject
     private UserCache userCache;
     
-    @Context
-    private HttpServletRequest servletReq;
 
     public UserResource() {
     }
@@ -52,7 +47,7 @@ public class UserResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getAllUser() {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         debug(fid);
 
         List<UserModel> result = userServiceBean.getAllUser(fid);
@@ -69,7 +64,7 @@ public class UserResource extends AbstractResource {
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String postUser(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         debug(fid);
         
         UserModel model = (UserModel)

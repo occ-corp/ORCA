@@ -14,6 +14,11 @@ public interface IInfoModel extends java.io.Serializable, java.lang.Cloneable {
     public static final String DEFAULT_FACILITY_OID = "1.3.6.1.4.1.9414.10.1";
     public static final Date AD1800 = new Date(-5362016400000L);
     public static final String ISO_DF_FORMAT = "yyyy-MM-dd HH:mm:ss";
+    
+    public static final String USER_NAME = "userName";
+    public static final String PASSWORD = "password";
+    public static final String FID = "fid";
+    public static final String CLIENT_UUID = "clientUUID";
 //masuda$
     
     /** ISO 8601 style date format */

@@ -1,13 +1,10 @@
-
 package open.dolphin.rest;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.*;
 import open.dolphin.session.MasudaServiceBean;
 
@@ -22,9 +19,7 @@ public class MasudaResource extends AbstractResource {
     
     @Inject
     private MasudaServiceBean masudaServiceBean;
-    
-    @Context
-    private HttpServletRequest servletReq;
+
     
     public MasudaResource() {
     }
@@ -105,7 +100,7 @@ public class MasudaResource extends AbstractResource {
     public String getDisconItemModels() {
 
         // 施設
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         List<DisconItemModel> list = masudaServiceBean.getDisconItems(fid);
 
@@ -121,7 +116,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String addDisconItemModel(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         DisconItemModel model = (DisconItemModel)
                 getConverter().fromJson(json, DisconItemModel.class);
@@ -139,7 +134,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String updateDiconItemModel(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         DisconItemModel model = (DisconItemModel)
                 getConverter().fromJson(json, DisconItemModel.class);
@@ -169,7 +164,7 @@ public class MasudaResource extends AbstractResource {
     public String getUsingDrugModels() {
 
         // 施設
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         List<UsingDrugModel> list = masudaServiceBean.getUsingDrugModels(fid);
 
@@ -185,7 +180,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String addUsingDrugModel(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         
         UsingDrugModel model = (UsingDrugModel)
                 getConverter().fromJson(json, UsingDrugModel.class);
@@ -203,7 +198,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String updateUsingDrugModel(String json) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         UsingDrugModel model = (UsingDrugModel)
                 getConverter().fromJson(json, UsingDrugModel.class);
@@ -235,7 +230,7 @@ public class MasudaResource extends AbstractResource {
                 @QueryParam("toDate") String toDateStr,
                 @QueryParam("entities") String entitiesStr) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         Date fromDate = parseDate(fromDateStr);
         Date toDate = parseDate(toDateStr);
@@ -255,7 +250,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getLastPvtInThisMonth(@PathParam("ptId") String ptId) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         
         PatientVisitModel model = masudaServiceBean.getLastPvtInThisMonth(fid, ptId);
         
@@ -288,7 +283,7 @@ public class MasudaResource extends AbstractResource {
             @QueryParam("fromDocPk") Long fromDocPk, 
             @QueryParam("maxResults") Integer maxResults) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         String ret = masudaServiceBean.makeDocumentModelIndex(fid, fromDocPk, maxResults);
 
@@ -303,7 +298,7 @@ public class MasudaResource extends AbstractResource {
             @QueryParam("karteId") Long karteId,
             @QueryParam("text") String text) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         List<PatientModel> list = masudaServiceBean.getKarteFullTextSearch(fid, karteId, text);
 
@@ -322,7 +317,7 @@ public class MasudaResource extends AbstractResource {
             @QueryParam("maxResult") Integer maxResult,
             @QueryParam("pcOnly") Boolean progressCourseOnly) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         SearchResultModel model = masudaServiceBean.getSearchResult(fid, text, fromId, maxResult, progressCourseOnly);
 
@@ -339,7 +334,7 @@ public class MasudaResource extends AbstractResource {
             @QueryParam("fromDate") String fromDateStr,
             @QueryParam("toDate") String toDateStr) {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         Date fromDate = parseDate(fromDateStr);
         Date toDate = parseDate(toDateStr);
         
@@ -359,7 +354,7 @@ public class MasudaResource extends AbstractResource {
             @QueryParam("toDate") String toDateStr,
             @QueryParam("yoyuu") Integer yoyuu) {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         Date fromDate = parseDate(fromDateStr);
         Date toDate = parseDate(toDateStr);
 
@@ -376,7 +371,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getInFacilityLaboItemList() {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         List<InFacilityLaboItem> list = masudaServiceBean.getInFacilityLaboItemList(fid);
         
         String json = getConverter().toJson(list);
@@ -391,7 +386,7 @@ public class MasudaResource extends AbstractResource {
     @Produces(MEDIATYPE_TEXT_UTF8)
     public String updateInFacilityLaboItem(String json) {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         
         TypeReference typeRef = new TypeReference<List<InFacilityLaboItem>>(){};
         List<InFacilityLaboItem> list = (List<InFacilityLaboItem>)
@@ -424,7 +419,7 @@ public class MasudaResource extends AbstractResource {
             @QueryParam("fromId") Long fromIndex,
             @QueryParam("maxResults") Integer maxResults) {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         
         String ret = masudaServiceBean.initSanteiHistory(fid, fromIndex, maxResults);
         

@@ -8,6 +8,7 @@ import javax.servlet.*;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.mbean.UserCache;
 import open.dolphin.session.UserServiceBean;
 
@@ -25,8 +26,6 @@ public class LogFilter implements Filter {
 
     private static final Logger logger = Logger.getLogger(LogFilter.class.getSimpleName());
 
-    private static final String USER_NAME = "userName";
-    private static final String PASSWORD = "password";
     private static final String UNAUTHORIZED_USER = "Unauthorized user: ";
 
     @Inject
@@ -43,9 +42,13 @@ public class LogFilter implements Filter {
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain) throws IOException, ServletException {
 
         HttpServletRequest req = (HttpServletRequest) request;
-
-        String userName = req.getHeader(USER_NAME);
-        String password = req.getHeader(PASSWORD);
+        
+        StringBuilder sb = new StringBuilder();
+        String fid = req.getHeader(IInfoModel.FID);
+        sb.append(fid).append(IInfoModel.COMPOSITE_KEY_MAKER);
+        sb.append(req.getHeader(IInfoModel.USER_NAME));
+        String userName = sb.toString();
+        String password = req.getHeader(IInfoModel.PASSWORD);
         //System.err.println(userName);
         //System.err.println(password);
         
@@ -56,10 +59,10 @@ public class LogFilter implements Filter {
             authentication = userService.authenticate(userName, password);
             if (!authentication) {
                 HttpServletResponse res = (HttpServletResponse) response;
-                StringBuilder sbd = new StringBuilder();
-                sbd.append(UNAUTHORIZED_USER);
-                sbd.append(userName).append(": ").append(req.getRequestURI());
-                String msg = sbd.toString();
+                sb = new StringBuilder();
+                sb.append(UNAUTHORIZED_USER);
+                sb.append(userName).append(": ").append(req.getRequestURI());
+                String msg = sb.toString();
                 warn(msg);
                 res.sendError(401);
                 return;
@@ -67,17 +70,17 @@ public class LogFilter implements Filter {
                 userMap.put(userName, password);
             }
         }
+        
+        // facilityIdを属性にセットしておく
+        req.setAttribute(IInfoModel.FID, fid);
 
-        BlockWrapper wrapper = new BlockWrapper(req);
-        wrapper.setRemoteUser(userName);
-
-        StringBuilder sb = new StringBuilder();
+        sb = new StringBuilder();
         sb.append("\n");
-        sb.append(wrapper.getRemoteAddr()).append(" ");
-        sb.append(wrapper.getShortUser()).append(" ");
-        sb.append(wrapper.getMethod()).append(" ");
-        sb.append(wrapper.getRequestURI());
-        String query = wrapper.getQueryString();
+        sb.append(req.getRemoteAddr()).append(" ");
+        sb.append(userName.substring(17)).append(" ");
+        sb.append(req.getMethod()).append(" ");
+        sb.append(req.getRequestURI());
+        String query = req.getQueryString();
         if (query != null && !query.isEmpty()) {
             sb.append("?").append(query);
         }
@@ -87,7 +90,7 @@ public class LogFilter implements Filter {
                 : sb.toString();
         info(msg);
 
-        chain.doFilter(wrapper, response);
+        chain.doFilter(req, response);
     }
 
     @Override

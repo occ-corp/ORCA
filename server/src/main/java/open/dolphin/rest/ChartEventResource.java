@@ -5,11 +5,10 @@ import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import javax.ws.rs.core.Response;
 import open.dolphin.infomodel.ChartEventModel;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.ChartEventServiceBean;
 
@@ -24,8 +23,6 @@ public class ChartEventResource extends AbstractResource {
     
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
     
-    public static final String CLIENT_UUID = "clientUUID";
-    public static final String FID = "fid";
     public static final String DISPATCH_URL = "/openSource/chartEvent/dispatch";
     public static final String KEY_NAME = "chartEvent";
     
@@ -35,23 +32,19 @@ public class ChartEventResource extends AbstractResource {
     @Inject
     private ServletContextHolder contextHolder;
     
-    @Context
-    private HttpServletRequest servletReq;
-    
-    
     @GET
     @Path("subscribe")
     public void subscribe() {
 
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
-        String clientUUID = servletReq.getHeader(CLIENT_UUID);
+        String fid = getRemoteFacility();
+        String clientUUID = servletReq.getHeader(IInfoModel.CLIENT_UUID);
         
         final AsyncContext ac = servletReq.startAsync();
         // timeoutを設定
         ac.setTimeout(asyncTimeout);
         // requestにfid, clientUUIDを記録しておく
-        ac.getRequest().setAttribute(FID, fid);
-        ac.getRequest().setAttribute(CLIENT_UUID, clientUUID);
+        ac.getRequest().setAttribute(IInfoModel.FID, fid);
+        ac.getRequest().setAttribute(IInfoModel.CLIENT_UUID, clientUUID);
         contextHolder.addAsyncContext(ac);
 
         ac.addListener(new AsyncListener() {

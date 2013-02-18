@@ -46,8 +46,8 @@ public class ChartEventServiceBean {
             for (Iterator<AsyncContext> itr = acList.iterator(); itr.hasNext();) {
                 
                 AsyncContext ac = itr.next();
-                String acFid = (String) ac.getRequest().getAttribute(ChartEventResource.FID);
-                String acUUID = (String) ac.getRequest().getAttribute(ChartEventResource.CLIENT_UUID);
+                String acFid = (String) ac.getRequest().getAttribute(IInfoModel.FID);
+                String acUUID = (String) ac.getRequest().getAttribute(IInfoModel.CLIENT_UUID);
                 String issuerUUID = evt.getIssuerUUID();
                 
                 // 同一施設かつChartEventModelの発行者でないクライアントに通知する

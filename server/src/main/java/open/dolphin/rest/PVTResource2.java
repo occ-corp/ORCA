@@ -3,13 +3,11 @@ package open.dolphin.rest;
 import java.util.Collection;
 import java.util.List;
 import javax.inject.Inject;
-import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
-import javax.ws.rs.core.Context;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientVisitModel;
-import open.dolphin.session.PVTServiceBean;
 import open.dolphin.session.ChartEventServiceBean;
+import open.dolphin.session.PVTServiceBean;
 
 /**
  * PVTResource2
@@ -27,10 +25,8 @@ public class PVTResource2 extends AbstractResource {
     
     @Inject
     private ChartEventServiceBean eventServiceBean;
-    
-    @Context
-    private HttpServletRequest servletReq;
 
+    
     public PVTResource2() {
     }
 
@@ -43,7 +39,7 @@ public class PVTResource2 extends AbstractResource {
                 getConverter().fromJson(json, PatientVisitModel.class);
 
         // 関係構築
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         model.setFacilityId(fid);
         //model.getPatientModel().setFacilityId(fid);
 
@@ -67,7 +63,7 @@ public class PVTResource2 extends AbstractResource {
     public void deletePvt(@PathParam("pvtPK") String pkStr) {
 
         long pvtPK = Long.parseLong(pkStr);
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
 
         int cnt = pvtServiceBean.removePvt(pvtPK, fid);
 
@@ -80,7 +76,7 @@ public class PVTResource2 extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getPvtList() {
         
-        String fid = getRemoteFacility(servletReq.getRemoteUser());
+        String fid = getRemoteFacility();
         List<PatientVisitModel> model = eventServiceBean.getPvtList(fid);
         
         String json = getConverter().toJson(model);

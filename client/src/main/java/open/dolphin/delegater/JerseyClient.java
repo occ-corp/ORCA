@@ -5,6 +5,7 @@ import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.Dolphin;
+import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.util.HashUtil;
 
 /**
@@ -15,23 +16,18 @@ import open.dolphin.util.HashUtil;
 public class JerseyClient {
 
     private static final JerseyClient instance;
-    private static final String USER_NAME = "userName";
-    private static final String PASSWORD = "password";
-    private static final String CLIENT_UUID = "clientUUID";
     private static final int TIMEOUT1 = 30;
     
     private String clientUUID;
     private String baseURI;
     private String userName;
     private String password;
+    private String facilityId;
     
     private Client client;
     private Client client2;
     private WebResource webResource;
     private AsyncWebResource asyncResource;
-    //private WebResource asyncResource;
-    
-    //private ExecutorService exec;
     
     static {
         instance = new JerseyClient();
@@ -39,7 +35,6 @@ public class JerseyClient {
 
     private JerseyClient() {
         clientUUID = Dolphin.getInstance().getClientUUID();
-        //exec = Executors.newSingleThreadExecutor();
         client = Client.create();
         client2 = Client.create();
     }
@@ -50,13 +45,15 @@ public class JerseyClient {
 
     public void setUpAuthentication(String username, String password, boolean hashPass) {
         try {
-            this.userName = username;
+            String[] fidUid = splitFidUid(username);
+            this.facilityId = fidUid[0];
+            this.userName = fidUid[1];
             this.password = hashPass ? password : HashUtil.MD5(password);
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
     }
-
+    
     public String getBaseURI() {
         return baseURI;
     }
@@ -75,10 +72,7 @@ public class JerseyClient {
         webResource = client.resource(baseURI);
 
         // pvt同期用のクライアントを別に用意する
-        // 専用のExecutorServiceを設定する
-        //client2.setExecutorService(exec);
         asyncResource = client2.asyncResource(baseURI);
-        //asyncResource = client2.resource(baseURI);
     }
 
     // QueryParam付のWebResource
@@ -86,10 +80,14 @@ public class JerseyClient {
 
         if (qmap != null) {
             return webResource.path(path).queryParams(qmap)
-                    .header(USER_NAME, userName).header(PASSWORD, password);
+                    .header(IInfoModel.FID, facilityId)
+                    .header(IInfoModel.USER_NAME, userName)
+                    .header(IInfoModel.PASSWORD, password);
         } else {
             return webResource.path(path)
-                    .header(USER_NAME, userName).header(PASSWORD, password);
+                    .header(IInfoModel.FID, facilityId)
+                    .header(IInfoModel.USER_NAME, userName)
+                    .header(IInfoModel.PASSWORD, password);
         }
     }
     
@@ -97,16 +95,17 @@ public class JerseyClient {
 
     public AsyncWebResource.Builder getAsyncResource(String path) {
         return asyncResource.path(path)
-                .header(USER_NAME, userName)
-                .header(PASSWORD, password)
-                .header(CLIENT_UUID, clientUUID);
+                .header(IInfoModel.FID, facilityId)
+                .header(IInfoModel.USER_NAME, userName)
+                .header(IInfoModel.PASSWORD, password)
+                .header(IInfoModel.CLIENT_UUID, clientUUID);
     }
-/*
-    public WebResource.Builder getAsyncResource(String path) {
-        return asyncResource.path(path)
-                .header(USER_NAME, userName)
-                .header(PASSWORD, password)
-                .header(CLIENT_UUID, clientUUID);
+
+    
+    private String[] splitFidUid(String username) {
+        int pos = username.indexOf(IInfoModel.COMPOSITE_KEY_MAKER);
+        String fid = username.substring(0, pos);
+        String uid = username.substring(pos + 1);
+        return new String[]{fid, uid};
     }
-*/
 }
