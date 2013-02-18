@@ -289,19 +289,23 @@ public class PatientServiceBean {
         }
     }
     
+    // 保険情報は後でクライアントから取りに行く
+    // http://mdc.blog.ocn.ne.jp/blog/2013/02/post_f69f.html
+    // ダミーの保険情報を設定する。LAZY_FETCHを回避する
+    // com.fasterxml.jackson.databind.JsonMappingException: could not initialize proxy - no Session
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {
-            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
-            pm.setHealthInsurances(ins);
+            pm.setHealthInsurances(null);
         }
     }
 
-    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
+    public List<HealthInsuranceModel> getHealthInsurances(long pk) {
         
         List<HealthInsuranceModel> ins =
                 em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
                 .setParameter(PK, pk)
                 .getResultList();
+        
         return ins;
     }
 }

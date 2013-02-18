@@ -409,9 +409,6 @@ public class MasudaDelegater extends BusinessDelegater {
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
         
-        // 忘れがちｗ
-        decodePmHealthInsurance(list);
-        
         return list;
     }
 
@@ -439,12 +436,6 @@ public class MasudaDelegater extends BusinessDelegater {
         
         SearchResultModel model = (SearchResultModel)
                 getConverter().fromJson(entityStr, SearchResultModel.class);
-        
-        // 忘れてたｗ
-        if (model != null) {
-            List<PatientModel> list = model.getResultList();
-            decodePmHealthInsurance(list);
-        }
         
         return model;
     }
@@ -500,9 +491,6 @@ public class MasudaDelegater extends BusinessDelegater {
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
-        
-        // 忘れがちｗ
-        decodePmHealthInsurance(list);
         
         return list;
     }
@@ -709,9 +697,6 @@ public class MasudaDelegater extends BusinessDelegater {
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>) 
                 getConverter().fromJson(entityStr, typeRef);
-        
-        // 忘れがちｗ
-        decodePmHealthInsurance(list);
         
         return list;
     }

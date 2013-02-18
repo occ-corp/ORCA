@@ -277,8 +277,7 @@ public class MasudaServiceBean {
                     .setMaxResults(1)
                     .getSingleResult();
             // ダミーの保険情報を設定する
-            List<HealthInsuranceModel> ins = Collections.emptyList();
-            result.getPatientModel().setHealthInsurances(ins);
+            setHealthInsurances(result.getPatientModel());
         } catch (NoResultException e) {
         }
 
@@ -492,26 +491,30 @@ public class MasudaServiceBean {
     }
 
     // 保険情報をとPvtDateを設定する
+    // thx to Dr. pns
     private void setInsuranceAndPvtDate(String fid, List<PatientModel> list) {
 
         final int CANCEL_PVT = 1 << 6;  // BIT_CANCEL = 6;
         final String sqlPvt = "from PatientVisitModel p where p.facilityId = :fid " +
-                "and p.patient.id = :patientPk and p.status != :status order by p.pvtDate desc";
+                "and p.patient in (:pts) and p.status != :status order by p.pvtDate desc";
+        
 
-        for (PatientModel pm : list) {
-            // 患者の健康保険を取得する
-            setHealthInsurances(pm);
-
-            try {
-                PatientVisitModel pvt = (PatientVisitModel)
-                        em.createQuery(sqlPvt)
-                        .setParameter("fid", fid)
-                        .setParameter("patientPk", pm.getId())
-                        .setParameter("status", CANCEL_PVT)
-                        .setMaxResults(1)
-                        .getSingleResult();
-                pm.setPvtDate(pvt.getPvtDate());
-            } catch (NoResultException e) {
+        List<PatientVisitModel> pvtList = (List<PatientVisitModel>) 
+                em.createQuery(sqlPvt)
+                .setParameter("fid", fid)
+                .setParameter("pts", list)
+                .setParameter("status", CANCEL_PVT)
+                .getResultList();
+        
+        for (PatientVisitModel pvt : pvtList) {
+            long id = pvt.getPatientModel().getId();
+            for (PatientModel pm : list) {
+                if (pm.getId() == id) {
+                    // 患者の健康保険を取得する、ダミーだがｗ
+                    setHealthInsurances(pm);
+                    pm.setPvtDate(pvt.getPvtDate());
+                    break;
+                }
             }
         }
     }
@@ -1234,7 +1237,10 @@ public class MasudaServiceBean {
         return new ArrayList<PatientModel>(set);
     }
     
-    
+    // 保険情報は後でクライアントから取りに行く
+    // http://mdc.blog.ocn.ne.jp/blog/2013/02/post_f69f.html
+    // ダミーの保険情報を設定する。LAZY_FETCHを回避する
+    // com.fasterxml.jackson.databind.JsonMappingException: could not initialize proxy - no Session
     private void setHealthInsurances(Collection<PatientModel> list) {
         if (list != null && !list.isEmpty()) {
             for (PatientModel pm : list) {
@@ -1245,17 +1251,7 @@ public class MasudaServiceBean {
     
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {
-            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
-            pm.setHealthInsurances(ins);
+            pm.setHealthInsurances(null);
         }
-    }
-
-    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
-        
-        List<HealthInsuranceModel> ins =
-                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                .setParameter(PK, pk)
-                .getResultList();
-        return ins;
     }
 }

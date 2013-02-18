@@ -3,6 +3,7 @@ package open.dolphin.rest;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.session.PatientServiceBean;
 
@@ -158,6 +159,18 @@ public class PatientResource extends AbstractResource {
         List<String> idList = getConverter().toStrList(ids);
         
         List<PatientModel> list = patientServiceBean.getPatientList(fid, idList);
+        
+        String json = getConverter().toJson(list);
+        
+        return json;
+    }
+
+    @GET
+    @Path("insurances/{id}/")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public String getHealthInsurances(@PathParam("id") Long pk) {
+        
+        List<HealthInsuranceModel> list = patientServiceBean.getHealthInsurances(pk);
         
         String json = getConverter().toJson(list);
         

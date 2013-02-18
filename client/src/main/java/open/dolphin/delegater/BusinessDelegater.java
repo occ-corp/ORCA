@@ -78,15 +78,7 @@ public class BusinessDelegater {
             }
         }
     }
-    protected void decodePmHealthInsurance(Collection<PatientModel> list) {
-        
-        if (list != null && !list.isEmpty()) {
-            for (PatientModel pm : list) {
-                decodeHealthInsurance(pm);
-            }
-        }
-    }
-    
+
     protected void decodeHealthInsurance(PatientModel patient) {
 
         // Health Insurance を変換をする beanXML2PVT

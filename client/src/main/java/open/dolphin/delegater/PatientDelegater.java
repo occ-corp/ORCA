@@ -7,6 +7,7 @@ import java.util.Collection;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.dto.PatientSearchSpec;
+import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 
 /**
@@ -138,8 +139,6 @@ public class  PatientDelegater extends BusinessDelegater {
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
         
-        decodePmHealthInsurance(list);
-
         return list;
     }
 
@@ -191,12 +190,35 @@ public class  PatientDelegater extends BusinessDelegater {
         List<PatientModel> list = (List<PatientModel>)
                 getConverter().fromJson(entityStr, typeRef);
         
-        // 忘れがちｗ
-        decodePmHealthInsurance(list);
-        
         return list;
     }
 
+    // カルテオープン時に保険情報を更新する
+    public void updateHealthInsurances(PatientModel pm) {
+        
+        long pk = pm.getId();
+        String path = BASE_RESOURCE + "insurances/" + String.valueOf(pk);
+
+        ClientResponse response = getResource(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+        
+        int status = response.getStatus();
+        String entityStr = response.getEntity(String.class);
+        debug(status, entityStr);
+
+        if (status != HTTP200) {
+            return;
+        }
+
+        TypeReference typeRef = new TypeReference<List<HealthInsuranceModel>>(){};
+        List<HealthInsuranceModel> list = (List<HealthInsuranceModel>)
+                getConverter().fromJson(entityStr, typeRef);
+        
+        pm.setHealthInsurances(list);
+        // 忘れがちｗ
+        decodeHealthInsurance(pm);
+    }
     
     @Override
     protected void debug(int status, String entity) {

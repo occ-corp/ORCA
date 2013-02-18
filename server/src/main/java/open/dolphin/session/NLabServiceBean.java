@@ -407,17 +407,7 @@ public class NLabServiceBean {
     
     private void setHealthInsurances(PatientModel pm) {
         if (pm != null) {
-            List<HealthInsuranceModel> ins = getHealthInsurances(pm.getId());
-            pm.setHealthInsurances(ins);
+            pm.setHealthInsurances(null);
         }
-    }
-
-    private List<HealthInsuranceModel> getHealthInsurances(long pk) {
-        
-        List<HealthInsuranceModel> ins =
-                em.createQuery(QUERY_INSURANCE_BY_PATIENT_PK)
-                .setParameter(PK, pk)
-                .getResultList();
-        return ins;
     }
 }

@@ -26,6 +26,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
+import open.dolphin.delegater.PatientDelegater;
 import open.dolphin.delegater.StampDelegater;
 import open.dolphin.helper.ComponentMemory;
 import open.dolphin.helper.MenuSupport;
@@ -604,8 +605,9 @@ public class Dolphin implements MainWindow {
         }
         
         // このクライアントでChartImplとEditorFrameを開いていた場合の処理
+        PatientModel pm = pvt.getPatientModel();
         boolean opened = false;
-        long ptId = pvt.getPatientModel().getId();
+        long ptId = pm.getId();
         for (ChartImpl chart : allCharts) {
             if (chart.getPatient().getId() == ptId) {
                 chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
@@ -629,7 +631,7 @@ public class Dolphin implements MainWindow {
 
         // まだ開いていない場合
         boolean readOnly = Project.isReadOnly();
-        if (pvt.getPatientModel().getOwnerUUID() != null) {
+        if (pm.getOwnerUUID() != null) {
             // ダイアログで確認する
             String ptName = pvt.getPatientName();
             String[] options = {"閲覧のみ", "強制的に編集", "キャンセル"};
@@ -643,7 +645,7 @@ public class Dolphin implements MainWindow {
                     readOnly = true;
                     break;
                 case 1:     // 強制的に編集するときは所有権横取り
-                    pvt.getPatientModel().setOwnerUUID(clientUUID);
+                    pm.setOwnerUUID(clientUUID);
                     break;
                 case 2:     // キャンセル
                 case JOptionPane.CLOSED_OPTION:
@@ -652,6 +654,11 @@ public class Dolphin implements MainWindow {
         } else {
             // 誰も開いていないときは自分が所有者
             pvt.getPatientModel().setOwnerUUID(clientUUID);
+        }
+        
+        // カルテオープン時にpvtHealthInsuranceが設定されてなかったら取得しに行く
+        if (pm.getPvtHealthInsurances() == null) {
+            PatientDelegater.getInstance().updateHealthInsurances(pm);
         }
 
         Chart chart = new ChartImpl();
