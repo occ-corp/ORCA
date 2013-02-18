@@ -7,6 +7,6 @@ import javax.ws.rs.core.Application;
  * ApplicationPathアノテーションで、JAX-RSのルートディレクトリを指定
  * @author masuda, Masuda Naika
  */
-@ApplicationPath("openSource")
+@ApplicationPath("/")
 public class OpenDolphinServerApplication extends Application {
 }

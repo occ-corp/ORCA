@@ -18,7 +18,7 @@ import open.dolphin.session.UserServiceBean;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-@WebFilter(urlPatterns = {"/openSource/*"}, asyncSupported = true)
+@WebFilter(urlPatterns = {"/rest/*"}, asyncSupported = true)
 public class LogFilter implements Filter {
     
     private static final boolean WARN = false;

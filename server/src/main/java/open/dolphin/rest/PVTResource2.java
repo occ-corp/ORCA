@@ -15,7 +15,7 @@ import open.dolphin.session.PVTServiceBean;
  * @author masuda, Masuda Naika
  */
 
-@Path("pvt2")
+@Path("rest/pvt2")
 public class PVTResource2 extends AbstractResource {
 
     private static final boolean debug = false;

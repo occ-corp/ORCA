@@ -14,7 +14,7 @@ import open.dolphin.session.StampServiceBean;
  * @author modified by masuda, Masuda Naika
  */
 
-@Path("stampTree")
+@Path("rest/stampTree")
 public class StampTreeResource extends AbstractResource {
 
     private static final boolean debug = false;

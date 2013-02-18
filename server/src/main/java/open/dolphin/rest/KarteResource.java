@@ -18,7 +18,7 @@ import open.dolphin.session.KarteServiceBean;
  * @author modified by masuda, Masuda Naika
  * @author modified by katoh, Hashimoto iin
  */
-@Path("karte")
+@Path("rest/karte")
 public class KarteResource extends AbstractResource {
 
     private static final boolean debug = false;

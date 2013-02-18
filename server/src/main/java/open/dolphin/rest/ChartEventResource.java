@@ -16,14 +16,14 @@ import open.dolphin.session.ChartEventServiceBean;
  * ChartEventResource
  * @author masuda, Masuda Naika
  */
-@Path("chartEvent")
+@Path("rest/chartEvent")
 public class ChartEventResource extends AbstractResource {
     
     private static final boolean debug = false;
     
     private static final int asyncTimeout = 60 * 1000 * 60; // 60 minutes
     
-    public static final String DISPATCH_URL = "/openSource/chartEvent/dispatch";
+    public static final String DISPATCH_URL = "/rest/chartEvent/dispatch";
     public static final String KEY_NAME = "chartEvent";
     
     @Inject

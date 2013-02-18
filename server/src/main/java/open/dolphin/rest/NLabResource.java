@@ -12,7 +12,7 @@ import open.dolphin.session.NLabServiceBean;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-@Path("lab")
+@Path("rest/lab")
 public class NLabResource extends AbstractResource {
 
     private static final boolean debug = false;

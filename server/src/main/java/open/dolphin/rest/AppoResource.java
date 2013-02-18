@@ -17,7 +17,7 @@ import open.dolphin.session.AppoServiceBean;
  * @author modified by masuda, Masuda Naika
  */
 
-@Path("appo")
+@Path("rest/appo")
 public class AppoResource extends AbstractResource {
 
     private boolean debug = false;

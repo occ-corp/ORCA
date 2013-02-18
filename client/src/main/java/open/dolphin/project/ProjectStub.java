@@ -23,7 +23,7 @@ public final class ProjectStub implements java.io.Serializable {
     // デフォルトのプロジェクト名
     //-------------------------------------------
     private final String DEFAULT_PROJECT_NAME = "OpenDolphin";
-    private final String REST_BASE_RESOURCE = "/dolphin/openSource";
+    private final String REST_BASE_RESOURCE = "/dolphin/rest";
 
     private boolean valid;
 
