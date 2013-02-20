@@ -205,7 +205,8 @@ public class MakeBaseChargeStamp extends CheckSantei {
         boolean failed = prepareClaimItemMap();
         if (!failed) {
             String title = ClientContext.getFrameTitle("基本料");
-            JOptionPane.showMessageDialog(context.getFrame(), "ORCAとの接続を確認してください。",
+            JFrame frame = (context != null) ? context.getFrame() : null;
+            JOptionPane.showMessageDialog(frame, "ORCAとの接続を確認してください。",
                     title, JOptionPane.ERROR_MESSAGE);
             return;
         }
@@ -219,7 +220,8 @@ public class MakeBaseChargeStamp extends CheckSantei {
 
         if (diagnosis == null || diagnosis.isEmpty()) {
             String title = ClientContext.getFrameTitle("基本料");
-            JOptionPane.showMessageDialog(context.getFrame(), "病名がありません。病名登録してください。",
+            JFrame frame = (context != null) ? context.getFrame() : null;
+            JOptionPane.showMessageDialog(frame, "病名がありません。病名登録してください。",
                     title, JOptionPane.WARNING_MESSAGE);
             return;
         }
