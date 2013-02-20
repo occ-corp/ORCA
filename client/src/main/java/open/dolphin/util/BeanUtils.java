@@ -14,51 +14,42 @@ public class BeanUtils {
     
     public static String beanToXml(Object bean)  {
         
-        String ret = null;
         try {
-            ret = new String(xmlEncode(bean), UTF8);
+            return new String(xmlEncode(bean), UTF8);
         } catch (Exception e) {
-            //System.out.println(e);
             e.printStackTrace(System.err);
         }
-        return ret;
+        return null;
     }
     
     public static Object xmlToBean(String beanXml) {
-        
-        Object ret;
-        
-        // XMLDecode
+
         try {
             byte[] bytes = beanXml.getBytes(UTF8);
-            XMLDecoder d = new XMLDecoder(new ByteArrayInputStream(bytes));
-            ret = d.readObject();
+            return xmlDecode(bytes);
         } catch (Exception e) {
-            ret = null;
             e.printStackTrace(System.err);
         }
-        
-        return ret;
+        return null;
     }
     
     public static byte[] xmlEncode(Object bean)  {
+        
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
         XMLEncoder e = new XMLEncoder(bo);
         e.writeObject(bean);
         e.close();
+        
         return bo.toByteArray();
     }
     
     public static Object xmlDecode(byte[] bytes) {
         
         XMLDecoder d = new XMLDecoder(new ByteArrayInputStream(bytes));
-
         return d.readObject();
     }
     
     public static Object deepCopy(Object src) {
-        
-        Object ret = null;
   
         try {
             ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
@@ -66,12 +57,13 @@ public class BeanUtils {
             out.writeObject(src);
             ByteArrayInputStream byteIn = new ByteArrayInputStream(byteOut.toByteArray());
             ObjectInputStream in = new ObjectInputStream(byteIn);
-            ret = in.readObject();
+            return in.readObject();
+            
         } catch (ClassNotFoundException ex) {
         } catch (IOException ex) {
         }
         
-        return ret;
+        return null;
     }
 
 /*
