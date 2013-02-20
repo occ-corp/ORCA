@@ -17,6 +17,7 @@ import open.dolphin.delegater.ChartEventDelegater;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.util.BeanUtils;
+import open.dolphin.util.NamedThreadFactory;
 
 /**
  * カルテオープンなどの状態の変化をまとめて管理する
@@ -149,8 +150,8 @@ public class ChartEventListener {
     }
 
     public void start() {
-
-        exec = Executors.newSingleThreadExecutor();
+        NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+        exec = Executors.newSingleThreadExecutor(factory);
         listenTask = new EventListenTask();
         thread = new Thread(listenTask, "ChartEvent Listen Task");
         thread.start();

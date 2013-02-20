@@ -33,6 +33,7 @@ import open.dolphin.table.StripeTableCellRenderer;
 import open.dolphin.tr.ImageEntryTransferHandler;
 import open.dolphin.util.DicomImageEntry;
 import open.dolphin.util.ImageTool;
+import open.dolphin.util.NamedThreadFactory;
 import org.dcm4che2.data.DicomObject;
 import org.dcm4che2.data.Tag;
 
@@ -107,7 +108,8 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     @Override
     public void start() {
         initComponents();
-        executor = Executors.newSingleThreadExecutor();
+        NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+        executor = Executors.newSingleThreadExecutor(factory);
         pacsService = (PacsService) ((ChartImpl) getContext()).getContext().getPlugin("pacsService");
         pacsService.addPropertyChangeListener(this);
         enter();

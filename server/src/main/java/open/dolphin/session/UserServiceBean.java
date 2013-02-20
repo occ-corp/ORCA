@@ -22,7 +22,9 @@ public class UserServiceBean {
             = "from UserModel u where u.userId=:uid";
     private static final String QUERY_USER_BY_FID_MEMBERTYPE 
             = "from UserModel u where u.userId like :fid and u.memberType!=:memberType";
-
+    private static final String QUERY_FACILITY
+            = "from FacilityModel f where f.facilityId like :fid";
+    
     private static final String MEMBER_TYPE = "memberType";
     private static final String MEMBER_TYPE_EXPIRED = "EXPIRED";
     
@@ -47,6 +49,32 @@ public class UserServiceBean {
         }
 
         return ret;
+    }
+    
+    public String[] getFidAndPassword(String userName) {
+        
+        try {
+            String fid = IInfoModel.DEFAULT_FACILITY_OID;
+            if (userName.contains(":")) {
+                int pos = userName.indexOf(":");
+                fid = userName.substring(0, pos);
+                userName = userName.substring(pos + 1);
+                FacilityModel facility = (FacilityModel)
+                        em.createQuery(QUERY_FACILITY)
+                        .setParameter(FID, "%" + fid)
+                        .getSingleResult();
+                fid = facility.getFacilityId();
+            }
+            userName = fid + IInfoModel.COMPOSITE_KEY_MAKER + userName;
+
+            UserModel user = (UserModel) 
+                    em.createQuery(QUERY_USER_BY_UID)
+                    .setParameter(UID, userName)
+                    .getSingleResult();
+            return new String[]{fid, user.getPasswd()};
+        } catch (Exception e) {
+        }
+        return null;
     }
 
     /**

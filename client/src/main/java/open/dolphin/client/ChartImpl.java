@@ -1977,15 +1977,12 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      *
      * @return dirtyの時true
      */
-    private java.util.List<UnsavedDocument> dirtyList() {
-        java.util.List<UnsavedDocument> ret = null;
+    private List<UnsavedDocument> dirtyList() {
+        List<UnsavedDocument> ret = new ArrayList<UnsavedDocument>();
         int count = tabbedPane.getTabCount();
         for (int i = 0; i < count; i++) {
             ChartDocument doc = providers.get(String.valueOf(i));
             if (doc != null && doc.isDirty()) {
-                if (ret == null) {
-                    ret = new ArrayList<UnsavedDocument>(3);
-                }
                 ret.add(new UnsavedDocument(i, doc));
             }
         }
@@ -2015,9 +2012,9 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         // 未保存ドキュメントがある場合はダイアログを表示し
         // 保存するかどうかを確認する
         //
-        java.util.List<UnsavedDocument> dirtyList = dirtyList();
+        List<UnsavedDocument> dirtyList = dirtyList();
 
-        if (dirtyList != null && dirtyList.size() > 0) {
+        if (dirtyList != null && !dirtyList.isEmpty()) {
 
             ResourceBundle resource = ClientContext.getBundle(this.getClass());
             String saveAll = resource.getString("unsavedtask.saveText");     // 保存;
@@ -2087,10 +2084,10 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         mediator.dispose();
         inspector.dispose();
         Project.setRectangle(PROP_FRMAE_BOUNDS, getFrame().getBounds());
-        disposeTabbedPane();    // memory leak? 
         getFrame().setVisible(false);
         getFrame().setJMenuBar(null);
         getFrame().dispose();
+        disposeTabbedPane();    // memory leak? 
     }
     
     private void disposeTabbedPane() {

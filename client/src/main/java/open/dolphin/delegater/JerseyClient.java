@@ -3,10 +3,13 @@ package open.dolphin.delegater;
 import com.sun.jersey.api.client.AsyncWebResource;
 import com.sun.jersey.api.client.Client;
 import com.sun.jersey.api.client.WebResource;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.Dolphin;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.util.HashUtil;
+import open.dolphin.util.NamedThreadFactory;
 
 /**
  * JerseyClient
@@ -28,6 +31,7 @@ public class JerseyClient {
     private Client client2;
     private WebResource webResource;
     private AsyncWebResource asyncResource;
+    private ExecutorService exec;
     
     static {
         instance = new JerseyClient();
@@ -37,6 +41,9 @@ public class JerseyClient {
         clientUUID = Dolphin.getInstance().getClientUUID();
         client = Client.create();
         client2 = Client.create();
+        NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+        exec = Executors.newSingleThreadExecutor(factory);
+        client2.setExecutorService(exec);
     }
 
     public static JerseyClient getInstance() {
@@ -92,7 +99,6 @@ public class JerseyClient {
     }
     
     // pvt同期用のクライアント
-
     public AsyncWebResource.Builder getAsyncResource(String path) {
         return asyncResource.path(path)
                 .header(IInfoModel.FID, facilityId)

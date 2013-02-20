@@ -23,6 +23,7 @@ import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.*;
 import open.dolphin.util.AgeCalculator;
+import open.dolphin.util.NamedThreadFactory;
 import org.apache.commons.lang.time.DurationFormatUtils;
 
 /**
@@ -225,8 +226,8 @@ public class WatingListImpl extends AbstractMainComponent {
         sexRenderer = Project.getBoolean("sexRenderer", false);
         ageDisplay = Project.getBoolean("ageDisplay", true);
         timeFormatter = new SimpleDateFormat("HH:mm");
-        
-        executor = Executors.newSingleThreadScheduledExecutor();
+        NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+        executor = Executors.newSingleThreadScheduledExecutor(factory);
         
         pvtDelegater = PVTDelegater.getInstance();
     }

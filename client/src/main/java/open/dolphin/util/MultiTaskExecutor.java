@@ -15,7 +15,8 @@ public class MultiTaskExecutor<T> {
     private ExecutorService exec;
 
     public MultiTaskExecutor() {
-        exec = Executors.newFixedThreadPool(NUM_THREADS);
+        NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+        exec = Executors.newFixedThreadPool(NUM_THREADS, factory);
     }
     
     public List<Future<T>> execute(List<Callable<T>> taskList) throws InterruptedException {

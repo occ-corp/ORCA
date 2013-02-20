@@ -15,6 +15,7 @@ import open.dolphin.infomodel.ModuleModel;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.tr.StampHolderTransferHandler;
+import open.dolphin.util.NamedThreadFactory;
 
 /**
  * AbstractChartExtensions
@@ -129,7 +130,8 @@ public abstract class AbstractChartExtensions {
         // timer 開始
         statred = System.currentTimeMillis();
         if (scheduler == null) {
-            scheduler = Executors.newSingleThreadScheduledExecutor();
+            NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+            scheduler = Executors.newSingleThreadScheduledExecutor(factory);
         }
         final Runnable beeper = new Runnable() {
 
