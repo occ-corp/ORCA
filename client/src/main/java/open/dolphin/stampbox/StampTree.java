@@ -4,7 +4,10 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.beans.XMLEncoder;
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
@@ -1571,7 +1574,9 @@ public class StampTree extends JTree implements TreeModelListener {
 
     private byte[] getXMLBytes(Object bean) {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        XMLEncoder e = new XMLEncoder(new BufferedOutputStream(bo));
+        // ムダ？ masuda
+        //XMLEncoder e = new XMLEncoder(new BufferedOutputStream(bo));
+        XMLEncoder e = new XMLEncoder(bo);
         e.writeObject(bean);
         e.close();
         return bo.toByteArray();

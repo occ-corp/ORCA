@@ -1,6 +1,7 @@
 package open.dolphin.util;
 
-import java.beans.*;
+import java.beans.XMLDecoder;
+import java.beans.XMLEncoder;
 import java.io.*;
 
 /**
@@ -15,9 +16,9 @@ public class BeanUtils {
         
         String ret = null;
         try {
-            ret = new String(getXMLBytes(bean), UTF8);
+            ret = new String(xmlEncode(bean), UTF8);
         } catch (Exception e) {
-            System.out.println(e);
+            //System.out.println(e);
             e.printStackTrace(System.err);
         }
         return ret;
@@ -30,11 +31,7 @@ public class BeanUtils {
         // XMLDecode
         try {
             byte[] bytes = beanXml.getBytes(UTF8);
-            
-            XMLDecoder d = new XMLDecoder(
-                    new BufferedInputStream(
-                    new ByteArrayInputStream(bytes)));
-            
+            XMLDecoder d = new XMLDecoder(new ByteArrayInputStream(bytes));
             ret = d.readObject();
         } catch (Exception e) {
             ret = null;
@@ -44,25 +41,9 @@ public class BeanUtils {
         return ret;
     }
     
-    public static byte[] getXMLBytes(Object bean)  {
-        ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        XMLEncoder e = new XMLEncoder(new BufferedOutputStream(bo));
-        e.writeObject(bean);
-        e.close();
-        return bo.toByteArray();
-    }
-    
     public static byte[] xmlEncode(Object bean)  {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        XMLEncoder e = new XMLEncoder(new BufferedOutputStream(bo));
-
-//masuda^   java.sql.Dateとjava.sql.TimestampがxmlEncodeで失敗する
-        DatePersistenceDelegate dpd = new DatePersistenceDelegate();
-        e.setPersistenceDelegate(java.sql.Date.class, dpd);
-        TimestampPersistenceDelegate tpd = new TimestampPersistenceDelegate();
-        e.setPersistenceDelegate(java.sql.Timestamp.class, tpd);
-//masuda$
-
+        XMLEncoder e = new XMLEncoder(bo);
         e.writeObject(bean);
         e.close();
         return bo.toByteArray();
@@ -70,17 +51,10 @@ public class BeanUtils {
     
     public static Object xmlDecode(byte[] bytes) {
         
-        XMLDecoder d = new XMLDecoder(
-                new BufferedInputStream(
-                new ByteArrayInputStream(bytes)));
+        XMLDecoder d = new XMLDecoder(new ByteArrayInputStream(bytes));
 
         return d.readObject();
     }
-    
-//masuda^
-    //public static Object deepCopy(Object src) {
-    //    return xmlDecode(getXMLBytes(src));
-    //}
     
     public static Object deepCopy(Object src) {
         
@@ -99,9 +73,26 @@ public class BeanUtils {
         
         return ret;
     }
+
+/*
+//masuda^   http://forums.sun.com/thread.jspa?threadID=427879
+
+    public static byte[] xmlEncode(Object bean)  {
+        ByteArrayOutputStream bo = new ByteArrayOutputStream();
+        XMLEncoder e = new XMLEncoder(new BufferedOutputStream(bo));
+        
+//masuda^   java.sql.Dateとjava.sql.TimestampがxmlEncodeで失敗する
+        DatePersistenceDelegate dpd = new DatePersistenceDelegate();
+        e.setPersistenceDelegate(java.sql.Date.class, dpd);
+        TimestampPersistenceDelegate tpd = new TimestampPersistenceDelegate();
+        e.setPersistenceDelegate(java.sql.Timestamp.class, tpd);
 //masuda$
 
-//masuda^   http://forums.sun.com/thread.jspa?threadID=427879
+        e.writeObject(bean);
+        e.close();
+        return bo.toByteArray();
+    }
+
    private static class DatePersistenceDelegate extends PersistenceDelegate {
 
        @Override
@@ -122,5 +113,5 @@ public class BeanUtils {
        }
    }
 //masuda$
-
+*/
 }

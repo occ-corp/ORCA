@@ -10,9 +10,6 @@ import java.awt.event.MouseListener;
 import java.awt.image.BufferedImage;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
-import java.beans.XMLDecoder;
-import java.io.BufferedInputStream;
-import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -858,10 +855,13 @@ public class KartePane implements DocumentListener, MouseListener,
             public void succeeded(StampModel result) {
                 if (result != null) {
                     try {
+//masuda^
                         byte[] bytes = result.getStampBytes();
-                        XMLDecoder d = new XMLDecoder(new BufferedInputStream(new ByteArrayInputStream(bytes)));
-                        IInfoModel model = (IInfoModel) d.readObject();
-                        d.close();
+                        //XMLDecoder d = new XMLDecoder(new BufferedInputStream(new ByteArrayInputStream(bytes)));
+                        //IInfoModel model = (IInfoModel) d.readObject();
+                        //d.close();
+                        IInfoModel model = (IInfoModel) BeanUtils.xmlDecode(bytes);
+//masuda$
 
                         if (model != null) {
                             insertTextStamp(model.toString());

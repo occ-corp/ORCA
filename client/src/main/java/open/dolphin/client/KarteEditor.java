@@ -1094,7 +1094,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             mb.setFirstConfirmed(docInfo.getFirstConfirmDate());    // 適合開始日
             mb.setRecorded(docInfo.getConfirmDate());               // 記録日
             mb.setStatus(STATUS_FINAL);                             // status
-            mb.setBeanBytes(BeanUtils.getXMLBytes(mb.getModel()));  // byte[]
+            mb.setBeanBytes(BeanUtils.xmlEncode(mb.getModel()));  // byte[]
 
             // ModuleInfo を設定する
             // Name, Role, Entity は設定されている
@@ -1561,7 +1561,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
                             }
                         }
 
-                        bean.setBeanBytes(BeanUtils.getXMLBytes(bean.getModel()));
+                        bean.setBeanBytes(BeanUtils.xmlEncode(bean.getModel()));
 
                         // ModuleInfo を設定する
                         // Name, Role, Entity は設定されている
