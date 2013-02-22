@@ -67,22 +67,4 @@ public class AbstractResource {
     protected JsonConverter getConverter() {
         return JsonConverter.getInstance();
     }
-    
-    protected class LapTimer {
-        private String name;
-        private long t1;
-        
-        protected LapTimer(String name) {
-            this.name = name;
-            t1 = System.currentTimeMillis();
-        }
-        
-        protected void printLapTime() {
-            long t2 = System.currentTimeMillis();
-            StringBuilder sb = new StringBuilder();
-            sb.append("Lap time ").append(name).append("=");
-            sb.append(String.valueOf(t2 - t1));
-            System.out.println(sb.toString());
-        }
-    }
 }

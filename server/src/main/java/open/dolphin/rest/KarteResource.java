@@ -34,17 +34,13 @@ public class KarteResource extends AbstractResource {
     @Produces(MEDIATYPE_JSON_UTF8)
     public String getKarte(@PathParam("ptId") Long patientPK, 
             @QueryParam("fromDate") String fromDateStr) {
-        
-        LapTimer timer = new LapTimer("KarteResource.getKarte");
-        
+
         Date fromDate = parseDate(fromDateStr);
 
         KarteBean karte = karteServiceBean.getKarte(patientPK, fromDate);
 
         String json = getConverter().toJson(karte);
         debug(json);
-        
-        timer.printLapTime();
         
         return json;
     }
@@ -60,8 +56,6 @@ public class KarteResource extends AbstractResource {
             @QueryParam("toDate") String toDateStr, 
             @QueryParam("includeModified") Boolean includeModified) {
 
-        LapTimer timer = new LapTimer("KarteResource.getDocumentList");
-        
         Date fromDate = parseDate(fromDateStr);
         Date toDate = parseDate(toDateStr);
 
@@ -69,9 +63,7 @@ public class KarteResource extends AbstractResource {
 
         String json = getConverter().toJson(result);
         debug(json);
-        
-        timer.printLapTime();
-        
+
         return json;
     }
 //katoh$
