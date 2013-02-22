@@ -352,16 +352,17 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 setKarte(karteBean);
                 //-------------------------------------------------------------
                 initComponents();
-                SwingUtilities.invokeLater(new Runnable() {
+                // もたもた？
+                //SwingUtilities.invokeLater(new Runnable() {
 
-                    @Override
-                    public void run() {
+                    //@Override
+                    //public void run() {
                         getDocumentHistory().showHistory();
 //masuda^   抽出期間コンボ設定・ブロック解除
                         getDocumentHistory().setExtractionPeriodComboIndex(periodComboIndex);
 //masuda$
-                    }
-                });
+                    //}
+                //});
             }
 
             @Override
