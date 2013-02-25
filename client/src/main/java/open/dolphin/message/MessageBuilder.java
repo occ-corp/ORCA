@@ -1,5 +1,8 @@
 package open.dolphin.message;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.StringReader;
 import java.io.StringWriter;
 import open.dolphin.client.ClientContext;
 import open.dolphin.util.TemplateLoader;
@@ -58,8 +61,19 @@ public class MessageBuilder {
         
         StringWriter sw = new StringWriter();
         template.merge(context, sw);
+        
+        // 余分な空白を除去する
+        StringBuilder sb = new StringBuilder();
+        try {
+            BufferedReader br = new BufferedReader(new StringReader(sw.toString()));
+            String str;
+            while((str = br.readLine()) != null) {
+                sb.append(str.trim()).append("\n");
+            }
+        } catch (IOException ex) {
+        }
 
-        String text = sw.toString();
+        String text = sb.toString();
 
         return text;
     }

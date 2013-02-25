@@ -2,17 +2,17 @@ package open.dolphin.dao;
 
 import java.sql.*;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.Collection;
-import javax.sql.DataSource;
+import java.util.Collections;
+import java.util.List;
+import open.dolphin.delegater.OrcaDelegater;
 import open.dolphin.infomodel.DiseaseEntry;
+import open.dolphin.infomodel.OrcaSqlModel;
 import open.dolphin.infomodel.TensuMaster;
 import open.dolphin.project.Project;
-import org.apache.commons.dbcp.ConnectionFactory;
-import org.apache.commons.dbcp.DriverManagerConnectionFactory;
-import org.apache.commons.dbcp.PoolableConnectionFactory;
-import org.apache.commons.dbcp.PoolingDataSource;
-import org.apache.commons.pool.ObjectPool;
-import org.apache.commons.pool.impl.GenericObjectPool;
+import org.apache.tomcat.jdbc.pool.DataSource;
+import org.apache.tomcat.jdbc.pool.PoolProperties;
 
 /**
  * SqlDaoBean
@@ -32,19 +32,6 @@ public class SqlDaoBean extends DaoBean {
     private String driver;
     private boolean trace = true;
 
-    /**
-     * Creates a new instance of SqlDaoBean
-     */
-    public SqlDaoBean() {
-//masuda^
-        // DataSourceを設定
-        if (dataSource == null) {
-            setupDataSource();
-        }
-//masuda$
-    }
-
-//masuda^
     protected static final String ORCA_DB_VER45 = "040500-1";
     protected static final String ORCA_DB_VER46 = "040600-1";
     protected static final String ORCA_DB_VER47 = "040700-1";
@@ -69,41 +56,232 @@ public class SqlDaoBean extends DaoBean {
     
     protected static final DecimalFormat srycdFrmt = new DecimalFormat("000000000");
     
-    
     private static DataSource dataSource;
-
     
-    protected DiseaseEntry getDiseaseEntry(ResultSet rs) throws SQLException {
-
-        DiseaseEntry de = new DiseaseEntry();
-        de.setCode(rs.getString(1));        // Code
-        de.setName(rs.getString(2));        // Name
-        de.setKana(rs.getString(3));         // Kana
-        de.setIcdTen(rs.getString(4));      // IcdTen
-        de.setDisUseDate(rs.getString(5));  // DisUseDate
-        de.setByoKanrenKbn(rs.getInt(6));
-        return de;
+    
+    /**
+     * Creates a new instance of SqlDaoBean
+     */
+    public SqlDaoBean() {
+        // DataSourceを設定
+        setDriver(DRIVER);
+        setHost(Project.getString(Project.CLAIM_ADDRESS));
+        setPort(PORT);
+        setDatabase(DATABASE);
+        setUser(USER);
+        setPasswd(PASSWD);
     }
 
-    protected TensuMaster getTensuMaster(ResultSet rs) throws SQLException {
+    protected DiseaseEntry getDiseaseEntry(List<String> values) {
+
+        DiseaseEntry de = new DiseaseEntry();
+        de.setCode(values.get(0));        // Code
+        de.setName(values.get(1));        // Name
+        de.setKana(values.get(2));         // Kana
+        de.setIcdTen(values.get(3));      // IcdTen
+        de.setDisUseDate(values.get(4));  // DisUseDate
+        de.setByoKanrenKbn(Integer.valueOf(values.get(5)));
+        return de;
+    }
+    
+    protected TensuMaster getTensuMaster(List<String> values) {
 
         TensuMaster tm = new TensuMaster();
-        tm.setSrycd(rs.getString(1));
-        tm.setName(rs.getString(2));
-        tm.setKananame(rs.getString(3));
-        tm.setTaniname(rs.getString(4));
-        tm.setTensikibetu(rs.getString(5));
-        tm.setTen(rs.getString(6));
-        tm.setNyugaitekkbn(rs.getString(7));
-        tm.setRoutekkbn(rs.getString(8));
-        tm.setSrysyukbn(rs.getString(9));
-        tm.setHospsrykbn(rs.getString(10));
-        tm.setYkzkbn(rs.getString(11));
-        tm.setYakkakjncd(rs.getString(12));
-        tm.setYukostymd(rs.getString(13));
-        tm.setYukoedymd(rs.getString(14));
-        tm.setDataKbn(rs.getString(15));
+        tm.setSrycd(values.get(0));
+        tm.setName(values.get(1));
+        tm.setKananame(values.get(2));
+        tm.setTaniname(values.get(3));
+        tm.setTensikibetu(values.get(4));
+        tm.setTen(values.get(5));
+        tm.setNyugaitekkbn(values.get(6));
+        tm.setRoutekkbn(values.get(7));
+        tm.setSrysyukbn(values.get(8));
+        tm.setHospsrykbn(values.get(9));
+        tm.setYkzkbn(values.get(10));
+        tm.setYakkakjncd(values.get(11));
+        tm.setYukostymd(values.get(12));
+        tm.setYukoedymd(values.get(13));
+        tm.setDataKbn(values.get(14));
         return tm;
+    }
+    
+    private List<String> getColumnValues(ResultSet rs) throws SQLException {
+
+        List<String> values = new ArrayList<String>();
+        ResultSetMetaData meta = rs.getMetaData();
+        int columnCount = meta.getColumnCount();
+
+        for (int i = 1; i <= columnCount; ++i) {
+            int type = meta.getColumnType(i);
+            switch (type) {
+                case Types.SMALLINT:
+                case Types.NUMERIC:
+                case Types.INTEGER:
+                    values.add(String.valueOf(rs.getInt(i)));
+                    break;
+                default:
+                    values.add(rs.getString(i));
+                    break;
+            }
+        }
+        return values;
+    }
+    
+    protected List<List<String>> executeStatement(String sql) {
+        
+        boolean client = Project.CLAIM_CLIENT.equals(Project.getString(Project.CLAIM_SENDER));
+        if (client) {
+            return executeStatement1(sql);
+        }
+        return executeStatement2(sql);
+    }
+   
+    private List<List<String>> executeStatement1(String sql) {
+
+        Connection con = null;
+        Statement st = null;
+        List<List<String>> valuesList = new ArrayList<List<String>>();
+
+        try {
+            con = getConnection();
+            st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+
+            while (rs.next()) {
+                List<String> values = getColumnValues(rs);
+                valuesList.add(values);
+            }
+
+            rs.close();
+            st.close();
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            processError(e);
+            closeConnection(con);
+
+        } finally {
+            closeConnection(con);
+        }
+
+        return valuesList;
+    }
+    
+    private List<List<String>> executeStatement2(String sql) {
+        
+        OrcaSqlModel sqlModel = new OrcaSqlModel();
+        sqlModel.setUrl(getURL());
+        sqlModel.setSql(sql);
+
+        OrcaSqlModel result = OrcaDelegater.getInstance().executeQuery(sqlModel);
+        
+        if (result != null) {
+            String errMsg = result.getErrorMessage();
+            if (errMsg != null) {
+                processError(new SQLException(result.getErrorMessage()));
+            } else {
+                return result.getValuesList();
+            }
+        }
+
+        return Collections.emptyList();
+    }
+    
+    protected List<List<String>> executePreparedStatement(String sql, int[] types, String[] params) {
+        
+        boolean client = Project.CLAIM_CLIENT.equals(Project.getString(Project.CLAIM_SENDER));
+        if (client) {
+            return executePreparedStatement1(sql, types, params);
+        }
+        return executePreparedStatement2(sql, types, params);
+    }
+    
+    private List<List<String>> executePreparedStatement1(String sql, int[] types, String[] params) {
+
+        Connection con = null;
+        PreparedStatement ps = null;
+        List<List<String>> valuesList = new ArrayList<List<String>>();
+
+        try {
+            con = getConnection();
+            ps = con.prepareStatement(sql);
+            
+            for (int i = 0; i < types.length; ++i) {
+                int type = types[i];
+                String param = params[i];
+                switch (type) {
+                    case Types.INTEGER:
+                        ps.setInt(i + 1, Integer.valueOf(param));
+                        break;
+                    case Types.BIGINT:
+                        ps.setLong(i + 1, Long.valueOf(param));
+                        break;
+                    case Types.FLOAT:
+                        ps.setFloat(i + 1, Float.valueOf(param));
+                        break;
+                    case Types.CHAR:
+                    default:
+                        ps.setString(i + 1, param);
+                        break;
+                }
+            }
+            
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                List<String> values = getColumnValues(rs);
+                valuesList.add(values);
+            }
+
+            rs.close();
+            ps.close();
+
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+            processError(e);
+            closeConnection(con);
+
+        } finally {
+            closeConnection(con);
+        }
+
+        return valuesList;
+    }
+    
+    private List<List<String>> executePreparedStatement2(String sql, int[] types, String[] params) {
+        
+        OrcaSqlModel sqlModel = new OrcaSqlModel();
+        sqlModel.setPreparedStatement(true);
+        sqlModel.setUrl(getURL());
+        sqlModel.setSql(sql);
+        
+        for (int i = 0; i < types.length; ++i) {
+            int type = types[i];
+            switch (type) {
+                case Types.INTEGER:
+                case Types.FLOAT:
+                case Types.BIGINT:
+                    sqlModel.addParameter(type, String.valueOf(params[i]));
+                    break;
+                case Types.CHAR:
+                default:
+                    sqlModel.addParameter(type, params[i]);
+                    break;
+            }
+        }
+
+        OrcaSqlModel result = OrcaDelegater.getInstance().executeQuery(sqlModel);
+        
+        if (result != null) {
+            String errMsg = result.getErrorMessage();
+            if (errMsg != null) {
+                processError(new SQLException(result.getErrorMessage()));
+            } else {
+                return result.getValuesList();
+            }
+        }
+
+        return Collections.emptyList();
     }
     
     protected final int getHospNum() {
@@ -158,66 +336,44 @@ public class SqlDaoBean extends DaoBean {
     protected final long getOrcaPtID(String patientId){
 
         long ptid = 0;
-
-        final String sql = "select ptid from tbl_ptnum where hospnum = ? and ptnum = ?";
-        Connection con = null;
-        PreparedStatement ps = null;
         int hospNum = getHospNum();
         
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, hospNum);
-            ps.setString(2, patientId);
-
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                ptid = rs.getLong(1);
-            }
-            rs.close();
-            ps.close();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-        } finally {
-            closeConnection(con);
+        final String sql = "select ptid from tbl_ptnum where hospnum = ? and ptnum = ?";
+        
+        int[] types = {Types.INTEGER, Types.CHAR};
+        String[] params = {String.valueOf(hospNum), patientId};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        if (!valuesList.isEmpty()) {
+            List<String> values = valuesList.get(0);
+            ptid = Long.valueOf(values.get(0));
         }
 
         return ptid;
     }
-    
-    private void setupDataSource() {
-        
-        setDriver(DRIVER);
-        setHost(Project.getString(Project.CLAIM_ADDRESS));
-        setPort(PORT) ;
-        setDatabase(DATABASE);
-        setUser(USER);
-        setPasswd(PASSWD);
-        
-        ObjectPool connectionPool = new GenericObjectPool();
-        ConnectionFactory connectionFactory = 
-                new DriverManagerConnectionFactory(getURL(), getUser(), getPasswd());
-        PoolableConnectionFactory poolableConnectionFactory =
-                new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, true, true);
-        dataSource = new PoolingDataSource(connectionPool);
-    }
 
-    // エラーを消去する。getConnection時に呼ばれる
-    private void clearErrors() {
+    public Connection getConnection() throws Exception {
+        
+        if (dataSource == null) {
+            setupDataSource();
+        }
+        // 呼び出し前にエラーをクリア。シングルトン化の影響ｗ
         errorCode = TT_NO_ERROR;
         errorMessage = null;
-    }
-//masuda$
-    
-    public Connection getConnection() throws Exception {
-//masuda^
-        // 呼び出し前にエラーをクリア。シングルトン化の影響ｗ
-        clearErrors();
+        
         return dataSource.getConnection();
-        //return DriverManager.getConnection(getURL(), user, passwd);
-//masuda$
+    }
+    
+    private void setupDataSource() {
+        PoolProperties p = new PoolProperties();
+        p.setDriverClassName(getDriver());
+        p.setUrl(getURL());
+        p.setUsername(getUser());
+        p.setPassword(getPasswd());
+        p.setDefaultReadOnly(true);
+        dataSource = new DataSource();
+        dataSource.setPoolProperties(p);
     }
 
     public String getDriver() {
@@ -225,17 +381,7 @@ public class SqlDaoBean extends DaoBean {
     }
 
     public final void setDriver(String driver) {
-
         this.driver = driver;
-
-        try {
-            Class.forName(driver);
-        } catch (ClassNotFoundException cnfe) {
-            logger.warn("Couldn't find the driver!");
-            logger.warn("Let's print a stack trace, and exit.");
-            cnfe.printStackTrace(System.err);
-            System.exit(1);
-        }
     }
 
     public final String getDatabase() {
@@ -274,7 +420,7 @@ public class SqlDaoBean extends DaoBean {
     }
 
     /**
-     * To make sql statement ('xxxx',)<br>
+     * To make sql statement ('xxxx',)
      */
     public String addSingleQuoteComa(String s) {
         StringBuilder buf = new StringBuilder();
@@ -285,40 +431,29 @@ public class SqlDaoBean extends DaoBean {
     }
     
     public void closeStatement(Statement st) {
-        if (st != null) {
-            try {
-                st.close();
-            }
-            catch (SQLException e) {
-            	e.printStackTrace(System.err);
-            }
+        try {
+            st.close();
+        } catch (SQLException e) {
+        } catch (NullPointerException e) {
         }
     }
-    
-//masuda^
+
     public void closePreparedStatement(PreparedStatement ps) {
-        if (ps != null) {
-            try {
-                ps.close();
-            }
-            catch (SQLException e) {
-            	e.printStackTrace(System.err);
-            }
+        try {
+            ps.close();
+        } catch (SQLException e) {
+        } catch (NullPointerException e) {
         }
     }
-//masuda$
-    
+
     public void closeConnection(Connection con) {
-        if (con != null) {
-            try {
-                con.close();
-            }
-            catch (SQLException e) {
-                e.printStackTrace(System.err);
-            }
+        try {
+            con.close();
+        } catch (SQLException e) {
+        } catch (NullPointerException e) {
         }
     }
-    
+
     protected void debug(String msg) {
         logger.debug(msg);
     }
@@ -330,12 +465,10 @@ public class SqlDaoBean extends DaoBean {
     }
     
     protected void rollback(Connection con) {
-        if (con != null) {
-            try {
-                con.rollback();
-            } catch (Exception e) {
-                e.printStackTrace(System.err);
-            }
+        try {
+            con.rollback();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
         }
     }
 }

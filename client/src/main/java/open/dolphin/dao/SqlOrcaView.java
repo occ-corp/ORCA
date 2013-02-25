@@ -1,9 +1,6 @@
 package open.dolphin.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.Types;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -32,8 +29,8 @@ public class SqlOrcaView extends SqlDaoBean {
     private static final String WHERE_WITH_HOSPNUM =
             "where ptid=? and sryymd >= ? and sryymd <= ? and dltflg!=? and hospnum=? order by sryymd ";
     
-    private static final String WHERE_WO_HOSPNUM =
-            "where ptid=? and sryymd >= ? and sryymd <= ? and dltflg!=? order by sryymd ";
+    //private static final String WHERE_WO_HOSPNUM =
+    //        "where ptid=? and sryymd >= ? and sryymd <= ? and dltflg!=? order by sryymd ";
     
     private static final String WHERE_WITH_HOSPNUM_AO =
             "where ptid=? and tenkikbn=? and dltflg!=? and hospnum=? order by sryymd ";
@@ -64,7 +61,7 @@ public class SqlOrcaView extends SqlDaoBean {
      * ORCA に登録してある病名を検索する。
      * @return RegisteredDiagnosisModelのリスト
      */
-    public List<RegisteredDiagnosisModel> getOrcaDisease(String patientId, String from, String to, Boolean ascend) {
+    public List<RegisteredDiagnosisModel> getOrcaDisease(String patientId, String from, String to, boolean ascend) {
         
         int hospNum = getHospNum();
         long orcaPtId = getOrcaPtID(patientId);
@@ -74,62 +71,33 @@ public class SqlOrcaView extends SqlDaoBean {
         }
         
         StringBuilder sb = new StringBuilder();
-
         sb.append(SELECT_TBL_PTBYOMEI);
-        if (hospNum > 0) {
-            sb.append(WHERE_WITH_HOSPNUM);
-        } else {
-            sb.append(WHERE_WO_HOSPNUM);
-        }
-        if (ascend != null && !ascend) {
+        sb.append(WHERE_WITH_HOSPNUM);
+        if (!ascend) {
             sb.append(DESC);
         }
 
-        Connection con = null;
-        PreparedStatement pt = null;
-        
         String sql = sb.toString();
         ClientContext.getBootLogger().debug(sql);
-        
-        try {
-            con = getConnection();
-            pt = con.prepareStatement(sql);
 
-            pt.setLong(1, orcaPtId);   // 元町皮膚科
-            pt.setString(2, from);
-            pt.setString(3, to);
-            pt.setString(4, "1");
-            if (hospNum > 0) {
-                pt.setInt(5, hospNum);
-            }
-            
-            ResultSet rs = pt.executeQuery();
-            List<RegisteredDiagnosisModel> collection = new ArrayList<RegisteredDiagnosisModel>();
-            
-            while (rs.next()) {
-                RegisteredDiagnosisModel ord = getRegisteredDiagnosisModel(rs);
-                collection.add(ord);
-            }
-            
-            rs.close();
-            closeStatement(pt);
-            closeConnection(con);
-            
-            return collection;
-            
-        } catch (Exception e) {
-            ClientContext.getBootLogger().warn(e.getMessage());
-            processError(e);
-            closeConnection(con);
-            closeStatement(pt);
+        int[] types = {Types.BIGINT, Types.CHAR, Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {String.valueOf(orcaPtId), from, to, "1", String.valueOf(hospNum)};
+
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+
+        List<RegisteredDiagnosisModel> collection = new ArrayList<RegisteredDiagnosisModel>();
+
+        for (List<String> values : valuesList) {
+            RegisteredDiagnosisModel ord = getRegisteredDiagnosisModel(values);
+            collection.add(ord);
         }
-        
-        return null;
-    }
 
+        return collection;
+    }
 
     /**
      * ORCA に登録してある直近の病名を検索する。
+     *
      * @return RegisteredDiagnosisModelのリスト
      */
     public List<RegisteredDiagnosisModel> getActiveOrcaDisease(String patientId, boolean asc) {
@@ -143,53 +111,25 @@ public class SqlOrcaView extends SqlDaoBean {
 
         StringBuilder sb = new StringBuilder();
         sb.append(SELECT_TBL_PTBYOMEI);
-        if (hospNum > 0) {
-            sb.append(WHERE_WITH_HOSPNUM_AO);
-        } else {
-            sb.append(WHERE_WO_HOSPNUM_AO);
-        }
+        sb.append(WHERE_WITH_HOSPNUM_AO);
         if (!asc) {
             sb.append(DESC);
         }
 
         String sql = sb.toString();
         ClientContext.getBootLogger().debug(sql);
-        
-        Connection con = null;
-        PreparedStatement pt = null;
-        
-        try {
-            con = getConnection();
-            pt = con.prepareStatement(sql);
-            pt.setLong(1, orcaPtId);   // 元町皮膚科
-            pt.setString(2, " ");
-            pt.setString(3, "1");
-            if (hospNum > 0) {
-                pt.setInt(4, hospNum);
-            }
-            
-            ResultSet rs = pt.executeQuery();
-            List<RegisteredDiagnosisModel> collection = new ArrayList<RegisteredDiagnosisModel>();
 
-            while (rs.next()) {
-                RegisteredDiagnosisModel ord = getRegisteredDiagnosisModel(rs);
-                collection.add(ord);
-            }
+        int[] types = {Types.BIGINT, Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {String.valueOf(orcaPtId), " ", "1", String.valueOf(hospNum)};
 
-            rs.close();
-            closeStatement(pt);
-            closeConnection(con);
-
-            return collection;
-
-        } catch (Exception e) {
-            ClientContext.getBootLogger().warn(e.getMessage());
-            processError(e);
-            closeConnection(con);
-            closeStatement(pt);
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        List<RegisteredDiagnosisModel> collection = new ArrayList<RegisteredDiagnosisModel>();
+        for (List<String> values : valuesList) {
+            RegisteredDiagnosisModel ord = getRegisteredDiagnosisModel(values);
+            collection.add(ord);
         }
 
-        return null;
+        return collection;
     }
     
     // ORCA カテゴリ
@@ -266,15 +206,15 @@ public class SqlOrcaView extends SqlDaoBean {
     }
     
     // ResultSetからRegisteredDiagnosisModelを
-    private RegisteredDiagnosisModel getRegisteredDiagnosisModel(ResultSet rs) throws SQLException {
+    private RegisteredDiagnosisModel getRegisteredDiagnosisModel(List<String> values) {
         
         RegisteredDiagnosisModel rd = new RegisteredDiagnosisModel();
         
         // 病名コード、修飾語も含めて
         StringBuilder sb = new StringBuilder();
         boolean first = true;
-        for (int i = 1; i <= 21; ++i) {
-            String code = rs.getString("byomeicd_" + String.valueOf(i)).trim();
+        for (int i = 0; i < 21; ++i) {
+            String code = values.get(i).trim();
             if ("".equals(code)) {
                 break;
             }
@@ -289,17 +229,17 @@ public class SqlOrcaView extends SqlDaoBean {
         rd.setDiagnosisCode(sb.toString());
 
         // 疾患開始日
-        rd.setStartDate(toDolphinDateStr(rs.getString("sryymd")));
+        rd.setStartDate(toDolphinDateStr(values.get(21)));
         // 疑いフラグ
-        storeSuspectedDiagnosis(rd, rs.getString("utagaiflg"));
+        storeSuspectedDiagnosis(rd, values.get(22));
         // 主病名フラグ
-        storeMainDiagnosis(rd, rs.getString("syubyoflg"));
+        storeMainDiagnosis(rd, values.get(23));
         // 転帰
-        storeOutcome(rd, rs.getString("tenkikbn"));
+        storeOutcome(rd, values.get(24));
         // 疾患終了日（転帰）
-        rd.setEndDate(toDolphinDateStr(rs.getString("tenkiymd")));
+        rd.setEndDate(toDolphinDateStr(values.get(25)));
         // 疾患名
-        rd.setDiagnosis(rs.getString("byomei"));
+        rd.setDiagnosis(values.get(26));
         // 制御のための Status
         rd.setStatus("ORCA");
 

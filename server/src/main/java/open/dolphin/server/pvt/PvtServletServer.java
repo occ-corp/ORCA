@@ -7,28 +7,18 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
-import javax.inject.Inject;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.annotation.WebListener;
-import open.dolphin.session.MasudaServiceBean;
-import open.dolphin.session.PVTServiceBean;
+import javax.servlet.ServletContext;
 
 /**
- * PvtServletServer
- * 
- * Java EE環境における非同期プログラミング
- * http://d.hatena.ne.jp/nekop/20120417/1334654442
+ * PvtServerThread, server
+ *
  * @author masuda, Masuda Naika
  */
-@WebListener
-public class PvtServletServer implements ServletContextListener {
+public class PvtServletServer {
 
     private static final Logger logger = Logger.getLogger(PvtServletServer.class.getSimpleName());
-    private static final String UTF8 = "UTF-8";
-    private static final int DEFAULT_PORT = 5002;
     
-    private String encoding = UTF8;
+    private static final int DEFAULT_PORT = 5002;
     private int port = DEFAULT_PORT;
     
     // ServerSocketのスレッド nio!
@@ -36,31 +26,30 @@ public class PvtServletServer implements ServletContextListener {
     private PvtServerThread serverThread;
     // PVT登録処理のSingle Thread Executor
     private ExecutorService exec;
-    
-    @Inject
-    private PVTServiceBean pvtServiceBean;
-    
-    @Inject
-    private MasudaServiceBean masudaServiceBean;
 
+    private static PvtServletServer instance;
     
-    @Override
-    public void contextInitialized(ServletContextEvent sce) {
-        
-        if (!masudaServiceBean.usePvtServletServer()) {
-            logger.info("PVT Servlet Server disabled.");
-            return;
-        }
-        
+    static {
+        instance = new PvtServletServer();
+    }
+    
+    public static PvtServletServer getInstance() {
+        return instance;
+    }
+
+    private PvtServletServer() {
+    }
+
+    public void start() {
+
         exec = Executors.newSingleThreadExecutor();
 
         try {
             InetSocketAddress address = new InetSocketAddress(InetAddress.getLocalHost(), port);
-
-            String msg = "PVT Server is binded " + address + " with encoding: " + encoding;
+            String msg = "PVT Server is binded " + address;
             logger.info(msg);
 
-            serverThread = new PvtServerThread(PvtServletServer.this, address);
+            serverThread = new PvtServerThread(address);
             thread = new Thread(serverThread, "PVT server socket");
             thread.start();
 
@@ -70,8 +59,7 @@ public class PvtServletServer implements ServletContextListener {
         }
     }
 
-    @Override
-    public void contextDestroyed(ServletContextEvent sce) {
+    public void dispose() {
 
         // ServerThreadを中止させる
         serverThread.stop();
@@ -84,7 +72,6 @@ public class PvtServletServer implements ServletContextListener {
         shutdownExecutor();
 
         logger.info("PVT Server stopped.");
-
     }
 
     private void shutdownExecutor() {
@@ -100,22 +87,10 @@ public class PvtServletServer implements ServletContextListener {
         }
         exec = null;
     }
-    
-    public String getEncoding() {
-        return encoding;
-    }
-    
-    public PVTServiceBean getPvtServiceBean() {
-        return pvtServiceBean;
-    }
-    
-    public MasudaServiceBean getMasudaServiceBean() {
-        return masudaServiceBean;
-    }
 
     // PvtClaimIOHanlderから呼ばれる
     public void postPvt(String pvtXml) {
-        PvtPostTask task = new PvtPostTask(this, pvtXml);
+        PvtPostTask task = new PvtPostTask(pvtXml);
         exec.submit(task);
     }
 }

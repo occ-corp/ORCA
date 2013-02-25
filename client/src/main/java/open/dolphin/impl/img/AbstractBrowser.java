@@ -7,9 +7,16 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Properties;
 import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
@@ -123,8 +130,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     }
 
     protected String getSuffix(String path) {
-        int index = path!=null ? path.lastIndexOf('.') : -1;
-        return index>=0 ? path.substring(index+1).toLowerCase(): null;
+        int index = (path != null) ? path.lastIndexOf('.') : -1;
+        return (index >= 0) ? path.substring(index + 1).toLowerCase() : null;
     }
 
     protected boolean isImage(String ext) {
@@ -184,13 +191,14 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
             }
             sb.append(patientId);
 
-            File imageDirectory = new File(sb.toString());
-            if ( imageDirectory.exists() && imageDirectory.isDirectory() ) {
-
-                File[] imageFiles = imageDirectory.listFiles();
-
-                if (imageFiles != null || imageFiles.length> 0) {
-                    ret = true;
+            FileSystem fs = FileSystems.getDefault();
+            Path imagePath = fs.getPath(sb.toString());
+            
+            if (Files.exists(imagePath) && Files.isDirectory(imagePath)) {
+                try {
+                    Iterator<Path> itr = Files.newDirectoryStream(imagePath).iterator();
+                    ret = itr.hasNext();
+                } catch (IOException ex) {
                 }
             }
         }
@@ -241,25 +249,25 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         if (valueIsNullOrEmpty(imgLoc)) {
             return;
         }
+        
+        FileSystem fs = FileSystems.getDefault();
+        final Path imagePath = fs.getPath(imgLoc);
 
-        final File imageDirectory = new File(imgLoc);
-        if ((!imageDirectory.exists()) || (!imageDirectory.isDirectory())) {
+        if (!Files.exists(imagePath) || !Files.isDirectory(imagePath)) {
             return;
         }
 
-        //SwingWorker worker = new SwingWorker<List<ImageEntry>, Void>() {
         SwingWorker worker = new SwingWorker<Void, Void>() {
 
             @Override
-            //protected List<ImageEntry> doInBackground() throws Exception {
             protected Void doInBackground() throws Exception {
-
-                //List<ImageEntry> imageList = new ArrayList<ImageEntry>();
-
-                File[] imageFiles = imageDirectory.listFiles();
-
-                if (imageFiles == null || imageFiles.length == 0) {
-                    //return imageList;
+                
+                List<Path> pathList = new ArrayList<Path>();
+                for (Iterator<Path> itr = Files.newDirectoryStream(imagePath).iterator(); itr.hasNext();) {
+                    pathList.add(itr.next());
+                }
+                
+                if (pathList.isEmpty()) {
                     return null;
                 }
 
@@ -267,68 +275,71 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                 if (sortIsLastModified()) {
                     // 最終更新日でソート
                     if (sortIsDescending()) {
-                        Arrays.sort(imageFiles, new Comparator() {
+                        Collections.sort(pathList, new Comparator() {
 
                             @Override
                             public int compare(final Object o1, final Object o2) {
-                                long l1 = ((File) o1).lastModified();
-                                long l2 = ((File) o2).lastModified();
-                                return (l2 > l1) ? 1 : ((l2 < l1) ? -1 : 0);
+                                try {
+                                    long l1 = Files.getLastModifiedTime((Path) o1).toMillis();
+                                    long l2 = Files.getLastModifiedTime((Path) o2).toMillis();
+                                    return (l2 > l1) ? 1 : ((l2 < l1) ? -1 : 0);
+                                } catch (IOException ex) {
+                                }
+                                return 0;
                             }
                         });
-
                     } else {
-                        Arrays.sort(imageFiles, new Comparator() {
+                        Collections.sort(pathList, new Comparator() {
 
                             @Override
                             public int compare(final Object o1, final Object o2) {
-                                long l1 = ((File) o1).lastModified();
-                                long l2 = ((File) o2).lastModified();
-                                return (l1 > l2) ? 1 : ((l1 < l2) ? -1 : 0);
+                                try {
+                                    long l1 = Files.getLastModifiedTime((Path) o1).toMillis();
+                                    long l2 = Files.getLastModifiedTime((Path) o2).toMillis();
+                                    return (l1 > l2) ? 1 : ((l1 < l2) ? -1 : 0);
+                                } catch (IOException ex) {
+                                }
+                                return 0;
                             }
                         });
                     }
+                    
                 } else {
                     // filename でソート
                     if (sortIsDescending()) {
-                        Arrays.sort(imageFiles, new Comparator() {
+                        Collections.sort(pathList, new Comparator() {
 
                             @Override
                             public int compare(final Object o1, final Object o2) {
-                                String n1 = ((File) o1).getName();
-                                String n2 = ((File) o2).getName();
+                                String n1 = ((Path) o1).toString();
+                                String n2 = ((Path) o2).toString();
                                 return n2.compareTo(n1);
                             }
                         });
-
                     } else {
-                        Arrays.sort(imageFiles, new Comparator() {
+                        Collections.sort(pathList, new Comparator() {
 
                             @Override
                             public int compare(final Object o1, final Object o2) {
-                                String n1 = ((File) o1).getName();
-                                String n2 = ((File) o2).getName();
+                                String n1 = ((Path) o1).toString();
+                                String n2 = ((Path) o2).toString();
                                 return n1.compareTo(n2);
                             }
                         });
                     }
                 }
 
-                int cnt = 0;
+                for (Path filePath : pathList) {
 
-                for (File file : imageFiles) {
-
-                    cnt++;
-                    
-                    URI uri = file.toURI();
+                    URI uri = filePath.toUri();
                     URL url = uri.toURL();
-                    String path = file.getPath();
-                    String fileName = file.getName();
-                    long last = file.lastModified();
+                    String path = filePath.toString();
+                    String fileName = filePath.getFileName().toString();
+                    long last = Files.getLastModifiedTime(filePath).toMillis();
 
                     debug(uri, url, path, fileName);
 
-                    if (file.length()==0) {
+                    if (Files.size(filePath) == 0) {
                         continue;
                     }
 

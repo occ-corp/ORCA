@@ -2,10 +2,7 @@ package open.dolphin.dao;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -121,9 +118,6 @@ public class SyskanriInfo extends SqlDaoBean {
     // ORCAのデータベースバージョンとhospNumを取得する
     private boolean setHospNum() {
         
-        Connection con = null;
-        Statement st = null;
-
         boolean success = true;
         hospNum = 1;
         String jmari = Project.getString(Project.JMARI_CODE);
@@ -133,38 +127,20 @@ public class SyskanriInfo extends SqlDaoBean {
         sb.append(jmari);
         sb.append("%'");
         String sql = sb.toString();
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                hospNum = rs.getInt(1);
-            }
-            rs.close();
-        } catch (Exception e) {
-            processError(e);
-            success = false;
-        } finally {
-            closeStatement(st);
-            closeConnection(con);
+        
+        List<List<String>> valuesList = executeStatement(sql);
+        if (!valuesList.isEmpty()) {
+            List<String> values = valuesList.get(0);
+            hospNum = Integer.valueOf(values.get(0));
         }
 
         String dbVersion = null;
         sql = "select version from tbl_dbkanri where kanricd='ORCADB00'";
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                dbVersion = rs.getString(1);
-            }
-            rs.close();
-        } catch (Exception e) {
-            processError(e);
-            success = false;
-        } finally {
-            closeStatement(st);
-            closeConnection(con);
+        
+        valuesList = executeStatement(sql);
+        if (!valuesList.isEmpty()) {
+            List<String> values = valuesList.get(0);
+            dbVersion = values.get(0);
         }
 
         if (ORCA_DB_VER45.equals(dbVersion)) {
@@ -183,34 +159,20 @@ public class SyskanriInfo extends SqlDaoBean {
         final String sql = "select kbncd, kanritbl from tbl_syskanri where kanricd = '1006' order by kbncd";
         boolean success = true;
         
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            while (rs.next()) {
-                int kbncd = rs.getInt(1);
-                String kanritbl = rs.getString(2);
-                for (int i = 0; i < kanritbl.length(); ++i) {
-                    int index = (kbncd - 1) * 500 + i + 1;
-                    char c = kanritbl.charAt(i);
-                    if (c == '1') {
-                        syskanri1006.add(index);
-                    }
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            int kbncd = Integer.valueOf(values.get(0).trim());
+            String kanritbl = values.get(1);
+            for (int i = 0; i < kanritbl.length(); ++i) {
+                int index = (kbncd - 1) * 500 + i + 1;
+                char c = kanritbl.charAt(i);
+                if (c == '1') {
+                    syskanri1006.add(index);
                 }
             }
-            rs.close();
-        } catch (Exception e) {
-            processError(e);
-            success = false;
-        } finally {
-            closeStatement(st);
-            closeConnection(con);            
         }
-        
+
         return success;
     }
 
@@ -329,30 +291,20 @@ public class SyskanriInfo extends SqlDaoBean {
         final String sql = "select kbncd, kanritbl from tbl_syskanri where kanricd = ?";
         List<KanriTblModel> ret = new ArrayList<KanriTblModel>();
         
-        Connection con = null;
-        PreparedStatement ps = null;
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, kanricd);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                // kbccdは余分な空白は除去
-                String kbncd = rs.getString(1).trim();
-                // これがカオスのkanritbl。こっちはそのままで
-                String kanritbl = rs.getString(2);
-                KanriTblModel model = new KanriTblModel(kbncd, kanritbl);
-                ret.add(model);
-            }
-            rs.close();
-
-        } catch (Exception e) {
-            processError(e);
-        } finally {
-            closePreparedStatement(ps);
-            closeConnection(con);
+        int[] types = {Types.CHAR};
+        String[] params = {kanricd};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            // kbccdは余分な空白は除去
+            String kbncd = values.get(0).trim();
+            // これがカオスのkanritbl。こっちはそのままで
+            String kanritbl = values.get(1);
+            KanriTblModel model = new KanriTblModel(kbncd, kanritbl);
+            ret.add(model);
         }
+
         return ret;
     }
     

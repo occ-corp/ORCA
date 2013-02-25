@@ -7,6 +7,7 @@ import javax.inject.Singleton;
 import javax.servlet.AsyncContext;
 import open.dolphin.infomodel.PatientVisitModel;
 
+
 /**
  * サーブレットの諸情報を保持するクラス
  * @author masuda, Masuda Naika
@@ -19,17 +20,23 @@ public class ServletContextHolder {
     private GregorianCalendar tomorrow;
 
     // AsyncContextのリスト
-    private final List<AsyncContext> acList = new ArrayList<AsyncContext>();
+    private final List<AsyncContext> acList;
     
     // facilityIdとpvtListのマップ
-    private Map<String, List<PatientVisitModel>> pvtListMap 
-            = new ConcurrentHashMap<String, List<PatientVisitModel>>();
+    private Map<String, List<PatientVisitModel>> pvtListMap;
     
     // サーバーのUUID
     private String serverUUID;
     
+    // ユーザーのキャッシュ
+    private Map<String, String> userMap;
+
+    
     public ServletContextHolder() {
         serverUUID = UUID.randomUUID().toString();
+        acList = new ArrayList<AsyncContext>();
+        pvtListMap = new ConcurrentHashMap<String, List<PatientVisitModel>>();
+        userMap = new ConcurrentHashMap<String, String>();
     }
 
     public List<AsyncContext> getAsyncContextList() {
@@ -88,5 +95,9 @@ public class ServletContextHolder {
     }
     public GregorianCalendar getTomorrow() {
         return tomorrow;
+    }
+    
+    public Map<String, String> getUserMap() {
+        return userMap;
     }
 }

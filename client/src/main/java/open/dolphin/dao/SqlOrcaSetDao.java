@@ -1,10 +1,8 @@
 package open.dolphin.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.Types;
 import java.util.ArrayList;
+import java.util.List;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 
@@ -31,6 +29,9 @@ public class SqlOrcaSetDao extends SqlDaoBean {
     static {
         instance = new SqlOrcaSetDao();
     }
+    
+    private SqlOrcaSetDao() {
+    }
 
     public static SqlOrcaSetDao getInstance() {
         return instance;
@@ -40,13 +41,10 @@ public class SqlOrcaSetDao extends SqlDaoBean {
      * ORCA の入力セットコード（約束処方、診療セット）を返す。
      * @return 入力セットコード(OrcaInputCd)の昇順リスト
      */
-    public ArrayList<OrcaInputCd> getOrcaInputSet() {
+    public List<OrcaInputCd> getOrcaInputSet() {
          
         debug("getOrcaInputSet()");
-        Connection con = null;
-        ArrayList<OrcaInputCd> collection;
-        Statement st = null;
-        String sql;
+        List<OrcaInputCd> collection = new ArrayList<OrcaInputCd>();
 
         StringBuilder sb = new StringBuilder();
         sb.append("select * from tbl_inputcd where ");
@@ -57,395 +55,294 @@ public class SqlOrcaSetDao extends SqlDaoBean {
             sb.append(" and ");
         } 
         sb.append("inputcd like 'P%' or inputcd like 'S%' order by inputcd");
-        
-        sql = sb.toString();
+        String sql = sb.toString();
         debug(sql);
         
         boolean v4 = true;  //Project.getOrcaVersion().startsWith("4") ? true : false;
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            collection = new ArrayList<OrcaInputCd>();
-            
-            while (rs.next()) {
-                
-                debug("got from tbl_inputcd");
-                
-                OrcaInputCd inputCd = new OrcaInputCd();
-                
-                if (!v4) {
-                    inputCd.setHospId(rs.getString(1));
-                    inputCd.setCdsyu(rs.getString(2));
-                    inputCd.setInputCd(rs.getString(3));
-                    inputCd.setSryKbn(rs.getString(4));
-                    inputCd.setSryCd(rs.getString(5));
-                    inputCd.setDspSeq(rs.getInt(6));
-                    inputCd.setDspName(rs.getString(7));
-                    inputCd.setTermId(rs.getString(8));
-                    inputCd.setOpId(rs.getString(9));
-                    inputCd.setCreYmd(rs.getString(10));
-                    inputCd.setUpYmd(rs.getString(11));
-                    inputCd.setUpHms(rs.getString(12));
-                    
-                    String cd = inputCd.getInputCd();
-                    if (cd.length() > 6) {
-                        cd = cd.substring(0, 6);
-                        inputCd.setInputCd(cd);
-                    }
-                    
-                } else {
-                    inputCd.setCdsyu(rs.getString(1));
-                    inputCd.setInputCd(rs.getString(2));
-                    inputCd.setSryKbn(rs.getString(3));
-                    inputCd.setSryCd(rs.getString(4));
-                    inputCd.setDspSeq(rs.getInt(5));
-                    inputCd.setDspName(rs.getString(6));
-                    inputCd.setTermId(rs.getString(7));
-                    inputCd.setOpId(rs.getString(8));
-                    inputCd.setCreYmd(rs.getString(9));
-                    inputCd.setUpYmd(rs.getString(10));
-                    inputCd.setUpHms(rs.getString(11));
-                    
-                    String cd = inputCd.getInputCd();
-                    if (cd.length() > 6) {
-                        cd = cd.substring(0, 6);
-                        inputCd.setInputCd(cd);
-                    }
-                    
-                    debug("getCdsyu = " + inputCd.getCdsyu());
-                    debug("getInputCd = " + inputCd.getInputCd());
-                    debug("getSryKbn = " + inputCd.getSryKbn());
-                    debug("getSryCd = " + inputCd.getSryCd());
-                    debug("getDspSeq = " + String.valueOf(inputCd.getDspSeq()));
-                    debug("getDspName = " + inputCd.getDspName());
-                    debug("getTermId = " + inputCd.getTermId());
-                    debug("getOpId " + inputCd.getOpId());
-                    debug("getCreYmd " + inputCd.getCreYmd());
-                    debug("getUpYmd " + inputCd.getUpYmd());
-                    debug("getUpHms " + inputCd.getUpHms());
-                    
-                    ModuleInfoBean info = inputCd.getStampInfo();
-                    debug("getStampName = " + info.getStampName());
-                    debug("getStampRole = " + info.getStampRole());
-                    debug("getEntity = " + info.getEntity());
-                    debug("getStampId = " + info.getStampId());
-                }
-                
-                collection.add(inputCd);
-            }
-            
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-            
-            return collection;
-            
-        } catch (Exception e) {
-            processError(e);
-            closeConnection(con);
-            closeStatement(st);
-        }
+        List<List<String>> valuesList = executeStatement(sql);
         
-        return null;
+        for (List<String> values : valuesList) {
+
+            debug("got from tbl_inputcd");
+
+            OrcaInputCd inputCd = new OrcaInputCd();
+
+            if (!v4) {
+                inputCd.setHospId(values.get(0));
+                inputCd.setCdsyu(values.get(1));
+                inputCd.setInputCd(values.get(2));
+                inputCd.setSryKbn(values.get(3));
+                inputCd.setSryCd(values.get(4));
+                inputCd.setDspSeq(Integer.valueOf(values.get(5)));
+                inputCd.setDspName(values.get(6));
+                inputCd.setTermId(values.get(7));
+                inputCd.setOpId(values.get(8));
+                inputCd.setCreYmd(values.get(9));
+                inputCd.setUpYmd(values.get(10));
+                inputCd.setUpHms(values.get(11));
+
+                String cd = inputCd.getInputCd();
+                if (cd.length() > 6) {
+                    cd = cd.substring(0, 6);
+                    inputCd.setInputCd(cd);
+                }
+
+            } else {
+                inputCd.setCdsyu(values.get(0));
+                inputCd.setInputCd(values.get(1));
+                inputCd.setSryKbn(values.get(2));
+                inputCd.setSryCd(values.get(3));
+                inputCd.setDspSeq(Integer.valueOf(values.get(4)));
+                inputCd.setDspName(values.get(5));
+                inputCd.setTermId(values.get(6));
+                inputCd.setOpId(values.get(7));
+                inputCd.setCreYmd(values.get(8));
+                inputCd.setUpYmd(values.get(9));
+                inputCd.setUpHms(values.get(10));
+
+                String cd = inputCd.getInputCd();
+                if (cd.length() > 6) {
+                    cd = cd.substring(0, 6);
+                    inputCd.setInputCd(cd);
+                }
+
+                debug("getCdsyu = " + inputCd.getCdsyu());
+                debug("getInputCd = " + inputCd.getInputCd());
+                debug("getSryKbn = " + inputCd.getSryKbn());
+                debug("getSryCd = " + inputCd.getSryCd());
+                debug("getDspSeq = " + String.valueOf(inputCd.getDspSeq()));
+                debug("getDspName = " + inputCd.getDspName());
+                debug("getTermId = " + inputCd.getTermId());
+                debug("getOpId " + inputCd.getOpId());
+                debug("getCreYmd " + inputCd.getCreYmd());
+                debug("getUpYmd " + inputCd.getUpYmd());
+                debug("getUpHms " + inputCd.getUpHms());
+
+                ModuleInfoBean info = inputCd.getStampInfo();
+                debug("getStampName = " + info.getStampName());
+                debug("getStampRole = " + info.getStampRole());
+                debug("getEntity = " + info.getEntity());
+                debug("getStampId = " + info.getStampId());
+            }
+
+            collection.add(inputCd);
+        }
+
+        return collection;
+
     }
     
     /**
      * 指定された入力セットコードから診療セットを Stamp にして返す。
      * @param inputSetInfo 入力セットの StampInfo
      * @return 入力セットのStampリスト
-     */    
-    public ArrayList<ModuleModel> getStamp(ModuleInfoBean inputSetInfo) {
-        
+     */
+    public List<ModuleModel> getStamp(ModuleInfoBean inputSetInfo) {
+
         String setCd = inputSetInfo.getStampId(); // stampId=setCd; セットコード
         String stampName = inputSetInfo.getStampName();
         debug("getStamp()");
         debug("setCd = " + setCd);
         debug("stampName = " + stampName);
-        
-        
-        int hospnum = -1;
-        if (true) {
-            hospnum = getHospNum();
+
+        int hospnum = getHospNum();
+        String sql1 = "select inputcd,suryo1,kaisu from tbl_inputset where hospnum=? and setcd=? order by setseq";
+        String sql2 = "select srysyukbn,name,taniname,ykzkbn from tbl_tensu where hospnum=? and srycd=?";
+
+        List<ModuleModel> retSet = new ArrayList<ModuleModel>();
+
+        // setCd を検索する
+        int[] types1 = {Types.INTEGER, Types.CHAR};
+        String[] params1 = {String.valueOf(hospnum), setCd};
+        List<List<String>> valuesList1 = executePreparedStatement(sql1, types1, params1);
+
+        List<OrcaInputSet> list = new ArrayList<OrcaInputSet>();
+
+        for (List<String> values1 : valuesList1) {
+
+            debug("got from tbl_inputset");
+            OrcaInputSet inputSet = new OrcaInputSet();
+            inputSet.setInputCd(values1.get(0));                // .210 616130532 ...
+            inputSet.setSuryo1(Float.valueOf(values1.get(1)));  // item の個数
+            inputSet.setKaisu(Integer.valueOf(values1.get(2))); // バンドル数
+
+            debug("getInputCd = " + inputSet.getInputCd());
+            debug("getSuryo1 = " + String.valueOf(inputSet.getSuryo1()));
+            debug("getKaisu = " + String.valueOf(inputSet.getKaisu()));
+
+            list.add(inputSet);
+        }
+
+        if (list.isEmpty()) {
+            return retSet;
         }
         
-        Connection con = null;
-        PreparedStatement ps1 = null;
-        PreparedStatement ps2 = null;
-        String sql1;
-        String sql2;
-        
-        StringBuilder sb1 = new StringBuilder();
-        if (true) {
-            sb1.append("select inputcd,suryo1,kaisu from tbl_inputset where hospnum=? and setcd=? order by setseq");
-            sql1 = sb1.toString();
-        } else {
-            sb1.append("select inputcd,suryo1,kaisu from tbl_inputset where setcd=? order by setseq");
-            sql1 = sb1.toString();
-        }
-        
-        StringBuilder sb2 = new StringBuilder();
-        if (true) {
-            sb2.append("select srysyukbn,name,taniname,ykzkbn from tbl_tensu where hospnum=? and srycd=?");
-            sql2 = sb2.toString();
-        } else {
-            sb2.append("select srysyukbn,name,taniname,ykzkbn from tbl_tensu where srycd=?");
-            sql2 = sb2.toString();
-        }
-        
-        ArrayList<ModuleModel> retSet = new ArrayList<ModuleModel>();
-        
-        try {
-            //
-            // setCd を検索する
-            //
-            con = getConnection();
-            ps1 = con.prepareStatement(sql1);
-            if (hospnum > 0) {
-                ps1.setInt(1, hospnum);
-                ps1.setString(2, setCd);
+        BundleDolphin bundle = null;
+        ModuleModel stamp;
+
+        for (OrcaInputSet inputSet : list) {
+
+            String inputcd = inputSet.getInputCd();
+            debug("inputcd = " + inputcd);
+
+            if (inputcd.startsWith(SHINRYO_KBN_START)) {
+
+                stamp = createStamp(stampName, inputcd);
+                if (stamp != null) {
+                    bundle = (BundleDolphin) stamp.getModel();
+                    retSet.add(stamp);
+                }
+                debug("created stamp " + inputcd);
+
             } else {
-                ps1.setString(1, setCd);
-            }
-            debug(ps1.toString());
-            
-            ResultSet rs = ps1.executeQuery();
-            
-            ArrayList<OrcaInputSet> list = new ArrayList<OrcaInputSet>();
 
-            while (rs.next()) {
-               
-                debug("got from tbl_inputset");
-                OrcaInputSet inputSet = new OrcaInputSet();
-                //inputSet.setHospId(rs.getString(1));
-                //inputSet.setSetCd(rs.getString(2));         // P01001 ...
-                //inputSet.setYukostYmd(rs.getString(3));
-                //inputSet.setYukoedYmd(rs.getString(4));
-                //inputSet.setSetSeq(rs.getInt(5));           // 1, 2, ...
-                inputSet.setInputCd(rs.getString(1));       // .210 616130532 ...
-                inputSet.setSuryo1(rs.getFloat(2));         // item の個数
-                //inputSet.setSuryo2(rs.getFloat(8));
-                inputSet.setKaisu(rs.getInt(3));            // バンドル数
-                //inputSet.setComment(rs.getString(10));
-                //inputSet.setAtai1(rs.getString(11));
-                //inputSet.setAtai2(rs.getString(12));
-                //inputSet.setAtai3(rs.getString(13));
-                //inputSet.setAtai4(rs.getString(14));
-                //inputSet.setTermId(rs.getString(15));
-                //inputSet.setOpId(rs.getString(16));
-                //inputSet.setCreYmd(rs.getString(17));
-                //inputSet.setUpYmd(rs.getString(18));
-                //inputSet.setUpHms(rs.getString(19));
-                
-                debug("getInputCd = " + inputSet.getInputCd());
-                debug("getSuryo1 = " + String.valueOf(inputSet.getSuryo1()));
-                debug("getKaisu = " + String.valueOf(inputSet.getKaisu()));
-                
-                list.add(inputSet);
-            }
-            
-            rs.close();
-            closeStatement(ps1);
-            
-            ModuleModel stamp;
-            BundleDolphin bundle = null;
-            ps2 = con.prepareStatement(sql2);
-            
-            if (list != null && list.size() > 0) {
-                
-                for (OrcaInputSet inputSet : list) {
-                    
-                    String inputcd = inputSet.getInputCd();
-                    debug("inputcd = " + inputcd);
-                    
-                    if (inputcd.startsWith(SHINRYO_KBN_START)) {
-                        
-                        //---------------------------------------
-                        //
-                        //---------------------------------------
-                        stamp = createStamp(stampName, inputcd);
-                        if (stamp != null) {
-                            bundle = (BundleDolphin) stamp.getModel();
-                            retSet.add(stamp);
-                        }
-                        debug("created stamp " + inputcd);
-                        
-                    } else {
-                        
-                        if (hospnum > 0) {
-                            ps2.setInt(1, hospnum);
-                            ps2.setString(2, inputcd);
-                        } else {
-                            ps2.setString(1, inputcd);
-                        }
-                        debug(ps2.toString());
-                    
-                        ResultSet rs2 = ps2.executeQuery();
-                        
-                        if (rs2.next()) {
-                            
-                            debug("got from tbl_tensu");
-                            String code = inputcd;
-                            String kbn = rs2.getString(1);
-                            String name = rs2.getString(2);
-                            String number = String.valueOf(inputSet.getSuryo1());
-                            String unit = rs2.getString(3);
-                            
-                            debug("code = " + code);
-                            debug("kbn = " + kbn);
-                            debug("name = " + name);
-                            debug("number = " + number);
-                            debug("unit = " + unit);
-                            
-                            ClaimItem item = new ClaimItem();
-                            item.setCode(code);
-                            item.setName(name);
-                            item.setNumber(number);
-                            item.setClassCodeSystem(ClaimConst.SUBCLASS_CODE_ID);
-                            
-                            if (code.startsWith(ClaimConst.SYUGI_CODE_START)) {
-                                //
-                                // 手技の場合
-                                //
-                                debug("item is tech");
-                                item.setClassCode(String.valueOf(ClaimConst.SYUGI));
-                                
-                                if (bundle == null) {
-                                    stamp = createStamp(stampName, kbn);
-                                    if (stamp != null) {
-                                        bundle = (BundleDolphin) stamp.getModel();
-                                        retSet.add(stamp);
-                                    }
-                                }
-                                
-                                if (bundle != null) {
-                                    bundle.addClaimItem(item);
-                                } 
-                            
-                            } else if (code.startsWith(ClaimConst.YAKUZAI_CODE_START)) {
-                                //
-                                // 薬剤の場合
-                                //
-                                debug("item is medicine");
-                                item.setClassCode(String.valueOf(ClaimConst.YAKUZAI));
-                                item.setNumberCode(ClaimConst.YAKUZAI_TOYORYO);
-                                item.setNumberCodeSystem(ClaimConst.NUMBER_CODE_ID);
-                                item.setUnit(unit);
-                                
-                                if (bundle == null) {
-                                    String receiptCode = rs2.getString(4).equals(ClaimConst.YKZ_KBN_NAIYO)
-                                            ? ClaimConst.RECEIPT_CODE_NAIYO 
-                                            : ClaimConst.RECEIPT_CODE_GAIYO;
-                                    stamp = createStamp(stampName, receiptCode);
-                                    if (stamp != null) {
-                                        bundle = (BundleDolphin) stamp.getModel();
-                                        retSet.add(stamp);
-                                    }
-                                }
-                                
-                                if (bundle != null) {
-                                    bundle.addClaimItem(item);
-                                }
-                                
-                            } else if (code.startsWith(ClaimConst.ZAIRYO_CODE_START)) {
-                                //
-                                // 材料の場合
-                                //
-                                debug("item is material");
-                                item.setClassCode(String.valueOf(ClaimConst.ZAIRYO));
-                                item.setNumberCode(ClaimConst.ZAIRYO_KOSU);
-                                item.setNumberCodeSystem(ClaimConst.NUMBER_CODE_ID);
-                                item.setUnit(unit);
-                                
-                                if (bundle == null) {
-                                    stamp = createStamp(stampName, KBN_GENERAL);
-                                    if (stamp != null) {
-                                        bundle = (BundleDolphin) stamp.getModel();
-                                        retSet.add(stamp);
-                                    }
-                                }
-                                
-                                if (bundle != null) {
-                                    bundle.addClaimItem(item);
-                                }
-                                
-                            
-                            } else if (code.startsWith(ClaimConst.ADMIN_CODE_START)) {
-                                //
-                                // 用法の場合
-                                //
-                                debug("item is administration");
-                                if (bundle == null) {
-                                    stamp = createStamp(stampName, KBN_RP);
-                                    if (stamp != null) {
-                                        bundle = (BundleDolphin) stamp.getModel();
-                                        retSet.add(stamp);
-                                    }
-                                }
-                                
-                                if (bundle != null) {
-                                    if (bundle instanceof BundleMed) {
-                                        debug("cur bundle is BundleMed");
-                                        bundle.setAdmin(name);
-                                        bundle.setAdminCode(code);
-                                        bundle.setBundleNumber(String.valueOf(inputSet.getKaisu()));
-                                    } else {
-                                        debug("cur bundle is ! BundleMed");
-                                        bundle.addClaimItem(item);
-                                    }
-                                }
-                            
-                            } else if (inputcd.startsWith(ClaimConst.RBUI_CODE_START)) {
-                                //
-                                // 放射線部位の場合
-                                //
-                                debug("item is rad loc.");
-                                item.setClassCode(String.valueOf(ClaimConst.SYUGI));
-                                
-                                if (bundle == null) {
-                                    stamp = createStamp(stampName, KBN_RAD);
-                                    if (stamp != null) {
-                                        bundle = (BundleDolphin) stamp.getModel();
-                                        retSet.add(stamp);
-                                    }
-                                }
-                                
-                                if (bundle != null) {
-                                    bundle.addClaimItem(item);
-                                }
+                int[] types2 = {Types.INTEGER, Types.CHAR};
+                String[] params2 = {String.valueOf(hospnum), inputcd};
+                List<List<String>> valuesList2 = executePreparedStatement(sql2, types2, params2);
 
-                            } else {
+                if (!valuesList2.isEmpty()) {
+                    List<String> values2 = valuesList2.get(0);
 
-                                debug("item is other");
-                                if (bundle==null) {
-                                    stamp = createStamp(stampName, KBN_GENERAL);
-                                    if (stamp != null) {
-                                        bundle = (BundleDolphin) stamp.getModel();
-                                        retSet.add(stamp);
-                                    }
-                                }
-                                if (bundle != null) {
-                                    bundle.addClaimItem(item);
-                                }
+                    debug("got from tbl_tensu");
+                    String code = inputcd;
+                    String kbn = values2.get(0);
+                    String name = values2.get(1);
+                    String number = String.valueOf(inputSet.getSuryo1());
+                    String unit = values2.get(2);
+
+                    debug("code = " + code);
+                    debug("kbn = " + kbn);
+                    debug("name = " + name);
+                    debug("number = " + number);
+                    debug("unit = " + unit);
+
+                    ClaimItem item = new ClaimItem();
+                    item.setCode(code);
+                    item.setName(name);
+                    item.setNumber(number);
+                    item.setClassCodeSystem(ClaimConst.SUBCLASS_CODE_ID);
+
+                    if (code.startsWith(ClaimConst.SYUGI_CODE_START)) {
+                        // 手技の場合
+                        debug("item is tech");
+                        item.setClassCode(String.valueOf(ClaimConst.SYUGI));
+
+                        if (bundle == null) {
+                            stamp = createStamp(stampName, kbn);
+                            if (stamp != null) {
+                                bundle = (BundleDolphin) stamp.getModel();
+                                retSet.add(stamp);
                             }
+                        }
+
+                        if (bundle != null) {
+                            bundle.addClaimItem(item);
+                        }
+
+                    } else if (code.startsWith(ClaimConst.YAKUZAI_CODE_START)) {
+                        // 薬剤の場合
+                        debug("item is medicine");
+                        item.setClassCode(String.valueOf(ClaimConst.YAKUZAI));
+                        item.setNumberCode(ClaimConst.YAKUZAI_TOYORYO);
+                        item.setNumberCodeSystem(ClaimConst.NUMBER_CODE_ID);
+                        item.setUnit(unit);
+
+                        if (bundle == null) {
+                            String receiptCode = values2.get(3).equals(ClaimConst.YKZ_KBN_NAIYO)
+                                    ? ClaimConst.RECEIPT_CODE_NAIYO
+                                    : ClaimConst.RECEIPT_CODE_GAIYO;
+                            stamp = createStamp(stampName, receiptCode);
+                            if (stamp != null) {
+                                bundle = (BundleDolphin) stamp.getModel();
+                                retSet.add(stamp);
+                            }
+                        }
+
+                        if (bundle != null) {
+                            bundle.addClaimItem(item);
+                        }
+
+                    } else if (code.startsWith(ClaimConst.ZAIRYO_CODE_START)) {
+                        // 材料の場合
+                        debug("item is material");
+                        item.setClassCode(String.valueOf(ClaimConst.ZAIRYO));
+                        item.setNumberCode(ClaimConst.ZAIRYO_KOSU);
+                        item.setNumberCodeSystem(ClaimConst.NUMBER_CODE_ID);
+                        item.setUnit(unit);
+
+                        if (bundle == null) {
+                            stamp = createStamp(stampName, KBN_GENERAL);
+                            if (stamp != null) {
+                                bundle = (BundleDolphin) stamp.getModel();
+                                retSet.add(stamp);
+                            }
+                        }
+
+                        if (bundle != null) {
+                            bundle.addClaimItem(item);
+                        }
+
+
+                    } else if (code.startsWith(ClaimConst.ADMIN_CODE_START)) {
+                        // 用法の場合
+                        debug("item is administration");
+                        if (bundle == null) {
+                            stamp = createStamp(stampName, KBN_RP);
+                            if (stamp != null) {
+                                bundle = (BundleDolphin) stamp.getModel();
+                                retSet.add(stamp);
+                            }
+                        }
+
+                        if (bundle != null) {
+                            if (bundle instanceof BundleMed) {
+                                debug("cur bundle is BundleMed");
+                                bundle.setAdmin(name);
+                                bundle.setAdminCode(code);
+                                bundle.setBundleNumber(String.valueOf(inputSet.getKaisu()));
+                            } else {
+                                debug("cur bundle is ! BundleMed");
+                                bundle.addClaimItem(item);
+                            }
+                        }
+
+                    } else if (inputcd.startsWith(ClaimConst.RBUI_CODE_START)) {
+                        // 放射線部位の場合
+                        debug("item is rad loc.");
+                        item.setClassCode(String.valueOf(ClaimConst.SYUGI));
+
+                        if (bundle == null) {
+                            stamp = createStamp(stampName, KBN_RAD);
+                            if (stamp != null) {
+                                bundle = (BundleDolphin) stamp.getModel();
+                                retSet.add(stamp);
+                            }
+                        }
+
+                        if (bundle != null) {
+                            bundle.addClaimItem(item);
+                        }
+
+                    } else {
+                        debug("item is other");
+                        if (bundle == null) {
+                            stamp = createStamp(stampName, KBN_GENERAL);
+                            if (stamp != null) {
+                                bundle = (BundleDolphin) stamp.getModel();
+                                retSet.add(stamp);
+                            }
+                        }
+                        
+                        if (bundle != null) {
+                            bundle.addClaimItem(item);
                         }
                     }
                 }
-                
-                closeStatement(ps2);
             }
-            
-            closeConnection(con);
-            
-        } catch (Exception e) {
-            processError(e);
-            closeConnection(con);
-            closeStatement(ps1);
-            closeStatement(ps2);
         }
-        
-        return retSet; 
+
+        return retSet;
     }
     
     /**

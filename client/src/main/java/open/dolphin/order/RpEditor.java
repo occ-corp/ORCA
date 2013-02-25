@@ -828,6 +828,7 @@ public final class RpEditor extends AbstractStampEditor {
 
         // 定期・臨時・入院ボタン
         final JRadioButton rb_teiki = view.getRbTeiki();
+        rb_teiki.setSelected(true);
         final JRadioButton rb_rinji = view.getRbRinji();
         final JRadioButton rb_nyuin = view.getRbAdmission();
         

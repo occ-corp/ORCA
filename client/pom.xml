@@ -119,9 +119,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>commons-dbcp</groupId>
-            <artifactId>commons-dbcp</artifactId>
-            <version>1.4</version>
+            <groupId>org.apache.tomcat</groupId>
+            <artifactId>tomcat-jdbc</artifactId>
+            <version>7.0.35</version>
         </dependency>
 <!-- 以下は自分でローカルリポジトリに追加する -->
         <dependency>

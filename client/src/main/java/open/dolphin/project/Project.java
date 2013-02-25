@@ -40,6 +40,9 @@ public class Project  {
     public static final String JMARI_CODE               = "jmariCode";
     public static final String CLAIM_BIND_ADDRESS       = "BIND_ADDRESS";
     public static final String CLAIM_01                 = "CLAIM01";
+    public static final String CLAIM_SENDER             = "claim.sender";
+    public static final String CLAIM_CLIENT             = "client";
+    public static final String CLAIM_SERVER             = "server";
 
     // Labtest
     public static final String SEND_LABTEST             = "order.labtest.send";

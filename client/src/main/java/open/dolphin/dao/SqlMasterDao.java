@@ -2,7 +2,7 @@ package open.dolphin.dao;
 
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
 import open.dolphin.infomodel.DiseaseEntry;
@@ -72,32 +72,14 @@ public final class SqlMasterDao extends SqlDaoBean {
         String sql = QUERY_TENSU_BY_SHINKU;
         int hospNum = getHospNum();
         
-        Connection con = null;
-        PreparedStatement ps;
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, shinku);
-            ps.setString(2, now);
-            ps.setString(3, now);
-            ps.setInt(4, hospNum);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                TensuMaster t = getTensuMaster(rs);
-                ret.add(t);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-        } finally {
-            closeConnection(con);
+        int[] types = {Types.CHAR, Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {shinku, now, now, String.valueOf(hospNum)};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            TensuMaster t = getTensuMaster(values);
+            ret.add(t);
         }
 
         return ret;
@@ -127,33 +109,14 @@ public final class SqlMasterDao extends SqlDaoBean {
         String sql = buf.toString();
         int hospNum = getHospNum();
         
-        Connection con = null;
-        PreparedStatement ps;
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, name);
-            ps.setString(2, kana);
-            ps.setString(3, now);
-            ps.setString(4, now);
-            ps.setInt(5, hospNum);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                TensuMaster t = getTensuMaster(rs);
-                ret.add(t);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-        } finally {
-            closeConnection(con);
+        int[] types = {Types.CHAR, Types.CHAR, Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {name, kana, now, now, String.valueOf(hospNum)};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            TensuMaster t = getTensuMaster(values);
+            ret.add(t);
         }
 
         return ret;
@@ -167,34 +130,15 @@ public final class SqlMasterDao extends SqlDaoBean {
         // SQL 文
         String sql = QUERY_TENSU_BY_CODE;
         int hospNum = getHospNum();
-
-        Connection con = null;
-        PreparedStatement ps;
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            // 増田内科 コール側で ^ をとる
-            ps.setString(1, "^" + regExp);
-            ps.setString(2, now);
-            ps.setString(3, now);
-            ps.setInt(4, hospNum);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                TensuMaster t = getTensuMaster(rs);
-                ret.add(t);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-        } finally {
-            closeConnection(con);
+        
+        int[] types = {Types.CHAR, Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {"^" + regExp, now, now, String.valueOf(hospNum)};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            TensuMaster t = getTensuMaster(values);
+            ret.add(t);
         }
 
         return ret;
@@ -208,41 +152,23 @@ public final class SqlMasterDao extends SqlDaoBean {
         // SQL 文
         String sql =QUERY_TENSU_BY_TEN;
         int hospNum = getHospNum();
+        
+        String[] tens = ten.split("-");
+        int[] types = {Types.FLOAT, Types.FLOAT, Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {null, null, now, now, String.valueOf(hospNum)};
+        if (tens.length > 1) {
+            params[0] = tens[0];
+            params[1] = tens[1];
+        } else {
+            params[0] = tens[0];
+            params[1] = tens[0];
+        }
 
-        Connection con = null;
-        PreparedStatement ps;
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            String[] params = ten.split("-");
-            if (params.length > 1) {
-                ps.setFloat(1, Float.parseFloat(params[0]));
-                ps.setFloat(2, Float.parseFloat(params[1]));
-            } else {
-                ps.setFloat(1, Float.parseFloat(params[0]));
-                ps.setFloat(2, Float.parseFloat(params[0]));
-            }
-
-            ps.setString(3, now);
-            ps.setString(4, now);
-            ps.setInt(5, hospNum);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                TensuMaster t = getTensuMaster(rs);
-                ret.add(t);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            TensuMaster t = getTensuMaster(values);
+            ret.add(t);
         }
 
         return ret;
@@ -254,41 +180,22 @@ public final class SqlMasterDao extends SqlDaoBean {
         List<DiseaseEntry> ret = new ArrayList<DiseaseEntry>();
 
         // SQL 文
-//masuda^ Version46 対応
         String sql = SyskanriInfo.getInstance().isOrca45()
                 ? QUERY_DISEASE_BY_NAME_45
                 : QUERY_DISEASE_BY_NAME;
-//masuda$
-
-        Connection con = null;
-        PreparedStatement ps;
 
         if (!partialMatch) {
             name = "^" + name;
         }
 
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, name);
-            ps.setString(2, name);
-            ps.setString(3, now);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                DiseaseEntry de = getDiseaseEntry(rs);
-                ret.add(de);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-        } finally {
-            closeConnection(con);
+        int[] types = {Types.CHAR, Types.CHAR, Types.CHAR};
+        String[] params = {name, name, now};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            DiseaseEntry d = getDiseaseEntry(values);
+            ret.add(d);
         }
 
         return ret;
@@ -300,11 +207,9 @@ public final class SqlMasterDao extends SqlDaoBean {
         List<DiseaseEntry> ret = new ArrayList<DiseaseEntry>();
 
         // SQL 文
-//masuda^ Version46 対応
         String sql = SyskanriInfo.getInstance().isOrca45()
                 ? QUERY_DISEASE_BY_CODE_45
                 : QUERY_DISEASE_BY_CODE;
-//masuda$
 
         Connection con = null;
         PreparedStatement ps;
@@ -312,28 +217,15 @@ public final class SqlMasterDao extends SqlDaoBean {
         if (!partialMatch) {
             code = "^" + code;
         }
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, code);
-            ps.setString(2, now);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                DiseaseEntry de = getDiseaseEntry(rs);
-                ret.add(de);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-        } finally {
-            closeConnection(con);
+        
+        int[] types = {Types.CHAR, Types.CHAR};
+        String[] params = {code, now};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            DiseaseEntry d = getDiseaseEntry(values);
+            ret.add(d);
         }
 
         return ret;

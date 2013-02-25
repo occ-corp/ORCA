@@ -19,12 +19,7 @@ import java.util.logging.Logger;
 public class PvtClaimAcceptHandler implements IHandler {
 
     private static final Logger logger = Logger.getLogger(PvtClaimAcceptHandler.class.getSimpleName());
-    
-    private PvtServletServer server;
 
-    public PvtClaimAcceptHandler(PvtServletServer server) {
-        this.server = server;
-    }
 
     @Override
     public void handle(SelectionKey key) throws ClosedChannelException, IOException {
@@ -37,7 +32,7 @@ public class PvtClaimAcceptHandler implements IHandler {
 
         // 入出力用のハンドラを生成し、アタッチする
         // 監視する操作は読み込みのみ
-        PvtClaimIOHandler handler = new PvtClaimIOHandler(server);
+        PvtClaimIOHandler handler = new PvtClaimIOHandler();
         channel.register(key.selector(), SelectionKey.OP_READ, handler);
 
         // ログ出力

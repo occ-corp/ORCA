@@ -9,7 +9,7 @@ import javax.servlet.annotation.WebFilter;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import open.dolphin.infomodel.IInfoModel;
-import open.dolphin.mbean.UserCache;
+import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.UserServiceBean;
 
 /**
@@ -32,7 +32,7 @@ public class LogFilter implements Filter {
     private UserServiceBean userService;
     
     @Inject
-    private UserCache userCache;
+    private ServletContextHolder contextHolder;
 
     @Override
     public void init(FilterConfig filterConfig) throws ServletException {
@@ -52,7 +52,7 @@ public class LogFilter implements Filter {
         //System.err.println(userName);
         //System.err.println(password);
         
-        Map<String, String> userMap = userCache.getMap();
+        Map<String, String> userMap = contextHolder.getUserMap();
         boolean authentication = password.equals(userMap.get(userName));
         
         if (!authentication) {

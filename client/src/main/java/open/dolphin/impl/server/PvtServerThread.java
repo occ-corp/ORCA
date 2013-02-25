@@ -19,15 +19,15 @@ public class PvtServerThread implements Runnable {
     private static final Logger logger = ClientContext.getPvtLogger();
 
     private PVTClientServer server;
-    private InetSocketAddress address;
+
     private ServerSocketChannel ssc;
     private Selector selector;
+    
     private boolean isRunning;
     
     public PvtServerThread(PVTClientServer server, InetSocketAddress address) throws IOException {
         this.server = server;
-        this.address = address;
-        initialize();
+        initialize(address);
     }
 
     public void stop() {
@@ -35,7 +35,7 @@ public class PvtServerThread implements Runnable {
         selector.wakeup();
     }
 
-    private void initialize() throws IOException {
+    private void initialize(InetSocketAddress address) throws IOException {
 
         // ソケットチャネルを生成・設定
         ssc = ServerSocketChannel.open();

@@ -1,4 +1,3 @@
-
 package open.dolphin.dao;
 
 import java.sql.*;
@@ -75,36 +74,19 @@ public class SqlETensuDao extends SqlDaoBean {
         
         // 結果を格納するリスト
         List<ETensuModel1> ret = new ArrayList<ETensuModel1>();
-
-        Connection con = null;
-        PreparedStatement ps;
+        
         String sql = SELECT_ETENSU_1 + WHERE_ETENSU_RELATED + " limit ? offset ?";
+        
+        int[] types = {Types.BIGINT, Types.BIGINT};
+        String[] params = {String.valueOf(limit), String.valueOf(offset)};
 
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setInt(1, limit);
-            ps.setLong(2, offset);
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
 
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                ETensuModel1 model = createETensuModel1(rs);
-                ret.add(model);
-            }
-
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        for (List<String> values : valuesList) {
+            ETensuModel1 model = createETensuModel1(values);
+            ret.add(model);
         }
-
+ 
         return ret;
     }
     
@@ -123,30 +105,13 @@ public class SqlETensuDao extends SqlDaoBean {
         sb.append(" and yukoedymd >= ").append(ymd);
         
         String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
         List<ETensuModel1> list = new ArrayList<ETensuModel1>();
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            while(rs.next()) {
-                ETensuModel1 etm1 = createETensuModel1(rs);
-                list.add(etm1);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            ETensuModel1 model = createETensuModel1(values);
+            list.add(model);
         }
 
         return list;
@@ -168,30 +133,13 @@ public class SqlETensuDao extends SqlDaoBean {
         sb.append(" and yukoedymd >= ").append(ymd);
         
         String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
         List<ETensuModel2> list = new ArrayList<ETensuModel2>();
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            while(rs.next()) {
-                ETensuModel2 etm2 = createETensuModel2(rs);
-                list.add(etm2);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            ETensuModel2 model = createETensuModel2(values);
+            list.add(model);
         }
 
         return list;
@@ -228,30 +176,13 @@ public class SqlETensuDao extends SqlDaoBean {
         sb.append(" and yukoedymd >= ").append(ymd);
         
         String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
         List<ETensuModel3> list = new ArrayList<ETensuModel3>();
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            while(rs.next()) {
-                ETensuModel3 etm3 = createETensuModel3(rs);
-                list.add(etm3);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            ETensuModel3 model = createETensuModel3(values);
+            list.add(model);
         }
 
         return list;
@@ -272,133 +203,116 @@ public class SqlETensuDao extends SqlDaoBean {
         sb.append(" and yukoedymd >= ").append(ymd);
         
         String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
         List<ETensuModel5> list = new ArrayList<ETensuModel5>();
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            while(rs.next()) {
-                ETensuModel5 etm5 = createETensuModel5(rs);
-                list.add(etm5);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            ETensuModel5 model = createETensuModel5(values);
+            list.add(model);
         }
 
         return list;
     }
     
-    private ETensuModel1 createETensuModel1(ResultSet rs) throws SQLException {
+    private ETensuModel1 createETensuModel1(List<String> values) {
         int i = 0;
         ETensuModel1 model = new ETensuModel1();
-        model.setSrycd(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setH_tani1(rs.getInt(++i));
-        model.setH_group1(rs.getString(++i));
-        model.setH_tani2(rs.getInt(++i));
-        model.setH_group2(rs.getString(++i));
-        model.setH_tani3(rs.getInt(++i));
-        model.setH_group3(rs.getString(++i));
-        model.setR_day(rs.getInt(++i));
-        model.setR_month(rs.getInt(++i));
-        model.setR_same(rs.getInt(++i));
-        model.setR_week(rs.getInt(++i));
-        model.setN_group(rs.getInt(++i));
-        model.setC_kaisu(rs.getInt(++i));
-        model.setChgymd(rs.getString(++i));
+        model.setSrycd(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setH_tani1(Integer.valueOf(values.get(i++)));
+        model.setH_group1(values.get(i++));
+        model.setH_tani2(Integer.valueOf(values.get(i++)));
+        model.setH_group2(values.get(i++));
+        model.setH_tani3(Integer.valueOf(values.get(i++)));
+        model.setH_group3(values.get(i++));
+        model.setR_day(Integer.valueOf(values.get(i++)));
+        model.setR_month(Integer.valueOf(values.get(i++)));
+        model.setR_same(Integer.valueOf(values.get(i++)));
+        model.setR_week(Integer.valueOf(values.get(i++)));
+        model.setN_group(Integer.valueOf(values.get(i++)));
+        model.setC_kaisu(Integer.valueOf(values.get(i++)));
+        model.setChgymd(values.get(i++));
         return model;
     }
     
-    private ETensuModel2 createETensuModel2(ResultSet rs) throws SQLException {
+    private ETensuModel2 createETensuModel2(List<String> values) {
         int i = 0;
         ETensuModel2 model = new ETensuModel2();
-        model.setH_group(rs.getString(++i));
-        model.setSrycd(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setChgymd(rs.getString(++i));
+        model.setH_group(values.get(i++));
+        model.setSrycd(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setChgymd(values.get(i++));
         return model;
     }
 
-    private ETensuModel2 createETensuModel2_OFF(ResultSet rs) throws SQLException {
+    private ETensuModel2 createETensuModel2_OFF(List<String> values) {
         int i = 0;
         ETensuModel2 model = new ETensuModel2();
-        model.setHospnum(rs.getString(++i));
-        model.setH_group(rs.getString(++i));
-        model.setSrycd(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setTermid(rs.getString(++i));
-        model.setOpid(rs.getString(++i));
-        model.setChgymd(rs.getString(++i));
-        model.setUpymd(rs.getString(++i));
-        model.setUphms(rs.getString(++i));
+        model.setHospnum(values.get(i++));
+        model.setH_group(values.get(i++));
+        model.setSrycd(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setTermid(values.get(i++));
+        model.setOpid(values.get(i++));
+        model.setChgymd(values.get(i++));
+        model.setUpymd(values.get(i++));
+        model.setUphms(values.get(i++));
         return model;
     }
 
-    private ETensuModel2 createETensuModel2_SAMPLE(ResultSet rs) throws SQLException {
+    private ETensuModel2 createETensuModel2_SAMPLE(List<String> values) {
         int i = 0;
         ETensuModel2 model = new ETensuModel2();
-        model.setH_group(rs.getString(++i));
-        model.setSrycd(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setRennum(rs.getInt(++i));
-        model.setSamplecd(rs.getString(++i));
-        model.setChgymd(rs.getString(++i));
+        model.setH_group(values.get(i++));
+        model.setSrycd(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setRennum(Integer.valueOf(values.get(i++)));
+        model.setSamplecd(values.get(i++));
+        model.setChgymd(values.get(i++));
         return model;
     }
     
-    private ETensuModel3 createETensuModel3(ResultSet rs) throws SQLException {
+    private ETensuModel3 createETensuModel3(List<String> values) {
         int i = 0;
         ETensuModel3 model = new ETensuModel3();
-        model.setSrycd1(rs.getString(++i));
-        model.setSrycd2(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setHaihan(rs.getInt(++i));
-        model.setTokurei(rs.getInt(++i));
-        model.setChgymd(rs.getString(++i));
+        model.setSrycd1(values.get(i++));
+        model.setSrycd2(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setHaihan(Integer.valueOf(values.get(i++)));
+        model.setTokurei(Integer.valueOf(values.get(i++)));
+        model.setChgymd(values.get(i++));
         return model;
     }
 
-    private ETensuModel4 createETensuModel4(ResultSet rs) throws SQLException {
+    private ETensuModel4 createETensuModel4(List<String> values) {
         int i = 0;
         ETensuModel4 model = new ETensuModel4();
-        model.setN_group(rs.getString(++i));
-        model.setSrycd(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setKasan(rs.getInt(++i));
-        model.setChgymd(rs.getString(++i));
+        model.setN_group(values.get(i++));
+        model.setSrycd(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setKasan(Integer.valueOf(values.get(i++)));
+        model.setChgymd(values.get(i++));
         return model;
     }
     
-    private ETensuModel5 createETensuModel5(ResultSet rs) throws SQLException {
+    private ETensuModel5 createETensuModel5(List<String> values) {
         int i = 0;
         ETensuModel5 model = new ETensuModel5();
-        model.setSrycd(rs.getString(++i));
-        model.setYukostymd(rs.getString(++i));
-        model.setYukoedymd(rs.getString(++i));
-        model.setTanicd(rs.getInt(++i));
-        model.setTaniname(rs.getString(++i));
-        model.setKaisu(rs.getInt(++i));
-        model.setTokurei(rs.getInt(++i));
-        model.setChgymd(rs.getString(++i));
+        model.setSrycd(values.get(i++));
+        model.setYukostymd(values.get(i++));
+        model.setYukoedymd(values.get(i++));
+        model.setTanicd(Integer.valueOf(values.get(i++)));
+        model.setTaniname(values.get(i++));
+        model.setKaisu(Integer.valueOf(values.get(i++)));
+        model.setTokurei(Integer.valueOf(values.get(i++)));
+        model.setChgymd(values.get(i++));
         return model;
     }
 
@@ -416,25 +330,10 @@ public class SqlETensuDao extends SqlDaoBean {
 
         String sql = "select count(*) from " + tableName + " " + condition;
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            if (rs.next()) {
-                count = rs.getLong(1);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        if (!valuesList.isEmpty()) {
+            List<String> values = valuesList.get(0);
+            count = Long.valueOf(values.get(0));
         }
 
         return count;

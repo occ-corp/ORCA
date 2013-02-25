@@ -18,21 +18,20 @@ public class PvtClaimIOHandler implements IHandler {
     private static final byte EOT = 0x04;
     private static final byte ACK = 0x06;
     //private static final byte NAK = 0x15;
+    private static final String UTF8 = "UTF-8";
 
     private static final int bufferSize = 8192;
     private ByteBuffer byteBuffer;
     
     private ByteArrayOutputStream baos;
     private BufferedOutputStream bos;
-    
-    private PvtServletServer server;
    
     private static final Logger logger = Logger.getLogger(PvtClaimIOHandler.class.getSimpleName());
     private static final boolean DEBUG = false;
+    
 
-    public PvtClaimIOHandler(PvtServletServer server) {
-        
-        this.server = server;
+    public PvtClaimIOHandler() {
+
         baos = new ByteArrayOutputStream();
         bos = new BufferedOutputStream(baos);
         byteBuffer = ByteBuffer.allocate(bufferSize);
@@ -85,9 +84,9 @@ public class PvtClaimIOHandler implements IHandler {
         try {
             // 取得したxmlをPVT登録キューに送る
             bos.flush();
-            String pvtXml = baos.toString(server.getEncoding());
+            String pvtXml = baos.toString(UTF8);
             // PvtClaimListenWorkに登録処理をさせる
-            server.postPvt(pvtXml);
+            PvtServletServer.getInstance().postPvt(pvtXml);
             
             // ACKを返す
             channel.write(ByteBuffer.wrap(new byte[]{ACK}));

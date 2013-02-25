@@ -40,6 +40,8 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
     private JTextField claimPortField;
     private JCheckBox useAsPVTServer;
     private JTextField bindAddress;
+    private JRadioButton claimConnectionIsClient;
+    private JRadioButton claimConnectionIsServer;
 
     // ORCA API
     private JRadioButton useOrcaApi;
@@ -170,6 +172,15 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
         
         row = 0;
         gbl = new GridBagBuilder("ORCA通信情報");
+        label = new JLabel("レセコンとの接続:");
+        ButtonGroup bg3 = new ButtonGroup();
+        claimConnectionIsClient = GUIFactory.createRadioButton("クライアント", null, bg3);
+        claimConnectionIsServer = GUIFactory.createRadioButton("サーバー経由", null, bg3);
+        JPanel conPanel = GUIFactory.createRadioPanel(new JRadioButton[] {claimConnectionIsClient, claimConnectionIsServer});
+        gbl.add(label, 0, row, GridBagConstraints.EAST);
+        gbl.add(conPanel, 1, row, GridBagConstraints.CENTER);
+        
+        row++;
         label = new JLabel("通信方法:");
         JPanel vPanel = GUIFactory.createRadioPanel(new JRadioButton[]{useClaim, useOrcaApi});
         gbl.add(label,  0, row, GridBagConstraints.EAST);
@@ -386,6 +397,9 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
         orcaStaffCodeField.setText(model.getOrcaStaffCode());
         orcaStaffCodeButton.setEnabled(orcaApi);
 
+        boolean b = model.isClientConnection();
+        claimConnectionIsClient.setSelected(b);
+        claimConnectionIsServer.setSelected(!b);
     }
     
     /**
@@ -439,6 +453,8 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
         model.setOrcaUserId(orcaUserIdField.getText().trim());
         model.setOrcaPassword(new String(orcaPasswordField.getPassword()).trim());
         model.setOrcaStaffCode(orcaStaffCodeField.getText().trim());
+        
+        model.setClientConnection(claimConnectionIsClient.isSelected());
     }
     
     /**
@@ -460,6 +476,8 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
         private String orcaUserId;
         private String orcaPassword;
         private String orcaStaffCode;
+        
+        private boolean clientConnection;
         
         public void populate(ProjectStub stub) {
             
@@ -492,6 +510,10 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
             setOrcaUserId(Project.getString(Project.ORCA_USER_ID));
             setOrcaPassword(Project.getString(Project.ORCA_USER_PASSWORD));
             setOrcaStaffCode(Project.getString(Project.ORCA_STAFF_CODE));
+            
+            String str = Project.getString(Project.CLAIM_SENDER);
+            boolean b = (str == null) || (str.equals(Project.CLAIM_CLIENT));
+            setClientConnection(b);
         }
         
         public void restore(ProjectStub stub) {
@@ -525,6 +547,9 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
             Project.setString(Project.ORCA_USER_ID, getOrcaUserId());
             Project.setString(Project.ORCA_USER_PASSWORD, getOrcaPassword());
             Project.setString(Project.ORCA_STAFF_CODE, getOrcaStaffCode());
+            
+            String str = isClientConnection() ? Project.CLAIM_CLIENT : Project.CLAIM_SERVER;
+            Project.setString(Project.CLAIM_SENDER, str);
         }
         
         public boolean isSendClaim() {
@@ -623,6 +648,12 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
             this.orcaStaffCode = id;
         }
 //pns$
+        public void setClientConnection(boolean b) {
+            clientConnection = b;
+        }
+        public boolean isClientConnection() {
+            return clientConnection;
+        }
     }
     
     class StateMgr {

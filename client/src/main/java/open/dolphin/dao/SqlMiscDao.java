@@ -1,10 +1,8 @@
 package open.dolphin.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
+import java.sql.Types;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import open.dolphin.infomodel.*;
@@ -56,35 +54,15 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append("and hospnum = ").append(String.valueOf(hospNum));
         
         final String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                String srycd = rs.getString(1);
-                Integer kbn = rs.getInt(2);
-                if (kbn == null) {
-                    kbn = 0;
-                }
-                hokatsuKbnMap.put(srycd, kbn);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
-        }
         
+        List<List<String>> valuesList = executeStatement(sql);
+        for (List<String> values : valuesList) {
+            String srycd = values.get(0);
+            String kbnStr = values.get(1);
+            int kbn = (kbnStr != null) ? Integer.valueOf(kbnStr) : 0;
+            hokatsuKbnMap.put(srycd, kbn);
+        }
+
         return hokatsuKbnMap;
     }
 
@@ -99,47 +77,33 @@ public final class SqlMiscDao extends SqlDaoBean {
         String dateStr = frmt.format(date);
         int hospNum = getHospNum();
         
-        Connection con = null;
-        PreparedStatement ps = null;
         List<AdmissionModel> ret = new ArrayList<AdmissionModel>();
-
-        try {
-            con = getConnection();
-            ps = con.prepareStatement(sql);
-            ps.setString(1, dateStr);
-            ps.setString(2, dateStr);
-            ps.setInt(3, hospNum);
-
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                String patientId = rs.getString(1).trim();
-                String room = getRoomNumber(rs.getString(2).trim());
-                String dept = getDepartmentDesc(rs.getString(3).trim());
-                Date aDate = frmt.parse(rs.getString(4).trim());
-                String doctor = getOrcaStaffName(rs.getString(5).trim());
-                
-                // 新たに作成
-                AdmissionModel model = new AdmissionModel();
-                model.setId(0L);
-                model.setPatientId(patientId);
-                model.setRoom(room);
-                model.setDepartment(dept);
-                model.setStarted(aDate);
-                model.setDoctorName(doctor);
-                ret.add(model);
+        
+        int[] types = {Types.CHAR, Types.CHAR, Types.INTEGER};
+        String[] params = {dateStr, dateStr, String.valueOf(hospNum)};
+        
+        List<List<String>> valuesList = executePreparedStatement(sql, types, params);
+        
+        for (List<String> values : valuesList) {
+            String patientId = values.get(0).trim();
+            String room = getRoomNumber(values.get(1).trim());
+            String dept = getDepartmentDesc(values.get(2).trim());
+            Date aDate = null;
+            try {
+                aDate = frmt.parse(values.get(3).trim());
+            } catch (ParseException ex) {
             }
+            String doctor = getOrcaStaffName(values.get(4).trim());
 
-            rs.close();
-            ps.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+            // 新たに作成
+            AdmissionModel model = new AdmissionModel();
+            model.setId(0L);
+            model.setPatientId(patientId);
+            model.setRoom(room);
+            model.setDepartment(dept);
+            model.setStarted(aDate);
+            model.setDoctorName(doctor);
+            ret.add(model);
         }
 
         return ret;
@@ -194,24 +158,9 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append("))");
         String sql = sb.toString();
 
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                ret.add(new DrugInteractionModel(rs.getString(1), rs.getString(2), rs.getString(3), rs.getString(4)));
-            }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        for (List<String> values : valuesList) {
+            ret.add(new DrugInteractionModel(values.get(0), values.get(1), values.get(2), values.get(3)));
         }
 
         return ret;
@@ -238,24 +187,10 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append(")");
 
         String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
 
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                ret = true;
-            }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
-        }
+        List<List<String>> valuesList = executeStatement(sql);
+        ret = !valuesList.isEmpty();
+
         return ret;
     }
 
@@ -281,24 +216,10 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append(")");
 
         String sql = sb.toString();
-        Connection con = null;
-        Statement st = null;
+        
+        List<List<String>> valuesList = executeStatement(sql);
+        ret = !valuesList.isEmpty();
 
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            if (rs.next()) {
-                ret = true;
-            }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
-        }
         return ret;
     }
     
@@ -371,41 +292,24 @@ public final class SqlMiscDao extends SqlDaoBean {
         String sql = sb.toString();
 
         HashMap<Integer, TensuMaster> tmMap = new HashMap<Integer, TensuMaster>();
-        Connection con = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-
-                TensuMaster tm = getTensuMaster(rs);
-                // HashMapに登録していく
-                int srycd = Integer.valueOf(tm.getSrycd());
-                TensuMaster old = tmMap.get(srycd);
-                if (old == null){
+        
+        List<List<String>> valuesList = executeStatement(sql);
+        for (List<String> values : valuesList) {
+            TensuMaster tm = getTensuMaster(values);
+            // HashMapに登録していく
+            int srycd = Integer.valueOf(tm.getSrycd());
+            TensuMaster old = tmMap.get(srycd);
+            if (old == null) {
+                tmMap.put(srycd, tm);
+            } else {
+                // 有効期限が新しければ更新する
+                if (Integer.parseInt(tm.getYukostymd()) <= todayInt
+                        && Integer.parseInt(tm.getYukoedymd()) > Integer.parseInt(old.getYukoedymd())) {
                     tmMap.put(srycd, tm);
-                } else {
-                    // 有効期限が新しければ更新する
-                    if (Integer.parseInt(tm.getYukostymd()) <= todayInt
-                            && Integer.parseInt(tm.getYukoedymd()) > Integer.parseInt(old.getYukoedymd())){
-                        tmMap.put(srycd, tm);
-                    }
                 }
             }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-            return new ArrayList<TensuMaster>(tmMap.values());
-
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
         }
-        return null;
+        return new ArrayList<TensuMaster>(tmMap.values());
     }
 
     // 傷病名コードからまとめてDiseaseEntryを取得
@@ -425,40 +329,21 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append(")");
         String sql = sb.toString();
 
-        Connection con = null;
-        List<DiseaseEntry> collection = null;
-        List<DiseaseEntry> outUse = null;
-        Statement st = null;
-
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            collection = new ArrayList<DiseaseEntry>();
-            outUse = new ArrayList<DiseaseEntry>();
-
-            while (rs.next()) {
-                DiseaseEntry de = getDiseaseEntry(rs);
-                if (de.isInUse()) {
-                    collection.add(de);
-                } else {
-                    outUse.add(de);
-                }
+        List<DiseaseEntry> collection = new ArrayList<DiseaseEntry>();
+        List<DiseaseEntry> outUse = new ArrayList<DiseaseEntry>();
+        
+        List<List<String>> valuesList = executeStatement(sql);
+        for (List<String> values : valuesList) {
+            DiseaseEntry de = getDiseaseEntry(values);
+            if (de.isInUse()) {
+                collection.add(de);
+            } else {
+                outUse.add(de);
             }
-            rs.close();
-            collection.addAll(outUse);
-
-            closeStatement(st);
-            closeConnection(con);
-            return collection;
-
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
         }
-        return null;
+        collection.addAll(outUse);
+        
+        return collection;
     }
 
     // 患者の処方をORCAから取り出してMasterItemのリストとして返す
@@ -468,10 +353,6 @@ public final class SqlMiscDao extends SqlDaoBean {
 
         List<MasterItem> miList = new ArrayList<MasterItem>();
         List<String[]> dataList = new ArrayList<String[]>();      // {srycd, suryo}
-
-        Connection con = null;
-        Statement st = null;
-        String sql = null;
 
         String sryYM = visitYMD.substring(0, 6);
         String sryD = String.valueOf(Integer.parseInt(visitYMD.substring(6)));
@@ -486,9 +367,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append("act.srycd3,act.srysuryo3,act.srykaisu3,inputnum3,");
         sb.append("act.srycd4,act.srysuryo4,act.srykaisu4,inputnum4,");
         sb.append("act.srycd5,act.srysuryo5,act.srykaisu5,inputnum5,");
-
-        sb.append("main.");
-        sb.append(dayColumn);
+        sb.append("main.").append(dayColumn);
         sb.append(" from tbl_sryact act");
         sb.append(" join tbl_sryacct_main main on act.zainum=main.zainum and act.ptid=main.ptid");
 
@@ -503,56 +382,47 @@ public final class SqlMiscDao extends SqlDaoBean {
         sb.append(" and main.");
         sb.append(dayColumn);
         sb.append("<>0 order by act.rennum, act.zainum");
-        sql = sb.toString();
+        String sql = sb.toString();
+        
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            
+            int dayColumnValue = Integer.valueOf(values.get(20));
+            
+            for (int i = 0; i < 4; ++i) {
+                // 外用薬ならsrykaisu=1、内服ならsrykaisu = 0
+                // 「２つ目の数量（分画数）がある場合それを表す」の意味は理解できなかったｗ
 
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
+                String srycd = values.get(i * 4).trim();
+                // 数量はfloatにしないと、0.5錠とかNGになる
+                float srysuryo = Float.valueOf(values.get(i * 4 + 1));
+                int srykaisu = Integer.valueOf(values.get(i * 4 + 2));
+                int inputnum = Integer.valueOf(values.get(i * 4 + 3));
+                // srycdが空白なら剤の終了
+                if (srycd.isEmpty()) {
+                    break;
+                }
 
-            while (rs.next()) {
-                for (int i = 1; i <= 5; ++i) {
-                     // 外用薬ならsrykaisu=1、内服ならsrykaisu = 0
-                    // 「２つ目の数量（分画数）がある場合それを表す」の意味は理解できなかったｗ
-
-                    String srycd = rs.getString("srycd" + String.valueOf(i)).trim();
-                    // 数量はfloatにしないと、0.5錠とかNGになる
-                    float srysuryo = rs.getFloat("srysuryo" + String.valueOf(i));
-                    int srykaisu = rs.getInt("srykaisu" + String.valueOf(i));
-                    int inputnum = rs.getInt("inputnum" + String.valueOf(i));
-                    // srycdが空白なら剤の終了
-                    if ("".equals(srycd)) {
-                        break;
-                    }
-
-                    if (srycd.startsWith("001")) {
-                        // srycdが001から始まっていたら用法コード
-                        // 内服なら'day_DD'のカラムから日数を、外用ならsrykaisuを返す
-                        // 同日に同じ処方があると、その処方の日数は合計になる。
-                        // tbl_sryacct_subを参照すれば分離できるが、めんどくさいｗ
-                        srysuryo = (srykaisu == 0) ? rs.getInt(dayColumn) : srykaisu;
-                        DecimalFormat frmt = new DecimalFormat("0.###");
-                        String value = frmt.format(srysuryo);
-                        dataList.add(new String[]{srycd, value});
-                    } else if (inputnum != 0) {
-                        // おそらくコメント
-                        dataList.add(new String[]{srycd, ""});
-                    } else {
-                        // 普通の薬
-                        DecimalFormat frmt = new DecimalFormat("0.###");
-                        String value = frmt.format(srysuryo);
-                        dataList.add(new String[]{srycd, value});
-                    }
+                if (srycd.startsWith("001")) {
+                    // srycdが001から始まっていたら用法コード
+                    // 内服なら'day_DD'のカラムから日数を、外用ならsrykaisuを返す
+                    // 同日に同じ処方があると、その処方の日数は合計になる。
+                    // tbl_sryacct_subを参照すれば分離できるが、めんどくさいｗ
+                    srysuryo = (srykaisu == 0) ? dayColumnValue : srykaisu;
+                    DecimalFormat frmt = new DecimalFormat("0.###");
+                    String value = frmt.format(srysuryo);
+                    dataList.add(new String[]{srycd, value});
+                } else if (inputnum != 0) {
+                    // おそらくコメント
+                    dataList.add(new String[]{srycd, ""});
+                } else {
+                    // 普通の薬
+                    DecimalFormat frmt = new DecimalFormat("0.###");
+                    String value = frmt.format(srysuryo);
+                    dataList.add(new String[]{srycd, value});
                 }
             }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
         }
 
         // 調べたsrycdに応じたTensuMasterを取得して、MasterItemのリストに追加する。
@@ -620,10 +490,6 @@ public final class SqlMiscDao extends SqlDaoBean {
     public List<String> getOrcaVisit(String patientId, String startDate, String endDate, boolean desc, String search) {
 
         List<String> orcaVisit = new ArrayList<String>();
-        Connection con = null;
-        Statement st = null;
-        String sql = null;
-
         long ptid = getOrcaPtID(patientId);
 
         StringBuilder sb = new StringBuilder();
@@ -647,56 +513,27 @@ public final class SqlMiscDao extends SqlDaoBean {
         if (desc){
             sb.append(" desc");
         }
-        sql = sb.toString();
+        String sql = sb.toString();
 
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-
-            while (rs.next()) {
-                orcaVisit.add(rs.getString(1));
-            }
-            rs.close();
-            closeStatement(st);
-            closeConnection(con);
-
-        } catch (Exception e) {
-            processError(e);
-            closeStatement(st);
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        
+        for (List<String> values : valuesList) {
+            orcaVisit.add(values.get(0));
         }
+
         return orcaVisit;
     }
 
     public long getTableRowCount(String tableName) {
 
-        Connection con = null;
-        Statement st = null;
-        
         long count = 0;
 
         String sql = "select count(*) from " + tableName;
         
-        try {
-            con = getConnection();
-            st = con.createStatement();
-            ResultSet rs = st.executeQuery(sql);
-            
-            if (rs.next()) {
-                count = rs.getLong(1);
-            }
-
-            rs.close();
-            st.close();
-
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-            processError(e);
-            closeConnection(con);
-
-        } finally {
-            closeConnection(con);
+        List<List<String>> valuesList = executeStatement(sql);
+        if (!valuesList.isEmpty()) {
+            List<String> values = valuesList.get(0);
+            count = Long.valueOf(values.get(0));
         }
 
         return count;

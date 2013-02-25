@@ -4,7 +4,7 @@ import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
 import open.dolphin.infomodel.UserModel;
-import open.dolphin.mbean.UserCache;
+import open.dolphin.mbean.ServletContextHolder;
 import open.dolphin.session.UserServiceBean;
 
 /**
@@ -23,7 +23,7 @@ public class UserResource extends AbstractResource {
     private UserServiceBean userServiceBean;
     
     @Inject
-    private UserCache userCache;
+    private ServletContextHolder contextHolder;
     
 
     public UserResource() {
@@ -76,7 +76,7 @@ public class UserResource extends AbstractResource {
         
         debug(cntStr);
         
-        userCache.getMap().clear();
+        contextHolder.getUserMap().clear();
 
         return cntStr;
     }
@@ -95,7 +95,7 @@ public class UserResource extends AbstractResource {
         
         debug(cntStr);
         
-        userCache.getMap().clear();
+        contextHolder.getUserMap().clear();
 
         return cntStr;
     }
@@ -109,7 +109,7 @@ public class UserResource extends AbstractResource {
 
         debug(String.valueOf(result));
         
-        userCache.getMap().clear();
+        contextHolder.getUserMap().clear();
     }
 
 

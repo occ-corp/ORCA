@@ -10,30 +10,25 @@ import java.util.Iterator;
 import java.util.logging.Logger;
 
 /**
- * PvtServerThread, server
+ * PvtServerThread
+ *
  * @author masuda, Masuda Naika
  */
 public class PvtServerThread implements Runnable {
 
     private static final Logger logger = Logger.getLogger(PvtServerThread.class.getSimpleName());
-    private PvtServletServer server;
-    private InetSocketAddress address;
+    
     private ServerSocketChannel ssc;
     private Selector selector;
+    
     private boolean isRunning;
 
-    public PvtServerThread(PvtServletServer server, InetSocketAddress address) throws IOException {
-        this.server = server;
-        this.address = address;
-        initialize();
+    public PvtServerThread(InetSocketAddress address) throws IOException {
+        initialize(address);
+        isRunning = true;
     }
 
-    public void stop() {
-        isRunning = false;
-        selector.wakeup();
-    }
-
-    private void initialize() throws IOException {
+    private void initialize(InetSocketAddress address) throws IOException {
 
         // ソケットチャネルを生成・設定
         ssc = ServerSocketChannel.open();
@@ -44,13 +39,11 @@ public class PvtServerThread implements Runnable {
         // セレクタの生成
         selector = Selector.open();
         // ソケットチャネルをセレクタに登録
-        ssc.register(selector, SelectionKey.OP_ACCEPT, new PvtClaimAcceptHandler(server));
+        ssc.register(selector, SelectionKey.OP_ACCEPT, new PvtClaimAcceptHandler());
     }
 
     @Override
     public void run() {
-
-        isRunning = true;
 
         try {
             while (selector.select() >= 0 && isRunning) {
@@ -68,7 +61,7 @@ public class PvtServerThread implements Runnable {
         } catch (IOException ex) {
             logger.warning("I/O error occured.");
         } finally {
-              for (SelectionKey key : selector.keys()) {
+            for (SelectionKey key : selector.keys()) {
                 try {
                     key.channel().close();
                 } catch (IOException ex) {
@@ -76,5 +69,10 @@ public class PvtServerThread implements Runnable {
                 }
             }
         }
+    }
+
+    public void stop() {
+        isRunning = false;
+        selector.wakeup();
     }
 }

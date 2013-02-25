@@ -118,7 +118,11 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     @Override
     public void stop() {
         
-        listTableModel = null;
+        // ColumnSpecsを保存する
+        if (columnHelper != null) {
+            columnHelper.saveProperty();
+        }
+        
         entryList.clear();
         entryList = null;
         
@@ -127,16 +131,16 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
             imagePanel.removeAll();
             imagePanel = null;
         }
-        
-        shutdownExecutor();
-        
+        if (listTableModel != null) {
+            listTableModel.clear();
+            listTableModel = null;
+        }
+
         if (pacsService != null) {
             pacsService.removePropertyChangeListener(this);
         }
-        // ColumnSpecsを保存する
-        if (columnHelper != null) {
-            columnHelper.saveProperty();
-        }
+
+        shutdownExecutor();
     }
     
     private void shutdownExecutor() {
