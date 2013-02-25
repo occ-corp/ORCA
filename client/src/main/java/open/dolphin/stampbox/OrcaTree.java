@@ -93,7 +93,7 @@ public class OrcaTree extends StampTree {
     private void fetchOrcaSet2() {
         
         try {
-            SqlOrcaSetDao dao = new SqlOrcaSetDao();
+            SqlOrcaSetDao dao = SqlOrcaSetDao.getInstance();
             
             ArrayList<OrcaInputCd> inputSet = dao.getOrcaInputSet();
             StampTreeNode root = (StampTreeNode) this.getModel().getRoot();
@@ -130,7 +130,7 @@ public class OrcaTree extends StampTree {
 
             @Override
             protected List<OrcaInputCd> doInBackground() throws Exception {
-                SqlOrcaSetDao dao = new SqlOrcaSetDao();
+                SqlOrcaSetDao dao = SqlOrcaSetDao.getInstance();
                 List<OrcaInputCd> result = dao.getOrcaInputSet();
                 if (dao.isNoError()) {
                     return result;

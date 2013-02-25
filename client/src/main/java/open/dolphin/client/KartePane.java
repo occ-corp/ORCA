@@ -918,7 +918,7 @@ public class KartePane implements DocumentListener, MouseListener,
 
             @Override
             protected List<ModuleModel> doInBackground() throws Exception {
-                SqlOrcaSetDao sdl = new SqlOrcaSetDao();
+                SqlOrcaSetDao sdl = SqlOrcaSetDao.getInstance();
                 List<ModuleModel> models = sdl.getStamp(stampInfo);
                 return models;
             }
