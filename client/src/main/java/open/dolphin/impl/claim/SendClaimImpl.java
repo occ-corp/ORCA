@@ -7,8 +7,6 @@ import java.nio.channels.SelectionKey;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
 import java.util.Iterator;
-import java.util.LinkedList;
-import java.util.List;
 import open.dolphin.client.*;
 import open.dolphin.project.Project;
 import org.apache.log4j.Logger;
@@ -29,10 +27,9 @@ public class SendClaimImpl implements ClaimMessageListener {
     private MainWindow context;
     private Logger logger;
     
-    private Thread thread;
-    private ClaimSendTask claimSendTask;
-    
     private static final String CLAIM = "CLAIM";
+
+    private InetSocketAddress address;
 
     /**
      * Creates new ClaimQue
@@ -70,9 +67,8 @@ public class SendClaimImpl implements ClaimMessageListener {
         setHost(Project.getString(Project.CLAIM_ADDRESS));
         setPort(Project.getInt(Project.CLAIM_PORT));
         setEncoding(Project.getString(Project.CLAIM_ENCODING));
-        claimSendTask = new ClaimSendTask();
-        thread = new Thread(claimSendTask, "Claim send thread");
-        thread.start();
+
+        address = new InetSocketAddress(getHost(), getPort());
 
         logger.info("SendClaim started with = host = " + getHost() + " port = " + getPort());
     }
@@ -82,9 +78,6 @@ public class SendClaimImpl implements ClaimMessageListener {
      */
     @Override
     public void stop() {
-        claimSendTask.stop();
-        thread.interrupt();
-        thread = null;
     }
 
     @Override
@@ -122,87 +115,57 @@ public class SendClaimImpl implements ClaimMessageListener {
      */
     @Override
     public void claimMessageEvent(ClaimMessageEvent evt) {
-        claimSendTask.send(evt);
-    }
-    
-    private class ClaimSendTask implements Runnable {
-
-        private List<ClaimMessageEvent> queue;
-        private boolean isRunning;
-        private Selector selector;
-
-        private ClaimSendTask() {
-            queue = new LinkedList<ClaimMessageEvent>();
-            isRunning = true;
-            try {
-                selector = Selector.open();
-            } catch (IOException ex){
-                ex.printStackTrace(System.err);
-            } 
-        }
-
-        private void send(ClaimMessageEvent evt) {
-            queue.add(evt);
-            selector.wakeup();
-        }
         
-        @Override
-        public void run() {
-            try {
-                while (isRunning && selector.select() >= 0) {
-                    if (!queue.isEmpty()) {
-                        InetSocketAddress address = new InetSocketAddress(getHost(), getPort());
-                        SocketChannel channel = SocketChannel.open();
-                        channel.socket().setReuseAddress(true);
-                        channel.configureBlocking(false);
-                        channel.connect(address);
-                        for (Iterator<ClaimMessageEvent> itr = queue.iterator(); itr.hasNext();) {
-                            ClaimMessageEvent evt = itr.next();
-                            // registerは同一スレッド内でないとダメ!!
-                            ClaimIOHandler handler = new ClaimIOHandler(evt, getEncoding());
-                            channel.register(selector, SelectionKey.OP_CONNECT, handler);
-                            itr.remove();
-                        }
-                        continue;
-                    }
+        Selector selector = null;
+        boolean isRunning = true;
 
-                    // 実際の処理
-                    for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
-                        SelectionKey key = itr.next();
-                        itr.remove();
-                        ClaimIOHandler handler = (ClaimIOHandler) key.attachment();
-                        try {
-                            handler.handle(key);
-                        } catch (ClaimException ex) {
-                            processException(ex);
-                        }
+        try {
+            // セレクタの生成
+            selector = Selector.open();
+            SocketChannel channel = SocketChannel.open();
+            channel.socket().setReuseAddress(true);
+            channel.configureBlocking(false);
+            channel.connect(address);
+            // registerは同一スレッド内でないとダメ!!
+            ClaimIOHandler handler = new ClaimIOHandler(evt, getEncoding());
+            channel.register(selector, SelectionKey.OP_CONNECT, handler);
+            
+            while (isRunning && selector.select() > 0) {
+
+                // 実際の処理
+                for (Iterator<SelectionKey> itr = selector.selectedKeys().iterator(); itr.hasNext();) {
+                    SelectionKey key = itr.next();
+                    itr.remove();
+                    handler = (ClaimIOHandler) key.attachment();
+                    try {
+                        handler.handle(key);
+                    } catch (ClaimException ex) {
+                        processException(ex);
+                        isRunning = false;
+                        break;
                     }
-                    
                 }
-            } catch (IOException ex) {
-                logger.warn("通信エラーが発生しました" + ex);
-            } catch (ClosedSelectorException ex) {
-            } finally {
-                closeAllChannel();
             }
-        }
-
-        private void closeAllChannel() {
+            
+        } catch (IOException ex) {
+            processException(new ClaimException(ClaimException.ERROR_CODE.IO_ERROR, evt));
+        } catch (ClosedSelectorException ex) {
+        } finally {
             try {
                 for (SelectionKey key : selector.keys()) {
                     try {
                         key.channel().close();
                     } catch (IOException ex) {
-                        ex.printStackTrace(System.err);
+                        //ex.printStackTrace(System.err);
                     }
                 }
             } catch (ClosedSelectorException ex) {
             }
-        }
-
-        private void stop() {
-            isRunning = false;
-            selector.wakeup();
+            try {
+                selector.close();
+            } catch (IOException ex) {
+                //ex.printStackTrace(System.err);
+            }
         }
     }
 
@@ -210,18 +173,17 @@ public class SendClaimImpl implements ClaimMessageListener {
 
         ClaimException.ERROR_CODE errCode = ex.getErrorCode();
         String errMsg = getErrorInfo(errCode);
-        boolean noError = (errCode == ClaimException.ERROR_CODE.NO_ERROR);
 
         Object evtSource = ex.getClaimEvent().getSource();
         if (evtSource instanceof ClaimSender) {
             ClaimSender sender = (ClaimSender) evtSource;
-            KarteSenderResult result = !noError
+            KarteSenderResult result = (errCode != ClaimException.ERROR_CODE.NO_ERROR)
                     ? new KarteSenderResult(CLAIM, KarteSenderResult.ERROR, errMsg, sender)
                     : new KarteSenderResult(CLAIM, KarteSenderResult.NO_ERROR, null, sender);
             sender.fireResult(result);
         } else if (evtSource instanceof DiagnosisSender) {
             DiagnosisSender sender = (DiagnosisSender) evtSource;
-            KarteSenderResult result = !noError
+            KarteSenderResult result = (errCode != ClaimException.ERROR_CODE.NO_ERROR)
                     ? new KarteSenderResult(CLAIM, KarteSenderResult.ERROR, errMsg, sender)
                     : new KarteSenderResult(CLAIM, KarteSenderResult.NO_ERROR, null, sender);
             sender.fireResult(result);

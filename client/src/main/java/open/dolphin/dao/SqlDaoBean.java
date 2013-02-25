@@ -36,6 +36,12 @@ public class SqlDaoBean extends DaoBean {
      * Creates a new instance of SqlDaoBean
      */
     public SqlDaoBean() {
+//masuda^
+        // DataSourceを設定
+        if (dataSource == null) {
+            setupDataSource();
+        }
+//masuda$
     }
 
 //masuda^
@@ -197,17 +203,18 @@ public class SqlDaoBean extends DaoBean {
                 new PoolableConnectionFactory(connectionFactory, connectionPool, null, null, true, true);
         dataSource = new PoolingDataSource(connectionPool);
     }
-    
-    public Connection getConnection() throws Exception {
 
-        // DataSourceを設定
-        if (dataSource == null) {
-            setupDataSource();
-        }
-        
-        // 呼び出し前にエラーをクリア。シングルトン化の影響ｗ
+    // エラーを消去する。getConnection時に呼ばれる
+    private void clearErrors() {
         errorCode = TT_NO_ERROR;
         errorMessage = null;
+    }
+//masuda$
+    
+    public Connection getConnection() throws Exception {
+//masuda^
+        // 呼び出し前にエラーをクリア。シングルトン化の影響ｗ
+        clearErrors();
         return dataSource.getConnection();
         //return DriverManager.getConnection(getURL(), user, passwd);
 //masuda$

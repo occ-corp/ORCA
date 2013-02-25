@@ -32,9 +32,6 @@ public class SqlOrcaSetDao extends SqlDaoBean {
         instance = new SqlOrcaSetDao();
     }
 
-    private SqlOrcaSetDao() {
-    }
-    
     public static SqlOrcaSetDao getInstance() {
         return instance;
     }
