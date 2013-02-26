@@ -5,6 +5,7 @@ import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
+import java.util.zip.GZIPOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.core.Context;
@@ -59,6 +60,19 @@ public class AbstractResource {
             @Override
             public void write(OutputStream os) throws IOException, WebApplicationException {
                 getConverter().toJson(obj, os);
+            }
+        };
+        return so;
+    }
+    
+    protected StreamingOutput getGzipOutStream(final Object obj) {
+        StreamingOutput so = new StreamingOutput() {
+
+            @Override
+            public void write(OutputStream os) throws IOException, WebApplicationException {
+                GZIPOutputStream gos = new GZIPOutputStream(os);
+                getConverter().toJson(obj, gos);
+                gos.close();
             }
         };
         return so;

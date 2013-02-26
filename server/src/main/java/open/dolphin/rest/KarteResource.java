@@ -92,8 +92,9 @@ public class KarteResource extends AbstractResource {
 
         final List<DocumentModel> result = karteServiceBean.getDocuments(list);
 
-        StreamingOutput so = getJsonOutStream(result);
-
+        //StreamingOutput so = getJsonOutStream(result);
+        StreamingOutput so = getGzipOutStream(result);
+        
         return Response.ok(so).build();
     }
 

@@ -3,10 +3,12 @@ package open.dolphin.delegater;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
 import javax.swing.ImageIcon;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ImageEntry;
@@ -117,38 +119,31 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        //String entityStr = response.getEntity(String.class);
         InputStream is = response.getEntityInputStream();
-        
-        //debug(status, entityStr);
 
         if (status != HTTP200) {
             return null;
         }
-        
+
+        try {
+            GZIPInputStream gis = new GZIPInputStream(is);
+
+            TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
+            List<DocumentModel> list = (List<DocumentModel>) 
+                    getConverter().fromJson(gis, typeRef);
+            
+            return list;
+            
+        } catch (IOException ex) {
+        }
+        return null;
+/*
         TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
         List<DocumentModel> list = (List<DocumentModel>)
-                //getConverter().fromJson(entityStr, typeRef);
-                getConverter().fromJson(is, typeRef);
-/*
-        // マルチスレッド化　ここもCompletionService使っちゃう！
-        CompletionService service = DocTaskExecutor.getInstance().createCompletionService();
-        for (DocumentModel docModel : list) {
-            Callable<Void> task = new DocModelDecodeTask(docModel);
-            service.submit(task);
-        }
-        // タスク終了を待つ
-        try {
-            for (int i = 0; i < list.size(); ++i) {
-                service.take();
-            }
-        } catch (InterruptedException ex) {
-            logger.debug(ex);
-        }
-        
-        service = null;
-*/
+                getConverter().fromJson(entityStr, typeRef);
+                //getConverter().fromJson(is, typeRef);
         return list;
+*/
     }
 
 /*
@@ -254,7 +249,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         List<DocInfoModel> ret = new ArrayList<DocInfoModel>();
         
-        if (list != null && list.size() > 0) {
+        if (list != null && !list.isEmpty()) {
             for (LetterModule module : list) {
                 DocInfoModel docInfo = new DocInfoModel();
                 docInfo.setDocPk(module.getId());
