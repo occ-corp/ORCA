@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- *
+ * サーバー経由ORCA SQLモデル
  * @author masuda, Masuda Naika
  */
 public class OrcaSqlModel implements Serializable {

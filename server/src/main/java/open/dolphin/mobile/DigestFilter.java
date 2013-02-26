@@ -21,7 +21,7 @@ import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.session.UserServiceBean;
 
 /**
- * DigestFilterテスト
+ * DigestFilter
  * @author masuda, Masuda Naika
  */
 @WebFilter(urlPatterns = {"/mobile/*"})

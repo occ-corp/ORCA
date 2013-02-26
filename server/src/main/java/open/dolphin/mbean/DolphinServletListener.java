@@ -9,35 +9,37 @@ import open.dolphin.server.pvt.PvtServletServer;
 import open.dolphin.session.MasudaServiceBean;
 
 /**
- *
+ * DolphinServletListener
+ * ゴニョゴニョするときのJava EE標準の定番初期化ポイントらしい
  * @author masuda, Masuda Naika
  */
 @WebListener
 public class DolphinServletListener implements ServletContextListener {
     
-    private MasudaServiceBean masudaService;
-    
     @Override
     public void contextInitialized(ServletContextEvent sce) {
         
         try {
-            masudaService = (MasudaServiceBean) JndiUtil.getJndiResource(MasudaServiceBean.class);
+            MasudaServiceBean masudaService = (MasudaServiceBean) JndiUtil.getJndiResource(MasudaServiceBean.class);
+            if (masudaService != null && masudaService.usePvtServletServer()) {
+                PvtServletServer.getInstance().start();
+            }
         } catch (NamingException ex) {
-            System.out.println(ex);
         }
-        
-        if (masudaService != null && masudaService.usePvtServletServer()) {
-            PvtServletServer.getInstance().start();
-        }
+
         OrcaService.getInstance().start();
     }
 
     @Override
     public void contextDestroyed(ServletContextEvent sce) {
-        
-        if (masudaService != null && masudaService.usePvtServletServer()) {
-            PvtServletServer.getInstance().dispose();
+        try {
+            MasudaServiceBean masudaService = (MasudaServiceBean) JndiUtil.getJndiResource(MasudaServiceBean.class);
+            if (masudaService != null && masudaService.usePvtServletServer()) {
+                PvtServletServer.getInstance().dispose();
+            }
+        } catch (NamingException ex) {
         }
+
         OrcaService.getInstance().dispose();
     }
 

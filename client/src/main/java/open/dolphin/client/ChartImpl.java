@@ -862,7 +862,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         int index = 0;
         providers = new HashMap<String, ChartDocument>();
-        JTabbedPane tab = new JTabbedPane();
+        final JTabbedPane tab = new JTabbedPane();
 
         while (iterator.hasNext()) {
 
@@ -879,7 +879,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                     plugin.start();
                 }
 
-                tab.addTab(plugin.getTitle(), plugin.getIconInfo(this), plugin.getUI());
+                //tab.addTab(plugin.getTitle(), plugin.getIconInfo(this), plugin.getUI());
+                tab.addTab(plugin.getTitle(), plugin.getUI());
                 providers.put(String.valueOf(index), plugin);
 
                 index += 1;
@@ -891,6 +892,21 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         // ゼロ番目を選択しておき changeListener を機能させる
         tab.setSelectedIndex(0);
+        
+        SwingWorker worker = new SwingWorker<Void, Void>(){
+
+            @Override
+            protected Void doInBackground() throws Exception {
+                int num = providers.size();
+                for (int i = 0; i < num; ++i) {
+                    ChartDocument plugin = providers.get(String.valueOf(i));
+                    ImageIcon icon = plugin.getIconInfo(ChartImpl.this);
+                    tab.setIconAt(i, icon);
+                }
+                return null;
+            }
+        };
+        worker.execute();
 
         //
         // tab に プラグインを遅延生成するためのの ChangeListener を追加する

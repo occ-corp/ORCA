@@ -3,7 +3,7 @@ package open.dolphin.infomodel;
 import java.io.Serializable;
 
 /**
- *
+ * サーバー経由CLAIMモデル
  * @author masuda, Masuda Naika
  */
 public class ClaimMessageModel implements Serializable {

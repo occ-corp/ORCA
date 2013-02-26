@@ -1,7 +1,5 @@
 package open.dolphin.dao;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
 import java.sql.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -210,9 +208,6 @@ public final class SqlMasterDao extends SqlDaoBean {
         String sql = SyskanriInfo.getInstance().isOrca45()
                 ? QUERY_DISEASE_BY_CODE_45
                 : QUERY_DISEASE_BY_CODE;
-
-        Connection con = null;
-        PreparedStatement ps;
 
         if (!partialMatch) {
             code = "^" + code;

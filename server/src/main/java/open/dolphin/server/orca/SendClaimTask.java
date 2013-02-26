@@ -15,7 +15,7 @@ import open.dolphin.infomodel.ClaimMessageModel;
 import open.dolphin.rest.OrcaResource;
 
 /**
- *
+ * SendClaimTask
  * @author masuda, Mausda Naika
  */
 public class SendClaimTask implements Runnable {

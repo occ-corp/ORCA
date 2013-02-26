@@ -13,7 +13,7 @@ import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.session.ChartEventServiceBean;
 
 /**
- * TEST
+ * MobileResource TEST
  * @author masuda, Masuda Naika
  */
 @Path("mobile")
