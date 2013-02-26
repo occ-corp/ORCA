@@ -3,12 +3,10 @@ package open.dolphin.delegater;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
 import com.sun.jersey.core.util.MultivaluedMapImpl;
-import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.zip.GZIPInputStream;
 import javax.swing.ImageIcon;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.ImageEntry;
@@ -125,59 +123,14 @@ public class  DocumentDelegater extends BusinessDelegater {
             return null;
         }
 
-        try {
-            GZIPInputStream gis = new GZIPInputStream(is);
-
-            TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
-            List<DocumentModel> list = (List<DocumentModel>) 
-                    getConverter().fromJson(gis, typeRef);
-            
-            return list;
-            
-        } catch (IOException ex) {
-        }
-        return null;
-/*
         TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
         List<DocumentModel> list = (List<DocumentModel>)
-                getConverter().fromJson(entityStr, typeRef);
+                //getConverter().fromJson(entityStr, typeRef);
                 //getConverter().fromJson(is, typeRef);
+                getConverter().fromGzippedJson(is, typeRef);
         return list;
-*/
     }
 
-/*
-    private class DocModelDecodeTask implements Callable {
-        
-        private DocumentModel docModel;
-        
-        private DocModelDecodeTask(DocumentModel docModel) {
-            this.docModel = docModel;
-        }
-
-        @Override
-        public Void call() throws Exception {
-            
-            Collection<ModuleModel> mc = docModel.getModules();
-            if (mc != null && !mc.isEmpty()) {
-                for (ModuleModel module : mc) {
-                    module.setModel((InfoModel) BeanUtils.xmlDecode(module.getBeanBytes()));
-                }
-            }
-
-            // JPEG byte をアイコンへ戻す
-            Collection<SchemaModel> sc = docModel.getSchema();
-            if (sc != null && !sc.isEmpty()) {
-                for (SchemaModel schema : sc) {
-                    ImageIcon icon = new ImageIcon(schema.getJpegByte());
-                    schema.setIcon(icon);
-                }
-            }
-            return null;
-        }
-    }
-*/
-    
     /**
      * 文書履歴を検索して返す。
      * @param spec DocumentSearchSpec 検索仕様

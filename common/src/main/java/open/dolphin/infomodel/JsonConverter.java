@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
+import java.util.zip.GZIPInputStream;
 
 /**
  * Jackson関連
@@ -149,6 +150,39 @@ public class JsonConverter {
         } catch (IOException ex) {
             processException(ex);
         } catch (Exception ex) {
+            processException(ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+            }
+        }
+        return null;
+    }
+    
+    // GZipped JSON InputStream to Object
+    public Object fromGzippedJson(InputStream is, Class clazz) {
+        try {
+            GZIPInputStream gis = new GZIPInputStream(is);
+            Object obj = fromJson(gis, clazz);
+            return obj;
+        } catch (IOException ex) {
+            processException(ex);
+        } finally {
+            try {
+                is.close();
+            } catch (IOException ex) {
+            }
+        }
+        return null;
+    }
+    
+    public Object fromGzippedJson(InputStream is, TypeReference typeRef) {
+        try {
+            GZIPInputStream gis = new GZIPInputStream(is);
+            Object obj = fromJson(gis, typeRef);
+            return obj;
+        } catch (IOException ex) {
             processException(ex);
         } finally {
             try {
