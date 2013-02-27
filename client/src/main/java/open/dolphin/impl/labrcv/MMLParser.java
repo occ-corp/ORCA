@@ -452,12 +452,12 @@ public class MMLParser implements LabResultParser {
                 // up
                 String up = child.getAttributeValue("up", ns);
                 logger.debug("up = " + up);
-                laboItem.setUp(val);
+                laboItem.setUp(up);
 
                 // low
                 String low = child.getAttributeValue("low", ns);
                 logger.debug("low = " + low);
-                laboItem.setLow(val);
+                laboItem.setLow(low);
 
                 // normal
                 val = child.getAttributeValue("normal", ns);

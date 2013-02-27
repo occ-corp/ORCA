@@ -159,6 +159,7 @@ public class LaboTestBean extends AbstractChartDocument {
                         value.setComment1(item.getComment1());
                         value.setComment2(item.getComment2());
                         rowObject.addLabTestValueObjectAt(moduleIndex, value);
+                        rowObject.setNormalValue(item.getNormalValue());
                         break;
                     }
                 }
