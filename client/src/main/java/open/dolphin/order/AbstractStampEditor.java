@@ -28,7 +28,6 @@ import open.dolphin.project.Project;
 import open.dolphin.table.ListTableModel;
 import open.dolphin.table.StripeTableCellRenderer;
 import open.dolphin.tr.MasterItemTransferHandler;
-import open.dolphin.util.StringTool;
 import open.dolphin.util.ZenkakuUtils;
 
 /**

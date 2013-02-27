@@ -5,7 +5,6 @@ import java.awt.event.*;
 import java.awt.im.InputSubset;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -307,11 +306,9 @@ public class AddUserImpl extends AbstractMainTool implements AddUser {
             if (facility.getZipCode() != null) {
                 String val = facility.getZipCode();
                 try {
-                    StringTokenizer st = new StringTokenizer(val, "-");
-                    if (st.hasMoreTokens()) {
-                        zipField1.setText(st.nextToken());
-                        zipField2.setText(st.nextToken());
-                    }
+                    String[] tokens = val.split("-");
+                    zipField1.setText(tokens[0]);
+                    zipField2.setText(tokens[1]);
                 } catch (Exception e) {
                     e.printStackTrace(System.err);
                 }

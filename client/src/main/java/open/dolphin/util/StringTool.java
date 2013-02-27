@@ -1,8 +1,5 @@
 package open.dolphin.util;
 
-import java.util.ArrayList;
-import java.util.StringTokenizer;
-
 /**
  * Utilities to handel String.
  *
@@ -29,59 +26,6 @@ public final class StringTool {
     
     /** Creates new StringTool */
     public StringTool() {
-    }
-    
-    public static Object[] tokenToArray(String line, String delim) {
-        
-        StringTokenizer st = new StringTokenizer(line, delim, true);
-        ArrayList<String> list = new ArrayList<String>(10);
-        int state = 0;
-        String token;
-        
-        while (st.hasMoreTokens()) {
-            
-            token = st.nextToken();
-            switch (state) {
-                case 0:
-                    // VALUE_STATE
-                    if (token.equals(",")) {
-                        token = null;
-                    } else {
-                        state = 1;
-                    }
-                    list.add(token);
-                    break;
-                    
-                case 1:
-                    // DELIM_STATE
-                    state = 0;
-                    break;
-            }
-        }
-        
-        return list.toArray();
-    }
-    
-    public static String trimSpace(String text) {
-        
-        int start = 0;
-        int len = text.length();
-        
-        while (start < len) {
-            if (text.charAt(start) > 32) {
-                break;
-            }
-            start++;
-        }
-        int end = len - 1;
-        while (end > start) {
-            if (text.charAt(end) > 32) {
-                break;
-            }
-            end--;
-        }
-        
-        return end != 0 ? text.substring(start, end + 1) : null;
     }
     
     public static boolean startsWithKatakana(String s) {

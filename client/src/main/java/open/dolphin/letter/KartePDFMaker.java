@@ -470,13 +470,11 @@ public class KartePDFMaker extends AbstractPDFMaker {
             Font font = theParagraph.getFont();
             // foreground 属性を設定する
             if (foreground != null) {
-                StringTokenizer stk = new StringTokenizer(foreground, ",");
-                if (stk.hasMoreTokens()) {
-                    int r = Integer.parseInt(stk.nextToken());
-                    int g = Integer.parseInt(stk.nextToken());
-                    int b = Integer.parseInt(stk.nextToken());
-                    theParagraph.getFont().setColor(new Color(r, g, b));
-                }
+                String[] tokens = foreground.split(",");
+                int r = Integer.parseInt(tokens[0]);
+                int g = Integer.parseInt(tokens[1]);
+                int b = Integer.parseInt(tokens[2]);
+                theParagraph.getFont().setColor(new Color(r, g, b));
             }
 
             // size 属性を設定する

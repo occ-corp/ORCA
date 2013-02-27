@@ -6,6 +6,9 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import javax.swing.text.*;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.XmlUtils;
 import org.jdom2.Document;
@@ -61,22 +64,12 @@ public class KarteRenderer_2 {
     public static KarteRenderer_2 getInstance() {
         return instance;
     }
-    
-/*
-    private KartePane soaPane;
-    private KartePane pPane;
 
-    public KarteRenderer_2(KartePane soaPane, KartePane pPane) {
-        this.soaPane = soaPane;
-        this.pPane = pPane;
-    }
-*/
     /**
      * DocumentModel をレンダリングする。
      *
      * @param model レンダリングする DocumentModel
      */
-    @SuppressWarnings("unchecked")
     public void render(DocumentModel model, KartePane soaPane, KartePane pPane) {
 
         List<ModuleModel> modules = model.getModules();
@@ -126,9 +119,10 @@ public class KarteRenderer_2 {
             }
 
         } else {
-            debug("Render SOA Pane");
-            debug("Module count = " + soaModules.size());
-            new KartePaneRenderer().renderPane(soaSpec, soaModules, schemas, soaPane);
+            //debug("Render SOA Pane");
+            //debug("Module count = " + soaModules.size());
+            //new KartePaneRenderer().renderPane(soaSpec, soaModules, schemas, soaPane);
+            new KartePaneRenderer_StAX().renderPane(soaSpec, soaModules, schemas, soaPane);
         }
 
         // P Pane をレンダリングする
@@ -138,9 +132,10 @@ public class KarteRenderer_2 {
                 pPane.stamp(mm);
             }
         } else {
-            debug("Render P Pane");
-            debug("Module count = " + pModules.size());
-            new KartePaneRenderer().renderPane(pSpec, pModules, schemas, pPane);
+            //debug("Render P Pane");
+            //debug("Module count = " + pModules.size());
+            //new KartePaneRenderer().renderPane(pSpec, pModules, schemas, pPane);
+            new KartePaneRenderer_StAX().renderPane(pSpec, pModules, schemas, pPane);
             // StampHolder直後の改行がない場合は補う
             pPane.getDocument().fixCrAfterStamp();
         }
@@ -320,13 +315,11 @@ public class KarteRenderer_2 {
 
             // foreground 属性を設定する
             if (foreground != null) {
-                StringTokenizer stk = new StringTokenizer(foreground, ",");
-                if (stk.hasMoreTokens()) {
-                    int r = Integer.parseInt(stk.nextToken());
-                    int g = Integer.parseInt(stk.nextToken());
-                    int b = Integer.parseInt(stk.nextToken());
-                    StyleConstants.setForeground(atts, new Color(r, g, b));
-                }
+                String[] tokens = foreground.split(",");
+                int r = Integer.parseInt(tokens[0]);
+                int g = Integer.parseInt(tokens[1]);
+                int b = Integer.parseInt(tokens[2]);
+                StyleConstants.setForeground(atts, new Color(r, g, b));
             }
 
             // size 属性を設定する
@@ -335,15 +328,15 @@ public class KarteRenderer_2 {
             }
             // bold 属性を設定する
             if (bold != null) {
-                StyleConstants.setBold(atts, Boolean.valueOf(bold).booleanValue());
+                StyleConstants.setBold(atts, Boolean.valueOf(bold));
             }
             // italic 属性を設定する
             if (italic != null) {
-                StyleConstants.setItalic(atts, Boolean.valueOf(italic).booleanValue());
+                StyleConstants.setItalic(atts, Boolean.valueOf(italic));
             }
             // underline 属性を設定する
             if (underline != null) {
-                StyleConstants.setUnderline(atts, Boolean.valueOf(underline).booleanValue());
+                StyleConstants.setUnderline(atts, Boolean.valueOf(underline));
             }
 
             // テキストを挿入する
@@ -390,5 +383,214 @@ public class KarteRenderer_2 {
 
     private void debug(String msg) {
         //ClientContext.getBootLogger().debug(msg);
+    }
+    
+    
+    // StAX版
+    private enum ELEMENTS {paragraph, content, text, component, icon, kartePane, section, unknown};
+    
+    private class KartePaneRenderer_StAX {
+
+        private KartePane kartePane;
+        private boolean logicalStyle;
+        private List<ModuleModel> modules;
+        private List<SchemaModel> schemas;
+        
+        private String foreground;
+        private String size;
+        private String bold;
+        private String italic;
+        private String underline;
+
+        /**
+         * TextPane Dump の XML を解析する。
+         *
+         * @param xml TextPane Dump の XML
+         */
+        private void renderPane(String xml, List<ModuleModel> modules, List<SchemaModel> schemas, KartePane kartePane) {
+            
+            this.modules = modules;
+            this.schemas = schemas;
+            this.kartePane = kartePane;
+
+            XMLInputFactory factory = XMLInputFactory.newInstance();
+            StringReader stream = null;
+            XMLStreamReader reader = null;
+            
+            try {
+                stream = new StringReader(xml);
+                reader = factory.createXMLStreamReader(stream);
+                
+                while (reader.hasNext()) {
+                    int eventType = reader.next();
+                    switch (eventType) {
+                        case XMLStreamReader.START_ELEMENT:
+                            startElement(reader);
+                            break;
+                        case XMLStreamReader.END_ELEMENT:
+                            endElement(reader);
+                            break;
+                    }
+                }
+                
+            } catch (XMLStreamException ex) {
+            } finally {
+                if (reader != null) {
+                    try {
+                        reader.close();
+                    } catch (XMLStreamException ex) {
+                    }
+                }
+                if (stream != null) {
+                    stream.close();
+                }
+            }
+        }
+        
+        private ELEMENTS getValue(String eName) {
+            try {
+                return ELEMENTS.valueOf(eName);
+            } catch (IllegalArgumentException ex) {
+                return ELEMENTS.unknown;
+            }
+        }
+
+        private void startElement(XMLStreamReader reader) throws XMLStreamException {
+            
+            String eName = reader.getName().getLocalPart();
+            ELEMENTS elm = getValue(eName);
+            
+            switch (elm) {
+                case paragraph:
+                    String alignStr = reader.getAttributeValue(null, ALIGNMENT_NAME);
+                    startParagraph(alignStr);
+                    break;
+                case content:
+                    foreground = reader.getAttributeValue(null, FOREGROUND_NAME);
+                    size = reader.getAttributeValue(null, SIZE_NAME);
+                    bold = reader.getAttributeValue(null, BOLD_NAME);
+                    italic = reader.getAttributeValue(null, ITALIC_NAME);
+                    underline = reader.getAttributeValue(null, UNDERLINE_NAME);
+                    break;
+                case text:
+                    String text = reader.getElementText();
+                    startContent(foreground, size, bold, italic, underline, text);
+                    break;
+                case component:
+                    String name = reader.getAttributeValue(null, NAME_NAME);
+                    String number = reader.getAttributeValue(null, COMPONENT_ELEMENT_NAME);
+                    startComponent(name, number);
+                    break;
+                //case icon:
+                //case kartePane:
+                //case section:
+                default:
+                    break;
+            }
+        }
+
+        private void endElement(XMLStreamReader reader) {
+            
+            String eName = reader.getName().getLocalPart();
+            ELEMENTS elm = getValue(eName);
+            
+            switch (elm) {
+                case paragraph:
+                    endParagraph();
+                    break;
+                //case content:
+                //case component:
+                //case icon:
+                //case kartePane:
+                //case section:
+                default:
+                    break;
+            }
+        }
+
+        private void startParagraph(String alignStr) {
+
+            kartePane.setLogicalStyle("default");
+            logicalStyle = true;
+
+            if (alignStr != null) {
+                DefaultStyledDocument doc = (DefaultStyledDocument) kartePane.getTextPane().getDocument();
+                Style style0 = doc.getStyle("default");
+                Style style = doc.addStyle("alignment", style0);
+                if (alignStr.equals("0")) {
+                    StyleConstants.setAlignment(style, StyleConstants.ALIGN_LEFT);
+                } else if (alignStr.equals("1")) {
+                    StyleConstants.setAlignment(style, StyleConstants.ALIGN_CENTER);
+                } else if (alignStr.equals("2")) {
+                    StyleConstants.setAlignment(style, StyleConstants.ALIGN_RIGHT);
+                }
+                kartePane.setLogicalStyle("alignment");
+                logicalStyle = true;
+            }
+        }
+
+        private void endParagraph() {
+
+            if (logicalStyle) {
+                kartePane.clearLogicalStyle();
+                logicalStyle = false;
+            }
+        }
+
+        private void startContent(
+                String foreground,
+                String size,
+                String bold,
+                String italic,
+                String underline,
+                String text) {
+
+            // 特殊文字を戻す
+            text = XmlUtils.fromXml(text);
+
+            // このコンテントに設定する AttributeSet
+            MutableAttributeSet atts = new SimpleAttributeSet();
+
+            // foreground 属性を設定する
+            if (foreground != null) {
+                String[] tokens = foreground.split(",");
+                int r = Integer.parseInt(tokens[0]);
+                int g = Integer.parseInt(tokens[1]);
+                int b = Integer.parseInt(tokens[2]);
+                StyleConstants.setForeground(atts, new Color(r, g, b));
+            }
+
+            // size 属性を設定する
+            if (size != null) {
+                StyleConstants.setFontSize(atts, Integer.parseInt(size));
+            }
+            // bold 属性を設定する
+            if (bold != null) {
+                StyleConstants.setBold(atts, Boolean.valueOf(bold));
+            }
+            // italic 属性を設定する
+            if (italic != null) {
+                StyleConstants.setItalic(atts, Boolean.valueOf(italic));
+            }
+            // underline 属性を設定する
+            if (underline != null) {
+                StyleConstants.setUnderline(atts, Boolean.valueOf(underline));
+            }
+
+            // テキストを挿入する
+            kartePane.insertFreeString(text, atts);
+        }
+        
+        private void startComponent(String name, String number) {
+
+            int index = Integer.valueOf(number);
+            
+            if (name != null && name.equals(STAMP_HOLDER)) {
+                ModuleModel stamp = modules.get(index);
+                kartePane.flowStamp(stamp);
+            } else if (name != null && name.equals(SCHEMA_HOLDER)) {
+                kartePane.flowSchema(schemas.get(index));
+            }
+        }
     }
 }

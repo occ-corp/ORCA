@@ -9,7 +9,6 @@ import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
@@ -294,9 +293,8 @@ public class StampPublisher {
                 //
                 String published = ((StampTreeModel) stmpTree).getPublished();
                 if (published != null) {
-                    StringTokenizer st = new StringTokenizer(published, ",");
-                    while (st.hasMoreTokens()) {
-                        String entity = st.nextToken();
+                    String[] tokens = published.split(",");
+                    for (String entity : tokens) {
                         for (int i = 0; i < IInfoModel.STAMP_ENTITIES.length; i++) {
                             if (entity.equals(IInfoModel.STAMP_ENTITIES[i])) {
                                 entities[i].setSelected(true);
@@ -334,9 +332,8 @@ public class StampPublisher {
                 
                 published = ((StampTreeModel) stmpTree).getPublished();
                 if (published != null) {
-                    StringTokenizer st = new StringTokenizer(published, ",");
-                    while (st.hasMoreTokens()) {
-                        String entity = st.nextToken();
+                    String[] tokens = published.split(",");
+                    for (String entity : tokens) {
                         for (int i = 0; i < IInfoModel.STAMP_ENTITIES.length; i++) {
                             if (entity.equals(IInfoModel.STAMP_ENTITIES[i])) {
                                 entities[i].setSelected(true);
@@ -344,7 +341,7 @@ public class StampPublisher {
                             }
                         }
                     }
-                }
+                 }
                 
                 sb = new StringBuilder();
                 sb.append(ModelUtils.getDateAsString(stmpTree.getPublishedDate()));

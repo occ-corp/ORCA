@@ -94,21 +94,21 @@ public final class MMLDate extends Object {
      
         int[] ret = new int[3];
         try {
-            StringTokenizer st = new StringTokenizer(mmlDate, "-");
-            
+            String[] tokens = mmlDate.split("-");
+
             // Year
-            String val = st.nextToken();
+            String val = tokens[0];
             ret[0] = Integer.parseInt(val);
             
             // Month
-            val = st.nextToken();
+            val = tokens[1];
             if (val.charAt(0) == '0') {
                 val = val.substring(1);
             }
             ret[1] = Integer.parseInt(val) -1;
             
             // day
-            val = st.nextToken();
+            val = tokens[2];
             if (val.charAt(0) == '0') {
                 val = val.substring(1);
             }
