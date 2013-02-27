@@ -14,7 +14,7 @@ public class LapTimer {
     public LapTimer() {
         sTime = System.currentTimeMillis();
         sb = new StringBuilder();
-        sb.append("Lap timer started at ").append(sTime);
+        sb.append("Lap timer started at ").append(sTime).append("\n");
     }
 
     public void lap(String msg) {
@@ -25,8 +25,9 @@ public class LapTimer {
     
     public void stop() {
         long t = System.currentTimeMillis();
-        if (t - sTime > 2000 || true) {
-            System.out.println(sb.toString());
-        }
+        sb.append("Lap timer stopped at").append(t);;
+        sb.append(" (").append(t - sTime).append(")\n");
+        System.out.println(sb.toString());
+
     }
 }
