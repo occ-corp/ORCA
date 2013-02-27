@@ -28,6 +28,7 @@ import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.util.AgeCalculator;
 import open.dolphin.util.GUIDGenerator;
+import open.dolphin.util.LapTimer;
 import open.dolphin.util.MMLDate;
 import org.apache.commons.lang.time.DurationFormatUtils;
 import org.apache.log4j.Level;
@@ -289,8 +290,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     @Override
     public void start() {
         
+        final LapTimer timer = new LapTimer();
         
-
         final SimpleWorker worker = new SimpleWorker<KarteBean, Void>() {
             
             private int periodComboIndex;
@@ -311,6 +312,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 today.clear(Calendar.MILLISECOND);
                 
 //masuda^       // KarteBeanを取得
+                timer.lap("Getting KarteBean");
                 DocumentDelegater ddl = DocumentDelegater.getInstance();
                 long patientId = getPatientVisit().getPatientModel().getId();
                 KarteBean karteBean = ddl.getKarte(patientId, today.getTime());
@@ -327,6 +329,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 ExtractionPeriod period = DocumentHistory.EXTRACTION_OBJECTS[periodComboIndex];
                 
                 // DocInfoModelは別に取得する
+                timer.lap("Getting DocInfoModels");
                 DocumentSearchSpec spec = new DocumentSearchSpec();
                 spec.setKarteId(karteBean.getId());                 // カルテID
                 spec.setDocType(IInfoModel.DOCTYPE_KARTE);          // 文書タイプ
@@ -351,18 +354,14 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
                 karteBean.setPatientModel(getPatientVisit().getPatientModel());
                 setKarte(karteBean);
                 //-------------------------------------------------------------
+                timer.lap("InitComponents");
                 initComponents();
-                // もたもた？
-                //SwingUtilities.invokeLater(new Runnable() {
-
-                    //@Override
-                    //public void run() {
-                        getDocumentHistory().showHistory();
+                timer.lap("ShowHistory");
+                getDocumentHistory().showHistory();
 //masuda^   抽出期間コンボ設定・ブロック解除
-                        getDocumentHistory().setExtractionPeriodComboIndex(periodComboIndex);
+                getDocumentHistory().setExtractionPeriodComboIndex(periodComboIndex);
 //masuda$
-                    //}
-                //});
+                timer.lap("Finish succeeded");
             }
 
             @Override
@@ -384,10 +383,12 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
             @Override
             protected void stopProgress() {
+                timer.lap("StopProgress");
                 taskTimer.stop();
                 monitor.close();
                 taskTimer = null;
                 monitor = null;
+                timer.stop();
             }
         };
 
