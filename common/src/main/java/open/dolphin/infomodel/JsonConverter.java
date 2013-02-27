@@ -10,12 +10,11 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.zip.GZIPInputStream;
 
 /**
@@ -162,6 +161,19 @@ public class JsonConverter {
         return null;
     }
     
+    // GZipped JSON to Object
+    public Object fromGzippedJson(byte[] bytes, Class clazz) {
+        
+        InputStream is = new ByteArrayInputStream(bytes);
+        return fromGzippedJson(is, clazz);
+    }
+    
+    public Object fromGzippedJson(byte[] bytes, TypeReference typeRef) {
+        
+        InputStream is = new ByteArrayInputStream(bytes);
+        return fromGzippedJson(is, typeRef);
+    }
+    
     // GZipped JSON InputStream to Object
     public Object fromGzippedJson(InputStream is, Class clazz) {
 
@@ -177,10 +189,6 @@ public class JsonConverter {
                 if (gis != null) {
                     gis.close();
                 }
-            } catch (IOException ex) {
-            }
-            try {
-                is.close();
             } catch (IOException ex) {
             }
         }
@@ -201,10 +209,6 @@ public class JsonConverter {
                 if (gis != null) {
                     gis.close();
                 }
-            } catch (IOException ex) {
-            }
-            try {
-                is.close();
             } catch (IOException ex) {
             }
         }

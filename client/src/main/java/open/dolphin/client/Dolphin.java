@@ -44,6 +44,8 @@ import open.dolphin.server.PVTServer;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.setting.ProjectSettingDialog;
 import open.dolphin.stampbox.StampBoxPlugin;
+import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 /**
  * アプリケーションのメインウインドウクラス。
@@ -102,7 +104,7 @@ public class Dolphin implements MainWindow {
     private PacsService pacsService;
 
     // 状態変化リスナー
-    private ChartEventListener scl;
+    private ChartEventHandler scl;
     
     // clientのUUID
     private String clientUUID;
@@ -194,6 +196,9 @@ public class Dolphin implements MainWindow {
      */
     private void startServices() {
 
+        // RestEasyを初期化
+        RegisterBuiltin.register(ResteasyProviderFactory.getInstance());
+        
         // プラグインのプロバイダマップを生成する
         setProviders(new HashMap<String, MainService>());
 
@@ -269,7 +274,7 @@ public class Dolphin implements MainWindow {
 
                 // User用のStampTreeが存在しない新規ユーザの場合、そのTreeを生成する
                 boolean hasTree = false;
-                if (treeList != null || treeList.size() > 0) {
+                if (treeList != null || !treeList.isEmpty()) {
                     for (IStampTreeModel tree : treeList) {
                         if (tree != null) {
                             long id = tree.getUserModel().getId();
@@ -451,7 +456,7 @@ public class Dolphin implements MainWindow {
         FocusPropertyChangeListener.getInstance().register();
 
         // ChartStateListenerを開始する
-        scl = ChartEventListener.getInstance();
+        scl = ChartEventHandler.getInstance();
         scl.start();
 //masuda$
         

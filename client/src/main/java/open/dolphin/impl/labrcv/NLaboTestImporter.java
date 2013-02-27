@@ -64,13 +64,13 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private NLabTestImportView view;
     
     private String clientUUID;
-    private ChartEventListener cel;
+    private ChartEventHandler cel;
     
     
     /** Creates new NLaboTestImporter */
     public NLaboTestImporter() {
         setName(NAME);
-        cel = ChartEventListener.getInstance();
+        cel = ChartEventHandler.getInstance();
         clientUUID = cel.getClientUUID();
     }
     

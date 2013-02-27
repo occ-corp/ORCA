@@ -6,7 +6,7 @@ import java.util.Collection;
 import javax.swing.*;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import open.dolphin.delegater.JerseyClient;
+import open.dolphin.delegater.RESTEasyClient;
 import open.dolphin.delegater.UserDelegater;
 import open.dolphin.helper.SimpleWorker;
 import open.dolphin.infomodel.*;
@@ -522,7 +522,7 @@ public class ChangePasswordImpl extends AbstractMainTool implements ChangeProfil
                     //-------------------------------------
                     // Jersey Client
                     //-------------------------------------
-                    JerseyClient jersy = JerseyClient.getInstance();
+                    RESTEasyClient jersy = RESTEasyClient.getInstance();
                     jersy.setUpAuthentication(updateModel.getUserId(), updateModel.getPassword(), true);
 
                     JOptionPane.showMessageDialog(getFrame(),

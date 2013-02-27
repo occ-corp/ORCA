@@ -10,7 +10,7 @@ import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import open.dolphin.client.ChartEventListener;
+import open.dolphin.client.ChartEventHandler;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.Dolphin;
 import open.dolphin.client.IChartEventListener;
@@ -65,7 +65,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     
     private String clientUUID;
     
-    private ChartEventListener cel;
+    private ChartEventHandler cel;
     
     
     private static final TempKarteCheckDialog instance;
@@ -86,7 +86,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     
     private void setup() {
         
-        cel = ChartEventListener.getInstance();
+        cel = ChartEventHandler.getInstance();
         clientUUID = cel.getClientUUID();
         
         // ColumnSpecHelperを準備する
@@ -266,7 +266,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     private void openKarte() {
         
         PatientModel patient = getSelectedPatient();
-        PatientVisitModel pvt = ChartEventListener.getInstance().createFakePvt(patient);
+        PatientVisitModel pvt = ChartEventHandler.getInstance().createFakePvt(patient);
         
         // カルテコンテナを生成する
         Dolphin.getInstance().openKarte(pvt);

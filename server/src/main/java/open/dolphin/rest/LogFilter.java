@@ -1,6 +1,7 @@
 package open.dolphin.rest;
 
 import java.io.IOException;
+import java.net.URLDecoder;
 import java.util.Map;
 import java.util.logging.Logger;
 import javax.inject.Inject;
@@ -84,10 +85,13 @@ public class LogFilter implements Filter {
         if (query != null && !query.isEmpty()) {
             sb.append("?").append(query);
         }
-        int len = sb.length();
-        String msg = len > 160
-                ? sb.delete(157, len).append("...").toString()
-                : sb.toString();
+        
+        String msg = URLDecoder.decode(sb.toString(), "UTF-8"); // TO-DO
+
+        if (msg.length() > 160) {
+            msg = msg.substring(0, 157) + ("...");
+        }
+
         info(msg);
 
         chain.doFilter(req, response);

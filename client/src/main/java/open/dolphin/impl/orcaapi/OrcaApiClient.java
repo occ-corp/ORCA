@@ -1,22 +1,18 @@
 package open.dolphin.impl.orcaapi;
 
-import com.sun.jersey.api.client.Client;
-import com.sun.jersey.api.client.WebResource;
-import com.sun.jersey.api.client.filter.HTTPBasicAuthFilter;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.project.Project;
+import open.dolphin.util.Base64Utils;
+import org.jboss.resteasy.client.ClientRequest;
 
 /**
- * ORCA API用のJersey Client
+ * ORCA API用のRESTEasyClient
  * 
  * @author masuda, Masuda Naika
  */
 public class OrcaApiClient {
     
     private static final OrcaApiClient instance;
-    
-    private Client client;
-    private WebResource webResource;
     
     private static final int API_PORT = 8000;
     
@@ -25,37 +21,46 @@ public class OrcaApiClient {
     }
     
     private OrcaApiClient() {
-        client = Client.create();
-        setup();
     }
     
     public static OrcaApiClient getInstance() {
         return instance;
     }
     
-    final public void setup() {
-
+    private String getPath(String path) {
         StringBuilder sb = new StringBuilder();
         sb.append("http://");
         sb.append(Project.getString(Project.CLAIM_ADDRESS));
         sb.append(":").append(String.valueOf(API_PORT));
-        String uri = sb.toString();
+        if (!path.startsWith("/")) {
+            sb.append("/");
+        }
+        sb.append(path);
+        
+        return sb.toString();
+    }
+    
+    private String getAuthorizationHeader() {
+        
         String username = Project.getString(Project.ORCA_USER_ID);
         String password = Project.getString(Project.ORCA_USER_PASSWORD);
         
-        webResource = client.resource(uri);
+        StringBuilder sb = new StringBuilder();
+        sb.append(username).append(":").append(password);
+        String base64 = Base64Utils.getBase64(sb.toString());
+        sb = new StringBuilder();
+        sb.append("Basic ");
+        sb.append(base64);
         
-        client.removeAllFilters();
-        client.addFilter(new HTTPBasicAuthFilter(username, password));
+        return sb.toString();
     }
 
-    // QueryParam付のWebResource
-    public WebResource.Builder getResource(String path, MultivaluedMap<String, String> qmap) {
-
+    public ClientRequest getClientRequest(String path, MultivaluedMap<String, String> qmap) {
+        ClientRequest request = new ClientRequest(getPath(path));
+        request.header("Authorization", getAuthorizationHeader());
         if (qmap != null) {
-            return webResource.path(path).queryParams(qmap).getRequestBuilder();
-        } else {
-            return webResource.path(path).getRequestBuilder();
+            request.getQueryParameters().putAll(qmap);
         }
+        return request;
     }
 }

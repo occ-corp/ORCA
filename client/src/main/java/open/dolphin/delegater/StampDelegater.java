@@ -1,12 +1,12 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sun.jersey.api.client.ClientResponse;
-import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.*;
+import org.jboss.resteasy.client.ClientResponse;
+import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 
 /**
  * Stamp関連の Delegater クラス。
@@ -43,68 +43,74 @@ public class StampDelegater extends BusinessDelegater {
      * @return 保存個数
      */
     public long putTree(IStampTreeModel model) {
+        
         try {
             model.setTreeBytes(model.getTreeXml().getBytes(UTF8)); // UTF-8 bytes
-            //model.setTreeXml(null); DO NOT DO THIS!
-        } catch (UnsupportedEncodingException ex) {
-            logger.warn(ex.getMessage());
+
+            // こっちでキャストしておく
+            StampTreeModel treeModel = (StampTreeModel) model;
+
+            String json = getConverter().toJson(treeModel);
+
+            // resource post
+            String path = RES_STAMP_TREE;
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)    
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
+
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
+
+            debug(status, entityStr);
+
+            long pk = Long.parseLong(entityStr);
+            return pk;
+            
+        } catch (Exception ex) {
+            return -1;
         }
-        
-        // こっちでキャストしておく
-        StampTreeModel treeModel = (StampTreeModel) model;
-
-        String json = getConverter().toJson(treeModel);
-
-        // resource post
-        String path = RES_STAMP_TREE;
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)    
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
-
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-
-        debug(status, entityStr);
-
-        long pk = Long.parseLong(entityStr);
-        return pk;
     }
 
     public List<IStampTreeModel> getTrees(long userPK) {
         
-        String path = RES_STAMP_TREE + String.valueOf(userPK);
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_JSON_UTF8)
-                .get(ClientResponse.class);
+        try {
+            String path = RES_STAMP_TREE + String.valueOf(userPK);
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_JSON_UTF8)
+                    .get(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        debug(status, entityStr);
+            debug(status, entityStr);
+                
+            if (status != HTTP200) {
+                return null;
+            }
+
+            UserStampTreeModel ret = (UserStampTreeModel) getConverter()
+                    .fromJson(entityStr, UserStampTreeModel.class);
             
-        if (status != HTTP200) {
+            List<IStampTreeModel> treeList = new ArrayList<IStampTreeModel>();
+            List<IStampTreeModel> list = ret.getTreeList();
+            
+            for (IStampTreeModel model : list) {
+                try {
+                    String treeXml = new String(model.getTreeBytes(), UTF8);
+                    model.setTreeXml(treeXml);
+                    model.setTreeBytes(null);
+                    treeList.add(model);
+                } catch (UnsupportedEncodingException ex) {
+                    logger.warn(ex.getMessage());
+                }
+            }
+
+            return treeList;
+            
+        } catch (Exception ex) {
             return null;
         }
-
-        UserStampTreeModel ret = (UserStampTreeModel) getConverter()
-                .fromJson(entityStr, UserStampTreeModel.class);
-        
-        List<IStampTreeModel> treeList = new ArrayList<IStampTreeModel>();
-        List<IStampTreeModel> list = ret.getTreeList();
-        
-        for (IStampTreeModel model : list) {
-            try {
-                String treeXml = new String(model.getTreeBytes(), UTF8);
-                model.setTreeXml(treeXml);
-                model.setTreeBytes(null);
-                treeList.add(model);
-            } catch (UnsupportedEncodingException ex) {
-                logger.warn(ex.getMessage());
-            }
-        }
-
-        return treeList;
     }
     
     /**
@@ -116,32 +122,33 @@ public class StampDelegater extends BusinessDelegater {
         
         try {
             model.setTreeBytes(model.getTreeXml().getBytes(UTF8));
-        } catch (UnsupportedEncodingException ex) {
-            logger.warn(ex.getMessage());
+
+            PublishedTreeModel publishedModel = createPublishedTreeModel(model, publishBytes);
+            
+            // interfaceはmarshallingできない
+            UserStampTreeModel treeModel = new UserStampTreeModel();
+            treeModel.setStampTreeList(Collections.singletonList(model));
+            treeModel.setPublishedList(Collections.singletonList(publishedModel));
+
+            String json = getConverter().toJson(treeModel);
+
+            String path = RES_STAMP_TREE + "published";
+
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .post(ClientResponse.class);
+
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
+            
+            debug(status, entityStr);
+            
+            return Long.valueOf(entityStr);
+            
+        } catch (Exception ex) {
+            return -1;
         }
-
-        PublishedTreeModel publishedModel = createPublishedTreeModel(model, publishBytes);
-        
-        // interfaceはmarshallingできない
-        UserStampTreeModel treeModel = new UserStampTreeModel();
-        treeModel.setStampTreeList(Collections.singletonList(model));
-        treeModel.setPublishedList(Collections.singletonList(publishedModel));
-
-        String json = getConverter().toJson(treeModel);
-
-        String path = RES_STAMP_TREE + "published";
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .type(MEDIATYPE_JSON_UTF8)
-                .post(ClientResponse.class, json);
-
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-        
-        debug(status, entityStr);
-        
-        return Long.valueOf(entityStr);
     }
     
     /**
@@ -162,35 +169,36 @@ public class StampDelegater extends BusinessDelegater {
      * @return 更新数
      */
     public int updatePublishedTree(StampTreeModel model, byte[] publishBytes) {
+        
+        try {
+              model.setTreeBytes(model.getTreeXml().getBytes(UTF8));
 
-      try {
-            model.setTreeBytes(model.getTreeXml().getBytes(UTF8));
-        } catch (UnsupportedEncodingException ex) {
-            logger.warn(ex.getMessage());
+              PublishedTreeModel publishedModel = createPublishedTreeModel(model, publishBytes);
+              
+              // interfaceはunmarshallingできない
+              UserStampTreeModel treeModel = new UserStampTreeModel();
+              treeModel.setStampTreeList(Collections.singletonList(model));
+              treeModel.setPublishedList(Collections.singletonList(publishedModel));
+
+              String json = getConverter().toJson(treeModel);
+
+              String path = RES_STAMP_TREE + "published";
+
+              ClientResponse response = getClientRequest(path, null)
+                      .accept(MEDIATYPE_TEXT_UTF8)
+                      .body(MEDIATYPE_JSON_UTF8, json)
+                      .put(ClientResponse.class);
+
+              int status = response.getStatus();
+              String entityStr = (String) response.getEntity(String.class);
+              
+              debug(status, entityStr);
+              
+              return Integer.valueOf(entityStr);
+              
+        } catch (Exception ex) {
+            return -1;
         }
-
-        PublishedTreeModel publishedModel = createPublishedTreeModel(model, publishBytes);
-        
-        // interfaceはunmarshallingできない
-        UserStampTreeModel treeModel = new UserStampTreeModel();
-        treeModel.setStampTreeList(Collections.singletonList(model));
-        treeModel.setPublishedList(Collections.singletonList(publishedModel));
-
-        String json = getConverter().toJson(treeModel);
-
-        String path = RES_STAMP_TREE + "published";
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
-
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-        
-        debug(status, entityStr);
-        
-        return Integer.valueOf(entityStr);
     }
     
     /**
@@ -202,48 +210,54 @@ public class StampDelegater extends BusinessDelegater {
         
         try {
             model.setTreeBytes(model.getTreeXml().getBytes(UTF8));
-        } catch (UnsupportedEncodingException ex) {
-            logger.warn(ex.getMessage());
+            
+            String json = getConverter().toJson(model);
+
+            String path = RES_STAMP_TREE + "published/cancel/";
+
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
+
+            int status = response.getStatus();
+
+            debug(status, "put response");
+
+            return 1;
+            
+        } catch (Exception ex) {
+            return -1;
         }
-        
-        String json = getConverter().toJson(model);
-
-        String path = RES_STAMP_TREE + "published/cancel/";
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
-
-        int status = response.getStatus();
-
-        debug(status, "put response");
-
-        return 1;
     }
     
     public List<PublishedTreeModel> getPublishedTrees() {
+        
+        try {
+            String path = RES_STAMP_TREE + "published";
 
-        String path = RES_STAMP_TREE + "published";
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_JSON_UTF8)
+                    .get(ClientResponse.class);
 
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_JSON_UTF8)
-                .get(ClientResponse.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            debug(status, entityStr);
 
-        debug(status, entityStr);
+            if (status != HTTP200) {
+                return null;
+            }
+            
+            TypeReference typeRef = new TypeReference<List<PublishedTreeModel>>(){};
+            List<PublishedTreeModel> ret = (List<PublishedTreeModel>)
+                    getConverter().fromJson(entityStr, typeRef);
 
-        if (status != HTTP200) {
+            return ret;
+            
+        } catch (Exception ex) {
             return null;
         }
-        
-        TypeReference typeRef = new TypeReference<List<PublishedTreeModel>>(){};
-        List<PublishedTreeModel> ret = (List<PublishedTreeModel>)
-                getConverter().fromJson(entityStr, typeRef);
-
-        return ret;
     }
 
     // 個人用StampTreeから公開用StampTreeを生成する。
@@ -269,57 +283,67 @@ public class StampDelegater extends BusinessDelegater {
 
     public List<Long> subscribeTrees(List<SubscribedTreeModel> subscribeList) {
         
-        String json = getConverter().toJson(subscribeList);
+        try {
+            String json = getConverter().toJson(subscribeList);
 
-        String path = RES_STAMP_TREE + "subscribed";
+            String path = RES_STAMP_TREE + "subscribed";
 
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)    
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)    
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        debug(status, entityStr);
+            debug(status, entityStr);
 
-        String[] pks = entityStr.split(",");
-        List<Long> ret = new ArrayList<Long>(pks.length);
-        for (String str : pks) {
-            ret.add(Long.valueOf(str));
+            String[] pks = entityStr.split(",");
+            List<Long> ret = new ArrayList<Long>(pks.length);
+            for (String str : pks) {
+                ret.add(Long.valueOf(str));
+            }
+            return ret;
+            
+        } catch (Exception ex) {
+            return null;
         }
-        return ret;
     }
     
     
     public int unsubscribeTrees(List<SubscribedTreeModel> removeList) {
-
-        String path = RES_STAMP_TREE +"subscribed";
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (SubscribedTreeModel s : removeList) {
-            if (!first) {
+        
+        try {
+            String path = RES_STAMP_TREE +"subscribed";
+            StringBuilder sb = new StringBuilder();
+            boolean first = true;
+            for (SubscribedTreeModel s : removeList) {
+                if (!first) {
+                    sb.append(CAMMA);
+                } else {
+                    first = false;
+                }
+                sb.append(String.valueOf(s.getTreeId()));
                 sb.append(CAMMA);
-            } else {
-                first = false;
+                sb.append(String.valueOf(s.getUserModel().getId()));
             }
-            sb.append(String.valueOf(s.getTreeId()));
-            sb.append(CAMMA);
-            sb.append(String.valueOf(s.getUserModel().getId()));
+
+            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+            qmap.add("ids", sb.toString());
+
+            ClientResponse response = getClientRequest(path, qmap)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .delete(ClientResponse.class);
+
+            int status = response.getStatus();
+
+            debug(status, "delete response");
+
+            return 1;
+            
+        } catch (Exception ex) {
+            return -1;
         }
-
-        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", sb.toString());
-
-        ClientResponse response = getResource(path, qmap)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .delete(ClientResponse.class);
-
-        int status = response.getStatus();
-
-        debug(status, "delete response");
-
-        return 1;
     }
     
 
@@ -332,28 +356,33 @@ public class StampDelegater extends BusinessDelegater {
      */
     public List<String> putStamp(List<StampModel> list) {
         
-        // キャッシュに登録する
-        for (StampModel model : list) {
-            stampCache.put(model.getId(), model);
+        try {
+            // キャッシュに登録する
+            for (StampModel model : list) {
+                stampCache.put(model.getId(), model);
+            }
+            
+            String json = getConverter().toJson(list);
+            String path = RES_STAMP + "list";
+
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
+
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
+
+            debug(status, entityStr);
+
+            String[] params = entityStr.split(",");
+            List<String> ret = Arrays.asList(params);
+
+            return ret;
+            
+        } catch (Exception ex) {
+            return null;
         }
-        
-        String json = getConverter().toJson(list);
-        String path = RES_STAMP + "list";
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
-
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-
-        debug(status, entityStr);
-
-        String[] params = entityStr.split(",");
-        List<String> ret = Arrays.asList(params);
-
-        return ret;
     }
     
     /**
@@ -363,23 +392,28 @@ public class StampDelegater extends BusinessDelegater {
      */
     public String putStamp(StampModel model) {
         
-        // キャッシュに登録する
-        stampCache.put(model.getId(), model);
+        try {
+            // キャッシュに登録する
+            stampCache.put(model.getId(), model);
 
-        String json = getConverter().toJson(model);
-        String path = RES_STAMP + "id";
+            String json = getConverter().toJson(model);
+            String path = RES_STAMP + "id";
 
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)    
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)    
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-        
-        debug(status, entityStr);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
+            
+            debug(status, entityStr);
 
-        return entityStr;
+            return entityStr;
+            
+        } catch (Exception ex) {
+            return null;
+        }
     }
 
     /**
@@ -403,34 +437,39 @@ public class StampDelegater extends BusinessDelegater {
      */
     public StampModel getStamp(String stampId) {
         
-        // StampModelのキャッシュを参照する
-        StampModel ret = stampCache.get(stampId);
-        if (ret != null) {
+        try {
+            // StampModelのキャッシュを参照する
+            StampModel ret = stampCache.get(stampId);
+            if (ret != null) {
+                return ret;
+            }
+            
+            String path = RES_STAMP + "id/" +  stampId;
+
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_JSON_UTF8)
+                    .get(ClientResponse.class);
+
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
+
+            debug(status, entityStr);
+
+            if (status != HTTP200) {
+                return null;
+            }
+            
+            ret = (StampModel)
+                    getConverter().fromJson(entityStr, StampModel.class);
+            
+            // キャッシュに登録する
+            stampCache.put(stampId, ret);
+
             return ret;
-        }
-        
-        String path = RES_STAMP + "id/" +  stampId;
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_JSON_UTF8)
-                .get(ClientResponse.class);
-
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-
-        debug(status, entityStr);
-
-        if (status != HTTP200) {
+            
+        } catch (Exception ex) {
             return null;
         }
-        
-        ret = (StampModel)
-                getConverter().fromJson(entityStr, StampModel.class);
-        
-        // キャッシュに登録する
-        stampCache.put(stampId, ret);
-
-        return ret;
     }
     
     /**
@@ -449,41 +488,45 @@ public class StampDelegater extends BusinessDelegater {
         }
         
         if (!infosToGet.isEmpty()) {
-
-            String path = RES_STAMP + "list";
-            StringBuilder sb = new StringBuilder();
-            boolean first = true;
-            for (ModuleInfoBean info : infosToGet) {
-                if (!first) {
-                    sb.append(CAMMA);
-                } else {
-                    first = false;
+            try {
+                String path = RES_STAMP + "list";
+                StringBuilder sb = new StringBuilder();
+                boolean first = true;
+                for (ModuleInfoBean info : infosToGet) {
+                    if (!first) {
+                        sb.append(CAMMA);
+                    } else {
+                        first = false;
+                    }
+                    sb.append(info.getStampId());
                 }
-                sb.append(info.getStampId());
-            }
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("ids", sb.toString());
+                MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+                qmap.add("ids", sb.toString());
 
-            ClientResponse response = getResource(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+                ClientResponse response = getClientRequest(path, qmap)
+                        .accept(MEDIATYPE_JSON_UTF8)
+                        .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = response.getEntity(String.class);
+                int status = response.getStatus();
+                String entityStr = (String) response.getEntity(String.class);
 
-            debug(status, entityStr);
+                debug(status, entityStr);
 
-            if (status != HTTP200) {
+                if (status != HTTP200) {
+                    return null;
+                }
+
+                TypeReference typeRef = new TypeReference<List<StampModel>>(){};
+                List<StampModel> smList = (List<StampModel>)
+                            getConverter().fromJson(entityStr, typeRef);
+
+                // キャッシュに登録する
+                for (StampModel sm : smList) {
+                    stampCache.put(sm.getId(), sm);
+                }
+                
+            } catch (Exception ex) {
                 return null;
-            }
-
-            TypeReference typeRef = new TypeReference<List<StampModel>>(){};
-            List<StampModel> smList = (List<StampModel>)
-                        getConverter().fromJson(entityStr, typeRef);
-
-            // キャッシュに登録する
-            for (StampModel sm : smList) {
-                stampCache.put(sm.getId(), sm);
             }
         }
         
@@ -503,19 +546,24 @@ public class StampDelegater extends BusinessDelegater {
      */
     public int removeStamp(String stampId) {
         
-        // キャッシュから削除する
-        stampCache.remove(stampId);
-        
-        String path = RES_STAMP + "id/" + stampId;
+        try {
+            // キャッシュから削除する
+            stampCache.remove(stampId);
+            
+            String path = RES_STAMP + "id/" + stampId;
 
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .delete(ClientResponse.class);
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .delete(ClientResponse.class);
 
-        int status = response.getStatus();
-        debug(status, "delete response");
- 
-        return 1;
+            int status = response.getStatus();
+            debug(status, "delete response");
+     
+            return 1;
+            
+        } catch (Exception ex) {
+            return -1;
+        }
     }
     
     /**
@@ -525,23 +573,28 @@ public class StampDelegater extends BusinessDelegater {
      */
     public int removeStamps(List<String> ids) {
         
-        // キャッシュから削除する
-        for (String stampId : ids) {
-            stampCache.remove(stampId);
+        try {
+            // キャッシュから削除する
+            for (String stampId : ids) {
+                stampCache.remove(stampId);
+            }
+            
+            String path = RES_STAMP + "list";
+            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+            qmap.add("ids", getConverter().fromList(ids));
+            
+            ClientResponse response = getClientRequest(path, qmap)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .delete(ClientResponse.class);
+
+            int status = response.getStatus();
+            debug(status, "delete response");
+
+            return ids.size();
+            
+        } catch (Exception ex) {
+            return -1;
         }
-        
-        String path = RES_STAMP + "list";
-        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-        qmap.add("ids", getConverter().fromList(ids));
-        
-        ClientResponse response = getResource(path, qmap)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .delete(ClientResponse.class);
-
-        int status = response.getStatus();
-        debug(status, "delete response");
-
-        return ids.size();
     }
     
     @Override

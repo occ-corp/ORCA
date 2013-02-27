@@ -12,7 +12,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractMainComponent;
-import open.dolphin.client.ChartEventListener;
+import open.dolphin.client.ChartEventHandler;
 import open.dolphin.client.GUIConst;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.PatientDelegater;
@@ -78,12 +78,12 @@ public class AdmissionList extends AbstractMainComponent {
     private Action copyAction;
     
     private String clientUUID;
-    private ChartEventListener cel;
+    private ChartEventHandler cel;
     
     
     public AdmissionList() {
         setName(NAME);
-        cel = ChartEventListener.getInstance();
+        cel = ChartEventHandler.getInstance();
         clientUUID = cel.getClientUUID();
         statusInfo = INFO_MSG;
     }
@@ -282,7 +282,7 @@ public class AdmissionList extends AbstractMainComponent {
     private void openKarte() {
         
         PatientModel patient = getSelectedPatient();
-        PatientVisitModel pvt = ChartEventListener.getInstance().createFakePvt(patient);
+        PatientVisitModel pvt = ChartEventHandler.getInstance().createFakePvt(patient);
         
         // カルテコンテナを生成する
         getContext().openKarte(pvt);

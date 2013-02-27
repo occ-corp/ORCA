@@ -83,13 +83,13 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private AbstractAction copyAction;
     
     private String clientUUID;
-    private ChartEventListener cel;
+    private ChartEventHandler cel;
 
     
     /** Creates new PatientSearch */
     public PatientSearchImpl() {
         setName(NAME);
-        cel = ChartEventListener.getInstance();
+        cel = ChartEventHandler.getInstance();
         clientUUID = cel.getClientUUID();
     }
 

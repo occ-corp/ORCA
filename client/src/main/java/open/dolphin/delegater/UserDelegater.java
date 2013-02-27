@@ -1,11 +1,11 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.sun.jersey.api.client.ClientResponse;
 import java.util.List;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.project.Project;
+import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * User 関連の Business Delegater　クラス。
@@ -39,7 +39,7 @@ public class UserDelegater extends BusinessDelegater {
         sb.append(uid);
         String fidUid = sb.toString();
 
-        JerseyClient jersey = JerseyClient.getInstance();
+        RESTEasyClient jersey = RESTEasyClient.getInstance();
         String baseURI = Project.getBaseURI();
         jersey.setBaseURI(baseURI);
         jersey.setUpAuthentication(fidUid, password, false);
@@ -55,128 +55,157 @@ public class UserDelegater extends BusinessDelegater {
     
     public UserModel getUser(String userPK) {
         
-        StringBuilder sb = new StringBuilder();
-        sb.append(RES_USER);
-        sb.append(userPK);
-        String path = sb.toString();
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append(RES_USER);
+            sb.append(userPK);
+            String path = sb.toString();
 
-        ClientResponse response = getResource(path, null)
-                   .accept(MEDIATYPE_JSON_UTF8)
-                   .get(ClientResponse.class);
+            ClientResponse response = getClientRequest(path, null)
+                       .accept(MEDIATYPE_JSON_UTF8)
+                       .get(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        debug(status, entityStr);
+            debug(status, entityStr);
 
-        if (status != HTTP200) {
+            if (status != HTTP200) {
+                return null;
+            }
+
+            UserModel userModel = (UserModel) 
+                    getConverter().fromJson(entityStr, UserModel.class);
+
+            return userModel;
+            
+        } catch (Exception ex) {
             return null;
         }
-
-        UserModel userModel = (UserModel) 
-                getConverter().fromJson(entityStr, UserModel.class);
-
-        return userModel;
     }
     
     public List<UserModel> getAllUser() {
+        
+        try {
+            String path = RES_USER;
 
-        String path = RES_USER;
+            ClientResponse response = getClientRequest(path, null)
+                       .accept(MEDIATYPE_JSON_UTF8)
+                       .get(ClientResponse.class);
 
-        ClientResponse response = getResource(path, null)
-                   .accept(MEDIATYPE_JSON_UTF8)
-                   .get(ClientResponse.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            debug(status, entityStr);
 
-        debug(status, entityStr);
-
-        if (status != HTTP200) {
+            if (status != HTTP200) {
+                return null;
+            }
+            TypeReference typeRef = new TypeReference<List<UserModel>>(){};
+            List<UserModel> list  = (List<UserModel>) 
+                    getConverter().fromJson(entityStr, typeRef);
+            
+            return list;
+            
+        } catch (Exception ex) {
             return null;
         }
-        
-        TypeReference typeRef = new TypeReference<List<UserModel>>(){};
-        List<UserModel> list  = (List<UserModel>) 
-                getConverter().fromJson(entityStr, typeRef);
-        
-        return list;
     }
     
     public int addUser(UserModel userModel) {
-
-        String path = RES_USER;
-        String json = getConverter().toJson(userModel);
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .type(MEDIATYPE_JSON_UTF8)
-                .post(ClientResponse.class, json);
-
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
-
-        debug(status, entityStr);
-
-        int cnt = Integer.parseInt(entityStr);
         
-        return cnt;
+        try {
+            String path = RES_USER;
+            String json = getConverter().toJson(userModel);
+
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .post(ClientResponse.class);
+
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
+
+            debug(status, entityStr);
+
+            int cnt = Integer.parseInt(entityStr);
+            
+            return cnt;
+            
+        } catch (Exception ex) {
+            return -1;
+        }
     }
     
     public int updateUser(UserModel userModel) {
         
-        String path = RES_USER;
-        String json = getConverter().toJson(userModel);
+        try {
+            String path = RES_USER;
+            String json = getConverter().toJson(userModel);
 
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)   
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)   
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        debug(status, entityStr);
+            debug(status, entityStr);
 
-        int cnt = Integer.parseInt(entityStr);
-        
-        return cnt;
+            int cnt = Integer.parseInt(entityStr);
+            
+            return cnt;
+            
+        } catch (Exception ex) {
+            return -1;
+        }
     }
     
     public int deleteUser(String uid) {
-
-        String path = RES_USER + uid;
-
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .delete(ClientResponse.class);
-
-        int status = response.getStatus();
         
-        debug(status, "delete response");
+        try {
+            String path = RES_USER + uid;
 
-        return 1;
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .delete(ClientResponse.class);
+
+            int status = response.getStatus();
+            
+            debug(status, "delete response");
+
+            return 1;
+            
+        } catch (Exception ex) {
+            return -1;
+        }
     }
     
     public int updateFacility(UserModel userModel) {
         
-        String path = RES_USER + "facility";
-        
-        String json = getConverter().toJson(userModel);
+        try {
+            String path = RES_USER + "facility";
+            
+            String json = getConverter().toJson(userModel);
 
-        ClientResponse response = getResource(path, null)
-                .accept(MEDIATYPE_TEXT_UTF8)
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
+            ClientResponse response = getClientRequest(path, null)
+                    .accept(MEDIATYPE_TEXT_UTF8)
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
 
-        int status = response.getStatus();
-        String entityStr = response.getEntity(String.class);
+            int status = response.getStatus();
+            String entityStr = (String) response.getEntity(String.class);
 
-        debug(status, entityStr);
+            debug(status, entityStr);
 
-        int cnt = Integer.parseInt(entityStr);
-        
-        return cnt;
+            int cnt = Integer.parseInt(entityStr);
+            
+            return cnt;
+            
+        } catch (Exception ex) {
+            return -1;
+        }
     }
     
     @Override

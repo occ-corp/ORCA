@@ -1,9 +1,7 @@
 package open.dolphin.delegater;
 
-import com.sun.jersey.api.client.ClientResponse;
-import java.util.concurrent.Future;
 import open.dolphin.infomodel.ChartEventModel;
-import open.dolphin.project.Project;
+import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * State変化関連のデレゲータ
@@ -18,14 +16,11 @@ public class ChartEventDelegater extends BusinessDelegater {
     private static final boolean debug = false;
     private static final ChartEventDelegater instance;
     
-    private String fid;
-
     static {
         instance = new ChartEventDelegater();
     }
     
     private ChartEventDelegater() {
-        fid = Project.getFacilityId();
     }
     
     public static ChartEventDelegater getInstance() {
@@ -33,47 +28,40 @@ public class ChartEventDelegater extends BusinessDelegater {
     }
     
     public int putChartEvent(ChartEventModel evt) {
-
-        String json = getConverter().toJson(evt);
-
-        ClientResponse response = getResource(PUT_EVENT_PATH, null)
-                .type(MEDIATYPE_JSON_UTF8)
-                .put(ClientResponse.class, json);
-
-        int status = response.getStatus();
-        String enityStr = response.getEntity(String.class);
-        debug(status, enityStr);
         
-        if (status != HTTP200) {
+        try {
+            String json = getConverter().toJson(evt);
+
+            ClientResponse response = getClientRequest(PUT_EVENT_PATH, null)
+                    .body(MEDIATYPE_JSON_UTF8, json)
+                    .put(ClientResponse.class);
+
+            int status = response.getStatus();
+            String enityStr = (String) response.getEntity(String.class);
+            debug(status, enityStr);
+            
+            if (status != HTTP200) {
+                return -1;
+            }
+            
+            return Integer.parseInt(enityStr);
+            
+        } catch (Exception ex) {
             return -1;
         }
-        
-        return Integer.parseInt(enityStr);
     }
 
-    public Future<ClientResponse> subscribe() throws Exception {
+    public String subscribe() throws Exception {
         
-        // できるだけ時間をとらないようにデシリアライズは後回しにする
-        // 処理もれが心配
-        Future<ClientResponse> future = JerseyClient.getInstance()
-                .getAsyncResource(SUBSCRIBE_PATH)
+        ClientResponse response = getClientRequest(SUBSCRIBE_PATH, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
-        return future;
-    }
-/*
-    public String subscribe() throws Exception {
+        String entityStr = (String) response.getEntity(String.class);
         
-        // できるだけ時間をとらないようにデシリアライズは後回しにする
-        // 処理もれが心配
-        String json = JerseyClient.getInstance()
-                .getAsyncResource(SUBSCRIBE_PATH)
-                .accept(MEDIATYPE_JSON_UTF8)
-                .get(String.class);
-        return json;
+        return entityStr;
     }
-*/
+
     @Override
     protected void debug(int status, String entity) {
         if (debug || DEBUG) {

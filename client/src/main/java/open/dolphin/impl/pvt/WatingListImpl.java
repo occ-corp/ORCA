@@ -165,7 +165,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private PVTDelegater pvtDelegater;
     
     private String clientUUID;
-    private ChartEventListener cel;
+    private ChartEventHandler cel;
     private String orcaId;
 
     /**
@@ -173,7 +173,7 @@ public class WatingListImpl extends AbstractMainComponent {
      */
     public WatingListImpl() {
         setName(NAME);
-        cel = ChartEventListener.getInstance();
+        cel = ChartEventHandler.getInstance();
         clientUUID = cel.getClientUUID();
         orcaId = Project.getUserModel().getOrcaId();
     }
