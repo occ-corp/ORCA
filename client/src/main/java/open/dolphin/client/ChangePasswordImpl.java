@@ -520,10 +520,10 @@ public class ChangePasswordImpl extends AbstractMainTool implements ChangeProfil
                     Project.getProjectStub().setUserId(updateModel.idAsLocal());
 
                     //-------------------------------------
-                    // Jersey Client
+                    // RESTEasy Client
                     //-------------------------------------
-                    RESTEasyClient jersy = RESTEasyClient.getInstance();
-                    jersy.setUpAuthentication(updateModel.getUserId(), updateModel.getPassword(), true);
+                    RESTEasyClient resteasy = RESTEasyClient.getInstance();
+                    resteasy.setUpAuthentication(updateModel.getUserId(), updateModel.getPassword(), true);
 
                     JOptionPane.showMessageDialog(getFrame(),
                             SUCCESS_MESSAGE,

@@ -39,10 +39,10 @@ public class UserDelegater extends BusinessDelegater {
         sb.append(uid);
         String fidUid = sb.toString();
 
-        RESTEasyClient jersey = RESTEasyClient.getInstance();
+        RESTEasyClient restEasy = RESTEasyClient.getInstance();
         String baseURI = Project.getBaseURI();
-        jersey.setBaseURI(baseURI);
-        jersey.setUpAuthentication(fidUid, password, false);
+        restEasy.setBaseURI(baseURI);
+        restEasy.setUpAuthentication(fidUid, password, false);
         
         if (DEBUG) {
             System.out.println(baseURI);
