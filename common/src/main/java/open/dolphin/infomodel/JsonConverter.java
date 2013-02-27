@@ -165,6 +165,7 @@ public class JsonConverter {
         try {
             GZIPInputStream gis = new GZIPInputStream(is);
             Object obj = fromJson(gis, clazz);
+            gis.close();
             return obj;
         } catch (IOException ex) {
             processException(ex);
@@ -181,6 +182,7 @@ public class JsonConverter {
         try {
             GZIPInputStream gis = new GZIPInputStream(is);
             Object obj = fromJson(gis, typeRef);
+            gis.close();
             return obj;
         } catch (IOException ex) {
             processException(ex);
