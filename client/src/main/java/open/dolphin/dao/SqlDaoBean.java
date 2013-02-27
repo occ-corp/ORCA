@@ -127,10 +127,15 @@ public class SqlDaoBean extends DaoBean {
         return values;
     }
     
+    private boolean isClient() {
+        String str = Project.getString(Project.CLAIM_SENDER);
+        boolean client = (str == null || Project.CLAIM_CLIENT.equals(str));
+        return client;
+    }
+    
     protected List<List<String>> executeStatement(String sql) {
         
-        boolean client = Project.CLAIM_CLIENT.equals(Project.getString(Project.CLAIM_SENDER));
-        if (client) {
+        if (isClient()) {
             return executeStatement1(sql);
         }
         return executeStatement2(sql);
@@ -186,11 +191,10 @@ public class SqlDaoBean extends DaoBean {
 
         return Collections.emptyList();
     }
-    
+
     protected List<List<String>> executePreparedStatement(String sql, int[] types, String[] params) {
-        
-        boolean client = Project.CLAIM_CLIENT.equals(Project.getString(Project.CLAIM_SENDER));
-        if (client) {
+
+        if (isClient()) {
             return executePreparedStatement1(sql, types, params);
         }
         return executePreparedStatement2(sql, types, params);
