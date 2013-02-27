@@ -123,12 +123,18 @@ public class SendClaimImpl implements ClaimMessageListener {
      */
     @Override
     public void claimMessageEvent(ClaimMessageEvent evt) {
-        boolean client = Project.CLAIM_CLIENT.equals(Project.getString(Project.CLAIM_SENDER));
-        if (client) {
+
+        if (isClient()) {
             claimSendTask.sendClaim(evt);
         } else {
             OrcaDelegater.getInstance().sendClaim(evt);
         }
+    }
+    
+    private boolean isClient() {
+        String str = Project.getString(Project.CLAIM_SENDER);
+        boolean client = (str == null || Project.CLAIM_CLIENT.equals(str));
+        return client;
     }
     
     private class ClaimSendTask implements Runnable {
