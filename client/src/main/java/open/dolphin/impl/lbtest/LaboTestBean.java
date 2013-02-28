@@ -127,7 +127,9 @@ public class LaboTestBean extends AbstractChartDocument {
         for (NLaboModule module : modules) {
 
             // 検体採取日
-            header[moduleIndex + 1] = module.getSampleDate();
+            //header[moduleIndex + 1] = module.getSampleDate();
+            // 画面がちっちゃいと日付が見えないらしい
+            header[moduleIndex + 1] = module.getSampleDate().substring(2);
 
             for (NLaboItem item : module.getItems()) {
 
@@ -159,7 +161,7 @@ public class LaboTestBean extends AbstractChartDocument {
                         value.setComment1(item.getComment1());
                         value.setComment2(item.getComment2());
                         rowObject.addLabTestValueObjectAt(moduleIndex, value);
-                        rowObject.setNormalValue(item.getNormalValue());
+                        rowObject.setNormalValue(item.getNormalValue());    // 基準値記録漏れ対策
                         break;
                     }
                 }
