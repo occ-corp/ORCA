@@ -27,7 +27,6 @@ public class BusinessDelegater {
     private static final String CHARSET_UTF8 = "; charset=UTF-8";
     protected static final String MEDIATYPE_JSON_UTF8 = MediaType.APPLICATION_JSON + CHARSET_UTF8;
     protected static final String MEDIATYPE_TEXT_UTF8 = MediaType.TEXT_PLAIN + CHARSET_UTF8;
-    protected static final int HTTP200 = 200;
 //masuda$
     
     protected Logger logger;
@@ -99,6 +98,13 @@ public class BusinessDelegater {
 
             c.clear();
             patient.setHealthInsurances(null);
+        }
+    }
+    
+    protected void isHTTP200(int status) throws Exception {
+        if (status != 200) {
+            String msg = "HTTP" + String.valueOf(status);
+            throw new Exception(msg);
         }
     }
 }

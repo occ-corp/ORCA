@@ -272,7 +272,7 @@ public class CheckMedication {
     }
 
     // 処方切れの可能性のある患者を調べる
-    public List<PatientModel> getShohougirePatient(){
+    public List<PatientModel> getShohougirePatient() throws Exception{
 
         final int searchPeriod = 40;
         final int yoyuu = 3;

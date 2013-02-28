@@ -26,26 +26,22 @@ public final class AppointmentDelegater extends BusinessDelegater {
     private AppointmentDelegater() {
     }
 
-    public int putAppointments(List<AppointmentModel> list) {
+    public int putAppointments(List<AppointmentModel> list) throws Exception {
 
-        try {
-            String path = "appo/";
-            String json = getConverter().toJson(list);
+        String path = "appo/";
+        String json = getConverter().toJson(list);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .put(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .put(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            return Integer.parseInt(entityStr);
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        return Integer.parseInt(entityStr);
     }
 
     @Override

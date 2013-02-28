@@ -32,34 +32,27 @@ public class LaboDelegater extends BusinessDelegater {
     private LaboDelegater() {
     }
 
-    public List<PatientLiteModel> getConstrainedPatients(List<String> idList) {
+    public List<PatientLiteModel> getConstrainedPatients(List<String> idList) throws Exception {
+
+        String path = "lab/patient";
         
-        try {
-            String path = "lab/patient";
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("ids", getConverter().fromList(idList));
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("ids", getConverter().fromList(idList));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<PatientLiteModel>>(){};
-            List<PatientLiteModel> list = (List<PatientLiteModel>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return list;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        TypeReference typeRef = new TypeReference<List<PatientLiteModel>>(){};
+        List<PatientLiteModel> list = (List<PatientLiteModel>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return list;
     }
     
     /**
@@ -67,34 +60,26 @@ public class LaboDelegater extends BusinessDelegater {
      * @param value 追加する検査モジュール
      * @return      患者オブジェクト
      */
-    public PatientModel postNLaboModule(NLaboModule value) {
+    public PatientModel postNLaboModule(NLaboModule value) throws Exception {
         
-        try {
-            String path = "lab/module/";
-            
-            String json = getConverter().toJson(value);
+        String path = "lab/module/";
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        String json = getConverter().toJson(value);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            if (status != HTTP200) {
-                return null;
-            }
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            PatientModel patient = (PatientModel)
-                    getConverter().fromJson(entityStr, PatientModel.class);
-            
-            return patient;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        PatientModel patient = (PatientModel)
+                getConverter().fromJson(entityStr, PatientModel.class);
+
+        return patient;
     }
 
     /**
@@ -104,107 +89,84 @@ public class LaboDelegater extends BusinessDelegater {
      * @param maxResult     取得する件数の最大値
      * @return              ラボモジュールを採取日で降順に格納したリスト
      */
-    public List<NLaboModule> getLaboTest(String patientId, int firstResult, int maxResult) {
+    public List<NLaboModule> getLaboTest(String patientId, int firstResult, int maxResult) throws Exception {
+
+        String path = "lab/module/" + patientId;
         
-        try {
-            String path = "lab/module/" + patientId;
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("firstResult", String.valueOf(firstResult));
-            qmap.add("maxResult", String.valueOf(maxResult));
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("firstResult", String.valueOf(firstResult));
+        qmap.add("maxResult", String.valueOf(maxResult));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<NLaboModule>>(){};
-            List<NLaboModule> list = (List<NLaboModule>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return list;
-        } catch (Exception ex) {
-            return null;
-        }
+        TypeReference typeRef = new TypeReference<List<NLaboModule>>(){};
+        List<NLaboModule> list = (List<NLaboModule>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return list;
     }
 
 //masuda^   旧ラボ
-    public PatientModel putMmlLaboModule(LaboModuleValue value) {
-        
-        try {
-            String path = "lab/mmlModule";
+    public PatientModel putMmlLaboModule(LaboModuleValue value) throws Exception {
 
-            String json = getConverter().toJson(value);
+        String path = "lab/mmlModule";
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        String json = getConverter().toJson(value);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            PatientModel patient = (PatientModel) 
-                    getConverter().fromJson(entityStr, PatientModel.class);
-            
-            decodeHealthInsurance(patient);
-            
-            return patient;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        PatientModel patient = (PatientModel) 
+                getConverter().fromJson(entityStr, PatientModel.class);
+
+        decodeHealthInsurance(patient);
+
+        return patient;
     }
     
     // 削除
-    public int deleteNlaboModule(long id) {
-        
-        try {
-            String path = "lab/module/id/" + String.valueOf(id);
-            
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .delete(ClientResponse.class);
+    public int deleteNlaboModule(long id) throws Exception {
 
-            int status = response.getStatus();
-            
-            debug(status, "delete response");
+        String path = "lab/module/id/" + String.valueOf(id);
 
-            return 1;
-        } catch (Exception ex) {
-            return -1;
-        }
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
+
+        int status = response.getStatus();
+        debug(status, "delete response");
+        isHTTP200(status);
+
+        return 1;
     }
     
-    public int deleteMmlLaboModule(long id) {
-        
-        try {
-            String path = "lab/mmlModule/id/" + String.valueOf(id);
-            
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .delete(ClientResponse.class);
+    public int deleteMmlLaboModule(long id) throws Exception {
 
-            int status = response.getStatus();
-            
-            debug(status, "delete response");
+        String path = "lab/mmlModule/id/" + String.valueOf(id);
 
-            return 1;
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
+
+        int status = response.getStatus();
+        debug(status, "delete response");
+        isHTTP200(status);
+
+        return 1;
     }
 
     @Override

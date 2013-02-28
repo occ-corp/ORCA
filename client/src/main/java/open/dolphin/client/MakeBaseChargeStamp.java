@@ -216,7 +216,11 @@ public class MakeBaseChargeStamp extends CheckSantei {
         List<ModuleModel> stamps = doc.getStamps();
         
         // CheckSanteiの初期化
-        init(editor.getContext(), stamps, editor.getModel().getDocInfoModel().getFirstConfirmDate());
+        try {
+            init(editor.getContext(), stamps, editor.getModel().getDocInfoModel().getFirstConfirmDate());
+        } catch (Exception ex) {
+            return;
+        }
 
         if (diagnosis == null || diagnosis.isEmpty()) {
             String title = ClientContext.getFrameTitle("基本料");

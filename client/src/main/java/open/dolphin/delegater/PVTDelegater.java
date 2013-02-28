@@ -36,83 +36,67 @@ public class PVTDelegater extends BusinessDelegater {
      * @param principal UserId と FacilityId
      * @return 保存に成功した個数
      */
-    public int addPvt(PatientVisitModel pvtModel) {
+    public int addPvt(PatientVisitModel pvtModel) throws Exception {
         
-        try {
-            // convert
-            String json = getConverter().toJson(pvtModel);
+        // convert
+        String json = getConverter().toJson(pvtModel);
 
-            // resource post
-            String path = RES_PVT;
-            ClientResponse response = getClientRequest(path, null)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        // resource post
+        String path = RES_PVT;
+        ClientResponse response = getClientRequest(path, null)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            int status = response.getStatus();
-            String enityStr = (String) response.getEntity(String.class);
-            debug(status, enityStr);
+        int status = response.getStatus();
+        String enityStr = (String) response.getEntity(String.class);
+        debug(status, enityStr);
+        isHTTP200(status);
 
-            // result = count
-            int cnt = Integer.parseInt(enityStr);
-            return cnt;
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        // result = count
+        int cnt = Integer.parseInt(enityStr);
+        return cnt;
     }
 
-    public int removePvt(long id) {
+    public int removePvt(long id) throws Exception {
         
-        try {
-            String path = RES_PVT + String.valueOf(id);
+        String path = RES_PVT + String.valueOf(id);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .delete(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
 
-            int status = response.getStatus();
-            String enityStr = "delete response";
-            debug(status, enityStr);
+        int status = response.getStatus();
+        String enityStr = "delete response";
+        debug(status, enityStr);
+        isHTTP200(status);
 
-            return 1;
-            
-        } catch (Exception ex) {
-            return -1;
-        }
-    }
+        return 1;
+     }
 
-    public List<PatientVisitModel> getPvtList() {
+    public List<PatientVisitModel> getPvtList() throws Exception {
         
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append(RES_PVT);
-            sb.append("pvtList");
-            String path = sb.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(RES_PVT);
+        sb.append("pvtList");
+        String path = sb.toString();
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
+        TypeReference typeRef = new TypeReference<List<PatientVisitModel>>(){};
+        List<PatientVisitModel> pvtList = (List<PatientVisitModel>)
+                getConverter().fromJson(entityStr, typeRef);
 
-            TypeReference typeRef = new TypeReference<List<PatientVisitModel>>(){};
-            List<PatientVisitModel> pvtList = (List<PatientVisitModel>)
-                    getConverter().fromJson(entityStr, typeRef);
+        // 保険をデコード
+        decodePvtHealthInsurance(pvtList);
 
-            // 保険をデコード
-            decodePvtHealthInsurance(pvtList);
-
-            return pvtList;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        return pvtList;
     }
 
     @Override

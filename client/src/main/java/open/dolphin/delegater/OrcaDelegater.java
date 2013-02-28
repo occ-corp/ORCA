@@ -31,78 +31,81 @@ public class OrcaDelegater extends BusinessDelegater {
     private OrcaDelegater() {
     }
     
-    public OrcaSqlModel executeQuery(OrcaSqlModel sqlModel) {
+    public OrcaSqlModel executeQuery(OrcaSqlModel sqlModel) throws Exception {
         
-        try {
-            String json = getConverter().toJson(sqlModel);
+        String json = getConverter().toJson(sqlModel);
 
-            String path = "orca/query";
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        String path = "orca/query";
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            debug(status, entityStr);
+        sqlModel = (OrcaSqlModel) 
+                getConverter().fromJson(entityStr, OrcaSqlModel.class);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            sqlModel = (OrcaSqlModel) 
-                    getConverter().fromJson(entityStr, OrcaSqlModel.class);
-            
-            return sqlModel;
-        } catch (Exception ex) {
-            return null;
-        }
+        return sqlModel;
     }
     
     public void sendClaim(ClaimMessageEvent evt) {
-        
         try {
+            sendClaimImpl(evt);
+        } catch (Exception ex) {
+            final String errMsg = "接続を確認してください";
             Object evtSource = evt.getSource();
-            
-            ClaimMessageModel model = toClaimMessageModel(evt);
-            
-            String path = "orca/claim";
-            String json = getConverter().toJson(model);
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
-            
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            
-            debug(status, entityStr);
-            
-            if (status != HTTP200) {
-                return;
-            }
-            
-            ClaimMessageModel resModel = (ClaimMessageModel)
-                    getConverter().fromJson(entityStr, ClaimMessageModel.class);
-            
-            String errMsg = resModel.getErrorMsg();
-            boolean noError = NO_ERROR.equals(resModel.getErrorCode());
-
             if (evtSource instanceof ClaimSender) {
                 ClaimSender sender = (ClaimSender) evtSource;
-                KarteSenderResult result = !noError
-                        ? new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.ERROR, errMsg, sender)
-                        : new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.NO_ERROR, null, sender);
+                KarteSenderResult result = new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.ERROR, errMsg, sender);
                 sender.fireResult(result);
             } else if (evtSource instanceof DiagnosisSender) {
                 DiagnosisSender sender = (DiagnosisSender) evtSource;
-                KarteSenderResult result = !noError
-                        ? new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.ERROR, errMsg, sender)
-                        : new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.NO_ERROR, null, sender);
+                KarteSenderResult result = new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.ERROR, errMsg, sender);
                 sender.fireResult(result);
             }
-        } catch (Exception ex) {
+        }
+    }
+    
+    private void sendClaimImpl(ClaimMessageEvent evt) throws Exception {
+        
+        Object evtSource = evt.getSource();
+
+        ClaimMessageModel model = toClaimMessageModel(evt);
+
+        String path = "orca/claim";
+        String json = getConverter().toJson(model);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        ClaimMessageModel resModel = (ClaimMessageModel)
+                getConverter().fromJson(entityStr, ClaimMessageModel.class);
+
+        String errMsg = resModel.getErrorMsg();
+        boolean noError = NO_ERROR.equals(resModel.getErrorCode());
+
+        if (evtSource instanceof ClaimSender) {
+            ClaimSender sender = (ClaimSender) evtSource;
+            KarteSenderResult result = !noError
+                    ? new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.ERROR, errMsg, sender)
+                    : new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.NO_ERROR, null, sender);
+            sender.fireResult(result);
+        } else if (evtSource instanceof DiagnosisSender) {
+            DiagnosisSender sender = (DiagnosisSender) evtSource;
+            KarteSenderResult result = !noError
+                    ? new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.ERROR, errMsg, sender)
+                    : new KarteSenderResult(SERVER_CLAIM, KarteSenderResult.NO_ERROR, null, sender);
+            sender.fireResult(result);
         }
     }
     

@@ -50,7 +50,7 @@ public class ExtendedStampTreeXmlDirector {
      * @param tree StampTree
      * @throws IOException
      */
-    private void lbuild(StampTree tree) throws IOException {
+    private void lbuild(StampTree tree) throws Exception {
 
         // ルートノードを取得しチャイルドのEnumerationを得る
         DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tree.getModel().getRoot();

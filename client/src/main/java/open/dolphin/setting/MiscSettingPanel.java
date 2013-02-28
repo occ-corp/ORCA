@@ -407,7 +407,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                saveProperties();
+                try {
+                    saveProperties();
+                } catch (Exception ex) {
+                }
             }
         });
         btn_loadProp = new JButton("設定をサーバーから読込");
@@ -415,7 +418,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                loadProperties();
+                try {
+                    loadProperties();
+                } catch (Exception ex) {
+                }
             }
         });
         gbl.add(btn_openBase, 0, 0, GridBagConstraints.CENTER);
@@ -1275,7 +1281,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         Project.getUserDefaults().remove("chartPanelRightSize");
     }
     
-    private void loadProperties() {
+    private void loadProperties() throws Exception {
         
         Properties prop = Project.getUserDefaults();
         String userId = Project.getUserModel().getUserId();
@@ -1288,7 +1294,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         }
     }
     
-    private void saveProperties() {
+    private void saveProperties() throws Exception {
         
         // サーバーに保存する前にPropertiesを更新する
         getContext().saveOnly();

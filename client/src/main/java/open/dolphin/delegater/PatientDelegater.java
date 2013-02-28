@@ -44,27 +44,23 @@ public class  PatientDelegater extends BusinessDelegater {
      * @param patient 追加する患者
      * @return PK
      */
-    public long addPatient(PatientModel patient) {
+    public long addPatient(PatientModel patient) throws Exception {
         
-        try {
-            String json = getConverter().toJson(patient);
+        String json = getConverter().toJson(patient);
 
-            String path = BASE_RESOURCE;
+        String path = BASE_RESOURCE;
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            return Long.valueOf(entityStr);
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        return Long.valueOf(entityStr);
     }
     
     /**
@@ -72,31 +68,23 @@ public class  PatientDelegater extends BusinessDelegater {
      * @param pid 患者ID
      * @return PatientModel
      */
-    public PatientModel getPatientById(String pid) {
+    public PatientModel getPatientById(String pid) throws Exception {
         
-        try {
-            String path = ID_RESOURCE;
+        String path = ID_RESOURCE;
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            PatientModel patient = (PatientModel)
-                    getConverter().fromJson(entityStr, PatientModel.class);
-            
-            return patient;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        PatientModel patient = (PatientModel)
+                getConverter().fromJson(entityStr, PatientModel.class);
+
+        return patient;
     }
     
     /**
@@ -104,56 +92,49 @@ public class  PatientDelegater extends BusinessDelegater {
      * @param spec PatientSearchSpec 検索仕様
      * @return PatientModel の Collection
      */
-    public List<PatientModel> getPatients(PatientSearchSpec spec) {
+    public List<PatientModel> getPatients(PatientSearchSpec spec) throws Exception {
         
-        try {
-            StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
 
-            switch (spec.getCode()) {
+        switch (spec.getCode()) {
 
-                case PatientSearchSpec.NAME_SEARCH:
-                    sb.append(NAME_RESOURCE);
-                    sb.append(spec.getName());
-                    break;
+            case PatientSearchSpec.NAME_SEARCH:
+                sb.append(NAME_RESOURCE);
+                sb.append(spec.getName());
+                break;
 
-                case PatientSearchSpec.KANA_SEARCH:
-                    sb.append(KANA_RESOURCE);
-                    sb.append(spec.getName());
-                    break;
+            case PatientSearchSpec.KANA_SEARCH:
+                sb.append(KANA_RESOURCE);
+                sb.append(spec.getName());
+                break;
 
-                case PatientSearchSpec.DIGIT_SEARCH:
-                    sb.append(DIGIT_RESOURCE);
-                    sb.append(spec.getDigit());
-                    break;
+            case PatientSearchSpec.DIGIT_SEARCH:
+                sb.append(DIGIT_RESOURCE);
+                sb.append(spec.getDigit());
+                break;
 
-               case PatientSearchSpec.DATE_SEARCH:
-                    sb.append(PVT_DATE_RESOURCE);
-                    sb.append(spec.getDigit());
-                    break;
-            }
-
-            String path = sb.toString();
-
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
-
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
-            
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
-            List<PatientModel> list = (List<PatientModel>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return list;
-        } catch (Exception ex) {
-            return null;
+           case PatientSearchSpec.DATE_SEARCH:
+                sb.append(PVT_DATE_RESOURCE);
+                sb.append(spec.getDigit());
+                break;
         }
+
+        String path = sb.toString();
+
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
+        List<PatientModel> list = (List<PatientModel>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return list;
     }
 
     /**
@@ -161,90 +142,72 @@ public class  PatientDelegater extends BusinessDelegater {
      * @param patient 更新する患者
      * @return 更新数
      */
-    public int updatePatient(PatientModel patient) {
+    public int updatePatient(PatientModel patient) throws Exception {
         
-        try {
-            String json = getConverter().toJson(patient);
+        String json = getConverter().toJson(patient);
 
-            String path = BASE_RESOURCE;
+        String path = BASE_RESOURCE;
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)    
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .put(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)    
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .put(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            return Integer.parseInt(entityStr);
-        } catch (Exception ex) {
-            return -1;
-        }
+        return Integer.parseInt(entityStr);
     }
     
     // patientIDリストからPatienteModelのリストを取得する
-    public List<PatientModel> getPatientList(Collection patientIdList) {
+    public List<PatientModel> getPatientList(Collection patientIdList) throws Exception {
         
-        try {
-            String path = BASE_RESOURCE + "list";
-            String ids = getConverter().fromList(patientIdList);
-            
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("ids", ids);
-            
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
-            
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        String path = BASE_RESOURCE + "list";
+        String ids = getConverter().fromList(patientIdList);
 
-            if (status != HTTP200) {
-                return null;
-            }
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("ids", ids);
 
-            TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
-            List<PatientModel> list = (List<PatientModel>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return list;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
+        List<PatientModel> list = (List<PatientModel>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return list;
     }
 
     // カルテオープン時に保険情報を更新する
-    public void updateHealthInsurances(PatientModel pm) {
+    public void updateHealthInsurances(PatientModel pm) throws Exception {
         
-        try {
-            long pk = pm.getId();
-            String path = BASE_RESOURCE + "insurances/" + String.valueOf(pk);
+        long pk = pm.getId();
+        String path = BASE_RESOURCE + "insurances/" + String.valueOf(pk);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
-            
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            if (status != HTTP200) {
-                return;
-            }
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            TypeReference typeRef = new TypeReference<List<HealthInsuranceModel>>(){};
-            List<HealthInsuranceModel> list = (List<HealthInsuranceModel>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            pm.setHealthInsurances(list);
-            // 忘れがちｗ
-            decodeHealthInsurance(pm);
-            
-        } catch (Exception ex) {
-        }
+        TypeReference typeRef = new TypeReference<List<HealthInsuranceModel>>(){};
+        List<HealthInsuranceModel> list = (List<HealthInsuranceModel>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        pm.setHealthInsurances(list);
+        // 忘れがちｗ
+        decodeHealthInsurance(pm);
     }
     
     @Override

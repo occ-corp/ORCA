@@ -91,7 +91,7 @@ public class ExtendedStampTreeXmlBuilder {
         linkedList.addFirst(rootNode);
     }
 
-    public void buildNode(StampTreeNode node) throws IOException {
+    public void buildNode(StampTreeNode node) throws Exception {
 
         if ( node.isLeaf() ) {
             buildLeafNode(node);
@@ -125,7 +125,7 @@ public class ExtendedStampTreeXmlBuilder {
         }
     }
 
-    private void buildLeafNode(StampTreeNode node) throws IOException {
+    private void buildLeafNode(StampTreeNode node) throws IOException, Exception {
 
         if (logger != null) {
             logger.debug("Build Leaf Node: " + node.toString());
@@ -179,7 +179,7 @@ public class ExtendedStampTreeXmlBuilder {
     }
 
     // StampIdから対応するStampModelを取得してstampBytesのHex文字列を作成する
-    private String getHexStampBytes(String stampId){
+    private String getHexStampBytes(String stampId) throws Exception{
 
         StampDelegater del = StampDelegater.getInstance();
         // スタンプの実体を取得

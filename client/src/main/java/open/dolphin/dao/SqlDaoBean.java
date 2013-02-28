@@ -178,15 +178,17 @@ public class SqlDaoBean extends DaoBean {
         sqlModel.setUrl(getURL());
         sqlModel.setSql(sql);
 
-        OrcaSqlModel result = OrcaDelegater.getInstance().executeQuery(sqlModel);
-        
-        if (result != null) {
-            String errMsg = result.getErrorMessage();
-            if (errMsg != null) {
-                processError(new SQLException(result.getErrorMessage()));
-            } else {
-                return result.getValuesList();
+        try {
+            OrcaSqlModel result = OrcaDelegater.getInstance().executeQuery(sqlModel);
+            if (result != null) {
+                String errMsg = result.getErrorMessage();
+                if (errMsg != null) {
+                    processError(new SQLException(result.getErrorMessage()));
+                } else {
+                    return result.getValuesList();
+                }
             }
+        } catch (Exception ex) {
         }
 
         return Collections.emptyList();
@@ -273,18 +275,20 @@ public class SqlDaoBean extends DaoBean {
                     break;
             }
         }
+        try {
+            OrcaSqlModel result = OrcaDelegater.getInstance().executeQuery(sqlModel);
 
-        OrcaSqlModel result = OrcaDelegater.getInstance().executeQuery(sqlModel);
-        
-        if (result != null) {
-            String errMsg = result.getErrorMessage();
-            if (errMsg != null) {
-                processError(new SQLException(result.getErrorMessage()));
-            } else {
-                return result.getValuesList();
+            if (result != null) {
+                String errMsg = result.getErrorMessage();
+                if (errMsg != null) {
+                    processError(new SQLException(result.getErrorMessage()));
+                } else {
+                    return result.getValuesList();
+                }
             }
+        } catch (Exception ex) {
         }
-
+        
         return Collections.emptyList();
     }
     

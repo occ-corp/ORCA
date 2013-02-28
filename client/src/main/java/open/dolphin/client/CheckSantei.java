@@ -84,7 +84,7 @@ public class CheckSantei extends CheckSanteiConst {
     private MasudaDelegater del;    
 
 
-    public void init(Chart context, List<ModuleModel> stamps, Date date) {
+    public void init(Chart context, List<ModuleModel> stamps, Date date) throws Exception {
         
         eTenDao = SqlETensuDao.getInstance();
         del = MasudaDelegater.getInstance();
@@ -584,7 +584,7 @@ public class CheckSantei extends CheckSanteiConst {
         sourceStampHolder = sh;
     }
     
-    private void setupVariables() {
+    private void setupVariables() throws Exception {
         
         SyskanriInfo syskanri = SyskanriInfo.getInstance();
         
@@ -648,8 +648,11 @@ public class CheckSantei extends CheckSanteiConst {
     private void setupPastSanteiHistory() {
         
         Date fromThisMonth = getFromDateThisMonth(karteDate);
-        // 今月の算定履歴を取得する
-        pastSanteiListMonth = del.getSanteiHistory(karteId, fromThisMonth, karteDate, null);
+        try {
+            // 今月の算定履歴を取得する
+            pastSanteiListMonth = del.getSanteiHistory(karteId, fromThisMonth, karteDate, null);
+        } catch (Exception ex) {
+        }
     }
     
     private void setupCurrentSanteiHistory() {
@@ -705,7 +708,7 @@ public class CheckSantei extends CheckSanteiConst {
         }
     }
     
-    private void setupDiagnosis() {
+    private void setupDiagnosis() throws Exception {
         
         // 病名を取得する
         DocumentDelegater ddl = DocumentDelegater.getInstance();
@@ -838,7 +841,7 @@ public class CheckSantei extends CheckSanteiConst {
         return new Date[]{fromDate,toDate};
     }
     
-    protected void setupYakujouAvailable() {
+    protected void setupYakujouAvailable() throws Exception {
 
         choukiAvailable = false;
         yakujouAvailable = true;

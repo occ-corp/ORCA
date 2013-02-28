@@ -48,34 +48,25 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param fromDate 履歴の検索開始日
      * @return カルテ
      */
-    public KarteBean getKarte(long patientPK, Date fromDate) {
+    public KarteBean getKarte(long patientPK, Date fromDate) throws Exception {
         
-        try {
-            String path = "karte/" + String.valueOf(patientPK);
-            MultivaluedMap<String, String> qmap= new MultivaluedMapImpl();
-            qmap.add("fromDate", toRestFormat(fromDate));
+        String path = "karte/" + String.valueOf(patientPK);
+        MultivaluedMap<String, String> qmap= new MultivaluedMapImpl();
+        qmap.add("fromDate", toRestFormat(fromDate));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            debug(status, entityStr);
+        KarteBean karte = (KarteBean)
+                getConverter().fromJson(entityStr, KarteBean.class);
 
-            if (status != HTTP200) {
-                return null;
-            }
-
-            KarteBean karte = (KarteBean)
-                    getConverter().fromJson(entityStr, KarteBean.class);
-
-            return karte;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        return karte;
     }
     
     /**
@@ -83,35 +74,26 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param karteModel KarteModel
      * @return Result Code
      */
-    public long postDocument(DocumentModel karteModel) {
+    public long postDocument(DocumentModel karteModel) throws Exception {
         
-        try {
-            // 確定日、適合開始日、記録日、ステータスを
-            // DocInfo から DocumentModel(KarteEntry) に移す
-            karteModel.toPersist();
-            
-            String json = getConverter().toJson(karteModel);
+        // 確定日、適合開始日、記録日、ステータスを
+        // DocInfo から DocumentModel(KarteEntry) に移す
+        karteModel.toPersist();
 
-            String path = "karte/document";
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        String json = getConverter().toJson(karteModel);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            
-            debug(status, entityStr);
+        String path = "karte/document";
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            if (status != HTTP200) {
-                return -1;
-            }
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            return Long.parseLong(entityStr);
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        return Long.parseLong(entityStr);
     }
     
     /**
@@ -119,35 +101,28 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param id DocumentID
      * @return DocumentValue
      */
-    public List<DocumentModel> getDocuments(List<Long> ids) {
+    public List<DocumentModel> getDocuments(List<Long> ids) throws Exception {
         
-        try {
-            String path = "karte/document";
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("ids", getConverter().fromList(ids));
+        String path = "karte/document";
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("ids", getConverter().fromList(ids));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            //String entityStr = (String) response.getEntity(String.class);
-            byte[] bytes = (byte[]) response.getEntity(byte[].class);
+        int status = response.getStatus();
+        isHTTP200(status);
+        
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
+        byte[] bytes = (byte[]) response.getEntity(byte[].class);
 
-            //debug(status, entityStr);
-            if (status != HTTP200) {
-                return null;
-            }
+        TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
+        List<DocumentModel> list = (List<DocumentModel>)
+                getConverter().fromGzippedJson(bytes, typeRef);
 
-            TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
-            List<DocumentModel> list = (List<DocumentModel>)
-                    getConverter().fromGzippedJson(bytes, typeRef);
-
-            return list;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        return list;
     }
 
     /**
@@ -155,109 +130,91 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param spec DocumentSearchSpec 検索仕様
      * @return DocInfoModel の Collection
      */
-    public List<DocInfoModel> getDocumentList(DocumentSearchSpec spec) {
+    public List<DocInfoModel> getDocumentList(DocumentSearchSpec spec) throws Exception {
 
         if (spec.getDocType().startsWith("karte")) {
             return getKarteList(spec);
-
         } else if (spec.getDocType().equals(IInfoModel.DOCTYPE_LETTER)) {
             return getLetterList(spec);
-
         }
 
         return null;
     }
     
 //katoh^
-    private List<DocInfoModel> getKarteList(DocumentSearchSpec spec) {
+    private List<DocInfoModel> getKarteList(DocumentSearchSpec spec) throws Exception {
         
-        try {
-            String path = "karte/docinfo/" + String.valueOf(spec.getKarteId());
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("fromDate", toRestFormat(spec.getFromDate()));
-            qmap.add("toDate", toRestFormat(spec.getToDate()));
-            qmap.add("includeModified", String.valueOf(spec.isIncludeModifid()));
+        String path = "karte/docinfo/" + String.valueOf(spec.getKarteId());
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("fromDate", toRestFormat(spec.getFromDate()));
+        qmap.add("toDate", toRestFormat(spec.getToDate()));
+        qmap.add("includeModified", String.valueOf(spec.isIncludeModifid()));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            debug(status, entityStr);
+        TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
+        List<DocInfoModel> list = (List<DocInfoModel>)
+                getConverter().fromJson(entityStr, typeRef);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
-            List<DocInfoModel> list = (List<DocInfoModel>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return list;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        return list;
     }
 //katoh$
     
-    private List<DocInfoModel> getLetterList(DocumentSearchSpec spec) {
+    private List<DocInfoModel> getLetterList(DocumentSearchSpec spec) throws Exception {
         
-        try {
-            String path = "odletter/list/" + String.valueOf(spec.getKarteId());
+        String path = "odletter/list/" + String.valueOf(spec.getKarteId());
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
+        int status = response.getStatus();
+        isHTTP200(status);
 
-            debug(status, entityStr);
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
-            List<LetterModule> list = (List<LetterModule>)
-                    getConverter().fromJson(entityStr, typeRef);
+        TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
+        List<LetterModule> list = (List<LetterModule>)
+                getConverter().fromJson(entityStr, typeRef);
 
-            List<DocInfoModel> ret = new ArrayList<DocInfoModel>();
-            
-            if (list != null && !list.isEmpty()) {
-                for (LetterModule module : list) {
-                    DocInfoModel docInfo = new DocInfoModel();
-                    docInfo.setDocPk(module.getId());
-                    docInfo.setDocType(IInfoModel.DOCTYPE_LETTER);
-                    docInfo.setDocId(String.valueOf(module.getId()));
-                    docInfo.setConfirmDate(module.getConfirmed());
-                    docInfo.setFirstConfirmDate(module.getConfirmed());
-                    StringBuilder sb = new StringBuilder();
-                    if (module.getTitle()!=null) {
-                        sb.append(module.getTitle());
-                    } else if(module.getLetterType().equals(IInfoModel.CONSULTANT)) {
-                        sb.append(TITLE_REPLY).append(module.getClientHospital());
-                    } else if (module.getLetterType().equals(IInfoModel.CLIENT)) {
-                        sb.append(TITLE_LETTER).append(module.getConsultantHospital());
-                    } else if (module.getLetterType().equals(IInfoModel.MEDICAL_CERTIFICATE)) {
-                        sb.append(TITLE_CERTIFICATE);
-                    }
-                    docInfo.setTitle(sb.toString());
-                    docInfo.setHandleClass(module.getHandleClass());
+        List<DocInfoModel> ret = new ArrayList<DocInfoModel>();
 
-                    ret.add(docInfo);
+        if (list != null && !list.isEmpty()) {
+            for (LetterModule module : list) {
+                DocInfoModel docInfo = new DocInfoModel();
+                docInfo.setDocPk(module.getId());
+                docInfo.setDocType(IInfoModel.DOCTYPE_LETTER);
+                docInfo.setDocId(String.valueOf(module.getId()));
+                docInfo.setConfirmDate(module.getConfirmed());
+                docInfo.setFirstConfirmDate(module.getConfirmed());
+                StringBuilder sb = new StringBuilder();
+                if (module.getTitle()!=null) {
+                    sb.append(module.getTitle());
+                } else if(module.getLetterType().equals(IInfoModel.CONSULTANT)) {
+                    sb.append(TITLE_REPLY).append(module.getClientHospital());
+                } else if (module.getLetterType().equals(IInfoModel.CLIENT)) {
+                    sb.append(TITLE_LETTER).append(module.getConsultantHospital());
+                } else if (module.getLetterType().equals(IInfoModel.MEDICAL_CERTIFICATE)) {
+                    sb.append(TITLE_CERTIFICATE);
                 }
-            } else {
-                System.err.println("parse no results");
-            }
+                docInfo.setTitle(sb.toString());
+                docInfo.setHandleClass(module.getHandleClass());
 
-            return ret;
-        } catch (Exception ex) {
-            return null;
+                ret.add(docInfo);
+            }
+        } else {
+            System.err.println("parse no results");
         }
+
+        return ret;
     }
     
   
@@ -266,21 +223,18 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param pk 論理削除するドキュメントの prmary key
      * @return 削除件数
      */
-    public int deleteDocument(long pk) {
+    public int deleteDocument(long pk) throws Exception {
         
-        try {
-            String path = "karte/document/" + String.valueOf(pk);
+        String path = "karte/document/" + String.valueOf(pk);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .delete(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
 
-            int status = response.getStatus();
+        int status = response.getStatus();
+        isHTTP200(status);
 
-            return 1;
-        } catch (Exception ex) {
-            return -1;
-        }
+        return 1;
     }
     
     /**
@@ -316,63 +270,54 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param spec ModuleSearchSpec 検索仕様
      * @return Module の Collection
      */
-    public List<List<ModuleModel>> getModuleList(ModuleSearchSpec spec) {
-        
-        try {
-            String path = "karte/modules/" + String.valueOf(spec.getKarteId());
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+    public List<List<ModuleModel>> getModuleList(ModuleSearchSpec spec) throws Exception {
 
-            Date[] froms = spec.getFromDate();
-            Date[] tos = spec.getToDate();
-            
-            int len = froms.length;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < len; i++) {
-                if (i != 0) {
-                    sb.append(CAMMA);
-                }
-                sb.append(toRestFormat(froms[i]));
+        String path = "karte/modules/" + String.valueOf(spec.getKarteId());
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+
+        Date[] froms = spec.getFromDate();
+        Date[] tos = spec.getToDate();
+
+        int len = froms.length;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(CAMMA);
             }
-            qmap.add("froms", sb.toString());
-            
-            len = tos.length;
-            sb = new StringBuilder();
-            for (int i = 0; i < len; i++) {
-                if (i != 0) {
-                    sb.append(CAMMA);
-                }
-                sb.append(toRestFormat(tos[i]));
-            }
-            qmap.add("tos", sb.toString());
-            qmap.add("entity", spec.getEntity());
-            
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
-
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-
-            debug(status, entityStr);
-
-            if (status != HTTP200) {
-                return null;
-            }
-
-            TypeReference typeRef = new TypeReference<List<List<ModuleModel>>>(){};
-            List<List<ModuleModel>> ret = (List<List<ModuleModel>>) 
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            for (List<ModuleModel> list : ret) {
-                for (ModuleModel module : list) {
-                    module.setModel((InfoModel)BeanUtils.xmlDecode(module.getBeanBytes()));
-                }
-            }
-            return ret;
-            
-        } catch (Exception ex) {
-            return null;
+            sb.append(toRestFormat(froms[i]));
         }
+        qmap.add("froms", sb.toString());
+
+        len = tos.length;
+        sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(CAMMA);
+            }
+            sb.append(toRestFormat(tos[i]));
+        }
+        qmap.add("tos", sb.toString());
+        qmap.add("entity", spec.getEntity());
+
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        TypeReference typeRef = new TypeReference<List<List<ModuleModel>>>(){};
+        List<List<ModuleModel>> ret = (List<List<ModuleModel>>) 
+                getConverter().fromJson(entityStr, typeRef);
+
+        for (List<ModuleModel> list : ret) {
+            for (ModuleModel module : list) {
+                module.setModel((InfoModel)BeanUtils.xmlDecode(module.getBeanBytes()));
+            }
+        }
+        return ret;
     }
     
     /**
@@ -380,38 +325,29 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param id 画像のId
      * @return SchemaModel
      */
-    public SchemaModel getImage(long id) {
-        
-        try {
-            String path = "karte/image/" + String.valueOf(id);
-     
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+    public SchemaModel getImage(long id) throws Exception {
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
+        String path = "karte/image/" + String.valueOf(id);
 
-            debug(status, entityStr);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            if (status != HTTP200) {
-                return null;
-            }
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            SchemaModel model = (SchemaModel) 
-                    getConverter().fromJson(entityStr, SchemaModel.class);
-            
-            byte[] bytes = model.getJpegByte();
-            ImageIcon icon = new ImageIcon(bytes);
-            if (icon != null) {
-                model.setIcon(icon);
-            }
-            
-            return model;
-            
-        } catch (Exception ex) {
-            return null;
+        SchemaModel model = (SchemaModel) 
+                getConverter().fromJson(entityStr, SchemaModel.class);
+
+        byte[] bytes = model.getJpegByte();
+        ImageIcon icon = new ImageIcon(bytes);
+        if (icon != null) {
+            model.setIcon(icon);
         }
+
+        return model;
     }
 
 
@@ -490,71 +426,61 @@ public class  DocumentDelegater extends BusinessDelegater {
 
     //---------------------------------------------------------------------------
     
-    public List<Long> putDiagnosis(List<RegisteredDiagnosisModel> list) {
+    public List<Long> putDiagnosis(List<RegisteredDiagnosisModel> list) throws Exception {
         
-        try {
-            String path = "karte/diagnosis/";
+        String path = "karte/diagnosis/";
 
-            String json = getConverter().toJson(list);
+        String json = getConverter().toJson(list);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            debug(status, entityStr);
-            List<Long> ret = getConverter().toLongList(entityStr);
+        List<Long> ret = getConverter().toLongList(entityStr);
 
-            return ret;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        return ret;
     }
     
-    public int updateDiagnosis(List<RegisteredDiagnosisModel> list) {
-        
-        try {
-            String path = "karte/diagnosis/";
-            
-            String json = getConverter().toJson(list);
+    public int updateDiagnosis(List<RegisteredDiagnosisModel> list) throws Exception {
 
-            ClientResponse response = getClientRequest(path, null)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .put(ClientResponse.class);
+        String path = "karte/diagnosis/";
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        String json = getConverter().toJson(list);
 
-            return Integer.parseInt(entityStr);
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        ClientResponse response = getClientRequest(path, null)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .put(ClientResponse.class);
+
+        int status = response.getStatus();
+        isHTTP200(status);
+
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+
+        return Integer.parseInt(entityStr);
     }
     
-    public int removeDiagnosis(List<Long> ids) {
+    public int removeDiagnosis(List<Long> ids) throws Exception {
         
-        try {
-            String path = "karte/diagnosis/";
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("ids", getConverter().fromList(ids));
+        String path = "karte/diagnosis/";
+        
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("ids", getConverter().fromList(ids));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .delete(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .delete(ClientResponse.class);
 
-            int status = response.getStatus();
-            debug(status, "delete response");
+        int status = response.getStatus();
+        debug(status, "delete response");
+        isHTTP200(status);
 
-            return ids.size();
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        return ids.size();
     }
     
     /**
@@ -562,180 +488,153 @@ public class  DocumentDelegater extends BusinessDelegater {
      * @param spec DiagnosisSearchSpec 検索仕様
      * @return DiagnosisModel の Collection
      */
-    public List<RegisteredDiagnosisModel> getDiagnosisList(long karteId, Date fromDate, boolean activeOnly) {
+    public List<RegisteredDiagnosisModel> getDiagnosisList(
+            long karteId, Date fromDate, boolean activeOnly) throws Exception {
         
-        try {
-            String path = "karte/diagnosis/" + String.valueOf(karteId);
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("fromDate", toRestFormat(fromDate));
-            qmap.add("activeOnly", String.valueOf(activeOnly));
+        String path = "karte/diagnosis/" + String.valueOf(karteId);
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("fromDate", toRestFormat(fromDate));
+        qmap.add("activeOnly", String.valueOf(activeOnly));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
-            List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return list;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
+        List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return list;
     }
 
     
-    public List<Long> addObservations(List<ObservationModel> observations) {
+    public List<Long> addObservations(List<ObservationModel> observations) throws Exception {
         
-        try {
-            String path = "/karte/observations";
-            
-            String json = getConverter().toJson(observations);
+        String path = "/karte/observations";
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+        String json = getConverter().toJson(observations);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .post(ClientResponse.class);
 
-            List<Long> list = getConverter().toLongList(entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            return list;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        List<Long> list = getConverter().toLongList(entityStr);
+
+        return list;
     }
     
-    public int removeObservations(List<Long> ids) {
+    public int removeObservations(List<Long> ids) throws Exception {
         
-        try {
-            String path = "/karte/observations";
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            qmap.add("ids", getConverter().fromList(ids));
+        String path = "/karte/observations";
+        
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("ids", getConverter().fromList(ids));
 
-            ClientResponse response = getClientRequest(path, qmap)
-                    .delete(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, qmap)
+                .delete(ClientResponse.class);
 
-            int status = response.getStatus();
-            debug(status, "delete response");
+        int status = response.getStatus();
+        debug(status, "delete response");
+        isHTTP200(status);
 
-            return ids.size();
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        return ids.size();
     }
 
     //-------------------------------------------------------------------------
     
-    public int updatePatientMemo(PatientMemoModel pm) {
+    public int updatePatientMemo(PatientMemoModel pm) throws Exception {
         
-        try {
-            String path = "/karte/memo";
-            
-            String json = getConverter().toJson(pm);
+        String path = "/karte/memo";
 
-            ClientResponse response = getClientRequest(path, null)
+        String json = getConverter().toJson(pm);
+
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .put(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        return Integer.parseInt(entityStr);
+    }
+
+    //-------------------------------------------------------------------------
+    
+    public List<List<AppointmentModel>> getAppoinmentList(ModuleSearchSpec spec) throws Exception {
+        
+        String path = "karte/appo/" + String.valueOf(spec.getKarteId());
+
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        Date[] froms = spec.getFromDate();
+        Date[] tos = spec.getToDate();
+
+        int len = froms.length;
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(CAMMA);
+            }
+            sb.append(toRestFormat(froms[i]));
+        }
+        qmap.add("froms", sb.toString());
+
+        len = tos.length;
+        sb = new StringBuilder();
+        for (int i = 0; i < len; i++) {
+            if (i != 0) {
+                sb.append(CAMMA);
+            }
+            sb.append(toRestFormat(tos[i]));
+        }
+        qmap.add("tos", sb.toString());
+
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        TypeReference typeRef = new TypeReference<List<List<AppointmentModel>>>(){};
+        List<List<AppointmentModel>> ret = (List<List<AppointmentModel>>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return ret;
+    }
+
+
+    public void updatePVTState(long pvtPK, int state) throws Exception {
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("pvt/");
+        sb.append(pvtPK);
+        sb.append(CAMMA);
+        sb.append(state);
+        String path = sb.toString();
+
+        ClientResponse response = getClientRequest(path, null)
                     .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_JSON_UTF8, json)
                     .put(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
-
-            return Integer.parseInt(entityStr);
-            
-        } catch (Exception ex) {
-            return -1;
-        }
-    }
-
-    //-------------------------------------------------------------------------
-    
-    public List<List<AppointmentModel>> getAppoinmentList(ModuleSearchSpec spec) {
-        
-        try {
-            String path = "karte/appo/" + String.valueOf(spec.getKarteId());
-
-            MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
-            Date[] froms = spec.getFromDate();
-            Date[] tos = spec.getToDate();
-            
-            int len = froms.length;
-            StringBuilder sb = new StringBuilder();
-            for (int i = 0; i < len; i++) {
-                if (i != 0) {
-                    sb.append(CAMMA);
-                }
-                sb.append(toRestFormat(froms[i]));
-            }
-            qmap.add("froms", sb.toString());
-            
-            len = tos.length;
-            sb = new StringBuilder();
-            for (int i = 0; i < len; i++) {
-                if (i != 0) {
-                    sb.append(CAMMA);
-                }
-                sb.append(toRestFormat(tos[i]));
-            }
-            qmap.add("tos", sb.toString());
-
-            ClientResponse response = getClientRequest(path, qmap)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
-
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
-
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<List<AppointmentModel>>>(){};
-            List<List<AppointmentModel>> ret = (List<List<AppointmentModel>>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return ret;
-        } catch (Exception ex) {
-            return null;
-        }
-    }
-
-
-    public void updatePVTState(long pvtPK, int state) {
-        
-        try {
-            StringBuilder sb = new StringBuilder();
-            sb.append("pvt/");
-            sb.append(pvtPK);
-            sb.append(CAMMA);
-            sb.append(state);
-            String path = sb.toString();
-
-            ClientResponse response = getClientRequest(path, null)
-                        .accept(MEDIATYPE_TEXT_UTF8)
-                        .put(ClientResponse.class);
-
-            int status = response.getStatus();
-            debug(status, "put response");
-        } catch (Exception ex) {
-        }
+        int status = response.getStatus();
+        debug(status, "put response");
+        isHTTP200(status);
     }
     
     @Override

@@ -10,6 +10,7 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.logging.Level;
 import javax.swing.*;
 import open.dolphin.delegater.DocumentDelegater;
 import open.dolphin.helper.DBTask;
@@ -833,14 +834,17 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             while (fromIndex < idListSize) {
                 int toIndex = Math.min(fromIndex + fetchSize, idListSize);
                 List<Long> ids = docIdList.subList(fromIndex, toIndex);
-                List<DocumentModel> result = ddl.getDocuments(ids);
-                if (result != null && !result.isEmpty()) {
-                    for (DocumentModel model : result) {
-                        // Executorに登録していく
-                        MakeViewerTask task = new MakeViewerTask(model);
-                        service.submit(task);
-                       ++taskCount;
+                try {
+                    List<DocumentModel> result = ddl.getDocuments(ids);
+                    if (result != null && !result.isEmpty()) {
+                        for (DocumentModel model : result) {
+                            // Executorに登録していく
+                            MakeViewerTask task = new MakeViewerTask(model);
+                            service.submit(task);
+                            ++taskCount;
+                        }
                     }
+                } catch (Exception ex) {
                 }
                 fromIndex += fetchSize;
             }

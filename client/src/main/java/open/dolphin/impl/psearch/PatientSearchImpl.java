@@ -580,10 +580,13 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
             @Override
             protected Void doInBackground() {
-                PatientModel pm = getSelectedPatient();
-                PatientVisitModel pvt = cel.createFakePvt(pm);
-                PVTDelegater pdl = PVTDelegater.getInstance();
-                pdl.addPvt(pvt);
+                try {
+                    PatientModel pm = getSelectedPatient();
+                    PatientVisitModel pvt = cel.createFakePvt(pm);
+                    PVTDelegater pdl = PVTDelegater.getInstance();
+                    pdl.addPvt(pvt);
+                } catch (Exception ex) {
+                }
                 return null;
             }
 
@@ -920,7 +923,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             }
         }
 
-        private List<PatientModel> hibernateSearch() {
+        private List<PatientModel> hibernateSearch() throws Exception {
             // カルテ内検索をちょっとインチキする(Hibernate Search)
             publish(new String[]{startingNote, "50"});
             MasudaDelegater dl = MasudaDelegater.getInstance();
@@ -928,8 +931,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             return dl.getKarteFullTextSearch(0, searchText);
         }
 
-        @SuppressWarnings("unchecked")
-        private List<PatientModel> grepSearch() {
+        private List<PatientModel> grepSearch() throws Exception {
 
             final int maxResult = 500;
             final boolean progressCourseOnly 
@@ -1034,7 +1036,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         private final String initialNote = "<html><br>";
 
         @Override
-        protected Void doInBackground() {
+        protected Void doInBackground() throws Exception {
 
             doStartProgress();
             // progress bar 設定

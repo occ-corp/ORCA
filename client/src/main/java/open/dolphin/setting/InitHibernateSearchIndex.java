@@ -32,7 +32,7 @@ public class InitHibernateSearchIndex {
         private final String initialNote = "<html><br>";
 
         @Override
-        protected Void doInBackground() {
+        protected Void doInBackground() throws Exception {
 
             context.getBlockGlass().block();
             // progress bar 設定

@@ -27,28 +27,20 @@ public class ChartEventDelegater extends BusinessDelegater {
         return instance;
     }
     
-    public int putChartEvent(ChartEventModel evt) {
+    public int putChartEvent(ChartEventModel evt) throws Exception {
         
-        try {
-            String json = getConverter().toJson(evt);
+        String json = getConverter().toJson(evt);
 
-            ClientResponse response = getClientRequest(PUT_EVENT_PATH)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .put(ClientResponse.class);
+        ClientResponse response = getClientRequest(PUT_EVENT_PATH)
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .put(ClientResponse.class);
 
-            int status = response.getStatus();
-            String enityStr = (String) response.getEntity(String.class);
-            debug(status, enityStr);
-            
-            if (status != HTTP200) {
-                return -1;
-            }
-            
-            return Integer.parseInt(enityStr);
-            
-        } catch (Exception ex) {
-            return -1;
-        }
+        int status = response.getStatus();
+        String enityStr = (String) response.getEntity(String.class);
+        debug(status, enityStr);
+        isHTTP200(status);
+
+        return Integer.parseInt(enityStr);
     }
 
     public String subscribe() throws Exception {
@@ -57,7 +49,9 @@ public class ChartEventDelegater extends BusinessDelegater {
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
+        int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
+        isHTTP200(status);
         
         return entityStr;
     }

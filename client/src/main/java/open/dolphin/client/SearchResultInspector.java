@@ -345,13 +345,13 @@ public class SearchResultInspector {
         // Hibernate searchで患者カルテのModuleModelを全文検索する
         MasudaDelegater del = MasudaDelegater.getInstance();
         long karteId = context.getKarte().getId();
-        List<PatientModel> result = del.getKarteFullTextSearch(karteId, text);
-        if (result != null && !result.isEmpty()) {
+        try {
+            List<PatientModel> result = del.getKarteFullTextSearch(karteId, text);
             PatientModel pm = result.get(0);
             List<Long> docPkList = pm.getDocPkList();
             context.getPatient().setDocPkList(docPkList);
             getDocInfo();
-        } else {
+        } catch (Exception ex) {
             updateHistory(null);
         }
         context.getKarte().getPatient().setSearchText(text);

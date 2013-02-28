@@ -844,11 +844,14 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             boolean check = Project.getBoolean(MiscSettingPanel.SANTEI_CHECK, true);
             boolean selfIns = docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX);
             if (check && !inHospital && !selfIns) {
-                CheckSantei cs = new CheckSantei();
-                cs.init(context, stamps, docInfo.getFirstConfirmDate());
-                if (cs.checkOnSave()) {
-                    // 算定チェックが問題なければfalseで返ってくる masuda
-                    return;
+                try {
+                    CheckSantei cs = new CheckSantei();
+                    cs.init(context, stamps, docInfo.getFirstConfirmDate());
+                    if (cs.checkOnSave()) {
+                        // 算定チェックが問題なければfalseで返ってくる masuda
+                        return;
+                    }
+                } catch (Exception ex) {
                 }
             }
         }

@@ -40,16 +40,15 @@ public class UsingDrugs {
         usingDrugMap.clear();
 
         // データベースから採用薬を取得
-        List<UsingDrugModel> list = del.getUsingDrugModels();
-        if (list == null) {
-            return;
-        }
+        try {
+            List<UsingDrugModel> list = del.getUsingDrugModels();
+            for (UsingDrugModel model : list) {
+                usingDrugMap.put(model.getSrycd(), model);
+            }
 
-        for (UsingDrugModel model : list) {
-            usingDrugMap.put(model.getSrycd(), model);
+            changed = false;
+        } catch (Exception ex) {
         }
-        
-        changed = false;
     }
 
     // UsingDrugPanelから使用
@@ -68,31 +67,44 @@ public class UsingDrugs {
     }
 
     public void addUsingDrugs(List<UsingDrugModel> list) {
+        
         for (UsingDrugModel model : list) {
             if (model != null) {
-                del.addUsingDrugModel(model);
-                usingDrugMap.put(model.getSrycd(), model);
+                try {
+                    del.addUsingDrugModel(model);
+                    usingDrugMap.put(model.getSrycd(), model);
+                    changed = true;
+                } catch (Exception ex) {
+                }
             }
         }
-        changed = true;
-    }
+     }
 
     public void removeUsingDrugs(List<UsingDrugModel> list) {
+        
         for (UsingDrugModel model : list) {
             if (model != null) {
-                del.removeUsingDrugModel(model);
-                usingDrugMap.remove(model.getSrycd());
+                try {
+                    del.removeUsingDrugModel(model);
+                    usingDrugMap.remove(model.getSrycd());
+                    changed = true;
+                } catch (Exception ex) {
+                }
             }
         }
-        changed = true;
     }
+            
 
     public void updateUsingDrugs(List<UsingDrugModel> list) {
+        
         for (UsingDrugModel model : list) {
             if (model != null) {
-                del.updateUsingDrugModel(model);
+                try {
+                    del.updateUsingDrugModel(model);
+                    changed = true;
+                } catch (Exception ex) {
+                }
             }
         }
-        changed = true;
     }
 }

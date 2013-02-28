@@ -225,7 +225,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
         });
     }
     
-    public void renewList() {
+    public void renewList() throws Exception {
 
         UserModel user = Project.getUserModel();
         long userPk = user.getId();
@@ -259,7 +259,11 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     }
     
     public boolean isTempKarteExists() {
-        renewList();
+        try {
+            renewList();
+        } catch (Exception ex) {
+            return false;
+        }
         return tableModel.getObjectCount() > 0;
     }
     

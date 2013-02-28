@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.util.ArrayList;
@@ -40,15 +39,14 @@ public final class DisconItems {
         discontinuedItems.clear();
 
         // データベースから中止項目を調べる
-        List<DisconItemModel> list = del.getDisconItemModels();
-        if (list ==  null) {
-            return;
+        try {
+            List<DisconItemModel> list = del.getDisconItemModels();
+            for (DisconItemModel model : list) {
+                discontinuedItems.add(model);
+            }
+            changed = false;
+        } catch (Exception ex) {
         }
-        for(DisconItemModel model : list){
-            discontinuedItems.add(model);
-        }
-        
-        changed = false;
     }
 
     public boolean isDiscon(String str){
@@ -69,31 +67,43 @@ public final class DisconItems {
     }
 
     public void addDisconItems(List<DisconItemModel> list) {
+
         for (DisconItemModel model : list) {
             if (model != null) {
-                del.addDisconItemModel(model);
-                discontinuedItems.add(model);
+                try {
+                    del.addDisconItemModel(model);
+                    discontinuedItems.add(model);
+                    changed = true;
+                } catch (Exception ex) {
+                }
             }
         }
-        changed = true;
     }
 
     public void removeDisconItems(List<DisconItemModel> list) {
+        
         for (DisconItemModel model : list) {
             if (model != null) {
-                del.removeDisconItemModel(model);
-                discontinuedItems.remove(model);
+                try {
+                    del.removeDisconItemModel(model);
+                    discontinuedItems.remove(model);
+                    changed = true;
+                } catch (Exception ex) {
+                }
             }
         }
-        changed = true;
     }
 
     public void updateDisconItems(List<DisconItemModel> list) {
+        
         for (DisconItemModel model : list) {
             if (model != null) {
-                del.updateDisconItemModel(model);
+                try {
+                    del.updateDisconItemModel(model);
+                    changed = true;
+                } catch (Exception ex) {
+                }
             }
         }
-        changed = true;
     }
 }

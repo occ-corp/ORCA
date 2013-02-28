@@ -60,8 +60,11 @@ public class CheckInteractionPanel {
                 search();
             }
         });
-
-        collectMedicine();
+        
+        try {
+            collectMedicine();
+        } catch (Exception ex) {
+        }
 
         showDialog();
     }
@@ -92,7 +95,7 @@ public class CheckInteractionPanel {
         dialog.setVisible(true);
     }
 
-    private void collectMedicine() {
+    private void collectMedicine() throws Exception {
 
         rirekiItems = new HashMap<String, String[]>();
 

@@ -748,11 +748,14 @@ public class LaboTestBean extends AbstractChartDocument {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                InFacilityLabo fLabo = new InFacilityLabo();
-                fLabo.setContext(LaboTestBean.this.getContext());
-                boolean toUpdate = fLabo.start();
-                if (toUpdate) {
-                    searchLaboTest();
+                try {
+                    InFacilityLabo fLabo = new InFacilityLabo();
+                    fLabo.setContext(LaboTestBean.this.getContext());
+                    boolean toUpdate = fLabo.start();
+                    if (toUpdate) {
+                        searchLaboTest();
+                    }
+                } catch (Exception ex) {
                 }
             }
         });

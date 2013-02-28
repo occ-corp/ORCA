@@ -307,18 +307,21 @@ public class RoutineMedImpl extends AbstractChartDocument {
     }
     
     private void update() {
-        MasudaDelegater del = MasudaDelegater.getInstance();
-        long karteId = getContext().getKarte().getId();
-        int index = periodCombo.getSelectedIndex();
-        int[] results = getFirstAndMaxResult(index);
-        List<RoutineMedModel> list = del.getRoutineMedModels(karteId, results[0], results[1]);
-        tableModel.setDataProvider(list);
-        updateMedPanel(list);
+        try {
+            MasudaDelegater del = MasudaDelegater.getInstance();
+            long karteId = getContext().getKarte().getId();
+            int index = periodCombo.getSelectedIndex();
+            int[] results = getFirstAndMaxResult(index);
+            List<RoutineMedModel> list = del.getRoutineMedModels(karteId, results[0], results[1]);
+            tableModel.setDataProvider(list);
+            updateMedPanel(list);
 
-        undoQue.clear();
-        redoQue.clear();
-        table.clearSelection();
-        controlButton();
+            undoQue.clear();
+            redoQue.clear();
+            table.clearSelection();
+            controlButton();
+        } catch (Exception ex) {
+        }
     }
     
     private void updateMedPanel(List<RoutineMedModel> list) {

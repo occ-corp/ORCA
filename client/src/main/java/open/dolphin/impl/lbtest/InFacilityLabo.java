@@ -79,7 +79,7 @@ public class InFacilityLabo {
         male = IInfoModel.MALE.equals(chart.getPatient().getGender());
     }
 
-    public boolean start() {
+    public boolean start() throws Exception {
         
         initComponents();
         connect();
@@ -91,8 +91,7 @@ public class InFacilityLabo {
         return toUpdate;
     }
     
-    @SuppressWarnings("unchecked")
-    private void setupTables() {
+    private void setupTables() throws Exception {
         
         templateTableModel = new ListTableModel<InFacilityLaboItem>(TEMPLATE_COL_NAME, START_NUM_ROW, TEMPLATE_COL_METHOD, null) {
 
@@ -270,8 +269,11 @@ public class InFacilityLabo {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                save();
-                toUpdate = true;
+                try {
+                    save();
+                    toUpdate = true;
+                } catch (Exception ex) {
+                }
             }
         });
         
@@ -286,7 +288,7 @@ public class InFacilityLabo {
         }
     }
     
-    private void save() {
+    private void save() throws Exception {
         
         @SuppressWarnings("unchecked")
         List<InFacilityLaboItem> list = setTableModel.getDataProvider();

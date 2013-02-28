@@ -111,7 +111,7 @@ public class ExtendedStampTreeBuilder {
             String editable,
             String memo,
             String id,
-            String stampHexBytes) {     // stampBytesのHex文字列を追加
+            String stampHexBytes) throws Exception {     // stampBytesのHex文字列を追加
 
         if (logger != null) {
             StringBuilder sb = new StringBuilder();

@@ -1,8 +1,6 @@
-
 package open.dolphin.stampbox;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.List;
 import org.jdom2.Document;
@@ -49,13 +47,13 @@ public class ExtendedStampTreeDirector {
             e.printStackTrace(System.err);
             System.out.println("Not well-formed.");
             System.out.println(e.getMessage());
-        } catch (IOException e) {
+        } catch (Exception e) {
             System.out.println(e);
         }
         return builder.getProduct();
     }
 
-    public void parseChildren(Element current) {
+    public void parseChildren(Element current) throws Exception {
         
         int eType = startElement(current.getName(), current);
 
@@ -69,7 +67,7 @@ public class ExtendedStampTreeDirector {
         endElement(eType);
     }
 
-    public int startElement(String eName, Element e) {
+    public int startElement(String eName, Element e) throws Exception {
 
         if (eName.equals("stampInfo")) {
             builder.buildStampInfo(

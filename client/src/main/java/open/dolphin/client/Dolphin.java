@@ -663,7 +663,10 @@ public class Dolphin implements MainWindow {
         
         // カルテオープン時にpvtHealthInsuranceが設定されてなかったら取得しに行く
         if (pm.getPvtHealthInsurances() == null) {
-            PatientDelegater.getInstance().updateHealthInsurances(pm);
+            try {
+                PatientDelegater.getInstance().updateHealthInsurances(pm);
+            } catch (Exception ex) {
+            }
         }
 
         Chart chart = new ChartImpl();
@@ -1693,12 +1696,6 @@ public class Dolphin implements MainWindow {
     public void editUsingDrug() {
         UsingDrugPanel panel = new UsingDrugPanel();
         panel.enter();
-    }
-    
-    public void checkTempKarte() {
-        TempKarteCheckDialog tempKarte = TempKarteCheckDialog.getInstance();
-        tempKarte.renewList();
-        tempKarte.setVisible(true);
     }
 //masuda$
 }

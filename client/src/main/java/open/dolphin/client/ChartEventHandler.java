@@ -248,7 +248,10 @@ public class ChartEventHandler {
 
             // サーバーに更新を通知
             ChartEventDelegater del = ChartEventDelegater.getInstance();
-            del.putChartEvent(evt);
+            try {
+                del.putChartEvent(evt);
+            } catch (Exception ex) {
+            }
         }
     }
     

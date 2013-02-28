@@ -34,21 +34,23 @@ public class PvtPostTask implements Runnable {
         if (pvt == null) {
             return;
         }
-        
-        // PVT登録処理
-        PVTDelegater pdl = PVTDelegater.getInstance();
-        pdl.addPvt(pvt);
-        
-        // FEV70 export処理
-        String sharePath = Project.getString(MiscSettingPanel.FEV_SHAREPATH, MiscSettingPanel.DEFAULT_SHAREPATH);
-        boolean sendToFEV = sharePath != null 
-                && !sharePath.isEmpty() 
-                && Project.getBoolean(MiscSettingPanel.SEND_PATIENT_INFO, MiscSettingPanel.DEFAULT_SENDPATIENTINFO);
+        try {
+            // PVT登録処理
+            PVTDelegater pdl = PVTDelegater.getInstance();
+            pdl.addPvt(pvt);
 
-        if (sendToFEV) {
-            PatientVisitModel oldPvt = MasudaDelegater.getInstance().getLastPvtInThisMonth(pvt);
-            FEV70Exporter fev = new FEV70Exporter(pvt, oldPvt, sharePath);
-            fev.export();
+            // FEV70 export処理
+            String sharePath = Project.getString(MiscSettingPanel.FEV_SHAREPATH, MiscSettingPanel.DEFAULT_SHAREPATH);
+            boolean sendToFEV = sharePath != null
+                    && !sharePath.isEmpty()
+                    && Project.getBoolean(MiscSettingPanel.SEND_PATIENT_INFO, MiscSettingPanel.DEFAULT_SENDPATIENTINFO);
+
+            if (sendToFEV) {
+                PatientVisitModel oldPvt = MasudaDelegater.getInstance().getLastPvtInThisMonth(pvt);
+                FEV70Exporter fev = new FEV70Exporter(pvt, oldPvt, sharePath);
+                fev.export();
+            }
+        } catch (Exception ex) {
         }
     }
 }

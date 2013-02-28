@@ -29,105 +29,82 @@ public class LetterDelegater extends BusinessDelegater {
     private LetterDelegater() {
     }
     
-    public long saveOrUpdateLetter(LetterModule model) {
-        
-        try {
-            String json = getConverter().toJson(model);
+    public long saveOrUpdateLetter(LetterModule model) throws Exception {
 
-            if (json == null) {
-                return 0L;
-            }
-            
-            String path = PATH_FOR_LETTER;
+        String json = getConverter().toJson(model);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)    
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .put(ClientResponse.class);
-
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
-
-            long pk = Long.parseLong(entityStr);
-            return pk;
-            
-        } catch (Exception ex) {
-            return -1;
+        if (json == null) {
+            return 0L;
         }
+
+        String path = PATH_FOR_LETTER;
+
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)    
+                .body(MEDIATYPE_JSON_UTF8, json)
+                .put(ClientResponse.class);
+
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
+
+        long pk = Long.parseLong(entityStr);
+        return pk;
     }
 
-    public LetterModule getLetter(long letterPk) {
+    public LetterModule getLetter(long letterPk) throws Exception {
         
-        try {
-            String path = PATH_FOR_LETTER + String.valueOf(letterPk);
+        String path = PATH_FOR_LETTER + String.valueOf(letterPk);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
+        LetterModule ret = (LetterModule)
+                getConverter().fromJson(entityStr, LetterModule.class);
 
-            LetterModule ret = (LetterModule)
-                    getConverter().fromJson(entityStr, LetterModule.class);
-            
-            return ret;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        return ret;
     }
 
 
-    public List<LetterModule> getLetterList(long kartePk) {
+    public List<LetterModule> getLetterList(long kartePk) throws Exception {
         
-        try {
-            String path = PATH_FOR_LETTER_LIST + String.valueOf(kartePk);
+        String path = PATH_FOR_LETTER_LIST + String.valueOf(kartePk);
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_JSON_UTF8)
-                    .get(ClientResponse.class);
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
 
-            int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+        int status = response.getStatus();
+        String entityStr = (String) response.getEntity(String.class);
+        debug(status, entityStr);
+        isHTTP200(status);
 
-            if (status != HTTP200) {
-                return null;
-            }
-            
-            TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
-            List<LetterModule> ret = (List<LetterModule>)
-                    getConverter().fromJson(entityStr, typeRef);
-            
-            return ret;
-            
-        } catch (Exception ex) {
-            return null;
-        }
+        TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
+        List<LetterModule> ret = (List<LetterModule>)
+                getConverter().fromJson(entityStr, typeRef);
+
+        return ret;
     }
 
 
-    public void delete(long pk) {
-        
-        try {
-            String path = PATH_FOR_LETTER + String.valueOf(pk);
+    public void delete(long pk) throws Exception {
 
-            ClientResponse response = getClientRequest(path, null)
-                    .accept(MEDIATYPE_TEXT_UTF8)
-                    .delete(ClientResponse.class);
+        String path = PATH_FOR_LETTER + String.valueOf(pk);
 
-            int status = response.getStatus();
-            debug(status, "delete response");
-            
-        } catch (Exception ex) {
-        }
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .delete(ClientResponse.class);
+
+        int status = response.getStatus();
+        debug(status, "delete response");
+        isHTTP200(status);
     }
     
     @Override

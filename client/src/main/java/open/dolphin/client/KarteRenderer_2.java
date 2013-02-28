@@ -1,8 +1,6 @@
 package open.dolphin.client;
 
 import java.awt.Color;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.StringReader;
 import java.util.*;
 import javax.swing.text.*;
@@ -11,10 +9,6 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.XmlUtils;
-import org.jdom2.Document;
-import org.jdom2.Element;
-import org.jdom2.JDOMException;
-import org.jdom2.input.SAXBuilder;
 
 
 /**
@@ -28,27 +22,27 @@ public class KarteRenderer_2 {
     private static final String COMPONENT_ELEMENT_NAME = "component";
     private static final String STAMP_HOLDER = "stampHolder";
     private static final String SCHEMA_HOLDER = "schemaHolder";
-    private static final int TT_SECTION = 0;
-    private static final int TT_PARAGRAPH = 1;
-    private static final int TT_CONTENT = 2;
-    private static final int TT_ICON = 3;
-    private static final int TT_COMPONENT = 4;
-    private static final int TT_PROGRESS_COURSE = 5;
-    private static final String SECTION_NAME = "section";
-    private static final String PARAGRAPH_NAME = "paragraph";
-    private static final String CONTENT_NAME = "content";
-    private static final String COMPONENT_NAME = "component";
-    private static final String ICON_NAME = "icon";
+    //private static final int TT_SECTION = 0;
+    //private static final int TT_PARAGRAPH = 1;
+    //private static final int TT_CONTENT = 2;
+    //private static final int TT_ICON = 3;
+    //private static final int TT_COMPONENT = 4;
+    //private static final int TT_PROGRESS_COURSE = 5;
+    //private static final String SECTION_NAME = "section";
+    //private static final String PARAGRAPH_NAME = "paragraph";
+    //private static final String CONTENT_NAME = "content";
+    //private static final String COMPONENT_NAME = "component";
+    //private static final String ICON_NAME = "icon";
     private static final String ALIGNMENT_NAME = "Alignment";
     private static final String FOREGROUND_NAME = "foreground";
     private static final String SIZE_NAME = "size";
     private static final String BOLD_NAME = "bold";
     private static final String ITALIC_NAME = "italic";
     private static final String UNDERLINE_NAME = "underline";
-    private static final String TEXT_NAME = "text";
+    //private static final String TEXT_NAME = "text";
     private static final String NAME_NAME = "name";
-    private static final String LOGICAL_STYLE_NAME = "logicalStyle";
-    private static final String PROGRESS_COURSE_NAME = "kartePane";
+    //private static final String LOGICAL_STYLE_NAME = "logicalStyle";
+    //private static final String PROGRESS_COURSE_NAME = "kartePane";
     
     private static final String NAME_STAMP_HOLDER = "name=\"stampHolder\"";
     
@@ -140,7 +134,7 @@ public class KarteRenderer_2 {
             pPane.getDocument().fixCrAfterStamp();
         }
     }
-
+/*
     // クラスを分離した
     private class KartePaneRenderer {
 
@@ -149,11 +143,9 @@ public class KarteRenderer_2 {
         private List<ModuleModel> modules;
         private List<SchemaModel> schemas;
 
-        /**
-         * TextPane Dump の XML を解析する。
-         *
-         * @param xml TextPane Dump の XML
-         */
+        // TextPane Dump の XML を解析する。
+        // @param xml TextPane Dump の XML
+ 
         private void renderPane(String xml, List<ModuleModel> modules, List<SchemaModel> schemas, KartePane kartePane) {
 
             debug(xml);
@@ -177,11 +169,9 @@ public class KarteRenderer_2 {
             }
         }
 
-        /**
-         * 子要素をパースする。
-         *
-         * @param current 要素
-         */
+         // 子要素をパースする。
+         // @param current 要素
+
         private void writeChildren(Element current) {
 
             int eType = -1;
@@ -384,7 +374,7 @@ public class KarteRenderer_2 {
     private void debug(String msg) {
         //ClientContext.getBootLogger().debug(msg);
     }
-    
+*/
     
     // StAX版
     private enum ELEMENTS {paragraph, content, text, component, icon, kartePane, section, unknown};
