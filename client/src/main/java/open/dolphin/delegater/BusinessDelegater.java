@@ -42,6 +42,10 @@ public class BusinessDelegater {
     protected ClientRequest getClientRequest(String path, MultivaluedMap<String, String> qmap) {
         return RESTEasyClient.getInstance().getClientRequest(path, qmap);
     }
+    
+    protected ClientRequest getClientRequest(String path) {
+        return RESTEasyClient.getInstance().getClientRequest(path);
+    }
 
     protected void debug(int status, String entity) {
         logger.debug("---------------------------------------");

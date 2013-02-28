@@ -32,7 +32,7 @@ public class ChartEventDelegater extends BusinessDelegater {
         try {
             String json = getConverter().toJson(evt);
 
-            ClientResponse response = getClientRequest(PUT_EVENT_PATH, null)
+            ClientResponse response = getClientRequest(PUT_EVENT_PATH)
                     .body(MEDIATYPE_JSON_UTF8, json)
                     .put(ClientResponse.class);
 
