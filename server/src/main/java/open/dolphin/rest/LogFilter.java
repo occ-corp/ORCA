@@ -53,6 +53,12 @@ public class LogFilter implements Filter {
         //System.err.println(userName);
         //System.err.println(password);
         
+        if (userName == null || password == null) {
+            HttpServletResponse res = (HttpServletResponse) response;
+            res.sendError(400);
+            return;
+        }
+        
         Map<String, String> userMap = contextHolder.getUserMap();
         boolean authentication = password.equals(userMap.get(userName));
         
