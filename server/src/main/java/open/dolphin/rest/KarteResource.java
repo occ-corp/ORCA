@@ -51,7 +51,7 @@ public class KarteResource extends AbstractResource {
     @GET
     @Path("docinfo/{id}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getDocumentList(@PathParam("id") Long karteId, 
+    public Response getDocumentList(@PathParam("id") Long karteId, 
             @QueryParam("fromDate") String fromDateStr, 
             @QueryParam("toDate") String toDateStr, 
             @QueryParam("includeModified") Boolean includeModified) {
@@ -61,10 +61,11 @@ public class KarteResource extends AbstractResource {
 
         List<DocInfoModel> result = karteServiceBean.getDocumentList(karteId, fromDate, toDate, includeModified);
 
-        String json = getConverter().toJson(result);
-        debug(json);
-
-        return json;
+        //String json = getConverter().toJson(result);
+        //debug(json);
+        //return json;
+        StreamingOutput so = getGzipOutStream(result);
+        return Response.ok(so).build();
     }
 //katoh$
 /*

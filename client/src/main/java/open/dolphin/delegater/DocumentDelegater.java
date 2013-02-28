@@ -155,14 +155,16 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        byte[] bytes = (byte[]) response.getEntity(byte[].class);
 
         TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
         List<DocInfoModel> list = (List<DocInfoModel>)
-                getConverter().fromJson(entityStr, typeRef);
-
+                //getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromGzippedJson(bytes, typeRef);
+        
         return list;
     }
 //katoh$
