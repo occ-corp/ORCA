@@ -86,12 +86,13 @@ public class OrcaDelegater extends BusinessDelegater {
                 .post(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
-
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        
         ClaimMessageModel resModel = (ClaimMessageModel)
-                getConverter().fromJson(entityStr, ClaimMessageModel.class);
+                getConverter().fromJson(is, ClaimMessageModel.class);
 
         String errMsg = resModel.getErrorMsg();
         boolean noError = NO_ERROR.equals(resModel.getErrorCode());
