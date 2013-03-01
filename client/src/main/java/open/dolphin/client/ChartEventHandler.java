@@ -183,15 +183,10 @@ public class ChartEventHandler {
         
         private EventListenThread() {
             super("ChartEvent Listen Thread");
-        }
-        
-        @Override
-        public void start() {
             isRunning = true;
             NamedThreadFactory factory = new NamedThreadFactory("ChartEvent Subscribe Task");
             subscribeExec = Executors.newSingleThreadExecutor(factory);
             subscribeTask = new SubscribeTask();
-            super.start();
         }
 
         public void halt() {
