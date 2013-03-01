@@ -41,10 +41,11 @@ public class ChartEventHandler {
     
     // スレッド
     private EventListenTask listenTask;
+    private SubscribeTask subscribeTask;
     private Thread thread;
     
     // 状態変化を各listenerに通知するタスク
-    private ExecutorService exec;
+    private ExecutorService onEventExec;
     
     private static final ChartEventHandler instance;
 
@@ -91,7 +92,7 @@ public class ChartEventHandler {
 
     // 状態変更処理の共通入り口
     private void publish(ChartEventModel evt) {
-        exec.execute(new LocalOnEventTask(evt));
+        onEventExec.execute(new LocalOnEventTask(evt));
     }
     
     public void publishPvtDelete(PatientVisitModel pvt) {
@@ -150,7 +151,8 @@ public class ChartEventHandler {
 
     public void start() {
         NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
-        exec = Executors.newSingleThreadExecutor(factory);
+        onEventExec = Executors.newSingleThreadExecutor(factory);
+        subscribeTask = new SubscribeTask();
         listenTask = new EventListenTask();
         thread = new Thread(listenTask, "ChartEvent Listen Task");
         thread.start();
@@ -167,21 +169,21 @@ public class ChartEventHandler {
     private void shutdownExecutor() {
 
         try {
-            exec.shutdown();
-            if (!exec.awaitTermination(20, TimeUnit.MILLISECONDS)) {
-                exec.shutdownNow();
+            onEventExec.shutdown();
+            if (!onEventExec.awaitTermination(20, TimeUnit.MILLISECONDS)) {
+                onEventExec.shutdownNow();
             }
         } catch (InterruptedException ex) {
-            exec.shutdownNow();
+            onEventExec.shutdownNow();
         } catch (NullPointerException ex) {
         }
-        exec = null;
+        onEventExec = null;
     }
 
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
-        private ExecutorService exec2;
+        private ExecutorService subscribeExec;
         private Future<InputStream> future;
         
         private boolean isRunning;
@@ -189,7 +191,7 @@ public class ChartEventHandler {
         private EventListenTask() {
             isRunning = true;
             NamedThreadFactory factory = new NamedThreadFactory(EventListenTask.class.getSimpleName());
-            exec2 = Executors.newSingleThreadExecutor(factory);
+            subscribeExec = Executors.newSingleThreadExecutor(factory);
         }
 
         private void stop() {
@@ -198,15 +200,15 @@ public class ChartEventHandler {
                 future.cancel(true);
             }
             try {
-                exec2.shutdown();
-                if (!exec2.awaitTermination(100, TimeUnit.MILLISECONDS)) {
-                    exec2.shutdownNow();
+                subscribeExec.shutdown();
+                if (!subscribeExec.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+                    subscribeExec.shutdownNow();
                 }
             } catch (InterruptedException ex) {
-                exec2.shutdownNow();
+                subscribeExec.shutdownNow();
             } catch (NullPointerException ex) {
             }
-            exec2 = null;
+            subscribeExec = null;
         }
         
         @Override
@@ -214,9 +216,9 @@ public class ChartEventHandler {
             
             while (isRunning) {
                 try {
-                    future = exec2.submit(new SubscribeTask());
+                    future = subscribeExec.submit(subscribeTask);
                     InputStream is = future.get();
-                    exec.execute(new RemoteOnEventTask(is));
+                    onEventExec.execute(new RemoteOnEventTask(is));
                 } catch (Exception e) {
                 }
             }
