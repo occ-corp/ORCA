@@ -3,7 +3,7 @@ standalone.xml　編集箇所
         <subsystem xmlns="urn:jboss:domain:web:1.3" default-virtual-server="default-host" native="false">
             <connector name="http" protocol="HTTP/1.1" scheme="http" socket-binding="http"/>
             <connector name="https" protocol="HTTP/1.1" scheme="https" socket-binding="https" secure="true">
-                <ssl name="https" password="dolphin" certificate-key-file="${jboss.server.config.dir}/oreore.keystore"/>
+                <ssl name="https" password="dolphin" verify-client="false" certificate-key-file="${jboss.server.config.dir}/oreore.keystore"/>
             </connector>
             <virtual-server name="default-host" enable-welcome-root="true">
                 <alias name="localhost"/>

@@ -1,16 +1,7 @@
 package open.dolphin.delegater;
 
-import java.io.IOException;
-import java.security.KeyManagementException;
-import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLException;
-import javax.net.ssl.SSLSession;
-import javax.net.ssl.SSLSocket;
-import javax.net.ssl.TrustManager;
-import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.Dolphin;
 import open.dolphin.infomodel.IInfoModel;
@@ -19,7 +10,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.conn.scheme.Scheme;
 import org.apache.http.conn.scheme.SchemeRegistry;
 import org.apache.http.conn.ssl.SSLSocketFactory;
-import org.apache.http.conn.ssl.X509HostnameVerifier;
+import org.apache.http.conn.ssl.TrustStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.HttpConnectionParams;
 import org.apache.http.params.HttpParams;
@@ -51,8 +42,7 @@ public class RESTEasyClient {
         clientUUID = Dolphin.getInstance().getClientUUID();
         try {
             setupOreOreSSL();
-        } catch (NoSuchAlgorithmException ex) {
-        } catch (KeyManagementException ex) {
+        } catch (Exception ex) {
         }
     }
 
@@ -131,9 +121,24 @@ public class RESTEasyClient {
         }
         //register https protocol in httpclient's scheme registry
         SchemeRegistry sr = httpClient.getConnectionManager().getSchemeRegistry();
-        sr.register(new Scheme("https", 443, sslSocketFactory));    // 8443?
+        Scheme https = new Scheme("https", 443, sslSocketFactory);    // 8443?
+        sr.register(https);    
     }
     
+    private void setupOreOreSSL() throws Exception {
+
+        TrustStrategy ts = new TrustStrategy() {
+            @Override
+            public boolean isTrusted(X509Certificate[] x509Certificates, String s) throws CertificateException {
+                return true; // heck yea!
+            }
+        };
+        
+        // build socket factory with hostname verification turned off.
+        sslSocketFactory = new SSLSocketFactory(ts, SSLSocketFactory.ALLOW_ALL_HOSTNAME_VERIFIER);
+    }
+    
+/*
     private void setupOreOreSSL() throws NoSuchAlgorithmException, KeyManagementException {
 
         //Secure Protocol implementation.
@@ -177,4 +182,5 @@ public class RESTEasyClient {
         ctx.init(null, new TrustManager[]{manager}, null);
         sslSocketFactory = new SSLSocketFactory(ctx, verifier);
     }
+*/
 }
