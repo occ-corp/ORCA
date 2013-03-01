@@ -41,7 +41,6 @@ public class ChartEventHandler {
     
     // スレッド
     private EventListenTask listenTask;
-    private SubscribeTask subscribeTask;
     private Thread thread;
     
     // 状態変化を各listenerに通知するタスク
@@ -152,7 +151,6 @@ public class ChartEventHandler {
     public void start() {
         NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
         onEventExec = Executors.newSingleThreadExecutor(factory);
-        subscribeTask = new SubscribeTask();
         listenTask = new EventListenTask();
         thread = new Thread(listenTask, "ChartEvent Listen Task");
         thread.start();
@@ -183,6 +181,7 @@ public class ChartEventHandler {
     // Commetでサーバーと同期するスレッド
     private class EventListenTask implements Runnable {
         
+        private SubscribeTask subscribeTask;
         private ExecutorService subscribeExec;
         private Future<InputStream> future;
         
@@ -190,6 +189,7 @@ public class ChartEventHandler {
         
         private EventListenTask() {
             isRunning = true;
+            subscribeTask = new SubscribeTask();
             NamedThreadFactory factory = new NamedThreadFactory(EventListenTask.class.getSimpleName());
             subscribeExec = Executors.newSingleThreadExecutor(factory);
         }
