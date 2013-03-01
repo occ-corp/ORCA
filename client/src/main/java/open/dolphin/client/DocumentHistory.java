@@ -137,13 +137,13 @@ public class DocumentHistory {
     // 全履歴はaddValue = 0にする
     static {
         EXTRACTION_OBJECTS = new ExtractionPeriod[]{
-            new ExtractionPeriod("1ヶ月", -1, 1),
+            new ExtractionPeriod("1ヶ月", -1, 12),
             new ExtractionPeriod("先月", -1, 0),
-            new ExtractionPeriod("3ヶ月", -3, 1),
-            new ExtractionPeriod("半年", -6, 1),
-            new ExtractionPeriod("１年", -12, 1),
-            new ExtractionPeriod("２年", -24, 1),
-            new ExtractionPeriod("５年", -60, 1),
+            new ExtractionPeriod("3ヶ月", -3, 12),
+            new ExtractionPeriod("半年", -6, 12),
+            new ExtractionPeriod("１年", -12, 12),
+            new ExtractionPeriod("２年", -24, 12),
+            new ExtractionPeriod("５年", -60, 12),
             new ExtractionPeriod("-10年", -120, -60),
             new ExtractionPeriod("-20年", -240, -120),
             new ExtractionPeriod("-30年", -360, -240),

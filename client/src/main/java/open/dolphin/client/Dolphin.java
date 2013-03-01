@@ -1697,5 +1697,14 @@ public class Dolphin implements MainWindow {
         UsingDrugPanel panel = new UsingDrugPanel();
         panel.enter();
     }
+    
+    public void checkTempKarte() {
+        try {
+            TempKarteCheckDialog tempKarte = TempKarteCheckDialog.getInstance();
+            tempKarte.renewList();
+            tempKarte.setVisible(true);
+        } catch (Exception ex) {
+        }
+    }
 //masuda$
 }
