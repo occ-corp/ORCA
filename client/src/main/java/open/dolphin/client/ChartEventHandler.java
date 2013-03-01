@@ -7,10 +7,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.List;
-import java.util.concurrent.Callable;
+//import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
+//import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import open.dolphin.delegater.ChartEventDelegater;
 import open.dolphin.infomodel.*;
@@ -176,23 +176,23 @@ public class ChartEventHandler {
     // Commetでサーバーと同期するスレッド
     private class EventListenThread extends Thread {
         
-        private SubscribeTask subscribeTask;
-        private ExecutorService subscribeExec;
-        private Future<InputStream> future;
+        //private SubscribeTask subscribeTask;
+        //private ExecutorService subscribeExec;
+        //private Future<InputStream> future;
         private boolean isRunning;
         
         private EventListenThread() {
             super("ChartEvent Listen Thread");
             isRunning = true;
-            NamedThreadFactory factory = new NamedThreadFactory("ChartEvent Subscribe Task");
-            subscribeExec = Executors.newSingleThreadExecutor(factory);
-            subscribeTask = new SubscribeTask();
+            //NamedThreadFactory factory = new NamedThreadFactory("ChartEvent Subscribe Task");
+            //subscribeExec = Executors.newSingleThreadExecutor(factory);
+            //subscribeTask = new SubscribeTask();
         }
 
         public void halt() {
             isRunning = false;
             interrupt();
-            
+            /*
             if (future != null) {
                 future.cancel(true);
             }
@@ -206,6 +206,7 @@ public class ChartEventHandler {
             } catch (NullPointerException ex) {
             }
             subscribeExec = null;
+            */
         }
         
         @Override
@@ -213,15 +214,17 @@ public class ChartEventHandler {
             
             while (isRunning) {
                 try {
-                    future = subscribeExec.submit(subscribeTask);
-                    InputStream is = future.get();
+                    // Futureでなくてもいい気がするｗ
+                    //future = subscribeExec.submit(subscribeTask);
+                    //InputStream is = future.get();
+                    InputStream is = ChartEventDelegater.getInstance().subscribe();
                     onEventExec.execute(new RemoteOnEventTask(is));
                 } catch (Exception e) {
                 }
             }
         }
     }
-    
+/*
     private class SubscribeTask implements Callable<InputStream> {
         
         @Override
@@ -229,7 +232,7 @@ public class ChartEventHandler {
             return ChartEventDelegater.getInstance().subscribe();
         }
     }
-    
+*/
     // 自クライアントの状態変更後、サーバーに通知するタスク
     private class LocalOnEventTask implements Runnable {
         
