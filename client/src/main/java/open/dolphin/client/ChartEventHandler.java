@@ -191,6 +191,8 @@ public class ChartEventHandler {
 
         public void halt() {
             isRunning = false;
+            interrupt();
+            
             if (future != null) {
                 future.cancel(true);
             }
@@ -204,8 +206,6 @@ public class ChartEventHandler {
             } catch (NullPointerException ex) {
             }
             subscribeExec = null;
-            
-            interrupt();
         }
         
         @Override
