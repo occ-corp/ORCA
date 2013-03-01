@@ -39,9 +39,8 @@ public class ChartEventHandler {
 
     private PropertyChangeSupport boundSupport;
     
-    // スレッド
-    private EventListenTask listenTask;
-    private Thread thread;
+    // ChartEvent監視タスク
+    private EventListenThread listenThread;
     
     // 状態変化を各listenerに通知するタスク
     private ExecutorService onEventExec;
@@ -149,18 +148,14 @@ public class ChartEventHandler {
     }
 
     public void start() {
-        NamedThreadFactory factory = new NamedThreadFactory(getClass().getSimpleName());
+        NamedThreadFactory factory = new NamedThreadFactory("ChartEvent Handle Task");
         onEventExec = Executors.newSingleThreadExecutor(factory);
-        listenTask = new EventListenTask();
-        thread = new Thread(listenTask, "ChartEvent Listen Task");
-        thread.start();
+        listenThread = new EventListenThread();
+        listenThread.start();
     }
 
     public void stop() {
-
-        listenTask.stop();
-        thread.interrupt();
-        thread = null;
+        listenThread.halt();
         shutdownExecutor();
     }
 
@@ -179,29 +174,34 @@ public class ChartEventHandler {
     }
 
     // Commetでサーバーと同期するスレッド
-    private class EventListenTask implements Runnable {
+    private class EventListenThread extends Thread {
         
         private SubscribeTask subscribeTask;
         private ExecutorService subscribeExec;
         private Future<InputStream> future;
-        
         private boolean isRunning;
         
-        private EventListenTask() {
+        private EventListenThread() {
+            super("ChartEvent Listen Thread");
+        }
+        
+        @Override
+        public void start() {
             isRunning = true;
-            subscribeTask = new SubscribeTask();
-            NamedThreadFactory factory = new NamedThreadFactory(EventListenTask.class.getSimpleName());
+            NamedThreadFactory factory = new NamedThreadFactory("ChartEvent Subscribe Task");
             subscribeExec = Executors.newSingleThreadExecutor(factory);
+            subscribeTask = new SubscribeTask();
+            super.start();
         }
 
-        private void stop() {
+        public void halt() {
             isRunning = false;
             if (future != null) {
                 future.cancel(true);
             }
             try {
                 subscribeExec.shutdown();
-                if (!subscribeExec.awaitTermination(100, TimeUnit.MILLISECONDS)) {
+                if (!subscribeExec.awaitTermination(20, TimeUnit.MILLISECONDS)) {
                     subscribeExec.shutdownNow();
                 }
             } catch (InterruptedException ex) {
@@ -209,6 +209,8 @@ public class ChartEventHandler {
             } catch (NullPointerException ex) {
             }
             subscribeExec = null;
+            
+            interrupt();
         }
         
         @Override
