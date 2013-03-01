@@ -2,6 +2,7 @@ package open.dolphin.client;
 
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
@@ -181,7 +182,7 @@ public class ChartEventHandler {
     private class EventListenTask implements Runnable {
         
         private ExecutorService exec2;
-        private Future<String> future;
+        private Future<InputStream> future;
         
         private boolean isRunning;
         
@@ -214,20 +215,19 @@ public class ChartEventHandler {
             while (isRunning) {
                 try {
                     future = exec2.submit(new SubscribeTask());
-                    String json = future.get();
-                    exec.execute(new RemoteOnEventTask(json));
+                    InputStream is = future.get();
+                    exec.execute(new RemoteOnEventTask(is));
                 } catch (Exception e) {
                 }
             }
         }
     }
     
-    private class SubscribeTask implements Callable<String> {
-
+    private class SubscribeTask implements Callable<InputStream> {
+        
         @Override
-        public String call() throws Exception {
-            String json = ChartEventDelegater.getInstance().subscribe();
-            return json;
+        public InputStream call() throws Exception {
+            return ChartEventDelegater.getInstance().subscribe();
         }
     }
     
@@ -258,17 +258,17 @@ public class ChartEventHandler {
     // 状態変化通知メッセージをデシリアライズし各リスナに処理を分配する
     private class RemoteOnEventTask implements Runnable {
         
-        private String json;
+        private InputStream is;
         
-        private RemoteOnEventTask(String json) {
-            this.json = json;
+        private RemoteOnEventTask(InputStream is) {
+            this.is = is;
         }
 
         @Override
         public void run() {
             
             ChartEventModel evt = (ChartEventModel) 
-                    JsonConverter.getInstance().fromJson(json, ChartEventModel.class);
+                    JsonConverter.getInstance().fromJson(is, ChartEventModel.class);
             
             if (evt == null) {
                 return;

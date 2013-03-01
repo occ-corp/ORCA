@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -113,14 +114,11 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         int status = response.getStatus();
         isHTTP200(status);
-        
-        //String entityStr = (String) response.getEntity(String.class);
-        //debug(status, entityStr);
-        byte[] bytes = (byte[]) response.getEntity(byte[].class);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
         List<DocumentModel> list = (List<DocumentModel>)
-                getConverter().fromGzippedJson(bytes, typeRef);
+                getConverter().fromGzippedJson(is, typeRef);
 
         return list;
     }
@@ -155,15 +153,12 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        //String entityStr = (String) response.getEntity(String.class);
-        //debug(status, entityStr);
         isHTTP200(status);
-        byte[] bytes = (byte[]) response.getEntity(byte[].class);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
         List<DocInfoModel> list = (List<DocInfoModel>)
-                //getConverter().fromJson(entityStr, typeRef);
-                getConverter().fromGzippedJson(bytes, typeRef);
+                getConverter().fromGzippedJson(is, typeRef);
         
         return list;
     }

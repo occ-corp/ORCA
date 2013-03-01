@@ -1,5 +1,6 @@
 package open.dolphin.delegater;
 
+import java.io.InputStream;
 import open.dolphin.infomodel.ChartEventModel;
 import org.jboss.resteasy.client.ClientResponse;
 
@@ -43,17 +44,17 @@ public class ChartEventDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
 
-    public String subscribe() throws Exception {
+    public InputStream subscribe() throws Exception {
         
         ClientResponse response = getClientRequest(SUBSCRIBE_PATH, null)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
         
-        return entityStr;
+        return is;
     }
 
     @Override
