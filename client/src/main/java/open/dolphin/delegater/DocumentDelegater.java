@@ -60,12 +60,13 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
-
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        
         KarteBean karte = (KarteBean)
-                getConverter().fromJson(entityStr, KarteBean.class);
+                getConverter().fromJson(is, KarteBean.class);
 
         return karte;
     }
@@ -173,14 +174,14 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
-
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
-
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        
         TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
         List<LetterModule> list = (List<LetterModule>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         List<DocInfoModel> ret = new ArrayList<DocInfoModel>();
 
@@ -301,13 +302,14 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<List<ModuleModel>>>(){};
         List<List<ModuleModel>> ret = (List<List<ModuleModel>>) 
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         for (List<ModuleModel> list : ret) {
             for (ModuleModel module : list) {
@@ -331,12 +333,13 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         SchemaModel model = (SchemaModel) 
-                getConverter().fromJson(entityStr, SchemaModel.class);
+                getConverter().fromJson(is, SchemaModel.class);
 
         byte[] bytes = model.getJpegByte();
         ImageIcon icon = new ImageIcon(bytes);
@@ -498,13 +501,14 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
         List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return list;
     }
@@ -604,13 +608,14 @@ public class  DocumentDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<List<AppointmentModel>>>(){};
         List<List<AppointmentModel>> ret = (List<List<AppointmentModel>>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return ret;
     }

@@ -3,6 +3,8 @@ package open.dolphin.rest;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
 import open.dolphin.session.PatientServiceBean;
@@ -30,41 +32,47 @@ public class PatientResource extends AbstractResource {
     @GET
     @Path("name/{param}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPatientsByName(@PathParam("param") String param) {
+    public Response getPatientsByName(@PathParam("param") String param) {
 
         String fid = getRemoteFacility();
         String name = param;
 
         List<PatientModel> patients = patientServiceBean.getPatientsByName(fid, name);
 
-        String json = getConverter().toJson(patients);
-        debug(json);
+        //String json = getConverter().toJson(patients);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(patients);
+        
+        return Response.ok(so).build();
     }
 
 
     @GET
     @Path("kana/{param}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPatientsByKana(@PathParam("param") String param) {
+    public Response getPatientsByKana(@PathParam("param") String param) {
 
         String fid = getRemoteFacility();
         String kana = param;
 
         List<PatientModel> patients = patientServiceBean.getPatientsByKana(fid, kana);
 
-        String json = getConverter().toJson(patients);
-        debug(json);
+        //String json = getConverter().toJson(patients);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(patients);
+        
+        return Response.ok(so).build();
     }
     
 
     @GET
     @Path("digit/{param}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPatientsByDigit(@PathParam("param") String param) {
+    public Response getPatientsByDigit(@PathParam("param") String param) {
 
         String fid = getRemoteFacility();
         String digit = param;
@@ -73,50 +81,59 @@ public class PatientResource extends AbstractResource {
 
         List<PatientModel> patients = patientServiceBean.getPatientsByDigit(fid, digit);
 
-        String json = getConverter().toJson(patients);
-        debug(json);
+        //String json = getConverter().toJson(patients);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(patients);
+        
+        return Response.ok(so).build();
     }
 
 
     @GET
     @Path("id/{param}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPatientById(@PathParam("param") String param) {
+    public Response getPatientById(@PathParam("param") String param) {
 
         String fid = getRemoteFacility();
         String pid = param;
 
         PatientModel patient = patientServiceBean.getPatientById(fid, pid);
 
-        String json = getConverter().toJson(patient);
-        debug(json);
+        //String json = getConverter().toJson(patient);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(patient);
+        
+        return Response.ok(so).build();
     }
 
     @GET
     @Path("pvt/{param}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPatientsByPvt(@PathParam("param") String param) {
+    public Response getPatientsByPvt(@PathParam("param") String param) {
 
         String fid = getRemoteFacility();
         String pvtDate = param;
 
         List<PatientModel> patients = patientServiceBean.getPatientsByPvtDate(fid, pvtDate);
 
-        String json = getConverter().toJson(patients);
-        debug(json);
+        //String json = getConverter().toJson(patients);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(patients);
+        
+        return Response.ok(so).build();
     }
 
 
     @POST
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String postPatient(String json) {
+    public Response postPatient(String json) {
 
         String fid = getRemoteFacility();
 
@@ -128,14 +145,14 @@ public class PatientResource extends AbstractResource {
         String pkStr = String.valueOf(pk);
         debug(pkStr);
 
-        return pkStr;
+        return Response.ok(pkStr).build();
     }
 
 
     @PUT
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putPatient(String json) {
+    public Response putPatient(String json) {
 
         String fid = getRemoteFacility();
 
@@ -147,34 +164,40 @@ public class PatientResource extends AbstractResource {
         String pkStr = String.valueOf(cnt);
         debug(pkStr);
 
-        return pkStr;
+        return Response.ok(pkStr).build();
     }
     
     @GET
     @Path("list")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getPatientList(@QueryParam("ids") String ids) {
+    public Response getPatientList(@QueryParam("ids") String ids) {
         
         String fid = getRemoteFacility();
         List<String> idList = getConverter().toStrList(ids);
         
         List<PatientModel> list = patientServiceBean.getPatientList(fid, idList);
         
-        String json = getConverter().toJson(list);
+        //String json = getConverter().toJson(list);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @GET
     @Path("insurances/{id}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getHealthInsurances(@PathParam("id") Long pk) {
+    public Response getHealthInsurances(@PathParam("id") Long pk) {
         
         List<HealthInsuranceModel> list = patientServiceBean.getHealthInsurances(pk);
         
-        String json = getConverter().toJson(list);
+        //String json = getConverter().toJson(list);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
 

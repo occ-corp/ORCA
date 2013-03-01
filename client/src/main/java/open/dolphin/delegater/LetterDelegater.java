@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.InputStream;
 import java.util.List;
 import open.dolphin.infomodel.LetterModule;
 import org.jboss.resteasy.client.ClientResponse;
@@ -62,12 +63,13 @@ public class LetterDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         LetterModule ret = (LetterModule)
-                getConverter().fromJson(entityStr, LetterModule.class);
+                getConverter().fromJson(is, LetterModule.class);
 
         return ret;
     }
@@ -82,13 +84,14 @@ public class LetterDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
         List<LetterModule> ret = (List<LetterModule>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return ret;
     }

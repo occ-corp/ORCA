@@ -5,6 +5,8 @@ import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.*;
 import open.dolphin.session.MasudaServiceBean;
 
@@ -27,29 +29,35 @@ public class MasudaResource extends AbstractResource {
     @GET
     @Path("routineMed/list/{karteId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getRoutineMedModels(@PathParam("karteId") Long karteId,
+    public Response getRoutineMedModels(@PathParam("karteId") Long karteId,
                 @QueryParam("firstResult") Integer firstResult,
                 @QueryParam("maxResults") Integer maxResults) {
         
         List<RoutineMedModel> list = masudaServiceBean.getRoutineMedModels(karteId, firstResult, maxResults);
         
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     @GET
     @Path("routineMed/{id}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getRoutineMedModel(@PathParam("param") Long id) {
+    public Response getRoutineMedModel(@PathParam("param") Long id) {
         
         RoutineMedModel model = masudaServiceBean.getRoutineMedModel(id);
         
-        String json = getConverter().toJson(model);
-        debug(json);
+        //String json = getConverter().toJson(model);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
     }
     
     @DELETE
@@ -65,7 +73,7 @@ public class MasudaResource extends AbstractResource {
     @Path("routineMed/")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String addRoutineMedModel(String json) {
+    public Response addRoutineMedModel(String json) {
         
         RoutineMedModel model = (RoutineMedModel)
                 getConverter().fromJson(json, RoutineMedModel.class);
@@ -74,14 +82,15 @@ public class MasudaResource extends AbstractResource {
         
         String ret = String.valueOf(id);
         debug(ret);
-        return ret;
+        
+        return Response.ok(ret).build();
     }
     
     @PUT
     @Path("routineMed/")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String updateRoutineMedModel(String json) {
+    public Response updateRoutineMedModel(String json) {
         
         RoutineMedModel model = (RoutineMedModel)
                 getConverter().fromJson(json, RoutineMedModel.class);
@@ -90,31 +99,34 @@ public class MasudaResource extends AbstractResource {
         
         String ret = String.valueOf(id);
         debug(ret);
-        return ret;
+        
+        return Response.ok(ret).build();
     }
     
     // 中止項目
     @GET
     @Path("discon")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getDisconItemModels() {
+    public Response getDisconItemModels() {
 
         // 施設
         String fid = getRemoteFacility();
 
         List<DisconItemModel> list = masudaServiceBean.getDisconItems(fid);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
+        StreamingOutput so = getJsonOutStream(list);
         
-        return json;
+        return Response.ok(so).build();
     }
 
     @POST
     @Path("discon")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String addDisconItemModel(String json) {
+    public Response addDisconItemModel(String json) {
 
         String fid = getRemoteFacility();
 
@@ -125,14 +137,15 @@ public class MasudaResource extends AbstractResource {
         long id = masudaServiceBean.addDisconItem(model);
         String ret = String.valueOf(id);
         debug(ret);
-        return ret;
+        
+        return Response.ok(ret).build();
     }
 
     @PUT
     @Path("discon")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String updateDiconItemModel(String json) {
+    public Response updateDiconItemModel(String json) {
 
         String fid = getRemoteFacility();
 
@@ -143,7 +156,8 @@ public class MasudaResource extends AbstractResource {
         long id = masudaServiceBean.updateDisconItem(model);
         String ret = String.valueOf(id);
         debug(ret);
-        return ret;
+        
+        return Response.ok(ret).build();
     }
 
     @DELETE
@@ -161,24 +175,27 @@ public class MasudaResource extends AbstractResource {
     @GET
     @Path("usingDrug")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getUsingDrugModels() {
+    public Response getUsingDrugModels() {
 
         // 施設
         String fid = getRemoteFacility();
 
         List<UsingDrugModel> list = masudaServiceBean.getUsingDrugModels(fid);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @POST
     @Path("usingDrug")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String addUsingDrugModel(String json) {
+    public Response addUsingDrugModel(String json) {
 
         String fid = getRemoteFacility();
         
@@ -189,14 +206,15 @@ public class MasudaResource extends AbstractResource {
         long id = masudaServiceBean.addUsingDrugModel(model);
         String ret = String.valueOf(id);
         debug(ret);
-        return ret;
+        
+        return Response.ok(ret).build();
     }
 
     @PUT
     @Path("usingDrug")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String updateUsingDrugModel(String json) {
+    public Response updateUsingDrugModel(String json) {
 
         String fid = getRemoteFacility();
 
@@ -207,7 +225,8 @@ public class MasudaResource extends AbstractResource {
         long id = masudaServiceBean.updateUsingDrugModel(model);
         String ret = String.valueOf(id);
         debug(ret);
-        return ret;
+        
+        return Response.ok(ret).build();
     }
 
     @DELETE
@@ -225,7 +244,7 @@ public class MasudaResource extends AbstractResource {
     @GET
     @Path("moduleSearch/{karteId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getModulesEntitySearch(@PathParam("karteId") Long karteId,
+    public Response getModulesEntitySearch(@PathParam("karteId") Long karteId,
                 @QueryParam("fromDate") String fromDateStr,
                 @QueryParam("toDate") String toDateStr,
                 @QueryParam("entities") String entitiesStr) {
@@ -238,48 +257,57 @@ public class MasudaResource extends AbstractResource {
         List<String> entities = getConverter().toStrList(entitiesStr);
 
         List<ModuleModel> list = masudaServiceBean.getModulesEntitySearch(fid, karteId, fromDate, toDate, entities);
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     // 今月の最後の受診日を調べる
     @GET
     @Path("lastPvt/{ptId}/")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getLastPvtInThisMonth(@PathParam("ptId") String ptId) {
+    public Response getLastPvtInThisMonth(@PathParam("ptId") String ptId) {
 
         String fid = getRemoteFacility();
         
         PatientVisitModel model = masudaServiceBean.getLastPvtInThisMonth(fid, ptId);
         
-        String json = getConverter().toJson(model);
-        debug(json);
+        //String json = getConverter().toJson(model);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
     }
 
     // 指定したidのdocInfoをまとめて取得、検索結果で使用
     @GET
     @Path("docList")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getDocumentList(@QueryParam("ids") String ids) {
+    public Response getDocumentList(@QueryParam("ids") String ids) {
 
         List<Long> docPkList = getConverter().toLongList(ids);
 
         List<DocInfoModel> list = masudaServiceBean.getDocumentList(docPkList);
         
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @GET
     @Path("search/makeIndex")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String makeDocumentModelIndex(
+    public Response makeDocumentModelIndex(
             @QueryParam("fromDocPk") Long fromDocPk, 
             @QueryParam("maxResults") Integer maxResults) {
 
@@ -288,13 +316,13 @@ public class MasudaResource extends AbstractResource {
         String ret = masudaServiceBean.makeDocumentModelIndex(fid, fromDocPk, maxResults);
 
         debug(ret);
-        return ret;
+        return Response.ok(ret).build();
     }
 
     @GET
     @Path("search/hibernate")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getKarteFullTextSearch(
+    public Response getKarteFullTextSearch(
             @QueryParam("karteId") Long karteId,
             @QueryParam("text") String text) {
 
@@ -302,16 +330,19 @@ public class MasudaResource extends AbstractResource {
 
         List<PatientModel> list = masudaServiceBean.getKarteFullTextSearch(fid, karteId, text);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @GET
     @Path("search/grep")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getSearchResult(
+    public Response getSearchResult(
             @QueryParam("text") String text,
             @QueryParam("fromId") Long fromId,
             @QueryParam("maxResult") Integer maxResult,
@@ -321,16 +352,19 @@ public class MasudaResource extends AbstractResource {
 
         SearchResultModel model = masudaServiceBean.getSearchResult(fid, text, fromId, maxResult, progressCourseOnly);
 
-        String json = getConverter().toJson(model);
-        debug(json);
+        //String json = getConverter().toJson(model);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
     }
     
     @GET
     @Path("examHistory/{karteId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getExamHistory(@PathParam("karteId") Long karteId,
+    public Response getExamHistory(@PathParam("karteId") Long karteId,
             @QueryParam("fromDate") String fromDateStr,
             @QueryParam("toDate") String toDateStr) {
         
@@ -340,16 +374,19 @@ public class MasudaResource extends AbstractResource {
         
         List<ExamHistoryModel> list = masudaServiceBean.getExamHistory(fid, karteId, fromDate, toDate);
         
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     @GET
     @Path("outOfMed")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getOutOfMedStockPatient(
+    public Response getOutOfMedStockPatient(
             @QueryParam("fromDate") String fromDateStr,
             @QueryParam("toDate") String toDateStr,
             @QueryParam("yoyuu") Integer yoyuu) {
@@ -360,31 +397,37 @@ public class MasudaResource extends AbstractResource {
 
         List<PatientModel> list = masudaServiceBean.getOutOfMedStockPatient(fid, fromDate, toDate, yoyuu);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     @GET
     @Path("inFacilityLabo/list")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getInFacilityLaboItemList() {
+    public Response getInFacilityLaboItemList() {
         
         String fid = getRemoteFacility();
         List<InFacilityLaboItem> list = masudaServiceBean.getInFacilityLaboItemList(fid);
         
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     @PUT
     @Path("inFacilityLabo/list")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String updateInFacilityLaboItem(String json) {
+    public Response updateInFacilityLaboItem(String json) {
         
         String fid = getRemoteFacility();
         
@@ -394,14 +437,14 @@ public class MasudaResource extends AbstractResource {
         
         long ret = masudaServiceBean.updateInFacilityLaboItem(fid, list);
         
-        return String.valueOf(ret);
+        return Response.ok(String.valueOf(ret)).build();
     }
 
     // 電子点数表　未使用
     @POST
     @Path("etensu/update")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String updateETensu1Table(String json) {
+    public Response updateETensu1Table(String json) {
         
         TypeReference typeRef = new TypeReference<List<ETensuModel1>>(){};
         List<ETensuModel1> list = (List<ETensuModel1>)
@@ -409,13 +452,13 @@ public class MasudaResource extends AbstractResource {
         
         String ret = masudaServiceBean.updateETensu1Table(list);
         
-        return ret;
+        return Response.ok(ret).build();
     }
     
     @GET
     @Path("santeiHistory/init")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String initSanteiHistory(
+    public Response initSanteiHistory(
             @QueryParam("fromId") Long fromIndex,
             @QueryParam("maxResults") Integer maxResults) {
         
@@ -423,13 +466,13 @@ public class MasudaResource extends AbstractResource {
         
         String ret = masudaServiceBean.initSanteiHistory(fid, fromIndex, maxResults);
         
-        return ret;
+        return Response.ok(ret).build();
     }
     
     @GET
     @Path("santeiHistory/{karteId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getSanteiHistory(@PathParam("karteId") Long karteId,
+    public Response getSanteiHistory(@PathParam("karteId") Long karteId,
             @QueryParam("fromDate") String fromDateStr,
             @QueryParam("toDate") String toDateStr,
             @QueryParam("srycds") String srycds) {
@@ -443,16 +486,19 @@ public class MasudaResource extends AbstractResource {
         
         List<SanteiHistoryModel> list = masudaServiceBean.getSanteiHistory(karteId, fromDate, toDate, srycdList);
         
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     @GET
     @Path("rpHistory/list/{karteId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getRpHistory(@PathParam("karteId") Long karteId,
+    public Response getRpHistory(@PathParam("karteId") Long karteId,
             @QueryParam("fromDate") String fromDateStr,
             @QueryParam("toDate") String toDateStr,
             @QueryParam("lastOnly") Boolean lastOnly) {
@@ -462,35 +508,42 @@ public class MasudaResource extends AbstractResource {
         
         List<List<RpModel>> list = masudaServiceBean.getRpModelList(karteId, fromDate, toDate, lastOnly);
         
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     @POST
     @Path("userProperty/{uid}")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String postUserProperties(@PathParam("uid") String userId, String json) {
+    public Response postUserProperties(@PathParam("uid") String userId, String json) {
         
         TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
         List<UserPropertyModel> list = (List<UserPropertyModel>) 
                 getConverter().fromJson(json, typeRef);
         
         int cnt = masudaServiceBean.postUserProperties(list);
-        return String.valueOf(cnt);
+        
+        return Response.ok(String.valueOf(cnt)).build();
     }
     
     @GET
     @Path("userProperty/{uid}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getUserProperties(@PathParam("uid") String userId) {
+    public Response getUserProperties(@PathParam("uid") String userId) {
         
         List<UserPropertyModel> list = masudaServiceBean.getUserProperties(userId);
-        String json = getConverter().toJson(list);
+        //String json = getConverter().toJson(list);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     
@@ -498,7 +551,7 @@ public class MasudaResource extends AbstractResource {
     @Path("admission")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putAdmissionModels(String json) {
+    public Response putAdmissionModels(String json) {
         
         TypeReference typeRef = new TypeReference<List<AdmissionModel>>(){};
         List<AdmissionModel> list = (List<AdmissionModel>) 
@@ -506,25 +559,25 @@ public class MasudaResource extends AbstractResource {
         
         int cnt = masudaServiceBean.updateAdmissionModels(list);
         
-        return String.valueOf(cnt);
+        return Response.ok(String.valueOf(cnt)).build();
     }
     
     @DELETE
     @Path("admission/{ids}")
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String deleteAdmissionModels(@PathParam("ids") String ids) {
+    public Response deleteAdmissionModels(@PathParam("ids") String ids) {
         
         List<Long> idList = getConverter().toLongList(ids);
         
         int cnt = masudaServiceBean.deleteAdmissionModels(idList);
         
-        return String.valueOf(cnt);
+        return Response.ok(String.valueOf(cnt)).build();
     }
     
     @GET
     @Path("tempKarte/{userId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getTempKartePatients(@PathParam("userId") String userPkStr, 
+    public Response getTempKartePatients(@PathParam("userId") String userPkStr, 
             @QueryParam("fromDate") String fromDateStr) {
         
         Date fromDate = parseDate(fromDateStr);
@@ -532,10 +585,13 @@ public class MasudaResource extends AbstractResource {
 
         List<PatientModel> list = masudaServiceBean.getTempDocumentPatients(fromDate, userPk);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
     
     

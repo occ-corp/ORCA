@@ -4,6 +4,8 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.StampModel;
 import open.dolphin.session.StampServiceBean;
 
@@ -28,49 +30,60 @@ public class StampResource extends AbstractResource {
     @GET
     @Path("id/{param}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getStamp(@PathParam("param") String param) {
+    public Response getStamp(@PathParam("param") String param) {
         
         StampModel stamp = stampServiceBean.getStamp(param);
-        String json = getConverter().toJson(stamp);
-        debug(json);
-        return json;
+        
+        //String json = getConverter().toJson(stamp);
+        //debug(json);
+        //return json;
+        
+        StreamingOutput so = getJsonOutStream(stamp);
+        
+        return Response.ok(so).build();
     }
 
     @GET
     @Path("list")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getStamps(@QueryParam("ids") String ids) {
+    public Response getStamps(@QueryParam("ids") String ids) {
 
         List<String> list = getConverter().toStrList(ids);
 
         List<StampModel> result = stampServiceBean.getStamp(list);
 
-        String json = getConverter().toJson(result);
-        debug(json);
-        return json;
+        //String json = getConverter().toJson(result);
+        //debug(json);
+        //return json;
+        
+        StreamingOutput so = getJsonOutStream(result);
+        
+        return Response.ok(so).build();
     }
 
     @PUT
     @Path("id")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putStamp(String json) {
+    public Response putStamp(String json) {
 
         StampModel model = (StampModel)
                 getConverter().fromJson(json, StampModel.class);
 
-        String ret = stampServiceBean.putStamp(model);
+        //String ret = stampServiceBean.putStamp(model);
+        //debug(ret);
+        //return ret;
         
-        debug(ret);
-
-        return ret;
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
     }
 
     @PUT
     @Path("list")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putStamps(String json) {
+    public Response putStamps(String json) {
         
         TypeReference typeRef = new TypeReference<List<StampModel>>(){};
         List<StampModel> list = (List<StampModel>)
@@ -78,11 +91,13 @@ public class StampResource extends AbstractResource {
 
         List<String> ret = stampServiceBean.putStamp(list);
         
-        String retText = getConverter().fromList(ret);
+        //String retText = getConverter().fromList(ret);
+        //debug(retText);
+        //return retText;
         
-        debug(retText);
-
-        return retText;
+        StreamingOutput so = getJsonOutStream(ret);
+        
+        return Response.ok(so).build();
     }
 
 

@@ -7,6 +7,7 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
 import open.dolphin.infomodel.AppointmentModel;
 import open.dolphin.session.AppoServiceBean;
 
@@ -31,7 +32,7 @@ public class AppoResource extends AbstractResource {
     @PUT
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putAppointments(String json) {
+    public Response putAppointments(String json) {
 
         TypeReference typeRef = new TypeReference<List<AppointmentModel>>(){};
         List<AppointmentModel> list = (List<AppointmentModel>) 
@@ -42,7 +43,7 @@ public class AppoResource extends AbstractResource {
         String cntStr = String.valueOf(count);
         debug(cntStr);
 
-        return cntStr;
+        return Response.ok(cntStr).build();
     }
 
     @Override

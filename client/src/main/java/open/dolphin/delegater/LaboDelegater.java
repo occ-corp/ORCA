@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.InputStream;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.LaboModuleValue;
@@ -44,13 +45,14 @@ public class LaboDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<PatientLiteModel>>(){};
         List<PatientLiteModel> list = (List<PatientLiteModel>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return list;
     }
@@ -72,12 +74,13 @@ public class LaboDelegater extends BusinessDelegater {
                 .post(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         PatientModel patient = (PatientModel)
-                getConverter().fromJson(entityStr, PatientModel.class);
+                getConverter().fromJson(is, PatientModel.class);
 
         return patient;
     }
@@ -102,13 +105,14 @@ public class LaboDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<NLaboModule>>(){};
         List<NLaboModule> list = (List<NLaboModule>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return list;
     }
@@ -126,12 +130,13 @@ public class LaboDelegater extends BusinessDelegater {
                 .post(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         PatientModel patient = (PatientModel) 
-                getConverter().fromJson(entityStr, PatientModel.class);
+                getConverter().fromJson(is, PatientModel.class);
 
         decodeHealthInsurance(patient);
 

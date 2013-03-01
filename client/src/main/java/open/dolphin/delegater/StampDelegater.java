@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import javax.ws.rs.core.MultivaluedMap;
@@ -75,12 +76,13 @@ public class StampDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         UserStampTreeModel ret = (UserStampTreeModel) getConverter()
-                .fromJson(entityStr, UserStampTreeModel.class);
+                .fromJson(is, UserStampTreeModel.class);
 
         List<IStampTreeModel> treeList = new ArrayList<IStampTreeModel>();
         List<IStampTreeModel> list = ret.getTreeList();
@@ -211,13 +213,14 @@ public class StampDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<PublishedTreeModel>>(){};
         List<PublishedTreeModel> ret = (List<PublishedTreeModel>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return ret;
     }
@@ -392,12 +395,13 @@ public class StampDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         ret = (StampModel)
-                getConverter().fromJson(entityStr, StampModel.class);
+                getConverter().fromJson(is, StampModel.class);
 
         // キャッシュに登録する
         stampCache.put(stampId, ret);
@@ -440,13 +444,14 @@ public class StampDelegater extends BusinessDelegater {
                     .get(ClientResponse.class);
 
             int status = response.getStatus();
-            String entityStr = (String) response.getEntity(String.class);
-            debug(status, entityStr);
+            //String entityStr = (String) response.getEntity(String.class);
+            //debug(status, entityStr);
             isHTTP200(status);
+            InputStream is = (InputStream) response.getEntity(InputStream.class);
 
             TypeReference typeRef = new TypeReference<List<StampModel>>(){};
             List<StampModel> smList = (List<StampModel>)
-                        getConverter().fromJson(entityStr, typeRef);
+                        getConverter().fromJson(is, typeRef);
 
             // キャッシュに登録する
             for (StampModel sm : smList) {

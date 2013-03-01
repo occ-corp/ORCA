@@ -5,6 +5,8 @@ import javax.ws.rs.Consumes;
 import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.ClaimMessageModel;
 import open.dolphin.infomodel.OrcaSqlModel;
 import open.dolphin.server.orca.OrcaService;
@@ -27,17 +29,20 @@ public class OrcaResource extends AbstractResource {
     @Path("query")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String executeQuery(String json) {
+    public Response executeQuery(String json) {
         
         OrcaSqlModel sqlModel = (OrcaSqlModel) 
                 getConverter().fromJson(json, OrcaSqlModel.class);
         
         OrcaService.getInstance().executeSql(sqlModel);
         
-        json = getConverter().toJson(sqlModel);
-        debug(json);
+        //json = getConverter().toJson(sqlModel);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(sqlModel);
+        
+        return Response.ok(so).build();
     }
     
     @POST
@@ -57,14 +62,17 @@ public class OrcaResource extends AbstractResource {
     @Path("claimres")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String dispachClaimResponse() {
+    public Response dispachClaimResponse() {
         
         ClaimMessageModel model = (ClaimMessageModel) 
                 servletReq.getAttribute(ClaimMessageModel.class.getSimpleName());
         model.setContent(null);
-        String json = getConverter().toJson(model);
+        //String json = getConverter().toJson(model);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
     }
     
     @Override

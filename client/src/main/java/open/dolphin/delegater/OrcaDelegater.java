@@ -1,5 +1,6 @@
 package open.dolphin.delegater;
 
+import java.io.InputStream;
 import open.dolphin.client.ClaimMessageEvent;
 import open.dolphin.client.KarteSenderResult;
 import open.dolphin.impl.claim.ClaimSender;
@@ -42,12 +43,13 @@ public class OrcaDelegater extends BusinessDelegater {
                 .post(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         sqlModel = (OrcaSqlModel) 
-                getConverter().fromJson(entityStr, OrcaSqlModel.class);
+                getConverter().fromJson(is, OrcaSqlModel.class);
 
         return sqlModel;
     }

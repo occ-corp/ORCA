@@ -1,12 +1,14 @@
 package open.dolphin.rest;
 
 import java.io.IOException;
+import java.io.OutputStream;
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
 import javax.servlet.AsyncListener;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.ChartEventModel;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.mbean.ServletContextHolder;
@@ -85,14 +87,14 @@ public class ChartEventResource extends AbstractResource {
     @Path("event")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_TEXT_UTF8)
-    public String putChartEvent(String json) {
+    public Response putChartEvent(String json) {
         
         ChartEventModel msg = (ChartEventModel)
                 getConverter().fromJson(json, ChartEventModel.class);
 
         int cnt = eventServiceBean.processChartEvent(msg);
 
-        return String.valueOf(cnt);
+        return Response.ok(String.valueOf(cnt)).build();
     }
     
     // 参：きしだのはてな もっとJavaEE6っぽくcometチャットを実装する
@@ -103,8 +105,8 @@ public class ChartEventResource extends AbstractResource {
     public Response deliverChartEvent() {
         
         ChartEventModel msg = (ChartEventModel) servletReq.getAttribute(KEY_NAME);
-        String json = getConverter().toJson(msg);
-        return Response.ok(json).build();
+        StreamingOutput so = getJsonOutStream(msg);
+        return Response.ok(so).build();
     }
 
     @Override

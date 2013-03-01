@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.InputStream;
 import java.util.List;
 import open.dolphin.infomodel.PatientVisitModel;
 import org.jboss.resteasy.client.ClientResponse;
@@ -85,13 +86,14 @@ public class PVTDelegater extends BusinessDelegater {
                 .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<PatientVisitModel>>(){};
         List<PatientVisitModel> pvtList = (List<PatientVisitModel>)
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         // 保険をデコード
         decodePvtHealthInsurance(pvtList);

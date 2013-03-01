@@ -1,6 +1,7 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import java.io.InputStream;
 import java.util.List;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.UserModel;
@@ -65,12 +66,13 @@ public class UserDelegater extends BusinessDelegater {
                    .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         UserModel userModel = (UserModel) 
-                getConverter().fromJson(entityStr, UserModel.class);
+                getConverter().fromJson(is, UserModel.class);
 
         return userModel;
     }
@@ -84,13 +86,14 @@ public class UserDelegater extends BusinessDelegater {
                    .get(ClientResponse.class);
 
         int status = response.getStatus();
-        String entityStr = (String) response.getEntity(String.class);
-        debug(status, entityStr);
+        //String entityStr = (String) response.getEntity(String.class);
+        //debug(status, entityStr);
         isHTTP200(status);
+        InputStream is = (InputStream) response.getEntity(InputStream.class);
 
         TypeReference typeRef = new TypeReference<List<UserModel>>(){};
         List<UserModel> list  = (List<UserModel>) 
-                getConverter().fromJson(entityStr, typeRef);
+                getConverter().fromJson(is, typeRef);
 
         return list;
     }

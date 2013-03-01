@@ -3,6 +3,8 @@ package open.dolphin.rest;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.*;
 import open.dolphin.session.NLabServiceBean;
 
@@ -27,7 +29,7 @@ public class NLabResource extends AbstractResource {
     @GET
     @Path("module/{ptId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getLaboTest(@PathParam("ptId") String pid,
+    public Response getLaboTest(@PathParam("ptId") String pid,
             @QueryParam("firstResult") Integer firstResult,
             @QueryParam("maxResult") Integer maxResult) {
 
@@ -39,16 +41,19 @@ public class NLabResource extends AbstractResource {
 
         List<NLaboModule> list = nLabServiceBean.getLaboTest(fidPid, firstResult, maxResult);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @GET
     @Path("patient")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String getConstrainedPatients(@QueryParam("ids") String ids) {
+    public Response getConstrainedPatients(@QueryParam("ids") String ids) {
 
         String fid = getRemoteFacility();
 
@@ -56,30 +61,34 @@ public class NLabResource extends AbstractResource {
 
         List<PatientLiteModel> list = nLabServiceBean.getConstrainedPatients(fid, idList);
 
-        String json = getConverter().toJson(list);
-        debug(json);
+        //String json = getConverter().toJson(list);
+        //debug(json);
+        //return json;
         
-        return json;
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @POST
     @Path("module")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String postNLaboTest(String json) {
+    public Response postNLaboTest(String json) {
 
         String fid = getRemoteFacility();
-
 
         NLaboModule module = (NLaboModule) 
                 getConverter().fromJson(json, NLaboModule.class);
         
         PatientModel patient = nLabServiceBean.create(fid, module);
 
-        String ret = getConverter().toJson(patient);
-        debug(ret);
-
-        return ret;
+        //String ret = getConverter().toJson(patient);
+        //debug(ret);
+        //return ret;
+        StreamingOutput so = getJsonOutStream(patient);
+        
+        return Response.ok(so).build();
     }
     
 //masuda^ 旧ラボ
@@ -87,7 +96,7 @@ public class NLabResource extends AbstractResource {
     @Path("mmlModule/")
     @Consumes(MEDIATYPE_JSON_UTF8)
     @Produces(MEDIATYPE_JSON_UTF8)
-    public String postMmlLaboTest(String json) {
+    public Response postMmlLaboTest(String json) {
 
         String fid = getRemoteFacility();
 
@@ -110,10 +119,13 @@ public class NLabResource extends AbstractResource {
         
         PatientModel patient = nLabServiceBean.putLaboModule(fid, module);
 
-        String ret = getConverter().toJson(patient);
-        debug(ret);
-
-        return ret;
+        //String ret = getConverter().toJson(patient);
+        //debug(ret);
+        //return ret;
+        
+        StreamingOutput so = getJsonOutStream(patient);
+        
+        return Response.ok(so).build();
     }
     
     @DELETE
