@@ -25,6 +25,7 @@ import open.dolphin.delegater.PatientDelegater;
 import open.dolphin.dto.PatientSearchSpec;
 import open.dolphin.helper.KeyBlocker;
 import open.dolphin.helper.SimpleWorker;
+import open.dolphin.helper.WindowSupport;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.setting.MiscSettingPanel;
@@ -200,7 +201,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private boolean isKarteOpened(PatientModel patient) {
         if (patient != null) {
             boolean opened = false;
-            List<ChartImpl> allCharts = Dolphin.getInstance().getAllCharts();
+            List<ChartImpl> allCharts = WindowSupport.getAllCharts();
             for (ChartImpl chart : allCharts) {
                 if (chart.getPatient().getId() == patient.getId()) {
                     opened = true;

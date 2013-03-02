@@ -10,10 +10,10 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CompletionService;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.logging.Level;
 import javax.swing.*;
 import open.dolphin.delegater.DocumentDelegater;
 import open.dolphin.helper.DBTask;
+import open.dolphin.helper.WindowSupport;
 import open.dolphin.infomodel.*;
 import open.dolphin.letter.KartePDFMaker;
 import open.dolphin.project.Project;
@@ -1043,7 +1043,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             return true;
         }
 
-        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
+        List<EditorFrame> editorFrames = WindowSupport.getAllEditorFrames();
         if (editorFrames.isEmpty()) {
             return true;
         }

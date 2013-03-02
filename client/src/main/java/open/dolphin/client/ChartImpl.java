@@ -453,7 +453,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 //masuda$
 
         // Frame と MenuBar を生成する
-        windowSupport = WindowSupport.create(sb.toString());
+        windowSupport = WindowSupport.create(sb.toString(), ChartImpl.this);
 
         // チャート用のメニューバーを得る
         JMenuBar myMenuBar = windowSupport.getMenuBar();
@@ -737,22 +737,15 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             }
 
             @Override
-            public void windowOpened(WindowEvent e) {
-                // Window がオープンされた時の処理を行う
-                chartWindowOpened(ChartImpl.this);
-            }
-
-            @Override
             public void windowClosed(WindowEvent e) {
-                // Window がクローズされた時の処理を行う
-                chartWindowClosed(ChartImpl.this);
+                // Windowクローズ時に状態変化を通知する
+                ChartEventHandler scl = ChartEventHandler.getInstance();
+                scl.publishKarteClosed(getPatientVisit());
             }
 
             @Override
             public void windowActivated(WindowEvent e) {
-                //
                 // 文書履歴へフォーカスする
-                //
                 getDocumentHistory().requestFocus();
             }
         });
@@ -2209,33 +2202,6 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         }
     }
 
-    /**
-     * チャートウインドウのオープンを通知する。
-     *
-     * @param opened オープンした ChartPlugin
-     */
-    //public void windowOpened(ChartImpl opened) {
-    public void chartWindowOpened(ChartImpl opened) {
-        // インスタンスを保持するリストへ追加する
-        Dolphin.getInstance().getAllCharts().add(opened);
-    }
-
-    /**
-     * チャートウインドウのクローズを通知する。
-     *
-     * @param closed クローズした ChartPlugin
-     */
-    //public void windowClosed(ChartImpl closed) {
-    public void chartWindowClosed(ChartImpl closed) {
-
-        // インスタンスリストから取り除く
-        if (Dolphin.getInstance().getAllCharts().remove(closed)) {
-            // 状態変化を通知する
-            ChartEventHandler scl = ChartEventHandler.getInstance();
-            scl.publishKarteClosed(closed.getPatientVisit());
-        }
-    }
-
 //masuda^
     // ChartDocumentの別ウィンドウを開く
     private HashMap<ChartDocument, JFrame> inactiveProvidersMap;  // 別ウィンドウで開いているChartDocumentとそのJFrame
@@ -2264,7 +2230,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
     private boolean canOpenNewKarte() {
 
-        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
+        List<EditorFrame> editorFrames = WindowSupport.getAllEditorFrames();
         if (editorFrames.isEmpty()) {
             return true;
         }
@@ -2288,7 +2254,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
     private boolean canCloseChartImpl() {
 
         // この患者のEditorFrameが開いたままなら、インスペクタを閉じられないようにする
-        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
+        List<EditorFrame> editorFrames = WindowSupport.getAllEditorFrames();
         if (editorFrames != null && !editorFrames.isEmpty()) {
             long ptId = getPatient().getId();
             for (EditorFrame ef : editorFrames) {

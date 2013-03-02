@@ -18,7 +18,6 @@ import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.print.attribute.HashPrintRequestAttributeSet;
 import javax.print.attribute.PrintRequestAttributeSet;
 import javax.swing.Timer;
@@ -111,20 +110,6 @@ public class Dolphin implements MainWindow {
 
     public String getClientUUID() {
         return clientUUID;
-    }
-    
-    // allEditorFramesはEditorFrameから移動
-    private List<EditorFrame> allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
-    
-    public List<EditorFrame> getAllEditorFrames() {
-        return allEditorFrames;
-    }
-    
-    // allChartsはChartImplから移動
-    private List<ChartImpl> allCharts = new CopyOnWriteArrayList<ChartImpl>();
-    
-    public List<ChartImpl> getAllCharts() {
-        return allCharts;
     }
     
     // ChartMediatorを経由せずに、Dolphin.getInstance().getStampBox()でスタンプ箱を取得できるようにする。
@@ -613,7 +598,7 @@ public class Dolphin implements MainWindow {
         PatientModel pm = pvt.getPatientModel();
         boolean opened = false;
         long ptId = pm.getId();
-        for (ChartImpl chart : allCharts) {
+        for (ChartImpl chart : WindowSupport.getAllCharts()) {
             if (chart.getPatient().getId() == ptId) {
                 chart.getFrame().setExtendedState(java.awt.Frame.NORMAL);
                 chart.getFrame().toFront();
@@ -622,7 +607,7 @@ public class Dolphin implements MainWindow {
             }
         }
 
-        for (EditorFrame ef : allEditorFrames) {
+        for (EditorFrame ef : WindowSupport.getAllEditorFrames()) {
             if (ef.getPatient().getId() == ptId) {
                 ef.getFrame().setExtendedState(java.awt.Frame.NORMAL);
                 ef.getFrame().toFront();
@@ -1037,7 +1022,8 @@ public class Dolphin implements MainWindow {
         boolean dirty = false;
 
         // Chart を調べる
-        if (allCharts != null && allCharts.size() > 0) {
+        List<ChartImpl> allCharts = WindowSupport.getAllCharts();
+        if (allCharts != null && !allCharts.isEmpty()) {
             for (ChartImpl chart : allCharts) {
                 if (chart.isDirty()) {
                     dirty = true;
@@ -1052,7 +1038,8 @@ public class Dolphin implements MainWindow {
         }
 
         // EditorFrameのチェックを行う
-        if (allEditorFrames != null && allEditorFrames.size() > 0) {
+        List<EditorFrame> allEditorFrames = WindowSupport.getAllEditorFrames();
+        if (allEditorFrames != null && !allEditorFrames.isEmpty()) {
             for (Chart chart : allEditorFrames) {
                 if (chart.isDirty()) {
                     dirty = true;
@@ -1083,10 +1070,10 @@ public class Dolphin implements MainWindow {
         }
 //pns$
 //masuda^   終了時は強制的に開いたままのChartImplとEditorFrameを閉じちゃう
-        for (Chart chart : allEditorFrames) {
+        for (Chart chart : WindowSupport.getAllEditorFrames()) {
             chart.stop();
         }
-        for (ChartImpl chart : allCharts) {
+        for (ChartImpl chart : WindowSupport.getAllCharts()) {
             chart.stop();
         }
 

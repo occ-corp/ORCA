@@ -17,6 +17,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.TableColumn;
 import open.dolphin.client.*;
 import open.dolphin.delegater.LaboDelegater;
+import open.dolphin.helper.WindowSupport;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.table.ColumnSpecHelper;
@@ -222,7 +223,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
     private boolean isKarteOpened(PatientModel patient) {
         if (patient != null) {
             boolean opened = false;
-            List<ChartImpl> allCharts = Dolphin.getInstance().getAllCharts();
+            List<ChartImpl> allCharts = WindowSupport.getAllCharts();
             for (ChartImpl chart : allCharts) {
                 if (chart.getPatient().getId() == patient.getId()) {
                     opened = true;

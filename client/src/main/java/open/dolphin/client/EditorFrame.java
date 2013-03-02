@@ -80,7 +80,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
      * EditorFrame オブジェクトを生成する。
      */
     public EditorFrame() {
-        Dolphin.getInstance().getAllEditorFrames().add(EditorFrame.this);
+        WindowSupport.getAllEditorFrames().add(EditorFrame.this);
     }
     
     /**
@@ -533,7 +533,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         }
 //masuda$
         mediator.dispose();
-        Dolphin.getInstance().getAllEditorFrames().remove(this);
+        WindowSupport.getAllEditorFrames().remove(EditorFrame.this);
         Project.setRectangle(PROP_FRMAE_BOUNDS, getFrame().getBounds());
         getFrame().setVisible(false);
         getFrame().dispose();
@@ -965,7 +965,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         // すでに修正中の document があれば toFront するだけで帰る
         // ここはこのEditorFrameは除外しないといけない
         long baseDocPk = base.getDocInfoModel().getDocPk();
-        List<EditorFrame> editorFrames = Dolphin.getInstance().getAllEditorFrames();
+        List<EditorFrame> editorFrames = WindowSupport.getAllEditorFrames();
         if (editorFrames.isEmpty()) {
             return true;
         }

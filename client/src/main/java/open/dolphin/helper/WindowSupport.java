@@ -3,12 +3,16 @@ package open.dolphin.helper;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
+import open.dolphin.client.ChartImpl;
 import open.dolphin.client.ClientContext;
+import open.dolphin.client.EditorFrame;
 
 /**
  * Window Menu をサポートするためのクラス。
@@ -26,8 +30,16 @@ public class WindowSupport implements MenuListener {
     // JFrameとWindowSupportのマップ　フォーカス処理にも使用
     private static Map<JFrame, WindowSupport> allWindows;
     
+    // allChartsはChartImplから移動
+    private static List<ChartImpl> allCharts;
+    
+    // allEditorFramesはEditorFrameから移動
+    private static List<EditorFrame> allEditorFrames;
+    
     static {
         allWindows = new ConcurrentHashMap<JFrame, WindowSupport>();
+        allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
+        allCharts = new CopyOnWriteArrayList<ChartImpl>();
     }
     
     // Window support が提供するスタッフ
@@ -54,13 +66,17 @@ public class WindowSupport implements MenuListener {
         this.windowMenu = windowMenu;
         this.windowAction = windowAction;
     }
-    
+
     /**
      * WindowSupportを生成する。
      * @param title フレームタイトル
      * @return WindowSupport
      */
     public static WindowSupport create(String title) {
+        return create(title, null);
+    }
+    
+    public static WindowSupport create(String title, final ChartImpl chartImpl) {
         
         // フレームを生成する
         final JFrame frame = new JFrame(title);
@@ -99,11 +115,17 @@ public class WindowSupport implements MenuListener {
             @Override
             public void windowOpened(WindowEvent e) {
                 allWindows.put(frame, windowSupport);
+                if (chartImpl != null) {
+                    allCharts.add(chartImpl);
+                }
             }
             
             @Override
             public void windowClosed(WindowEvent e) {
                 allWindows.remove(frame);
+                if (chartImpl != null) {
+                    allCharts.remove(chartImpl);
+                }
             }
         });
         
@@ -117,6 +139,13 @@ public class WindowSupport implements MenuListener {
         return allWindows.get(frame).getMediator();
     }
     
+    public static List<EditorFrame> getAllEditorFrames() {
+        return allEditorFrames;
+    }
+
+    public static List<ChartImpl> getAllCharts() {
+        return allCharts;
+    }
 /*
     public static List<WindowSupport> getAllWindows() {
         return (List<WindowSupport>) allWindows.values();
