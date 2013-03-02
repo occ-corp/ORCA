@@ -72,7 +72,7 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
             Container c = imagePanel.getTopLevelAncestor();
             if (c instanceof JFrame) {
                 JFrame frame = (JFrame) c;
-                Object objMediator = WindowSupport.getRelatedMediator(frame);
+                Object objMediator = WindowSupport.getMediator(frame);
                 if (objMediator != null && objMediator instanceof ChartMediator) {
                     ChartMediator mediator = (ChartMediator) objMediator;
                     Action copy = mediator.getAction(GUIConst.ACTION_COPY);

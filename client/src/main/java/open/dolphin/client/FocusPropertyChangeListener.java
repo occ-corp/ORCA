@@ -88,7 +88,7 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
         }
 
         JFrame frame = (JFrame) parent;
-        Object objMediator = WindowSupport.getRelatedMediator(frame);
+        Object objMediator = WindowSupport.getMediator(frame);
         if (objMediator == null) {
             return;
         }
