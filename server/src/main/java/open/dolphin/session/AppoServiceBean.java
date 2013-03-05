@@ -70,7 +70,6 @@ public class AppoServiceBean {
         // 抽出期間ごとに検索しコレクションに加える
         for (int i = 0; i < len; i++) {
 
-            @SuppressWarnings("unchecked")
             List<AppointmentModel> c = 
                     em.createQuery(QUERY_APPOINTMENT_BY_KARTE_ID)
                     .setParameter(KARTE_ID, karteId)

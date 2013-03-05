@@ -58,7 +58,6 @@ public class LetterServiceBean {
         // 削除
         if (model.getLinkId() != 0L) {
 
-            @SuppressWarnings("unchecked")
             List<LetterItem> itemList =
                     em.createQuery(QUERY_ITEM_BY_ID)
                     .setParameter(ID, model.getLinkId())
@@ -67,7 +66,6 @@ public class LetterServiceBean {
                 em.remove(item);
             }
 
-            @SuppressWarnings("unchecked")
             List<LetterText> textList =
                     em.createQuery(QUERY_TEXT_BY_ID)
                     .setParameter(ID, model.getLinkId())
@@ -77,7 +75,6 @@ public class LetterServiceBean {
                 em.remove(txt);
             }
 
-            @SuppressWarnings("unchecked")
             List<LetterDate> dateList =
                     em.createQuery(QUERY_DATE_BY_ID)
                     .setParameter(ID, model.getLinkId())
@@ -99,7 +96,6 @@ public class LetterServiceBean {
 
     public List<LetterModule> getLetterList(long karteId) {
 
-        @SuppressWarnings("unchecked")
         List<LetterModule> list =
                 em.createQuery(QUERY_LETTER_BY_KARTE_ID)
                 .setParameter(KARTE_ID, karteId)
@@ -115,7 +111,6 @@ public class LetterServiceBean {
                 .setParameter(ID, letterPk)
                 .getSingleResult();
         // item
-        @SuppressWarnings("unchecked")
         List<LetterItem> items = (List<LetterItem>)
                  em.createQuery(QUERY_ITEM_BY_ID)
                  .setParameter(ID, ret.getId())
@@ -123,7 +118,6 @@ public class LetterServiceBean {
         ret.setLetterItems(items);
 
         // text
-        @SuppressWarnings("unchecked")
         List<LetterText> texts = (List<LetterText>)
                  em.createQuery(QUERY_TEXT_BY_ID)
                  .setParameter(ID, ret.getId())
@@ -131,7 +125,6 @@ public class LetterServiceBean {
         ret.setLetterTexts(texts);
 
         // date
-        @SuppressWarnings("unchecked")
         List<LetterDate> dates = (List<LetterDate>)
                  em.createQuery(QUERY_DATE_BY_ID)
                  .setParameter(ID, ret.getId())
@@ -142,7 +135,7 @@ public class LetterServiceBean {
 }
 
     public void delete(long pk) {
-        @SuppressWarnings("unchecked")
+        
         List<LetterItem> itemList = (List<LetterItem>)
                  em.createQuery(QUERY_ITEM_BY_ID)
                  .setParameter(ID, pk)
@@ -151,7 +144,6 @@ public class LetterServiceBean {
             em.remove(item);
         }
 
-        @SuppressWarnings("unchecked")
         List<LetterText> textList = (List<LetterText>)
                 em.createQuery(QUERY_TEXT_BY_ID)
                 .setParameter(ID, pk)
@@ -161,7 +153,6 @@ public class LetterServiceBean {
             em.remove(txt);
         }
 
-        @SuppressWarnings("unchecked")
         List<LetterDate> dateList = (List<LetterDate>)
                 em.createQuery(QUERY_DATE_BY_ID)
                 .setParameter(ID, pk)

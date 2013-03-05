@@ -128,7 +128,6 @@ public class KarteServiceBean {
 
         try {
             // 最初に患者のカルテを取得する
-            @SuppressWarnings("unchecked")
             List<KarteBean> kartes = 
                     em.createQuery(QUERY_KARTE)
                     .setParameter(PATIENT_PK, patientPK)
@@ -139,7 +138,6 @@ public class KarteServiceBean {
             long karteId = karte.getId();
 
             // アレルギーデータを取得する
-            @SuppressWarnings("unchecked")
             List<ObservationModel> list1 = 
                     em.createQuery(QUERY_ALLERGY)
                     .setParameter(KARTE_ID, karteId)
@@ -159,7 +157,6 @@ public class KarteServiceBean {
             }
 
             // 身長データを取得する
-            @SuppressWarnings("unchecked")
             List<ObservationModel> list2 = 
                     em.createQuery(QUERY_BODY_HEIGHT)
                     .setParameter(KARTE_ID, karteId)
@@ -178,7 +175,6 @@ public class KarteServiceBean {
             }
 
             // 体重データを取得する
-            @SuppressWarnings("unchecked")
             List<ObservationModel> list3 = 
                     em.createQuery(QUERY_BODY_WEIGHT)
                     .setParameter(KARTE_ID, karteId)
@@ -198,7 +194,6 @@ public class KarteServiceBean {
 //masuda^   使わない
 /*
             // 直近の来院日エントリーを取得しカルテに設定する
-            @SuppressWarnings("unchecked")
             List<PatientVisitModel> latestVisits = 
                     em.createQuery(QUERY_PATIENT_VISIT)
                     .setParameter(PATIENT_PK, patientPK)
@@ -216,7 +211,6 @@ public class KarteServiceBean {
 
 //masuda    後で取得する
             // 文書履歴エントリーを取得しカルテに設定する
-            @SuppressWarnings("unchecked")
             List<DocumentModel> documents = 
                     em.createQuery(QUERY_DOC_INFO)
                     .setParameter(KARTE_ID, karteId)
@@ -234,7 +228,6 @@ public class KarteServiceBean {
 */
 //masuda$
             // 患者Memoを取得する
-            @SuppressWarnings("unchecked")
             List<PatientMemoModel> memo = 
                     em.createQuery(QUERY_PATIENT_MEMO)
                     .setParameter(KARTE_ID, karteId)
@@ -253,7 +246,6 @@ public class KarteServiceBean {
             } catch (NoResultException e) {
             }
             // 予約
-            @SuppressWarnings("unchecked")
             List<AppointmentModel> appoList =
                     em.createQuery(QUERY_APPOINTMENTS)
                     .setParameter(KARTE_ID, karteId)
@@ -300,7 +292,6 @@ public class KarteServiceBean {
      * @param status ステータス
      * @return DocInfo のコレクション
      */
-    @SuppressWarnings("unchecked")
     public List<DocInfoModel> getDocumentList(long karteId, Date fromDate, Date toDate, boolean includeModifid) {
 
         List<DocumentModel> documents;
@@ -386,17 +377,16 @@ public class KarteServiceBean {
         //long t = System.currentTimeMillis();
 
         // まとめて query改
-        @SuppressWarnings("unchecked")
         List<DocumentModel> documentList =
                 em.createQuery("from DocumentModel m where m.id in (:ids)")
                 .setParameter("ids", ids)
                 .getResultList();
-        @SuppressWarnings("unchecked")
+        
         List<ModuleModel> moduleList =
                 em.createQuery("from ModuleModel m where m.document.id in (:ids)")
                 .setParameter("ids", ids)
                 .getResultList();
-        @SuppressWarnings("unchecked")
+        
         List<SchemaModel> schemaList =
                 em.createQuery("from SchemaModel m where m.document.id in (:ids)")
                 .setParameter("ids", ids)
@@ -531,7 +521,6 @@ public class KarteServiceBean {
      * @param pk 論理削除するドキュメントの primary key
      * @return 削除した件数
      */
-    @SuppressWarnings("unchecked")
     public int deleteDocument(long id) {
         
 //masuda^   オリジナルでは修正したり仮保存をした文書を削除できないので改変
@@ -653,7 +642,6 @@ public class KarteServiceBean {
         // 抽出期間セットの数だけ繰り返す
         for (int i = 0; i < len; i++) {
 
-            @SuppressWarnings("unchecked")
             List<ModuleModel> modules = 
                     em.createQuery(QUERY_MODULE_BY_ENTITY)
                     .setParameter(KARTE_ID, karteId)
@@ -684,7 +672,6 @@ public class KarteServiceBean {
         // 抽出期間セットの数だけ繰り返す
         for (int i = 0; i < len; i++) {
 
-            @SuppressWarnings("unchecked")
             List<SchemaModel> modules = 
                     em.createQuery(QUERY_SCHEMA_BY_KARTE_ID)
                     .setParameter(KARTE_ID, karteId)
@@ -710,7 +697,6 @@ public class KarteServiceBean {
 /*
     public List<SchemaModel> getS3Images(String fid, int firstResult, int maxResult) {
 
-        @SuppressWarnings("unchecked")
         List<SchemaModel> ret = 
                 em.createQuery(QUERY_SCHEMA_BY_FACILITY_ID)
                 .setParameter(FID, fid+"%")
@@ -733,7 +719,6 @@ public class KarteServiceBean {
      * @param spec 検索仕様
      * @return 傷病名のリスト
      */
-    @SuppressWarnings("unchecked")
     public List<RegisteredDiagnosisModel> getDiagnosis(long karteId, Date fromDate, boolean activeOnly) {
 
         List<RegisteredDiagnosisModel> ret;
@@ -815,7 +800,6 @@ public class KarteServiceBean {
      * @param spec 検索仕様
      * @return Observationのリスト
      */
-    @SuppressWarnings("unchecked")
     public List<ObservationModel> getObservations(long karteId, String observation, String phenomenon, Date firstConfirmed) {
 
         List<ObservationModel> ret = null;
@@ -920,7 +904,6 @@ public class KarteServiceBean {
         // 抽出期間セットの数だけ繰り返す
         for (int i = 0; i < len; i++) {
 
-            @SuppressWarnings("unchecked")
             List<AppointmentModel> modules = 
                     em.createQuery(QUERY_APPO_BY_KARTE_ID_PERIOD)
                     .setParameter(KARTE_ID, karteId)
@@ -1029,7 +1012,6 @@ public class KarteServiceBean {
         }
     }
     
-    @SuppressWarnings("unchecked")
     private List<String> getETenRelatedSrycdList(Date date, Collection<String> srycds) {
 
         final String sql1 = "select distinct e.srycd from ETensuModel1 e";

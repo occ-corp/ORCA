@@ -159,7 +159,6 @@ public class PVTServiceBean {
                 .setParameter(ID, pvt.getPatientModel().getId())
                 .getSingleResult();
         // 予約を検索する
-        @SuppressWarnings("unchecked")
         List<AppointmentModel> c =
                 em.createQuery(QUERY_APPO_BY_KARTE_ID_DATE)
                 .setParameter(ID, karteId)

@@ -117,7 +117,6 @@ public class UserServiceBean {
      */
     public List<UserModel> getAllUser(String fid) {
 
-        @SuppressWarnings("unchecked")
         List<UserModel> results =
                 em.createQuery(QUERY_USER_BY_FID_MEMBERTYPE)
                 .setParameter(FID, fid+":%")
@@ -159,7 +158,6 @@ public class UserServiceBean {
         UserModel remove = getUser(removeId);
 
         // Stamp を削除する
-        @SuppressWarnings("unchecked")
         List<StampModel> stamps = 
                 em.createQuery("from StampModel s where s.userId = :pk")
                 .setParameter("pk", remove.getId())
@@ -169,7 +167,6 @@ public class UserServiceBean {
         }
 
         // Subscribed Tree を削除する
-        @SuppressWarnings("unchecked")
         List<SubscribedTreeModel> subscribedTrees =
                 em.createQuery("from SubscribedTreeModel s where s.user.id = :pk")
                 .setParameter("pk", remove.getId())
@@ -179,7 +176,6 @@ public class UserServiceBean {
         }
 
         // PublishedTree を削除する
-        @SuppressWarnings("unchecked")
         List<PublishedTreeModel> publishedTrees = 
                 em.createQuery("from PublishedTreeModel p where p.user.id = :pk")
                 .setParameter("pk", remove.getId())
@@ -189,7 +185,6 @@ public class UserServiceBean {
         }
 
         // PersonalTreeを削除する
-        @SuppressWarnings("unchecked")
         List<StampTreeModel> stampTree =
                 em.createQuery("from StampTreeModel s where s.user.id = :pk")
                 .setParameter("pk", remove.getId())

@@ -33,7 +33,6 @@ public class MasudaServiceBean {
     
     
     // 定期処方
-    @SuppressWarnings("unchecked")
     public List<RoutineMedModel> getRoutineMedModels(long karteId, int firstResult, int maxResults) {
         
         // 橋本医院　加藤さま
@@ -93,7 +92,7 @@ public class MasudaServiceBean {
         for (ModuleModel mm : mmListTemp) {
             idList.add(mm.getId());
         }
-        @SuppressWarnings("unchecked")
+        
         List<ModuleModel> mmList =
                 em.createQuery(sql)
                 .setParameter("ids", idList)
@@ -116,7 +115,6 @@ public class MasudaServiceBean {
             idList.add(Long.valueOf(id));
         }
 
-        @SuppressWarnings("unchecked")
         List<ModuleModel> mmList =
                 em.createQuery(sql)
                 .setParameter("ids", idList)
@@ -148,7 +146,6 @@ public class MasudaServiceBean {
 
         final String sql1 = "from UsingDrugModel u where u.facilityId = :fid";
 
-        @SuppressWarnings("unchecked")
         List<UsingDrugModel> list =
                 em.createQuery(sql1)
                 .setParameter("fid", fid)
@@ -184,7 +181,6 @@ public class MasudaServiceBean {
 
         final String sql1 = "from DisconItemModel d where d.facilityId = :fid";
 
-        @SuppressWarnings("unchecked")
         List<DisconItemModel> list =
                 em.createQuery(sql1)
                 .setParameter("fid", fid)
@@ -215,7 +211,6 @@ public class MasudaServiceBean {
 
 
     // 指定したEntityのModuleModleを一括取得
-    @SuppressWarnings("unchecked")
     public List<ModuleModel> getModulesEntitySearch(String fid, long karteId, Date fromDate, Date toDate, List<String> entities) {
         
         // 指定したentityのModuleModelを返す
@@ -291,7 +286,6 @@ public class MasudaServiceBean {
             return null;
         }
 
-        @SuppressWarnings("unchecked")
         List<DocumentModel> documents =
                 em.createQuery("from DocumentModel d where d.id in (:docPkList)")
                 .setParameter("docPkList", docPkList)
@@ -316,7 +310,8 @@ public class MasudaServiceBean {
             return FINISHED;
         }
 
-        final String fromSql = "from DocumentModel m where m.status = 'F' and m.creator.facility.id = :fPk and m.id > :fromPk";
+        final String fromSql = "from DocumentModel m where m.status = 'F' "
+                + "and m.creator.facility.id = :fPk and m.id > :fromPk order by m.id";
         final FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
 
         // fromPk == 0の場合、まずはインデックスをクリアする
@@ -334,7 +329,6 @@ public class MasudaServiceBean {
                 .getSingleResult();
 
         // idがfromPkより大きいDocumentModelをmaxResultsずつ取得
-        @SuppressWarnings("unchecked")
         List<DocumentModel> models =
                 em.createQuery(fromSql)
                 .setParameter("fPk", fPk)
@@ -366,7 +360,7 @@ public class MasudaServiceBean {
         //System.out.println("Hibernate Search: purging indexes.");
         final String sql = "select m.id from DocumentModel m where m.creator.facility.id = :fPk";
         final FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
-        @SuppressWarnings("unchecked")
+        
         List<Long> pkList =
                 em.createQuery(sql).setParameter("fPk", fPk).getResultList();
         for (long pk : pkList) {
@@ -375,7 +369,6 @@ public class MasudaServiceBean {
     }
 
     // Hibernate searchを利用して全文検索する
-    @SuppressWarnings("unchecked")
     public List<PatientModel> getKarteFullTextSearch(String fid, long karteId, String text) {
 
         long fPk = getFacilityPk(fid);
@@ -481,7 +474,7 @@ public class MasudaServiceBean {
         final String sql = "select p.karte.id from PatientMemoModel p " +
                 "where p.memo like :memo " +
                 "and p.creator.facility.facilityId = :fid";
-        @SuppressWarnings("unchecked")
+        
         List<Long> karteIdList =
                 em.createQuery(sql)
                 .setParameter("memo", "%" + text + "%")
@@ -490,9 +483,9 @@ public class MasudaServiceBean {
         return karteIdList;
     }
 
-    // 保険情報をとPvtDateを設定する
+    // 保険情報とPvtDateを設定する
     // thx to Dr. pns
-    private void setInsuranceAndPvtDate(String fid, List<PatientModel> list) {
+    private void setInsuranceAndPvtDate(String fid, List<PatientModel> pmList) {
 
         final int CANCEL_PVT = 1 << 6;  // BIT_CANCEL = 6;
         final String sqlPvt = "from PatientVisitModel p where p.facilityId = :fid " +
@@ -502,16 +495,17 @@ public class MasudaServiceBean {
         List<PatientVisitModel> pvtList = (List<PatientVisitModel>) 
                 em.createQuery(sqlPvt)
                 .setParameter("fid", fid)
-                .setParameter("pts", list)
+                .setParameter("pts", pmList)
                 .setParameter("status", CANCEL_PVT)
                 .getResultList();
         
-        for (PatientVisitModel pvt : pvtList) {
-            long id = pvt.getPatientModel().getId();
-            for (PatientModel pm : list) {
+        for (PatientModel pm : pmList) {
+            // 患者の健康保険を設定する、ダミーだがｗ
+            setHealthInsurances(pm);
+            for (PatientVisitModel pvt : pvtList) {
+                long id = pvt.getPatientModel().getId();
                 if (pm.getId() == id) {
-                    // 患者の健康保険を取得する、ダミーだがｗ
-                    setHealthInsurances(pm);
+                    // PvtDateを設定する
                     pm.setPvtDate(pvt.getPvtDate());
                     break;
                 }
@@ -520,13 +514,12 @@ public class MasudaServiceBean {
     }
 
     // grep方式の全文検索
-    @SuppressWarnings("unchecked")
     public SearchResultModel getSearchResult(String fid, String searchText, long fromModuleId, int maxResult, boolean progressCourseOnly) {
 
         final String fromSql = "from ModuleModel m where m.status = 'F' and m.creator.facility.facilityId = :fid";
         final String progressCourse = " and m.moduleInfo.entity = '" + IInfoModel.MODULE_PROGRESS_COURSE + "'";
 
-        String sql1 = fromSql + " and m.id > :fromId";
+        String sql1 = fromSql + " and m.id > :fromId order by m.id";
         String sql2 = "select count(m) " + fromSql;
 
         if (progressCourseOnly) {
@@ -676,7 +669,7 @@ public class MasudaServiceBean {
         for (Iterator itr = pmmmMap.entrySet().iterator(); itr.hasNext();) {
             Map.Entry entry = (Map.Entry) itr.next();
             PatientModel model = (PatientModel) entry.getKey();
-            @SuppressWarnings("unchecked")
+            
             List<ModuleModel> list = (List<ModuleModel>) entry.getValue();
             // 処方日と処方日数を列挙
             HashMap<Date, Integer> dateNumberMap = new HashMap<Date, Integer>();
@@ -725,7 +718,7 @@ public class MasudaServiceBean {
     
     public List<InFacilityLaboItem> getInFacilityLaboItemList(String fid) {
         final String sql = "from InFacilityLaboItem i where i.laboCode = :fid";
-        @SuppressWarnings("unchecked")
+        
         List<InFacilityLaboItem> list = 
                 em.createQuery(sql).setParameter("fid", fid).getResultList();
         return list;
@@ -800,7 +793,6 @@ public class MasudaServiceBean {
             return null;
         }
         
-        @SuppressWarnings("unchecked")
         List<String> list =
                 em.createQuery(sql1)
                 .setParameter("srycds", srycds)
@@ -813,7 +805,7 @@ public class MasudaServiceBean {
         
         final String sql1 = "from ModuleModel m "
                 + "where m.moduleInfo.entity <> '" + IInfoModel.MODULE_PROGRESS_COURSE + "' "
-                + "and m.status = 'F' and m.creator.facility.facilityId = :fid";
+                + "and m.status = 'F' and m.creator.facility.facilityId = :fid order by m.id";
         final String sql2 = "select count(m) " + sql1;
         final String sql3 = sql1 + " and m.id > :fromId";
         final String sql4 = "from SanteiHistoryModel s "
@@ -830,7 +822,6 @@ public class MasudaServiceBean {
         }
         
         // fromIdからModuleModelを取得する
-        @SuppressWarnings("unchecked")
         List<ModuleModel> mmList =
                 em.createQuery(sql3)
                 .setParameter("fid", fid)
@@ -919,7 +910,6 @@ public class MasudaServiceBean {
         return num;
     }
     
-    @SuppressWarnings("unchecked")
     public List<SanteiHistoryModel> getSanteiHistory(long karteId, Date fromDate, Date toDate, List<String> srycds) {
         
         List<SanteiHistoryModel> list;
@@ -989,7 +979,6 @@ public class MasudaServiceBean {
         return sb.toString();
     }
     
-    @SuppressWarnings("unchecked")
     public List<List<RpModel>> getRpModelList(long karteId, Date fromDate, Date toDate, boolean lastOnly) {
         
         final String yakuzaiClassCode = "2";    // 薬剤のclaim class code
@@ -1024,7 +1013,6 @@ public class MasudaServiceBean {
 
         for (DocumentModel doc : docList) {
 
-            @SuppressWarnings("unchecked")
             List<ModuleModel> mmList =
                     em.createQuery(sql2).setParameter("docPk", doc.getId()).getResultList();
             if (mmList.isEmpty()) {

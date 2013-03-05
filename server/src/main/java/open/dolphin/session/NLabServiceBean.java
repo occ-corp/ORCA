@@ -165,7 +165,6 @@ public class NLabServiceBean {
      * @param maxResult     取得する件数の最大値
      * @return              ラボモジュールのリスト
      */
-    @SuppressWarnings("unchecked")
     public List<NLaboModule> getLaboTest(String fidPid, int firstResult, int maxResult) {
 
         //String fidPid = SessionHelper.getQualifiedPid(ctx, patientId);
@@ -220,7 +219,6 @@ public class NLabServiceBean {
 
         //String fidPid = SessionHelper.getQualifiedPid(ctx, patientId);
 
-        @SuppressWarnings("unchecked")
         List<NLaboItem> ret =
                 em.createQuery(QUERY_ITEM_BY_FIDPID_ITEMCODE)
                 .setParameter(FIDPID, fidPid)
@@ -285,8 +283,6 @@ public class NLabServiceBean {
         String patientId = str[1];
 
         // 即時フェッチではない
-
-        @SuppressWarnings("unchecked")
         List<LaboModuleValue> modules =
                 em.createQuery("from LaboModuleValue l where l.karte.patient.facilityId = :fid "
                 + "and l.karte.patient.patientId = :ptId order by l.sampleTime desc")
@@ -297,7 +293,6 @@ public class NLabServiceBean {
                 .getResultList();
 
         for (LaboModuleValue module : modules) {
-            @SuppressWarnings("unchecked")
             List<LaboSpecimenValue> specimens =
                     em.createQuery("from LaboSpecimenValue l where l.laboModule.id = :moduleId")
                     .setParameter("moduleId", module.getId())
@@ -305,7 +300,6 @@ public class NLabServiceBean {
             module.setLaboSpecimens(specimens);
 
             for (LaboSpecimenValue specimen : specimens) {
-                @SuppressWarnings("unchecked")
                 List<LaboItemValue> items =
                         em.createQuery("from LaboItemValue l where l.laboSpecimen.id = :specimenId")
                         .setParameter("specimenId", specimen.getId())

@@ -55,7 +55,6 @@ public class PatientServiceBean {
     private ChartEventServiceBean eventServiceBean;
 //masuda$
 
-    @SuppressWarnings("unchecked")
     public List<PatientModel> getPatientsByName(String fid, String name) {
 
         List<PatientModel> ret = 
@@ -86,7 +85,6 @@ public class PatientServiceBean {
         return ret;
     }
 
-    @SuppressWarnings("unchecked")
     public List<PatientModel> getPatientsByKana(String fid, String name) {
 
         List<PatientModel> ret = 
@@ -116,7 +114,6 @@ public class PatientServiceBean {
         return ret;
     }
 
-    @SuppressWarnings("unchecked")
     public List<PatientModel> getPatientsByDigit(String fid, String digit) {
 
         List<PatientModel> ret = 
@@ -155,7 +152,6 @@ public class PatientServiceBean {
 
     public List<PatientModel> getPatientsByPvtDate(String fid, String pvtDate) {
 
-        @SuppressWarnings("unchecked")
         List<PatientVisitModel> list =
                 em.createQuery(QUERY_PATIENT_BY_PVTDATE)
                 .setParameter(FID, fid)

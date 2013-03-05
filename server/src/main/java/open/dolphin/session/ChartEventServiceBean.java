@@ -181,7 +181,7 @@ public class ChartEventServiceBean {
                 "from PatientVisitModel p " +
                 "where p.pvtDate >= :fromDate and p.pvtDate < :toDate " +
                 "order by p.id";
-        @SuppressWarnings("unchecked")
+        
         List<PatientVisitModel> result =
                 em.createQuery(sql)
                 .setParameter("fromDate", fromDate)
@@ -211,8 +211,7 @@ public class ChartEventServiceBean {
             long karteId = karte.getId();
 
             // 予約を検索する
-            @SuppressWarnings("unchecked")
-             List<AppointmentModel> list =
+            List<AppointmentModel> list =
                     em.createQuery("from AppointmentModel a where a.karte.id = :karteId and a.date = :date")
                     .setParameter("karteId", karteId)
                     .setParameter("date", contextHolder.getToday().getTime())

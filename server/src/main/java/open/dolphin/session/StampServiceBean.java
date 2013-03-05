@@ -55,7 +55,6 @@ public class StampServiceBean {
         // パーソナルツリーを取得する
         List<StampTreeModel> ret = new ArrayList<StampTreeModel>();
 
-        @SuppressWarnings("unchecked")
         List<StampTreeModel> list = 
                 em.createQuery(QUERY_TREE_BY_USER_PK)
                 .setParameter(USER_PK, userPK)
@@ -86,7 +85,6 @@ public class StampServiceBean {
         // ユーザがサブスクライブしているStampTreeのリストを取得する
         List<PublishedTreeModel> ret = new ArrayList<PublishedTreeModel>();
         
-        @SuppressWarnings("unchecked")
         List<SubscribedTreeModel> subscribed =
                 em.createQuery(QUERY_SUBSCRIBED_BY_USER_PK)
                 .setParameter(USER_PK, userPK)
@@ -135,7 +133,6 @@ public class StampServiceBean {
         UserStampTreeModel ret = new UserStampTreeModel();
         
         // パーソナルツリーを取得する
-        @SuppressWarnings("unchecked")
         List<StampTreeModel> list = 
                 em.createQuery(QUERY_TREE_BY_USER_PK)
                 .setParameter(USER_PK, userPK)
@@ -163,7 +160,6 @@ public class StampServiceBean {
         //
         // ユーザがサブスクライブしているStampTreeのリストを取得する
         //
-        @SuppressWarnings("unchecked")
         List<SubscribedTreeModel> subscribed =
                 em.createQuery(QUERY_SUBSCRIBED_BY_USER_PK)
                 .setParameter(USER_PK, userPK)
@@ -363,7 +359,6 @@ public class StampServiceBean {
         //
         // 公開Treeを削除する
         //
-        @SuppressWarnings("unchecked")
         List<PublishedTreeModel> list =
                 em.createQuery(QUERY_PUBLISHED_TREE_BY_ID)
                 .setParameter(ID, model.getId())
@@ -392,7 +387,6 @@ public class StampServiceBean {
 
         // local に公開されているTreeを取得する
         // publishType=施設ID
-        @SuppressWarnings("unchecked")
         List<PublishedTreeModel> locals = 
                 em.createQuery(QUERY_LOCAL_PUBLISHED_TREE)
                 .setParameter(FID, fid)
@@ -400,7 +394,6 @@ public class StampServiceBean {
         ret.addAll(locals);
 
         // パブリックTeeを取得する
-        @SuppressWarnings("unchecked")
         List<PublishedTreeModel> publics = 
                 em.createQuery(QUERY_PUBLIC_TREE)
                 .getResultList();
@@ -438,7 +431,7 @@ public class StampServiceBean {
         for (int i = 0; i < len; i+=2) {
             Long treeId = list.get(i);
             Long userPK = list.get(i+1);
-            @SuppressWarnings("unchecked")
+
             List<SubscribedTreeModel> removes = 
                     em.createQuery(QUERY_SUBSCRIBED_BY_USER_PK_TREE_ID)
                     .setParameter(USER_PK, userPK)
