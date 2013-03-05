@@ -50,7 +50,7 @@ public class UserServiceBean {
 
         return ret;
     }
-    
+/*
     public String[] getFidAndPassword(String userName) {
         
         try {
@@ -76,7 +76,7 @@ public class UserServiceBean {
         }
         return null;
     }
-
+*/
     /**
      * 施設管理者が院内Userを登録する。
      * @param add 登録するUser

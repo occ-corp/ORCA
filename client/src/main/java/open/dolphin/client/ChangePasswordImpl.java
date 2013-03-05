@@ -152,7 +152,7 @@ public class ChangePasswordImpl extends AbstractMainTool implements ChangeProfil
         private int[] passwordLength; // min,max
         
 //masuda^   生パスワード
-        private JCheckBox chk_rawPass;
+        //private JCheckBox chk_rawPass;
 //masuda$
         
         public ChangePasswordPanel() {
@@ -296,8 +296,8 @@ public class ChangePasswordImpl extends AbstractMainTool implements ChangeProfil
             constrain(content, label, x + 2, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.EAST);
             constrain(content, userPassword2, x + 3, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST);
 //masuda^   生パスワード
-            chk_rawPass = new JCheckBox("生Pass登録");
-            constrain(content, chk_rawPass, x + 4, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST);
+            //chk_rawPass = new JCheckBox("生Pass登録");
+            //constrain(content, chk_rawPass, x + 4, y, 1, 1, GridBagConstraints.NONE, GridBagConstraints.WEST);
 //masuda$
             
             x = 0;
@@ -435,6 +435,7 @@ public class ChangePasswordImpl extends AbstractMainTool implements ChangeProfil
             
                 String hashPass = HashUtil.MD5(password);
                 updateModel.setPassword(hashPass);
+/*
 //masuda^   生パスワード
                 if (chk_rawPass.isSelected()) {
                     updateModel.setPasswd(password);
@@ -442,6 +443,7 @@ public class ChangePasswordImpl extends AbstractMainTool implements ChangeProfil
                     updateModel.setPasswd(null);
                 }
 //masuda$
+*/
             } else {
                 //-----------------------------
                 // パスワードは変更されていない

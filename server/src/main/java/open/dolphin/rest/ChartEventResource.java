@@ -1,7 +1,6 @@
 package open.dolphin.rest;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import javax.inject.Inject;
 import javax.servlet.AsyncContext;
 import javax.servlet.AsyncEvent;
@@ -18,7 +17,7 @@ import open.dolphin.session.ChartEventServiceBean;
  * ChartEventResource
  * @author masuda, Masuda Naika
  */
-@Path("rest/chartEvent")
+@Path("chartEvent")
 public class ChartEventResource extends AbstractResource {
     
     private static final boolean debug = false;

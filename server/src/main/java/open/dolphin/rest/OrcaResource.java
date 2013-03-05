@@ -15,7 +15,7 @@ import open.dolphin.server.orca.OrcaService;
  * OrcaResource
  * @author masuda, Masuda Naika
  */
-@Path("rest/orca")
+@Path("orca")
 public class OrcaResource extends AbstractResource {
     
     public static final String CLAIMRES_URL = "/rest/orca/claimres";

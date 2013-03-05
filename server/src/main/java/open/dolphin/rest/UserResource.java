@@ -16,7 +16,7 @@ import open.dolphin.session.UserServiceBean;
  * @author modified by masuda, Masuda Naika
  */
 
-@Path("rest/user")
+@Path("user")
 public class UserResource extends AbstractResource {
 
     private static final boolean debug = false;

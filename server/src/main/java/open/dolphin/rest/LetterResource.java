@@ -14,7 +14,7 @@ import open.dolphin.session.LetterServiceBean;
  * @author Kazushi Minagawa, Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-@Path("rest/odletter")
+@Path("odletter")
 public class LetterResource extends AbstractResource {
 
     private static final boolean debug = false;

@@ -16,7 +16,7 @@ import open.dolphin.session.PatientServiceBean;
  * @author modified by masuda, Masuda Naika
  */
 
-@Path("rest/patient")
+@Path("patient")
 public class PatientResource extends AbstractResource {
 
     private static final boolean debug = false;

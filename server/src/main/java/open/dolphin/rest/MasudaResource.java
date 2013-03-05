@@ -14,7 +14,7 @@ import open.dolphin.session.MasudaServiceBean;
  * MasudaResource
  * @author masuda, Masuda Naika
  */
-@Path("rest/masuda")
+@Path("masuda")
 public class MasudaResource extends AbstractResource {
     
     private static final boolean debug = false;
