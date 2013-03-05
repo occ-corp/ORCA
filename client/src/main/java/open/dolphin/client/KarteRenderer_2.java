@@ -131,7 +131,7 @@ public class KarteRenderer_2 {
             //new KartePaneRenderer().renderPane(pSpec, pModules, schemas, pPane);
             new KartePaneRenderer_StAX().renderPane(pSpec, pModules, schemas, pPane);
             // StampHolder直後の改行がない場合は補う
-            pPane.getDocument().fixCrAfterStamp();
+            //pPane.getDocument().fixCrAfterStamp();
         }
     }
 /*
@@ -391,6 +391,7 @@ public class KarteRenderer_2 {
         private String bold;
         private String italic;
         private String underline;
+        private ELEMENTS lastElm;
 
         /**
          * TextPane Dump の XML を解析する。
@@ -461,12 +462,22 @@ public class KarteRenderer_2 {
                     bold = reader.getAttributeValue(null, BOLD_NAME);
                     italic = reader.getAttributeValue(null, ITALIC_NAME);
                     underline = reader.getAttributeValue(null, UNDERLINE_NAME);
+                    // StampHolder直後に文字列が続く場合、文字列の前に改行を補う
+                    // <content start="5" end="9" name="stampHolder"> のような場合
+                    if (lastElm == ELEMENTS.component 
+                            && STAMP_HOLDER.equals(reader.getAttributeValue(null, NAME_NAME))) {
+                        kartePane.insertFreeString("\n", null);
+                    }
                     break;
                 case text:
                     String text = reader.getElementText();
                     startContent(foreground, size, bold, italic, underline, text);
                     break;
                 case component:
+                    // StampHolderが連続している場合、間に改行を補う
+                    if (lastElm == ELEMENTS.component) {
+                        kartePane.insertFreeString("\n", null);
+                    }
                     String name = reader.getAttributeValue(null, NAME_NAME);
                     String number = reader.getAttributeValue(null, COMPONENT_ELEMENT_NAME);
                     startComponent(name, number);
@@ -477,6 +488,7 @@ public class KarteRenderer_2 {
                 default:
                     break;
             }
+            lastElm = elm;
         }
 
         private void endElement(XMLStreamReader reader) {
