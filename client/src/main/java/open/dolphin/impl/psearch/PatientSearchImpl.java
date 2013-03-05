@@ -32,6 +32,7 @@ import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.table.*;
 import open.dolphin.util.AgeCalculator;
 import open.dolphin.util.StringTool;
+import open.dolphin.util.ZenkakuUtils;
 
 /**
  * 患者検索PatientSearchPlugin
@@ -132,12 +133,11 @@ public class PatientSearchImpl extends AbstractMainComponent {
         return selectedPatient;
     }
 
-    public void setSelectedPatinet(PatientModel model) {
+    public void setSelectedPatient(PatientModel model) {
         selectedPatient = model;
         controlMenu();
     }
 
-    @SuppressWarnings("unchecked")
     public ListTableModel<PatientModel> getTableModel() {
         return (ListTableModel<PatientModel>) view.getTable().getModel();
     }
@@ -492,9 +492,9 @@ public class PatientSearchImpl extends AbstractMainComponent {
 //pns   row = -1 でここに入ってくることあり
                 if (row >= 0) {
                     PatientModel patient = (PatientModel) sorter.getObject(row);
-                    setSelectedPatinet(patient);
+                    setSelectedPatient(patient);
                 } else {
-                    setSelectedPatinet(null);
+                    setSelectedPatient(null);
                 }
             }
         }
@@ -653,6 +653,10 @@ public class PatientSearchImpl extends AbstractMainComponent {
                     sb.append(text);
                     text = sb.toString();
                 }
+                
+                //カルテ検索時に、全角数字を半角として扱えるようにする
+                // https://github.com/KatouBuntarou/OpenDolphin-2.3mh/issues/14
+                text = ZenkakuUtils.toHalfNumber(text);
 
                 spec.setCode(PatientSearchSpec.DIGIT_SEARCH);
                 spec.setDigit(text);
@@ -699,7 +703,6 @@ public class PatientSearchImpl extends AbstractMainComponent {
         }
 
         @Override
-        @SuppressWarnings("unchecked")
         protected void succeeded(Collection<PatientModel> result) {
 
             if (result != null){
@@ -708,6 +711,13 @@ public class PatientSearchImpl extends AbstractMainComponent {
                 tableModel.clear();
             }
             updateStatusLabel();
+            
+            // カルテをIDで検索した際、候補が1件であれば即座に開くように修正する
+            // https://github.com/KatouBuntarou/OpenDolphin-2.3mh/issues/15
+            if (tableModel.getDataProvider().size() == 1) {
+                setSelectedPatient(tableModel.getDataProvider().get(0));
+                openKarte();
+            }
         }
 
         @Override

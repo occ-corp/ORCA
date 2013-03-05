@@ -258,11 +258,19 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
      * @param 表示するドキュメントのタブ番号
      */
     @Override
-    public void showDocument(int index) {
-        int cnt = tabbedPane.getTabCount();
-        if (index >= 0 && index <= cnt - 1 && index != tabbedPane.getSelectedIndex()) {
-            tabbedPane.setSelectedIndex(index);
-        }
+    public void showDocument(final int index) {
+        
+        // カルテ選択時にNull Pointer Exceptionが発生することがある
+        // https://github.com/KatouBuntarou/OpenDolphin-2.3mh/issues/10
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                int cnt = tabbedPane.getTabCount();
+                if (index >= 0 && index <= cnt - 1 && index != tabbedPane.getSelectedIndex()) {
+                    tabbedPane.setSelectedIndex(index);
+                }
+            }
+        });
     }
 
     /**
