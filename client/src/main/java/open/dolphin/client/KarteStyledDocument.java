@@ -106,6 +106,7 @@ public class KarteStyledDocument extends DefaultStyledDocument {
             
             // Stamp を挿入する
             insertString(start, " ", runStyle);
+            clearLogicalStyle();    //masuda
             
             // スタンプの開始と終了位置を生成して保存する
             Position stPos = createPosition(start);
@@ -158,6 +159,7 @@ public class KarteStyledDocument extends DefaultStyledDocument {
             // 挿入位置
             int start = inPos.getOffset();
             insertString(start, " ", runStyle);
+            clearLogicalStyle();    //masuda
             sh.setEntry(createPosition(start), createPosition(start+1));
         } catch(BadLocationException be) {
             be.printStackTrace(System.err);
@@ -201,6 +203,7 @@ public class KarteStyledDocument extends DefaultStyledDocument {
 //masuda$
             // Stamp を挿入する
             insertString(start, " ", runStyle);
+            clearLogicalStyle();    //masuda
             
             // スタンプの開始と終了位置を生成して保存する
             sh.setEntry(createPosition(start), createPosition(start+1));
@@ -281,8 +284,8 @@ public class KarteStyledDocument extends DefaultStyledDocument {
     public void removeExtraCR() {
 
         int len = getLength();
+        int pos;
         try {
-            int pos = len;
             // 改行文字以外が出てくるまで文書末からスキャン
             for (pos = len - 1; pos >= 0; --pos) {
                 if (!"\n".equals(getText(pos, 1))) {
