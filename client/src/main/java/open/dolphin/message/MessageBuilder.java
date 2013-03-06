@@ -40,8 +40,9 @@ public class MessageBuilder {
     }
     
     private void prepareTemplates() {
-        claimTemplate = TemplateLoader.newTemplate("claimHelper.vm");
-        diseaseTemplate = TemplateLoader.newTemplate("diseaseHelper.vm");
+        TemplateLoader templateLoader = new TemplateLoader();
+        claimTemplate = templateLoader.newTemplate("claimHelper.vm");
+        diseaseTemplate = templateLoader.newTemplate("diseaseHelper.vm");
     }
 
     public String build(IMessageHelper helper) {

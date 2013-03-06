@@ -1,4 +1,4 @@
-package open.dolphin.client;
+package open.dolphin.util;
 
 import java.awt.Color;
 import java.io.StringWriter;
@@ -6,8 +6,7 @@ import open.dolphin.infomodel.BundleDolphin;
 import open.dolphin.infomodel.BundleMed;
 import open.dolphin.infomodel.ClaimConst;
 import open.dolphin.infomodel.IInfoModel;
-import open.dolphin.project.Project;
-import open.dolphin.util.TemplateLoader;
+import open.dolphin.infomodel.ModuleModel;
 import org.apache.velocity.Template;
 import org.apache.velocity.VelocityContext;
 
@@ -43,8 +42,7 @@ public class StampRenderingHints {
     }
 
     private StampRenderingHints() {
-        int cp = Project.getInt("stampHolderCellPadding", 0);
-        setCellPadding(cp);
+        setCellPadding(0);
         prepareTemplates();
     }
 
@@ -53,32 +51,31 @@ public class StampRenderingHints {
     }
     
     private void prepareTemplates() {
-        TemplateLoader templateLoader = new TemplateLoader();
-        medTemplate = templateLoader.newTemplate(BundleMed.class.getName() + DOT_VM);
-        dolphinTemplate = templateLoader.newTemplate(BundleDolphin.class.getName() + DOT_VM);
-        laboTemplate = templateLoader.newTemplate("labo.vm");
+        TemplateLoader loader = new TemplateLoader();
+        medTemplate = loader.newTemplate(BundleMed.class.getName() + DOT_VM);
+        dolphinTemplate = loader.newTemplate(BundleDolphin.class.getName() + DOT_VM);
+        laboTemplate = loader.newTemplate("labo.vm");
     }
     
-    public String getStampHtml(StampHolder sh) {
+    public String getStampHtml(ModuleModel stamp) {
 
         // entityを取得
-        String entity = sh.getStamp().getModuleInfoBean().getEntity();
+        String entity = stamp.getModuleInfoBean().getEntity();
         
         // entityに応じてテンプレートを選択
         Template template;        
         if (IInfoModel.ENTITY_MED_ORDER.equals(entity)) {
             template = medTemplate;
-        } else if (IInfoModel.ENTITY_LABO_TEST.equals(entity) 
-                && Project.getBoolean("laboFold", true)) {
+        } else if (IInfoModel.ENTITY_LABO_TEST.equals(entity)) {
             template = laboTemplate;
         } else {
             template = dolphinTemplate;
         }
         
         VelocityContext context = new VelocityContext();
-        context.put(KEY_HINTS, sh.getHints());
-        context.put(KEY_MODEL, sh.getStamp().getModel());
-        context.put(KEY_STAMP_NAME, sh.getStamp().getModuleInfoBean().getStampName());
+        context.put(KEY_HINTS, instance);
+        context.put(KEY_MODEL, stamp.getModel());
+        context.put(KEY_STAMP_NAME, stamp.getModuleInfoBean().getStampName());
             
         StringWriter sw = new StringWriter();
         template.merge(context, sw);

@@ -1,0 +1,36 @@
+##-------------------------------------
+##         RP Template
+##   Modified by masuda, Masuda Naika
+##-------------------------------------
+<TT><FONT SIZE="${hints.getFontSize()}" COLOR="${hints.getBackgroundAs16String()}">
+<TABLE BORDER="${hints.getBorder()}" CELLSPACING="${hints.getCellSpacing()}" CELLPADDING="${hints.getCellPadding()}">
+### タイトル ###
+#if ($hints.isNewStamp($stampName))
+<TR BGCOLOR="${hints.getLabelColorAs16String()}">
+<TD NOWRAP>RP) </TD>
+<TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${hints.getMedTypeAndCode($model)}</TD></TR>
+#else
+## 院内・院外処方は１行目の右端に表示する
+<TR BGCOLOR="${hints.getLabelColorAs16String()}">
+<TD NOWRAP>RP) ${stampName}</TD>
+<TD NOWRAP COLSPAN="2" ALIGN="RIGHT">${hints.getMedTypeAndCode($model)}</TD></TR>
+#end
+### 項目 ###
+#foreach ($item in $model.getClaimItem())
+## コメントコードなら"・"と"x"は表示しない
+#if ($hints.isCommentCode($item.getCode()))
+<TR><TD COLSPAN="3">${item.getName()}</TD></TR>
+#else
+<TR><TD>・${item.getName()}</TD>
+<TD NOWRAP ALIGN="RIGHT"> x ${item.getNumber()}</TD>
+<TD NOWRAP> ${hints.getUnit($item.getUnit())}</TD></TR>
+#end
+#end
+### 用法 ###
+<TR><TD COLSPAN="3">${model.getAdminDisplayString()}</TD></TR>
+### 用法メモ ###
+#if ($model.getAdminMemo())
+<TR><TD>${model.getAdminMemo()}</TD></TR>
+#end
+### おわり ###
+</TABLE></FONT></TT>
