@@ -401,7 +401,7 @@ public class KarteRenderer_2 {
          * @param xml TextPane Dump の XML
          */
         private void renderPane(String xml, List<ModuleModel> modules, List<SchemaModel> schemas, KartePane kartePane) {
-            System.out.println(xml);
+            
             this.modules = modules;
             this.schemas = schemas;
             this.kartePane = kartePane;
