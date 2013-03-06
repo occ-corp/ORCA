@@ -1,15 +1,14 @@
 package open.dolphin.client;
 
 import java.awt.Color;
-import java.io.BufferedWriter;
 import java.io.IOException;
-import java.io.StringWriter;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import javax.swing.text.AttributeSet;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.DefaultStyledDocument;
+import javax.swing.text.Element;
 import javax.swing.text.StyleConstants;
 import open.dolphin.infomodel.ModuleModel;
 import open.dolphin.infomodel.SchemaModel;
@@ -20,20 +19,25 @@ import org.apache.log4j.Logger;
  * KartePane の dumper
  *
  * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author a little modified by masuda, Masuda Naika
  */
 public final class KartePaneDumper_2 {
     
-    private ArrayList<ModuleModel> moduleList;
+    private static final char DQ = '\"';
+    private static final String FOREGROUND = "foreground";
+    private static final String CONTENT = "content";
+    private static final String NAME = "name";
     
-    private ArrayList<SchemaModel> schemaList;
-    
+    private List<ModuleModel> moduleList;
+    private List<SchemaModel> schemaList;
     private String spec;
-    
     private Logger logger;
     
     /** Creates a new instance of TextPaneDumpBuilder */
     public KartePaneDumper_2() {
         logger = ClientContext.getBootLogger();
+        moduleList = new ArrayList<ModuleModel>();
+        schemaList = new ArrayList<SchemaModel>();
     }
     
     /**
@@ -52,13 +56,11 @@ public final class KartePaneDumper_2 {
      * @return
      */
     public ModuleModel[] getModule() {
-        
-        ModuleModel[] ret = null;
-        
-        if ((moduleList != null) && (moduleList.size() > 0)) {
-            ret = moduleList.toArray(new ModuleModel[moduleList.size()]);
+
+        if (!moduleList.isEmpty()) {
+            return moduleList.toArray(new ModuleModel[moduleList.size()]);
         }
-        return ret;
+        return null;
     }
     
     /**
@@ -67,14 +69,11 @@ public final class KartePaneDumper_2 {
      * @return
      */
     public SchemaModel[] getSchema() {
-        
-        SchemaModel[] schemas = null;
-        
-        if ((schemaList != null) && (schemaList.size() > 0)) {
-            
-            schemas = schemaList.toArray(new SchemaModel[schemaList.size()]);
+
+        if (!schemaList.isEmpty()) {
+            return schemaList.toArray(new SchemaModel[schemaList.size()]);
         }
-        return schemas;
+        return null;
     }
     
     /**
@@ -84,18 +83,15 @@ public final class KartePaneDumper_2 {
      */
     public void dump(DefaultStyledDocument doc) {
         
-        StringWriter sw = new StringWriter();
-        BufferedWriter writer = new BufferedWriter(sw);
-        
+        StringBuilder sb = new StringBuilder();
+
         try {
             // ルート要素から再帰的にダンプする
-            javax.swing.text.Element root = doc.getDefaultRootElement();
-            writeElemnt(root, writer);
+            Element root = doc.getDefaultRootElement();
+            writeElemnt(root, sb);
             
             // 出力バッファーをフラッシュしペインのXML定義を生成する
-            writer.flush();
-            writer.close();
-            spec = sw.toString();
+            spec = sb.toString();
             
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -109,25 +105,28 @@ public final class KartePaneDumper_2 {
      * @throws IOException
      * @throws BadLocationException
      */
-    private void writeElemnt(javax.swing.text.Element element, Writer writer)
-    throws IOException, BadLocationException {
+    private void writeElemnt(Element element, StringBuilder sb)
+            throws IOException, BadLocationException {
         
         // 要素の開始及び終了のオフセット値を保存する
         int start = element.getStartOffset();
         int end = element.getEndOffset();
         logger.debug("start = " + start);
         logger.debug("end = " + end);
+
+        String elmName = element.getName();
+        boolean contentFlg = CONTENT.equals(elmName);
         
         // このエレメントの属性セットを得る
-        AttributeSet atts = element.getAttributes().copyAttributes();
+        AttributeSet atts = element.getAttributes();
         
         // 属性値の文字列表現
-        String asString = "";
+        String asString = null;
         
         // 属性を調べる
         if (atts != null) {
             
-            StringBuilder retBuffer = new StringBuilder();
+            StringBuilder attrBuf = new StringBuilder();
             
             // 全ての属性を列挙する
             Enumeration names = atts.getAttributeNames();
@@ -136,32 +135,27 @@ public final class KartePaneDumper_2 {
                 
                 // 属性の名前を得る
                 Object nextName = names.nextElement();
+                String attrName = nextName.toString();
                 
                 if (nextName != StyleConstants.ResolveAttribute) {
                     
-                    logger.debug("attribute name = " + nextName.toString());
+                    logger.debug("attribute name = " + attrName);
                     
                     // $enameは除外する
-                    if (nextName.toString().startsWith("$")) {
+                    if (attrName.startsWith("$")) {
                         continue;
                     }
                     
-                    // 属性= の形を準備する
-                    retBuffer.append(" ");
-                    retBuffer.append(nextName);
-                    retBuffer.append("=");
-                    
                     // foreground 属性の場合は再構築の際に利用しやすい形に分解する
-                    if (nextName.toString().equals("foreground")) {
+                    if (FOREGROUND.equals(attrName)) {
                         Color c = (Color) atts.getAttribute(StyleConstants.Foreground);
                         logger.debug("color = " + c.toString());
-                        StringBuilder buf = new StringBuilder();
-                        buf.append(String.valueOf(c.getRed()));
-                        buf.append(",");
-                        buf.append(String.valueOf(c.getGreen()));
-                        buf.append(",");
-                        buf.append(String.valueOf(c.getBlue()));
-                        retBuffer.append(addQuote(buf.toString()));
+                        addAttribute(attrName, attrBuf);
+                        attrBuf.append(DQ);
+                        attrBuf.append(String.valueOf(c.getRed())).append(",");
+                        attrBuf.append(String.valueOf(c.getGreen())).append(",");
+                        attrBuf.append(String.valueOf(c.getBlue()));
+                        attrBuf.append(DQ);
                         
                     } else {
                         // 属性セットから名前をキーにして属性オブジェクトを取得する
@@ -170,84 +164,76 @@ public final class KartePaneDumper_2 {
                         
                         if (attObject instanceof StampHolder) {
                             // スタンプの場合
-                            if (moduleList == null) {
-                                moduleList = new ArrayList<ModuleModel>();
-                            }
                             StampHolder sh = (StampHolder) attObject;
                             moduleList.add(sh.getStamp());
                             String value = String.valueOf(moduleList.size() - 1); // ペインに出現する順番をこの属性の値とする
-                            retBuffer.append(addQuote(value));
+                            addAttribute(attrName, attrBuf);
+                            attrBuf.append(addQuote(value));
                             
                         } else if (attObject instanceof SchemaHolder) {
                             // シュェーマの場合
-                            if (schemaList == null) {
-                                schemaList = new ArrayList<SchemaModel>();
-                            }
                             SchemaHolder ch = (SchemaHolder) attObject;
                             schemaList.add(ch.getSchema());
                             String value = String.valueOf(schemaList.size() - 1); // ペインに出現する順番をこの属性の値とする
-                            retBuffer.append(addQuote(value));
+                            addAttribute(attrName, attrBuf);
+                            attrBuf.append(addQuote(value));
                             
                         } else {
                             // それ以外の属性についてはそのまま記録する
-                            retBuffer.append(addQuote(attObject.toString()));
+                            // <content start="1" end="2" name="stampHolder">となるのを防ぐ
+                            if (!(contentFlg && NAME.equals(attrName))) {
+                                addAttribute(attrName, attrBuf);
+                                attrBuf.append(addQuote(attObject.toString()));
+                            }
                         }
                     }
                 }
             }
-            asString = retBuffer.toString();
+            asString = attrBuf.toString();
         }
-        
+
         // <要素名 start="xx" end="xx" + asString>
-        writer.write("<");
-        writer.write(element.getName());
-        writer.write(" start=");
-        writer.write(addQuote(start));
-        writer.write(" end=");
-        writer.write(addQuote(end));
-        writer.write(asString);
-        writer.write(">");
+        sb.append("<").append(elmName);
+        sb.append(" start=").append(addQuote(start));
+        sb.append(" end=").append(addQuote(end));
+        if (asString != null && !asString.isEmpty()) {
+            sb.append(asString);
+        }
+        sb.append(">");
         
         // content要素の場合はテキストを抽出する
-        if (element.getName().equals("content")) {
-            writer.write("<text>");
+        if (contentFlg) {
             int len = end - start;
             String text = element.getDocument().getText(start, len);
             logger.debug("text = " + text);
-            
+
             // 特定の文字列を置換する
             text = XmlUtils.toXml(text);
-            writer.write(text);
-            writer.write("</text>");
-
+            sb.append("<text>").append(text).append("</text>");
         }
         
         // 子要素について再帰する
         int children = element.getElementCount();
         for (int i = 0; i < children; i++) {
-            writeElemnt(element.getElement(i), writer);
+            writeElemnt(element.getElement(i), sb);
         }
         
         // この属性を終了する
         // </属性名>
-        writer.write("</");
-        writer.write(element.getName());
-        writer.write(">");
+        sb.append("</").append(elmName).append(">");
+    }
+    
+    private void addAttribute(String attrName, StringBuilder sb) {
+        sb.append(" ").append(attrName).append("=");
     }
     
     private String addQuote(String str) {
-        StringBuilder buf = new StringBuilder();
-        buf.append("\"");
-        buf.append(str);
-        buf.append("\"");
-        return buf.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append(DQ).append(str).append(DQ);
+        return sb.toString();
     }
     
-    private String addQuote(int str) {
-        StringBuilder buf = new StringBuilder();
-        buf.append("\"");
-        buf.append(str);
-        buf.append("\"");
-        return buf.toString();
+    private String addQuote(int num) {
+        return addQuote(String.valueOf(num));
     }
 }
