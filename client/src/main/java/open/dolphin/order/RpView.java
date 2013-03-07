@@ -100,6 +100,9 @@ public class RpView extends AbstractOrderView {
         cmdPanel2.add(Box.createHorizontalGlue());
         cmdPanel2.add(countLabel);
         cmdPanel2.add(countField);
+        
+        // 高さを固定
+        fixCmdPanelHeight();    
 
         // 処方エディタではセットテーブルを大きめにする
         scrollSetTable.setPreferredSize(new Dimension(300, 300));

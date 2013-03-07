@@ -95,7 +95,9 @@ public class InjectionView extends AbstractOrderView {
         cmdPanel2.add(Box.createHorizontalGlue());
         cmdPanel2.add(countLabel);
         cmdPanel2.add(countField);
-
+        
+        // 高さを固定
+        fixCmdPanelHeight();  
     }
     
     private JComboBox createCmb() {

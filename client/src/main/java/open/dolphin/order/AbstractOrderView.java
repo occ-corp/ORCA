@@ -2,6 +2,7 @@
 package open.dolphin.order;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import javax.swing.*;
 import javax.swing.border.Border;
 import open.dolphin.client.ClientContext;
@@ -234,5 +235,11 @@ public abstract class AbstractOrderView extends JPanel {
     
     public JCheckBox getPartialChk() {
         return partialCheck;
+    }
+    
+    protected void fixCmdPanelHeight() {
+        // 高さを固定
+        Dimension d = new Dimension(Integer.MAX_VALUE, cmdPanel.getPreferredSize().height);
+        cmdPanel.setMaximumSize(d);  
     }
 }
