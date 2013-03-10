@@ -172,7 +172,7 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         //periodObjects = ClientContext.getNameValuePair("docHistory.combo.period");
         List<ExtractionPeriod> list = new ArrayList<ExtractionPeriod>();
         for (ExtractionPeriod period : DocumentHistory.EXTRACTION_OBJECTS) {
-            if (period.getToMonth() == 1) {
+            if (period.getToMonth() != 0) {
                 list.add(period);
             }
         }
