@@ -147,7 +147,7 @@ public class DocumentHistory {
             new ExtractionPeriod("-10年", -120, -60),
             new ExtractionPeriod("-20年", -240, -120),
             new ExtractionPeriod("-30年", -360, -240),
-            new ExtractionPeriod("全て", Integer.MIN_VALUE, 1)
+            new ExtractionPeriod("全て", -12 * 200, 12)
         };
         CONTENT_OBJECTS = new NameValuePair[]{
             new NameValuePair(CMB_KARTE, KARTE + CAMMA + ALL),
