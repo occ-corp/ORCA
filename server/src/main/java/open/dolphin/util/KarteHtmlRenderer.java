@@ -19,8 +19,6 @@ public class KarteHtmlRenderer {
     private static final String SCHEMA_HOLDER = "schemaHolder";
     private static final String NAME_NAME = "name";
     
-    private static final String NAME_STAMP_HOLDER = "name=\"stampHolder\"";
-    
     private static final String CR = "\n";
     private static final String BR = "<BR>";
     private static final Dimension imageSize = new Dimension(240, 240);
@@ -48,11 +46,6 @@ public class KarteHtmlRenderer {
     public String[] render(DocumentModel model) {
 
         List<ModuleModel> modules = model.getModules();
-        if (modules != null && !modules.isEmpty()) {
-            for (ModuleModel module : modules) {
-                module.setModel((InfoModel) BeanUtils.xmlDecode(module.getBeanBytes()));
-            }
-        }
 
         // SOA と P のモジュールをわける
         // また夫々の Pane の spec を取得する
@@ -63,6 +56,8 @@ public class KarteHtmlRenderer {
         String pSpec = null;
 
         for (ModuleModel bean : modules) {
+            
+            bean.setModel((InfoModel) BeanUtils.xmlDecode(bean.getBeanBytes()));
 
             String role = bean.getModuleInfoBean().getStampRole();
 
@@ -80,16 +75,6 @@ public class KarteHtmlRenderer {
         // 念のためソート
         Collections.sort(soaModules);
         Collections.sort(pModules);
-
-        // この処理はなんだろう？ soaPaneにスタンプホルダ―？？？
-        if (soaSpec != null && pSpec != null) {
-            if (soaSpec.contains(NAME_STAMP_HOLDER)) {
-                String sTmp = soaSpec;
-                String pTmp = pSpec;
-                soaSpec = pTmp;
-                pSpec = sTmp;
-            }
-        }
 
         // SOA Pane をレンダリングする
         StringBuilder sb = new StringBuilder();
@@ -171,18 +156,14 @@ public class KarteHtmlRenderer {
             switch (elm) {
                 case text:
                     String text = reader.getElementText();
-                    // StampHolder直後に改行を補う
-                    if (componentFlg && !text.startsWith(CR)) {
-                        //htmlBuff.append(BR);
+                    // Component直後の改行を消す
+                    if (componentFlg && text.startsWith(CR)) {
+                        text = text.substring(1);
                     }
                     componentFlg = false;
                     startContent(text);
                     break;
                 case component:
-                    // StampHolderが連続している場合、間に改行を補う
-                    if (componentFlg) {
-                        //htmlBuff.append(BR);
-                    }
                     componentFlg = true;
                     String name = reader.getAttributeValue(null, NAME_NAME);
                     String number = reader.getAttributeValue(null, COMPONENT_ELEMENT_NAME);
@@ -216,9 +197,9 @@ public class KarteHtmlRenderer {
                 byte[] bytes = ImageTool.getJpegBytes(schema.getJpegByte(), imageSize);
                 if (bytes != null) {
                     String base64 = Base64Utils.getBase64(bytes);
-                    htmlBuff.append("<img src=\"data:image/jpeg;base64,");
-                    htmlBuff.append(base64).append("\"");
-                    htmlBuff.append(" alt=\"img\">");
+                    htmlBuff.append("<img src=\"data:image/jpeg;base64,\n");
+                    htmlBuff.append(base64);
+                    htmlBuff.append("\" alt=\"img\">");
                 }
             }
         }

@@ -50,8 +50,6 @@ public class LogFilter implements Filter {
         sb.append(req.getHeader(IInfoModel.USER_NAME));
         String userName = sb.toString();
         String password = req.getHeader(IInfoModel.PASSWORD);
-        //System.err.println(userName);
-        //System.err.println(password);
         
         if (userName == null || password == null) {
             HttpServletResponse res = (HttpServletResponse) response;

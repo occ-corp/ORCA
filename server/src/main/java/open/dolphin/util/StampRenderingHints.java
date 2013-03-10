@@ -23,8 +23,8 @@ public class StampRenderingHints {
     private Color background = Color.WHITE;
     private Color labelColor;
     private int border = 0;
-    private int cellSpacing = 1;    //masuda 0 -> 1 to avoid unexpected line wrap
-    private int cellPadding = 0;    //masuda 3 -> 0 to make slim
+    private int cellSpacing = 0;
+    private int cellPadding = 0;
 
     private static final String KEY_MODEL = "model";
     private static final String KEY_STAMP_NAME = "stampName";

@@ -137,6 +137,13 @@ public class UserResource extends AbstractResource {
 
         return Response.ok(cntStr).build();
     }
+    
+    @GET
+    @Path("hello/")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public Response helloDolphin() {
+        return Response.ok("Hello Dolphin").build();
+    }
 
     @Override
     protected void debug(String msg) {

@@ -2,8 +2,7 @@
 ##         RP Template
 ##   Modified by masuda, Masuda Naika
 ##-------------------------------------
-<TT><FONT SIZE="${hints.getFontSize()}" COLOR="${hints.getBackgroundAs16String()}">
-<TABLE BORDER="${hints.getBorder()}" CELLSPACING="${hints.getCellSpacing()}" CELLPADDING="${hints.getCellPadding()}">
+<TT><TABLE BORDER="${hints.getBorder()}" CELLSPACING="${hints.getCellSpacing()}" CELLPADDING="${hints.getCellPadding()}">
 ### タイトル ###
 #if ($hints.isNewStamp($stampName))
 <TR BGCOLOR="${hints.getLabelColorAs16String()}">
@@ -33,4 +32,4 @@
 <TR><TD>${model.getAdminMemo()}</TD></TR>
 #end
 ### おわり ###
-</TABLE></FONT></TT>
+</TABLE></TT>
