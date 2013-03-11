@@ -711,13 +711,6 @@ public class PatientSearchImpl extends AbstractMainComponent {
                 tableModel.clear();
             }
             updateStatusLabel();
-            
-            // カルテをIDで検索した際、候補が1件であれば即座に開くように修正する
-            // https://github.com/KatouBuntarou/OpenDolphin-2.3mh/issues/15
-            if (tableModel.getDataProvider().size() == 1) {
-                setSelectedPatient(tableModel.getDataProvider().get(0));
-                openKarte();
-            }
         }
 
         @Override
@@ -732,6 +725,14 @@ public class PatientSearchImpl extends AbstractMainComponent {
         @Override
         protected void stopProgress() {
             doStopProgress();
+            
+            // カルテをIDで検索した際、候補が1件であれば即座に開くように修正する
+            // https://github.com/KatouBuntarou/OpenDolphin-2.3mh/issues/15
+            if (tableModel.getDataProvider().size() == 1) {
+                //setSelectedPatient(tableModel.getDataProvider().get(0));
+                view.getTable().getSelectionModel().setSelectionInterval(0, 0);
+                openKarte();
+            }
         }
     }
 

@@ -136,7 +136,11 @@ public class WindowSupport implements MenuListener {
     }
     
     public static Object getMediator(JFrame frame) {
-        return allWindows.get(frame).getMediator();
+        WindowSupport ws = allWindows.get(frame);
+        if (ws != null) {
+            return ws.getMediator();
+        }
+        return null;
     }
     
     public static List<EditorFrame> getAllEditorFrames() {
