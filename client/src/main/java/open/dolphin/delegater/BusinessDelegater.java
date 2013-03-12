@@ -102,7 +102,7 @@ public class BusinessDelegater {
     }
     
     protected void isHTTP200(int status) throws Exception {
-        if (status != 200) {
+        if (status / 100 != 2) {
             String msg = "HTTP" + String.valueOf(status);
             throw new Exception(msg);
         }
