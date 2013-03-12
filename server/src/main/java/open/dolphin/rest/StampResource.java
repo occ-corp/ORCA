@@ -70,13 +70,10 @@ public class StampResource extends AbstractResource {
         StampModel model = (StampModel)
                 getConverter().fromJson(json, StampModel.class);
 
-        //String ret = stampServiceBean.putStamp(model);
+        String ret = stampServiceBean.putStamp(model);
         //debug(ret);
-        //return ret;
         
-        StreamingOutput so = getJsonOutStream(model);
-        
-        return Response.ok(so).build();
+        return Response.ok(ret).build();
     }
 
     @PUT
