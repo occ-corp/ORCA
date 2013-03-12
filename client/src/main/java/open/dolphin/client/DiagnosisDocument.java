@@ -1472,6 +1472,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                     itr.remove();
                 }
             }
+            filterDiagnosis();
         }
     }
 //masuda$
