@@ -38,10 +38,6 @@ public class PatientResource extends AbstractResource {
         String name = param;
 
         List<PatientModel> patients = patientServiceBean.getPatientsByName(fid, name);
-
-        //String json = getConverter().toJson(patients);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(patients);
         
@@ -58,10 +54,6 @@ public class PatientResource extends AbstractResource {
         String kana = param;
 
         List<PatientModel> patients = patientServiceBean.getPatientsByKana(fid, kana);
-
-        //String json = getConverter().toJson(patients);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(patients);
         
@@ -80,10 +72,6 @@ public class PatientResource extends AbstractResource {
         debug(digit);
 
         List<PatientModel> patients = patientServiceBean.getPatientsByDigit(fid, digit);
-
-        //String json = getConverter().toJson(patients);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(patients);
         
@@ -100,10 +88,6 @@ public class PatientResource extends AbstractResource {
         String pid = param;
 
         PatientModel patient = patientServiceBean.getPatientById(fid, pid);
-
-        //String json = getConverter().toJson(patient);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(patient);
         
@@ -119,10 +103,6 @@ public class PatientResource extends AbstractResource {
         String pvtDate = param;
 
         List<PatientModel> patients = patientServiceBean.getPatientsByPvtDate(fid, pvtDate);
-
-        //String json = getConverter().toJson(patients);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(patients);
         
@@ -177,9 +157,6 @@ public class PatientResource extends AbstractResource {
         
         List<PatientModel> list = patientServiceBean.getPatientList(fid, idList);
         
-        //String json = getConverter().toJson(list);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -191,9 +168,6 @@ public class PatientResource extends AbstractResource {
     public Response getHealthInsurances(@PathParam("id") Long pk) {
         
         List<HealthInsuranceModel> list = patientServiceBean.getHealthInsurances(pk);
-        
-        //String json = getConverter().toJson(list);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         

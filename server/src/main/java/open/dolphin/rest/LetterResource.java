@@ -49,9 +49,6 @@ public class LetterResource extends AbstractResource {
 
         List<LetterModule> list = letterServiceBean.getLetterList(karteId);
         
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -63,10 +60,6 @@ public class LetterResource extends AbstractResource {
     public Response getLetter(@PathParam("pk") Long pk) {
 
         LetterModule result = letterServiceBean.getLetter(pk);
-        
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(result);
         

@@ -36,10 +36,6 @@ public class OrcaResource extends AbstractResource {
         
         OrcaService.getInstance().executeSql(sqlModel);
         
-        //json = getConverter().toJson(sqlModel);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(sqlModel);
         
         return Response.ok(so).build();
@@ -67,8 +63,6 @@ public class OrcaResource extends AbstractResource {
         ClaimMessageModel model = (ClaimMessageModel) 
                 servletReq.getAttribute(ClaimMessageModel.class.getSimpleName());
         model.setContent(null);
-        //String json = getConverter().toJson(model);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(model);
         

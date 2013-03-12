@@ -40,10 +40,6 @@ public class NLabResource extends AbstractResource {
         String fidPid = sb.toString();
 
         List<NLaboModule> list = nLabServiceBean.getLaboTest(fidPid, firstResult, maxResult);
-
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         
@@ -60,10 +56,6 @@ public class NLabResource extends AbstractResource {
         List<String> idList = getConverter().toStrList(ids);
 
         List<PatientLiteModel> list = nLabServiceBean.getConstrainedPatients(fid, idList);
-
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         
@@ -83,9 +75,6 @@ public class NLabResource extends AbstractResource {
         
         PatientModel patient = nLabServiceBean.create(fid, module);
 
-        //String ret = getConverter().toJson(patient);
-        //debug(ret);
-        //return ret;
         StreamingOutput so = getJsonOutStream(patient);
         
         return Response.ok(so).build();
@@ -118,10 +107,6 @@ public class NLabResource extends AbstractResource {
         }
         
         PatientModel patient = nLabServiceBean.putLaboModule(fid, module);
-
-        //String ret = getConverter().toJson(patient);
-        //debug(ret);
-        //return ret;
         
         StreamingOutput so = getJsonOutStream(patient);
         

@@ -37,11 +37,7 @@ public class UserResource extends AbstractResource {
     public Response getUser(@PathParam("userId") String userId) {
 
         UserModel result = userServiceBean.getUser(userId);
-        
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
-        
+
         StreamingOutput so = getJsonOutStream(result);
         
         return Response.ok(so).build();
@@ -56,10 +52,6 @@ public class UserResource extends AbstractResource {
         debug(fid);
 
         List<UserModel> result = userServiceBean.getAllUser(fid);
-
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(result);
         
