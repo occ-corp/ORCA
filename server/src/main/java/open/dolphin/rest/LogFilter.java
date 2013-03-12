@@ -44,14 +44,17 @@ public class LogFilter implements Filter {
 
         HttpServletRequest req = (HttpServletRequest) request;
         
-        StringBuilder sb = new StringBuilder();
-        String fid = req.getHeader(IInfoModel.FID);
-        sb.append(fid).append(IInfoModel.COMPOSITE_KEY_MAKER);
-        sb.append(req.getHeader(IInfoModel.USER_NAME));
-        String userName = sb.toString();
+        String fid = null;
+        String userName = req.getHeader(IInfoModel.USER_NAME);
         String password = req.getHeader(IInfoModel.PASSWORD);
         
-        if (userName == null || password == null) {
+        try {
+            int pos = userName.indexOf(IInfoModel.COMPOSITE_KEY_MAKER);
+            fid = userName.substring(0, pos);
+        } catch (Exception ex) {
+        }
+
+        if (fid == null || userName == null || password == null) {
             HttpServletResponse res = (HttpServletResponse) response;
             res.sendError(400);
             return;
@@ -64,7 +67,7 @@ public class LogFilter implements Filter {
             authentication = userService.authenticate(userName, password);
             if (!authentication) {
                 HttpServletResponse res = (HttpServletResponse) response;
-                sb = new StringBuilder();
+                StringBuilder sb = new StringBuilder();
                 sb.append(UNAUTHORIZED_USER);
                 sb.append(userName).append(": ").append(req.getRequestURI());
                 String msg = sb.toString();
@@ -79,7 +82,7 @@ public class LogFilter implements Filter {
         // facilityIdを属性にセットしておく
         req.setAttribute(IInfoModel.FID, fid);
 
-        sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append("\n");
         sb.append(req.getRemoteAddr()).append(" ");
         sb.append(userName.substring(17)).append(" ");

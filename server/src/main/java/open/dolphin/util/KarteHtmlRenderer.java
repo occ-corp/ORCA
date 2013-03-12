@@ -177,7 +177,7 @@ public class KarteHtmlRenderer {
         private void startContent(String text) {
 
             // 特殊文字を戻す
-            text = XmlUtils.fromXml(text);
+            //text = XmlUtils.fromXml(text);
             text = text.replace(CR, BR);
             // テキストを挿入する
             htmlBuff.append(text);

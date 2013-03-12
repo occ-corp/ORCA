@@ -26,9 +26,8 @@ public class RESTEasyClient {
 
     private String clientUUID;
     private String baseURI;
-    private String userName;
-    private String password;
-    private String facilityId;
+    private String fidUid;
+    private String passMD5;
     
     private SSLSocketFactory sslSocketFactory;
     
@@ -50,19 +49,10 @@ public class RESTEasyClient {
         return instance;
     }
 
-    public void setUpAuthentication(String username, String password, boolean hashPass) {
+    public void setUpAuthentication(String fidUid, String password, boolean hashPass) {
 
-        String[] fidUid = splitFidUid(username);
-        this.facilityId = fidUid[0];
-        this.userName = fidUid[1];
-        this.password = hashPass ? password : HashUtil.MD5(password);
-    }
-    
-    private String[] splitFidUid(String username) {
-        int pos = username.indexOf(IInfoModel.COMPOSITE_KEY_MAKER);
-        String fid = username.substring(0, pos);
-        String uid = username.substring(pos + 1);
-        return new String[]{fid, uid};
+        this.fidUid = fidUid;
+        this.passMD5 = hashPass ? password : HashUtil.MD5(password);
     }
     
     public String getBaseURI() {
@@ -105,9 +95,8 @@ public class RESTEasyClient {
         ClientExecutor executor = new ApacheHttpClient4Executor(httpClient);
         
         ClientRequest request = new ClientRequest(getPath(path), executor);
-        request.header(IInfoModel.FID, facilityId);
-        request.header(IInfoModel.USER_NAME, userName);
-        request.header(IInfoModel.PASSWORD, password);
+        request.header(IInfoModel.USER_NAME, fidUid);
+        request.header(IInfoModel.PASSWORD, passMD5);
         request.header(IInfoModel.CLIENT_UUID, clientUUID);
         
         return request;
