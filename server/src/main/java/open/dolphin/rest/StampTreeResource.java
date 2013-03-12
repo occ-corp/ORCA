@@ -34,9 +34,6 @@ public class StampTreeResource extends AbstractResource {
     public Response getStampTree(@PathParam("userPK") String userPK) {
 
         UserStampTreeModel result = stampServiceBean.getTrees(Long.parseLong(userPK));
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(result);
         
@@ -120,10 +117,6 @@ public class StampTreeResource extends AbstractResource {
 
         String fid = getRemoteFacility();
         List<PublishedTreeModel> list = stampServiceBean.getPublishedTrees(fid);
-
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         

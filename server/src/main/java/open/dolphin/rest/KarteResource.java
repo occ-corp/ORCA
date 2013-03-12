@@ -39,9 +39,7 @@ public class KarteResource extends AbstractResource {
 
         KarteBean karte = karteServiceBean.getKarte(patientPK, fromDate);
         StreamingOutput so = getJsonOutStream(karte);
-        //String json = getConverter().toJson(karte);
-        //debug(json);
-        //return json
+
         return Response.ok(so).build();
     }
 
@@ -61,29 +59,11 @@ public class KarteResource extends AbstractResource {
 
         List<DocInfoModel> result = karteServiceBean.getDocumentList(karteId, fromDate, toDate, includeModified);
 
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         StreamingOutput so = getGzipOutStream(result);
         return Response.ok(so).build();
     }
 //katoh$
-/*
-    @GET
-    @Path("document")
-    @Produces(MEDIATYPE_JSON_UTF8)
-    public String getDocuments(@QueryParam("ids") String ids) {
 
-        List<Long> list = getConverter().toLongList(ids);
-
-        List<DocumentModel> result = karteServiceBean.getDocuments(list);
-
-        String json = getConverter().toJson(result);
-        debug(json);
-        
-        return json;
-    }
-*/
     @GET
     @Path("document")
     @Produces(MEDIATYPE_JSON_UTF8)
@@ -91,9 +71,8 @@ public class KarteResource extends AbstractResource {
 
         List<Long> list = getConverter().toLongList(ids);
 
-        final List<DocumentModel> result = karteServiceBean.getDocuments(list);
+        List<DocumentModel> result = karteServiceBean.getDocuments(list);
 
-        //StreamingOutput so = getJsonOutStream(result);
         StreamingOutput so = getGzipOutStream(result);
         
         return Response.ok(so).build();
@@ -164,9 +143,6 @@ public class KarteResource extends AbstractResource {
 
         List<List<ModuleModel>> result = karteServiceBean.getModules(karteId, entity, fromList, toList);
 
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(result);
         
         return Response.ok(so).build();
@@ -193,9 +169,6 @@ public class KarteResource extends AbstractResource {
 
         List<List<SchemaModel>> result = karteServiceBean.getImages(karteId, fromList, toList);
 
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(result);
         
         return Response.ok(so).build();
@@ -209,9 +182,6 @@ public class KarteResource extends AbstractResource {
 
         SchemaModel result = karteServiceBean.getImage(karteId);
 
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(result);
         
         return Response.ok(so).build();
@@ -230,9 +200,6 @@ public class KarteResource extends AbstractResource {
 
         List<RegisteredDiagnosisModel> list = karteServiceBean.getDiagnosis(karteId, fromDate, activeOnly);
 
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -347,9 +314,6 @@ public class KarteResource extends AbstractResource {
 
         List<List<AppointmentModel>> result = karteServiceBean.getAppointmentList(karteId, fromList, toList);
 
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(result);
         
         return Response.ok(so).build();

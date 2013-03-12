@@ -35,10 +35,6 @@ public class MasudaResource extends AbstractResource {
         
         List<RoutineMedModel> list = masudaServiceBean.getRoutineMedModels(karteId, firstResult, maxResults);
         
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -50,10 +46,6 @@ public class MasudaResource extends AbstractResource {
     public Response getRoutineMedModel(@PathParam("param") Long id) {
         
         RoutineMedModel model = masudaServiceBean.getRoutineMedModel(id);
-        
-        //String json = getConverter().toJson(model);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(model);
         
@@ -114,9 +106,6 @@ public class MasudaResource extends AbstractResource {
 
         List<DisconItemModel> list = masudaServiceBean.getDisconItems(fid);
 
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -182,10 +171,6 @@ public class MasudaResource extends AbstractResource {
 
         List<UsingDrugModel> list = masudaServiceBean.getUsingDrugModels(fid);
 
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -257,9 +242,6 @@ public class MasudaResource extends AbstractResource {
         List<String> entities = getConverter().toStrList(entitiesStr);
 
         List<ModuleModel> list = masudaServiceBean.getModulesEntitySearch(fid, karteId, fromDate, toDate, entities);
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         
@@ -276,10 +258,6 @@ public class MasudaResource extends AbstractResource {
         
         PatientVisitModel model = masudaServiceBean.getLastPvtInThisMonth(fid, ptId);
         
-        //String json = getConverter().toJson(model);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(model);
         
         return Response.ok(so).build();
@@ -294,10 +272,6 @@ public class MasudaResource extends AbstractResource {
         List<Long> docPkList = getConverter().toLongList(ids);
 
         List<DocInfoModel> list = masudaServiceBean.getDocumentList(docPkList);
-        
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         
@@ -330,10 +304,6 @@ public class MasudaResource extends AbstractResource {
 
         List<PatientModel> list = masudaServiceBean.getKarteFullTextSearch(fid, karteId, text);
 
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -351,10 +321,6 @@ public class MasudaResource extends AbstractResource {
         String fid = getRemoteFacility();
 
         SearchResultModel model = masudaServiceBean.getSearchResult(fid, text, fromId, maxResult, progressCourseOnly);
-
-        //String json = getConverter().toJson(model);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(model);
         
@@ -374,10 +340,6 @@ public class MasudaResource extends AbstractResource {
         
         List<ExamHistoryModel> list = masudaServiceBean.getExamHistory(fid, karteId, fromDate, toDate);
         
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -396,10 +358,6 @@ public class MasudaResource extends AbstractResource {
         Date toDate = parseDate(toDateStr);
 
         List<PatientModel> list = masudaServiceBean.getOutOfMedStockPatient(fid, fromDate, toDate, yoyuu);
-
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         
@@ -413,10 +371,6 @@ public class MasudaResource extends AbstractResource {
         
         String fid = getRemoteFacility();
         List<InFacilityLaboItem> list = masudaServiceBean.getInFacilityLaboItemList(fid);
-        
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         
@@ -486,10 +440,6 @@ public class MasudaResource extends AbstractResource {
         
         List<SanteiHistoryModel> list = masudaServiceBean.getSanteiHistory(karteId, fromDate, toDate, srycdList);
         
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -507,11 +457,7 @@ public class MasudaResource extends AbstractResource {
         Date toDate = parseDate(toDateStr);
         
         List<List<RpModel>> list = masudaServiceBean.getRpModelList(karteId, fromDate, toDate, lastOnly);
-        
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
-        
+         
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -538,9 +484,7 @@ public class MasudaResource extends AbstractResource {
     public Response getUserProperties(@PathParam("uid") String userId) {
         
         List<UserPropertyModel> list = masudaServiceBean.getUserProperties(userId);
-        //String json = getConverter().toJson(list);
-        //return json;
-        
+
         StreamingOutput so = getJsonOutStream(list);
         
         return Response.ok(so).build();
@@ -584,10 +528,6 @@ public class MasudaResource extends AbstractResource {
         long userPk = Long.valueOf(userPkStr);
 
         List<PatientModel> list = masudaServiceBean.getTempDocumentPatients(fromDate, userPk);
-
-        //String json = getConverter().toJson(list);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(list);
         

@@ -34,10 +34,6 @@ public class StampResource extends AbstractResource {
         
         StampModel stamp = stampServiceBean.getStamp(param);
         
-        //String json = getConverter().toJson(stamp);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(stamp);
         
         return Response.ok(so).build();
@@ -51,10 +47,6 @@ public class StampResource extends AbstractResource {
         List<String> list = getConverter().toStrList(ids);
 
         List<StampModel> result = stampServiceBean.getStamp(list);
-
-        //String json = getConverter().toJson(result);
-        //debug(json);
-        //return json;
         
         StreamingOutput so = getJsonOutStream(result);
         
@@ -88,13 +80,9 @@ public class StampResource extends AbstractResource {
 
         List<String> ret = stampServiceBean.putStamp(list);
         
-        //String retText = getConverter().fromList(ret);
-        //debug(retText);
-        //return retText;
+        String retText = getConverter().fromList(ret);
         
-        StreamingOutput so = getJsonOutStream(ret);
-        
-        return Response.ok(so).build();
+        return Response.ok(retText).build();
     }
 
 

@@ -81,10 +81,6 @@ public class PVTResource2 extends AbstractResource {
         String fid = getRemoteFacility();
         List<PatientVisitModel> model = eventServiceBean.getPvtList(fid);
         
-        //String json = getConverter().toJson(model);
-        //debug(json);
-        //return json;
-        
         StreamingOutput so = getJsonOutStream(model);
         
         return Response.ok(so).build();
