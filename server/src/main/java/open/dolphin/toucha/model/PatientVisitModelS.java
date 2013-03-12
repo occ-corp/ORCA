@@ -1,6 +1,6 @@
 package open.dolphin.toucha.model;
-
 import java.io.Serializable;
+import open.dolphin.infomodel.PatientVisitModel;
 
 /**
  *
@@ -16,6 +16,17 @@ public class PatientVisitModelS implements Serializable {
     private String department;
     
     public PatientVisitModelS() {
+    }
+    
+    public PatientVisitModelS(PatientVisitModel pvt) {
+        pvtDate = pvt.getPvtDate();
+        patientId = pvt.getPatientId();
+        patientName = pvt.getPatientName();
+        patientAge = pvt.getPatientAgeBirthday();
+        patientSex = pvt.getPatientModel().getGenderDesc();
+        String dept = pvt.getDepartment();
+        int pos = dept.indexOf(',');
+        department = dept.substring(0, pos);
     }
     
     public void setPvtDate(String pvtDate) {

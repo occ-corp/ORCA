@@ -1,5 +1,6 @@
 package open.dolphin.session;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.Stateless;
@@ -9,6 +10,7 @@ import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
 import open.dolphin.mbean.ServletContextHolder;
+import open.dolphin.toucha.model.PatientVisitModelS;
 
 /**
  * PVTServiceBean
@@ -34,6 +36,8 @@ public class PVTServiceBean {
             = "select k.id from KarteBean k where k.patient.id = :id";
     private static final String QUERY_APPO_BY_KARTE_ID_DATE
             = "from AppointmentModel a where a.karte.id=:id and a.date=:date";
+    private static final String QUERY_PVT_BY_FID_PVTDATE
+            = "from PatientVisitModel p where p.facilityId=:fid and p.pvtDate like :pvtDate";
 
     @Inject
     private ChartEventServiceBean eventServiceBean;
@@ -242,6 +246,22 @@ public class PVTServiceBean {
         } catch (Exception e) {
         }
         return 0;
+    }
+    
+    public List<PatientVisitModelS> getPvtList(String fid, String pvtDate) {
+        
+        List<PatientVisitModel> pvtList =
+                em.createQuery(QUERY_PVT_BY_FID_PVTDATE)
+                .setParameter(FID, fid)
+                .setParameter("pvtDate", pvtDate + "%")
+                .getResultList();
+        
+        List<PatientVisitModelS> ret = new ArrayList<PatientVisitModelS>();
+        for (PatientVisitModel pvt : pvtList) {
+            ret.add(new PatientVisitModelS(pvt));
+        }
+        
+        return ret;
     }
     
 
