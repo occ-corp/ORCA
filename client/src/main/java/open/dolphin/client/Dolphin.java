@@ -660,8 +660,9 @@ public class Dolphin implements MainWindow {
         chart.setReadOnly(readOnly);
         chart.start();
         
+        // ChartImplに移動
         // publish state
-        scl.publishKarteOpened(pvt);
+        //scl.publishKarteOpened(pvt);
 //masuda$        
     }
 

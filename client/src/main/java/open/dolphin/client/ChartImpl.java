@@ -735,6 +735,13 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
 
         // このチャートの Window にリスナを設定する
         frame.addWindowListener(new WindowAdapter() {
+            
+            @Override
+            public void windowOpened(WindowEvent e) {
+                // Windowオープン時に状態変化を通知する
+                ChartEventHandler scl = ChartEventHandler.getInstance();
+                scl.publishKarteOpened(getPatientVisit());
+            }
 
             @Override
             public void windowClosing(WindowEvent e) {
