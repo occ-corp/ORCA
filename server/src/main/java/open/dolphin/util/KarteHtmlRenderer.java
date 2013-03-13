@@ -2,6 +2,7 @@ package open.dolphin.util;
 
 import java.awt.Dimension;
 import java.io.StringReader;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.xml.stream.XMLInputFactory;
 import javax.xml.stream.XMLStreamException;
@@ -43,7 +44,7 @@ public class KarteHtmlRenderer {
      *
      * @param model レンダリングする DocumentModel
      */
-    public String[] render(DocumentModel model) {
+    public String render(DocumentModel model) {
 
         List<ModuleModel> modules = model.getModules();
 
@@ -82,11 +83,26 @@ public class KarteHtmlRenderer {
         String soaPane = sb.toString();
 
         // P Pane をレンダリングする
-        sb = new StringBuilder();
-        new KartePaneRenderer_StAX().renderPane(pSpec, pModules, schemas, sb);
-        String pPane = sb.toString();
+        String pPane = null;
+        if (pSpec != null) {
+            sb = new StringBuilder();
+            new KartePaneRenderer_StAX().renderPane(pSpec, pModules, schemas, sb);
+            pPane = sb.toString();
+        }
         
-        return new String[]{soaPane, pPane};
+        SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.KARTE_DATE_FORMAT);
+        String docDate = frmt.format(model.getStarted());
+        String title = model.getDocInfoModel().getTitle();
+        
+        sb = new StringBuilder();
+        sb.append("<h4 style=\"background-color:#cccccc\" align=\"center\">");
+        sb.append(docDate).append("<BR>").append(title).append("</h4>");
+        sb.append(soaPane);
+        if (pPane != null) {
+            sb.append("<HR>");
+            sb.append(pPane);
+        }
+        return sb.toString();
     }
 
     private class KartePaneRenderer_StAX {
@@ -106,7 +122,7 @@ public class KarteHtmlRenderer {
             this.modules = modules;
             this.schemas = schemas;
             this.htmlBuff = sb;
-            htmlBuff.append("<HTML><BODY>");
+            htmlBuff.append("<DIV>");
 
             XMLInputFactory factory = XMLInputFactory.newInstance();
             StringReader stream = null;
@@ -137,7 +153,7 @@ public class KarteHtmlRenderer {
                     stream.close();
                 }
             }
-            htmlBuff.append("</BODY></HTML>");
+            htmlBuff.append("</DIV>");
         }
         
         private ELEMENTS getValue(String eName) {

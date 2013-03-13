@@ -1,5 +1,6 @@
 package open.dolphin.session;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -257,8 +258,11 @@ public class PVTServiceBean {
                 .getResultList();
         
         List<PatientVisitModelS> ret = new ArrayList<PatientVisitModelS>();
-        for (PatientVisitModel pvt : pvtList) {
-            ret.add(new PatientVisitModelS(pvt));
+        for (int i = 0; i < pvtList.size(); ++i) {
+            PatientVisitModel pvt = pvtList.get(i);
+            PatientVisitModelS model = new PatientVisitModelS(pvt);
+            model.setNumber(String.valueOf(i + 1));
+            ret.add(model);
         }
         
         return ret;

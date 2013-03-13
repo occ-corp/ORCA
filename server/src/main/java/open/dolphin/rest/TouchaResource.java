@@ -11,6 +11,7 @@ import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
 import open.dolphin.infomodel.IInfoModel;
+import open.dolphin.session.KarteServiceBean;
 import open.dolphin.session.PVTServiceBean;
 import open.dolphin.toucha.model.PatientVisitModelS;
 
@@ -25,7 +26,10 @@ public class TouchaResource extends AbstractResource {
     private static final boolean debug = false;
     
     @Inject
-    private PVTServiceBean pvtService;
+    private PVTServiceBean pvtServiceBean;
+    
+    @Inject
+    private KarteServiceBean karteServiceBean;
    
     @GET
     @Path("hello")
@@ -46,11 +50,22 @@ public class TouchaResource extends AbstractResource {
             pvtDate = frmt.format(new Date());
         }
         
-        List<PatientVisitModelS> pvtList = pvtService.getPvtList(fid, pvtDate);
+        List<PatientVisitModelS> pvtList = pvtServiceBean.getPvtList(fid, pvtDate);
         
         StreamingOutput so = getJsonOutStream(pvtList);
 
         return Response.ok(so).build();
+    }
+    
+    @GET
+    @Path("document")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public Response getDocument(@QueryParam("ptId") String ptId, @QueryParam("docPk") Long docPk) {
+        
+        String fid = getRemoteFacility();
+        String ret = karteServiceBean.getDocHtml(fid, ptId, docPk);
+        
+        return Response.ok(ret).build();
     }
 
     @Override

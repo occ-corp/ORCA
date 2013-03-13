@@ -8,6 +8,7 @@ import open.dolphin.infomodel.PatientVisitModel;
  */
 public class PatientVisitModelS implements Serializable {
     
+    private String number;
     private String pvtDate;
     private String patientId;
     private String patientName;
@@ -29,6 +30,9 @@ public class PatientVisitModelS implements Serializable {
         department = dept.substring(0, pos);
     }
     
+    public void setNumber(String number) {
+        this.number = number;
+    }
     public void setPvtDate(String pvtDate) {
         this.pvtDate = pvtDate;
     }
@@ -48,6 +52,9 @@ public class PatientVisitModelS implements Serializable {
         this.department = department;
     }
     
+    public String getNumber() {
+        return number;
+    }
     public String getPvtDate() {
         return pvtDate;
     }
