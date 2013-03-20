@@ -311,7 +311,7 @@ public class MasudaServiceBean {
         }
 
         final String fromSql = "from DocumentModel m where m.status = 'F' "
-                + "and m.creator.facility.id = :fPk and m.id > :fromPk order by m.id";
+                + "and m.creator.facility.id = :fPk and m.id > :fromPk";
         final FullTextEntityManager fullTextEntityManager = Search.getFullTextEntityManager(em);
 
         // fromPk == 0の場合、まずはインデックスをクリアする
@@ -332,7 +332,7 @@ public class MasudaServiceBean {
         List<DocumentModel> models =
                 em.createQuery(fromSql)
                 .setParameter("fPk", fPk)
-                .setParameter("fromPk", fromDocPk)
+                .setParameter("fromPk", fromDocPk + " order by m.id")
                 .setMaxResults(maxResults)
                 .getResultList();
 
@@ -805,9 +805,9 @@ public class MasudaServiceBean {
         
         final String sql1 = "from ModuleModel m "
                 + "where m.moduleInfo.entity <> '" + IInfoModel.MODULE_PROGRESS_COURSE + "' "
-                + "and m.status = 'F' and m.creator.facility.facilityId = :fid order by m.id";
+                + "and m.status = 'F' and m.creator.facility.facilityId = :fid";
         final String sql2 = "select count(m) " + sql1;
-        final String sql3 = sql1 + " and m.id > :fromId";
+        final String sql3 = sql1 + " and m.id > :fromId order by m.id";
         final String sql4 = "from SanteiHistoryModel s "
                 + "where s.moduleModel.id = :mid and s.srycd = :srycd "
                 + "and s.itemIndex = :index";
