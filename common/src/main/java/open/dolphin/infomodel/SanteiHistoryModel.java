@@ -24,7 +24,8 @@ public class SanteiHistoryModel implements Serializable {
     private int itemCount;
     
     @JsonIgnore
-    @OneToOne(fetch=FetchType.EAGER)
+    @ManyToOne(fetch=FetchType.EAGER)
+    @JoinColumn(nullable=false) // "moduleModel_id"
     private ModuleModel moduleModel; 
     
     private int itemIndex;

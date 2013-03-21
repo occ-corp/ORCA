@@ -1,23 +1,23 @@
 package open.dolphin.rest;
 
-import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.List;
 import javax.inject.Inject;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.StreamingOutput;
-import open.dolphin.infomodel.IInfoModel;
-import open.dolphin.session.KarteServiceBean;
-import open.dolphin.session.PVTServiceBean;
-import open.dolphin.toucha.model.PatientVisitModelS;
+import open.dolphin.session.TouchaServiceBean;
+import open.dolphin.toucha.model.DiagnosisModelS;
+import open.dolphin.toucha.model.DocumentModelS;
+import open.dolphin.toucha.model.PatientModelS;
+import open.dolphin.toucha.model.PatientVisitModelList;
 
 
 /**
- *
+ * TouchaResource
  * @author masuda, Masuda Naika
  */
 @Path("toucha")
@@ -26,11 +26,9 @@ public class TouchaResource extends AbstractResource {
     private static final boolean debug = false;
     
     @Inject
-    private PVTServiceBean pvtServiceBean;
-    
-    @Inject
-    private KarteServiceBean karteServiceBean;
+    private TouchaServiceBean touchaServiceBean;
    
+    
     @GET
     @Path("hello")
     @Produces(MEDIATYPE_JSON_UTF8)
@@ -39,33 +37,72 @@ public class TouchaResource extends AbstractResource {
     }
     
     @GET
-    @Path("pvt")
+    @Path("diagnosis/{ptId}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public Response getPvtList(@QueryParam("pvtDate") String pvtDate) {
+    public Response getDiagnosis(@PathParam("ptId") String ptId) {
         
         String fid = getRemoteFacility();
         
-        if (pvtDate == null) {
-            SimpleDateFormat frmt = new SimpleDateFormat(IInfoModel.DATE_WITHOUT_TIME);
-            pvtDate = frmt.format(new Date());
-        }
+        List<DiagnosisModelS> sList = touchaServiceBean.getDiagnosis(fid, ptId);
         
-        List<PatientVisitModelS> pvtList = pvtServiceBean.getPvtList(fid, pvtDate);
-        
-        StreamingOutput so = getJsonOutStream(pvtList);
+        StreamingOutput so = getJsonOutStream(sList);
 
         return Response.ok(so).build();
     }
     
     @GET
-    @Path("document")
+    @Path("pvt/{pvtDate}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public Response getDocument(@QueryParam("ptId") String ptId, @QueryParam("docPk") Long docPk) {
+    public Response getPvtList(
+            @PathParam("pvtDate") String pvtDate, 
+            @QueryParam("direction") String direction) {
         
         String fid = getRemoteFacility();
-        String ret = karteServiceBean.getDocHtml(fid, ptId, docPk);
+        PatientVisitModelList model= touchaServiceBean.getPvtList(fid, pvtDate, direction);
+
+        StreamingOutput so = getJsonOutStream(model);
+
+        return Response.ok(so).build();
+    }
+    
+    @GET
+    @Path("document/{docPk}")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public Response getDocument(@PathParam("docPk") String docPkStr,
+            @QueryParam("patientId") String ptId,
+            @QueryParam("docDate") String docDateStr,
+            @QueryParam("direction") String direction) {
         
-        return Response.ok(ret).build();
+        String fid = getRemoteFacility();
+        DocumentModelS model = touchaServiceBean.getDocHtml(fid, ptId, docPkStr, docDateStr, direction);
+        
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
+    }
+    
+    @GET
+    @Path("patient/{ptId}")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public Response getPatientModel(@PathParam("ptId") String ptId) {
+        
+        String fid = getRemoteFacility();
+        PatientModelS model = touchaServiceBean.getPatientModel(fid, ptId);
+        StreamingOutput so = getJsonOutStream(model);
+        
+        return Response.ok(so).build();
+    }
+    
+    @GET
+    @Path("search")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public Response getSearchResults(@QueryParam("text") String text ,@QueryParam("type") String type) {
+        
+        String fid = getRemoteFacility();
+        List<PatientModelS> list = touchaServiceBean.getSearchResults(fid, text, type);
+        StreamingOutput so = getJsonOutStream(list);
+        
+        return Response.ok(so).build();
     }
 
     @Override

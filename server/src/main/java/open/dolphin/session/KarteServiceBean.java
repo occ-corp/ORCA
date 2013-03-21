@@ -7,7 +7,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
-import open.dolphin.util.KarteHtmlRenderer;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 
@@ -1037,32 +1036,6 @@ public class KarteServiceBean {
             }
         }
         return list;
-    }
-    
-    public String getDocHtml(String fid, String ptId, Long docPk) {
-
-        final String sql = "from DocumentModel d where d.karte.patient.patientId = :ptId "
-                + "and  d.karte.patient.facilityId = :fid and (d.status='F' or d.status='T') "
-                + " order by d.started desc";
-        
-        DocumentModel model = null;
-        
-        try {
-            model = (DocumentModel) 
-                    em.createQuery(sql)
-                    .setParameter("ptId", ptId)
-                    .setParameter("fid", fid)
-                    .setMaxResults(1)
-                    .getSingleResult();
-        } catch (Exception ex) {
-            System.out.println(ex);
-        }
-        if (model == null) {
-            return "No Document";
-        }
-        
-        return KarteHtmlRenderer.getInstance().render(model);
-
     }
 //masuda$
 }

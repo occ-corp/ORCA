@@ -178,9 +178,9 @@ public class KarteResource extends AbstractResource {
     @GET
     @Path("image/{id}")
     @Produces(MEDIATYPE_JSON_UTF8)
-    public Response getImage(@PathParam("param") Long karteId) {
+    public Response getImage(@PathParam("param") Long id) {
 
-        SchemaModel result = karteServiceBean.getImage(karteId);
+        SchemaModel result = karteServiceBean.getImage(id);
 
         StreamingOutput so = getJsonOutStream(result);
         

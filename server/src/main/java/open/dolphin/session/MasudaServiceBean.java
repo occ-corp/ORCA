@@ -330,9 +330,9 @@ public class MasudaServiceBean {
 
         // idがfromPkより大きいDocumentModelをmaxResultsずつ取得
         List<DocumentModel> models =
-                em.createQuery(fromSql)
+                em.createQuery(fromSql + " order by m.id")
                 .setParameter("fPk", fPk)
-                .setParameter("fromPk", fromDocPk + " order by m.id")
+                .setParameter("fromPk", fromDocPk)
                 .setMaxResults(maxResults)
                 .getResultList();
 
