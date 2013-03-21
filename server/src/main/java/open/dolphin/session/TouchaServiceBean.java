@@ -14,6 +14,7 @@ import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.DocumentModel;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.IInfoModel;
+import open.dolphin.infomodel.NLaboModule;
 import open.dolphin.infomodel.PVTHealthInsuranceModel;
 import open.dolphin.infomodel.PatientMemoModel;
 import open.dolphin.infomodel.PatientModel;
@@ -21,6 +22,7 @@ import open.dolphin.infomodel.PatientVisitModel;
 import open.dolphin.infomodel.RegisteredDiagnosisModel;
 import open.dolphin.toucha.BeanUtils;
 import open.dolphin.toucha.KarteHtmlRenderer;
+import open.dolphin.toucha.LaboHtmlRenderer;
 import open.dolphin.toucha.StringTool;
 import open.dolphin.toucha.model.DiagnosisModelS;
 import open.dolphin.toucha.model.DocumentModelS;
@@ -70,7 +72,20 @@ public class TouchaServiceBean {
     @Inject
     private MasudaServiceBean masudaServiceBean;
     
+    @Inject
+    private NLabServiceBean nlaboServiceBean;
     
+    
+    public String getLaboHtml(String fid, String ptId, int firstResult, int maxResults) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(fid).append(":").append(ptId);
+        String fidPid = sb.toString();
+        List<NLaboModule> modules = nlaboServiceBean.getLaboTest(fidPid, firstResult, maxResults);
+        LaboHtmlRenderer renderer = LaboHtmlRenderer.getInstance();
+        String html = renderer.render(modules);
+        return html;
+    }
+
     public List<PatientModelS> getSearchResults(String fid, String text, String type) {
         
         List<PatientModel> list;

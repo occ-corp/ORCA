@@ -37,6 +37,19 @@ public class TouchaResource extends AbstractResource {
     }
     
     @GET
+    @Path("labo/{ptId}")
+    @Produces(MEDIATYPE_JSON_UTF8)
+    public Response getLabo(@PathParam("ptId") String ptId,
+            @QueryParam("firstResult") int firstResult,
+            @QueryParam("maxResults") int maxResults) {
+        
+        String fid = getRemoteFacility();
+        String html = touchaServiceBean.getLaboHtml(fid, ptId, firstResult, maxResults);
+        
+        return Response.ok(html).build();
+    }
+    
+    @GET
     @Path("diagnosis/{ptId}")
     @Produces(MEDIATYPE_JSON_UTF8)
     public Response getDiagnosis(@PathParam("ptId") String ptId) {

@@ -22,7 +22,7 @@ public class KarteHtmlRenderer {
     
     private static final String CR = "\n";
     private static final String BR = "<BR>";
-    private static final Dimension imageSize = new Dimension(240, 240);
+    private static final Dimension imageSize = new Dimension(128, 128);
     
     private enum ELEMENTS {paragraph, content, text, component, icon, kartePane, section, unknown};
     
