@@ -251,11 +251,9 @@ public final class BaseEditor extends AbstractStampEditor {
 
                     if (item.getClassCode() == ClaimConst.SYUGI) {
                         techCnt++;
-//masuda^   ウソ診療行為区分はカウントしない
-                    } else if (!item.getCode().startsWith(".")){
+                    } else {
                         other++;
                     }
-//masuda$
                 }
 
                 // 何かあればOK
@@ -467,10 +465,8 @@ public final class BaseEditor extends AbstractStampEditor {
         JRadioButton inBtn = view.getInRadio();
         JRadioButton outBtn = view.getOutRadio();
         JButton btn_comment = view.getCommentBtn();
-        JButton btn_classCode = view.getClassCodeBtn();
 
         btn_laboTest.setVisible(false);
-        btn_classCode.setVisible(false);
         inBtn.setVisible(false);
         outBtn.setVisible(false);
 
