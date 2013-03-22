@@ -52,6 +52,7 @@ public class InjectionView extends AbstractOrderView {
 
         // 情報パネル
         infoPanel.add(infoLabel);
+        infoPanel.add(shinkuCmb);
         infoPanel.add(Box.createHorizontalGlue());
         techCheck = new JCheckBox("診療行為");
         techCheck.setToolTipText("診療行為がセットにあればチェックされます。");

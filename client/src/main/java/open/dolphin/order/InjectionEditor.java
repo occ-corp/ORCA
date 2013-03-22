@@ -138,8 +138,11 @@ public final class InjectionEditor extends AbstractStampEditor {
 
         // 診療行為があるかどうかのフラグ
         boolean found = false;
-
-        String c007 = null;
+        // 診療行為区分
+        String c007 = view.getSelectedShinku();
+        if (c007 != null) {
+            found = true;
+        }
 
         for (MasterItem masterItem : itemList) {
 

@@ -1,11 +1,16 @@
-
 package open.dolphin.order;
 
 import java.awt.Color;
 import java.awt.Dimension;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import javax.swing.*;
 import javax.swing.border.Border;
 import open.dolphin.client.ClientContext;
+import open.dolphin.infomodel.MMLTable;
 import open.dolphin.project.Project;
 
 /**
@@ -41,7 +46,8 @@ public abstract class AbstractOrderView extends JPanel {
     
     protected JPanel infoPanel;
     protected JLabel infoLabel;
-
+    protected JComboBox shinkuCmb;
+    
     protected JTable setTable;
     protected JScrollPane scrollSetTable;
 
@@ -91,6 +97,8 @@ public abstract class AbstractOrderView extends JPanel {
         infoLabel.setHorizontalTextPosition(SwingConstants.RIGHT);
         infoLabel.setVerticalTextPosition(SwingConstants.CENTER);
         infoPanel.add(infoLabel);
+        // ここではインスタンス化だけ
+        shinkuCmb = createShinkuCmb();
 
         // セットテーブル
         setTable = new JTable();
@@ -241,5 +249,86 @@ public abstract class AbstractOrderView extends JPanel {
         // 高さを固定
         Dimension d = new Dimension(Integer.MAX_VALUE, cmdPanel.getPreferredSize().height);
         cmdPanel.setMaximumSize(d);  
+    }
+/*
+    public void setShinkuCmb(String number) {
+        int cnt = shinkuCmb.getItemCount();
+        for (int i = 1; i < cnt; ++i) {
+            ShinkuItem item = (ShinkuItem) shinkuCmb.getItemAt(i);
+            if (item.getNumber().equals(number)) {
+                shinkuCmb.setSelectedIndex(i);
+                break;
+            } 
+        }
+        shinkuCmb.setSelectedIndex(0);
+    }
+*/
+    public String getSelectedShinku() {
+        int index = shinkuCmb.getSelectedIndex();
+        if (index == 0) {
+            return null;
+        }
+        ShinkuItem item = (ShinkuItem) shinkuCmb.getSelectedItem();
+        return item.getNumber();
+    }
+
+    private JComboBox createShinkuCmb() {
+        JComboBox cb = new JComboBox();
+        cb.setMaximumRowCount(20);
+        cb.setToolTipText("診療行為区分を強制指定するときに使用します。");
+        cb.addItem("診療行為区分指定");
+        List<ShinkuItem> shinkuItems = new ArrayList<ShinkuItem>();
+        Map<String,String> mmlMap = MMLTable.getClaimClassCodeMap();
+        for (Iterator<Map.Entry<String, String>> itr = mmlMap.entrySet().iterator(); itr.hasNext();) {
+            Map.Entry<String, String> entry = itr.next();
+            String number = entry.getKey();
+            String name = entry.getValue();
+            shinkuItems.add(new ShinkuItem(number, name));
+        }
+        Collections.sort(shinkuItems);
+        for (ShinkuItem item : shinkuItems) {
+            cb.addItem(item);
+        }
+        int h = cb.getPreferredSize().height;
+        Dimension d = new Dimension(200, h);
+        cb.setPreferredSize(d);
+        cb.setMaximumSize(d);
+        return cb;
+    }
+    
+    protected class ShinkuItem implements Comparable {
+        
+        private String number;
+        private String name;
+        
+        public ShinkuItem(String number, String name) {
+            this.number = number;
+            this.name = name;
+        }
+        public void setNumber(String number) {
+            this.number = number;
+        }
+        public void setName(String name) {
+            this.name = name;
+        }
+        public String getNumber() {
+            return number;
+        }
+        public String getName() {
+            return name;
+        }
+
+        @Override
+        public String toString() {
+            StringBuilder sb = new StringBuilder();
+            sb.append(number).append(":").append(name);
+            return sb.toString();
+        }
+
+        @Override
+        public int compareTo(Object o) {
+            ShinkuItem test = (ShinkuItem) o;
+            return number.compareTo(test.number);
+        }
     }
 }

@@ -613,7 +613,15 @@ public abstract class AbstractStampEditor extends StampEditorConst {
             return code;
         }
     }
-
+/*
+    protected final String getSuspectedC007(String srycd, String defaultC007) {
+        try {
+            return srycd.substring(1, 4);
+        } catch (Exception ex) {
+            return defaultC007;
+        }
+    }
+*/
     /**
      * Returns Claim004 Number Code 21 材料個数 when subclassCode = 1 11
      * 薬剤投与量（１回）when subclassCode = 2

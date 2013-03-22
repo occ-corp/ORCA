@@ -262,14 +262,17 @@ public final class RpEditor extends AbstractStampEditor {
     // ClassCodeを作成する
     private String getClassCode(String ykzKbn, String adminCode) {
         
+        String rCode = view.getSelectedShinku();
+        if (rCode != null) {
+            return rCode;
+        }
+        
         boolean inMed = view.getInRadio().isSelected();
         boolean rinji = view.getRbRinji().isSelected();
         boolean nyuin = view.getRbAdmission().isSelected();
         boolean houkatsu = view.getInRadio().isSelected() && view.getCbHoukatsu().isSelected();
         boolean noCharge = view.getCbNoCharge().isSelected();
         boolean tonyo = CheckTonyo.isTonyo(adminCode);
-        
-        String rCode = null;
         
         if (ykzKbn.equals(ClaimConst.YKZ_KBN_NAIYO)) {
             if (tonyo) {

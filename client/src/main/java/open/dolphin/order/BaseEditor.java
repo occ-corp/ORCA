@@ -136,18 +136,14 @@ public final class BaseEditor extends AbstractStampEditor {
 
         // 診療行為があるかどうかのフラグ
         boolean found = false;
-        
-        String c007 = null;
+        // 診療行為区分
+        String c007 = view.getSelectedShinku();
+        if (c007 != null) {
+            found = true;
+        }
 
         for (MasterItem masterItem : itemList) {
-            
-//masuda^   ウソ診療行為区分設定
-            if (masterItem.getCode().startsWith(".")) {
-                c007 = masterItem.getSrysyuKbn();
-                found = true;
-                continue;
-            }
-//masuda$
+
             // マスタアイテムを ClaimItem に変換する
             ClaimItem item = masterToClaimItem(masterItem);
 
@@ -276,19 +272,6 @@ public final class BaseEditor extends AbstractStampEditor {
 
     @Override
     protected void addSelectedTensu(TensuMaster tm) {
-        
-//masuda^   ウソ診療行為区分設定
-        if (tm.getSrycd().startsWith(".")) {
-            MasterItem usoMi = new MasterItem();
-            usoMi.setCode(tm.getSrycd());
-            usoMi.setName(tm.getName());
-            usoMi.setSrysyuKbn(tm.getSrysyukbn());
-            // 先頭に追加
-            tableModel.addObject(0, usoMi);
-            checkValidation();
-            return;
-        }
-//masuda$
 
         // 項目の受け入れ試験
         String test = tm.getSlot();
@@ -500,16 +483,6 @@ public final class BaseEditor extends AbstractStampEditor {
                     showLaboTestPanel();
                 }
             });
-        } else {
-            // ウソ診療行為区分入力ボタンはラボ以外で有効
-            btn_classCode.setVisible(true);
-            btn_classCode.addActionListener(new ActionListener() {
-
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    searchClaimClassCode();
-                }
-            });
         }
         
         btn_comment.addActionListener(new ActionListener() {
@@ -570,41 +543,6 @@ public final class BaseEditor extends AbstractStampEditor {
             tableModel.setDataProvider(ltp.getMasterItemList());
         }
         checkValidation();
-    }
-    
-    // ウソ診療行為区分設定
-    private void searchClaimClassCode() {
-        
-        List<TensuMaster> list = new ArrayList<TensuMaster>();
-        Map<String,String> mmlMap = MMLTable.getClaimClassCodeMap();
-        for (Iterator itr = mmlMap.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
-            String code = (String) entry.getKey();
-            String name = (String) entry.getValue();
-            TensuMaster usoTm = new TensuMaster();
-            usoTm.setSrycd("." + code);
-            usoTm.setSrysyukbn(code);
-            usoTm.setName(name);
-            list.add(usoTm);
-        }
-        Collections.sort(list, new UsoTmComparator());
-        
-
-        ListTableModel<TensuMaster> srModel = (ListTableModel<TensuMaster>) view.getSearchResultTable().getModel();
-        srModel.setDataProvider(list);
-        int cnt = srModel.getObjectCount();
-        view.getCountField().setText(String.valueOf(cnt));
-        showFirstResult(view.getSearchResultTable());
-    }
-    
-    private class UsoTmComparator implements Comparator {
-
-        @Override
-        public int compare(Object o1, Object o2) {
-            TensuMaster tm1 = (TensuMaster) o1;
-            TensuMaster tm2 = (TensuMaster) o2;
-            return tm1.getSrycd().compareTo(tm2.getSrycd());
-        }
     }
 //masuda$
 }

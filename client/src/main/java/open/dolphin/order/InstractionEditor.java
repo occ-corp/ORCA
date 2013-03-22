@@ -167,10 +167,13 @@ public final class InstractionEditor extends AbstractStampEditor {
         // セットテーブルのマスターアイテムを取得する
         List<MasterItem> itemList = tableModel.getDataProvider();
 
-        // 診療行為区分
-        String c007 = null;
         // 診療行為があるかどうかのフラグ
         boolean found = false;
+        // 診療行為区分
+        String c007 = view.getSelectedShinku();
+        if (c007 != null) {
+            found = true;
+        }
         
         for (MasterItem masterItem : itemList) {
 

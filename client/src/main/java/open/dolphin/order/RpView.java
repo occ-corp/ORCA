@@ -35,6 +35,7 @@ public class RpView extends AbstractOrderView {
 
         // 情報パネル
         infoPanel.add(infoLabel);
+        infoPanel.add(shinkuCmb);
         infoPanel.add(Box.createHorizontalGlue());
         medicineCheck = new JCheckBox("薬剤");
         medicineCheck.setToolTipText("薬剤がセットにあればチェックされます。");

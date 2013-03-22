@@ -151,7 +151,10 @@ public final class RadEditor extends AbstractStampEditor {
         bundle.setClaimItem(tmpList.toArray(new ClaimItem[0]));
 
         // 診療行為区分は".700"固定にする
-        String c007 = ClaimConst.RECEIPT_CODE_RADIOOGY;
+        String c007 = view.getSelectedShinku();
+        if (c007 == null) {
+            c007 = ClaimConst.RECEIPT_CODE_RADIOOGY;
+        }
         // 700 画像診断
         bundle.setClassCode(c007);
         // Claim007 固定の値
