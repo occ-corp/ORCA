@@ -33,7 +33,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.1.9.Final</version>
+            <version>4.1.10.Final</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -123,7 +123,7 @@
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
-            <version>7.0.35</version>
+            <version>7.0.37</version>
         </dependency>
 <!-- 以下は自分でローカルリポジトリに追加する -->
         <dependency>
