@@ -246,7 +246,12 @@ public class LaboTestBean extends AbstractChartDocument {
         String footer = sb.toString();
         
         try {
+            // quaqua使用時の不具合対策
+            Font old = table.getFont();
+            //System.out.println(old);
+            table.setFont(new Font(Font.MONOSPACED, old.getStyle(), old.getSize()));
             table.print(PrintMode.FIT_WIDTH, null, new MessageFormat(footer));
+            table.setFont(old);
         } catch (PrinterException ex) {
         }
 
