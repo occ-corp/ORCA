@@ -63,7 +63,7 @@ public class LetterResource extends AbstractResource {
         
         StreamingOutput so = getJsonOutStream(result);
         
-        return Response.ok(result).build();
+        return Response.ok(so).build();
     }
 
     @DELETE

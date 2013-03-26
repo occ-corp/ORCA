@@ -4,6 +4,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import javax.swing.AbstractCellEditor;
 import javax.swing.JPopupMenu;
 import javax.swing.JTextField;
 import open.dolphin.infomodel.SimpleDate;
@@ -19,7 +20,9 @@ public class PopupCalendarListener extends MouseAdapter implements PropertyChang
     private static final int[] defaultRange = {-12, 0};
     private JPopupMenu popup;
     private int[] range;
+    private AbstractCellEditor ce;  
     protected JTextField tf;
+
     
     public PopupCalendarListener(JTextField tf) {
         this(tf, defaultRange);
@@ -31,8 +34,15 @@ public class PopupCalendarListener extends MouseAdapter implements PropertyChang
         tf.addMouseListener(PopupCalendarListener.this);
     }
     
+    public void setCellEditor(AbstractCellEditor ce) {
+        this.ce = ce;
+    }
+    
     public void setValue(SimpleDate sd) {
         tf.setText(SimpleDate.simpleDateToMmldate(sd));
+        if (ce != null) {
+            ce.stopCellEditing();
+        }
     }
 
     @Override

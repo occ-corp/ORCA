@@ -665,6 +665,8 @@ public final class ClientContextStub {
             UIManager.put("OptionPane.noButtonText", "いいえ");
             //UIManager.put("Component.visualMargin", new Insets(0,0,0,0));
             //UIManager.put("TabbedPane.contentBorderPainted", false);
+            //UIManager.put("Quaqua.Debug.showVisualBounds", true);
+            //UIManager.put("Quaqua.Debug.showClipBounds", true);
         }
 
         try {

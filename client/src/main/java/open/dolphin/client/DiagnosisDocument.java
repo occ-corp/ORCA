@@ -434,21 +434,24 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         // IME を OFF にする
         tf.addFocusListener(AutoRomanListener.getInstance());
         final int[] range = {-12, 2};
-        PopupCalendarListener pcl1 = new PopupCalendarListener(tf, range);
+        
         tf.setDocument(new RegexConstrainedDocument(datePattern));
-        DefaultCellEditor de = new DefaultCellEditor2(tf);
-        column.setCellEditor(de);
-        de.setClickCountToStart(clickCountToStartEdit);
-
+        DefaultCellEditor de1 = new DefaultCellEditor2(tf);
+        column.setCellEditor(de1);
+        de1.setClickCountToStart(clickCountToStartEdit);
+        PopupCalendarListener pcl1 = new PopupCalendarListener(tf, range);
+        pcl1.setCellEditor(de1);
+        
         column = diagTable.getColumnModel().getColumn(END_DATE_COL);
         tf = new JTextField();
         // IME を OFF にする
         tf.addFocusListener(AutoRomanListener.getInstance());
         tf.setDocument(new RegexConstrainedDocument(datePattern));
+        DefaultCellEditor de2 = new DefaultCellEditor2(tf);
+        column.setCellEditor(de2);
+        de2.setClickCountToStart(clickCountToStartEdit);
         PopupCalendarListener pcl2 = new PopupCalendarListener(tf, range);
-        de = new DefaultCellEditor2(tf);
-        column.setCellEditor(de);
-        de.setClickCountToStart(clickCountToStartEdit);
+        pcl2.setCellEditor(de2);
 
         // TransferHandler を設定する
         diagTable.setTransferHandler(new DiagnosisTransferHandler(this));
