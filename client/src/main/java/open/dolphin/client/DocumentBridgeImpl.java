@@ -3,6 +3,8 @@ package open.dolphin.client;
 import java.awt.BorderLayout;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.util.HashMap;
+import java.util.Map;
 import javax.swing.JScrollPane;
 import open.dolphin.infomodel.DocInfoModel;
 import open.dolphin.infomodel.IInfoModel;
@@ -27,8 +29,15 @@ public class DocumentBridgeImpl extends AbstractChartDocument
     // Handle Class
     private String handleClass;
     
+//masuda^   使い回し
+    private Map<String, DocumentViewer> viewerCache;
+//masuda$
+    
     public DocumentBridgeImpl() {
         setTitle(TITLE);
+//masuda^   使い回し
+        viewerCache = new HashMap<String, DocumentViewer>();
+//masuda$
     }
     
 
@@ -75,6 +84,10 @@ public class DocumentBridgeImpl extends AbstractChartDocument
         if (curViwer != null) {
             curViwer.stop();
         }
+//masuda^
+        viewerCache.clear();
+        viewerCache = null;
+//masuda$
     }
     
     @Override
@@ -162,9 +175,12 @@ public class DocumentBridgeImpl extends AbstractChartDocument
                 curViwer = createKarteDocumentViewer();
             }
 
-            if (curViwer!=null) {
+            if (curViwer != null) {
                 curViwer.setContext(getContext());
-                curViwer.start();
+//masuda^   使い回し
+                //curViwer.start();
+                curViwer.enter();
+//masuda$
             }
             
         } else if (prop.equals(DocumentHistory.HISTORY_UPDATED)) {
@@ -194,7 +210,16 @@ public class DocumentBridgeImpl extends AbstractChartDocument
         if (curViwer != null) {
             curViwer = null;
         }
-        return new KarteDocumentViewer();
+//masuda^   使い回し
+        //return new KarteDocumentViewer();
+        DocumentViewer viewer = viewerCache.get(KarteDocumentViewer.class.getName());
+        if (viewer == null) {
+            viewer = new KarteDocumentViewer();
+            viewerCache.put(viewer.getClass().getName(), viewer);
+        }
+        return (KarteDocumentViewer) viewer;
+//masuda$
+        
     }
 
     private DocumentViewer createLetterModuleViewer(String handleClass)
@@ -202,8 +227,16 @@ public class DocumentBridgeImpl extends AbstractChartDocument
         if (curViwer != null) {
             curViwer = null;
         }
-        DocumentViewer doc = (DocumentViewer) Class.forName(
-                    handleClass).newInstance();
-        return doc;
+//masuda^   使い回し
+        //DocumentViewer doc = (DocumentViewer) Class.forName(handleClass).newInstance();
+        //return doc;
+        DocumentViewer viewer = viewerCache.get(handleClass);
+        if (viewer == null) {
+            viewer = (DocumentViewer) Class.forName(handleClass).newInstance();
+            viewerCache.put(viewer.getClass().getName(), viewer);
+        }
+        return viewer;
+//masuda$
+        
     }
 }
