@@ -4,8 +4,6 @@ import com.lowagie.text.*;
 import com.lowagie.text.pdf.PdfWriter;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
 import open.dolphin.client.ClientContext;
 import open.dolphin.project.Project;
 import open.dolphin.util.AgeCalculator;
@@ -70,10 +68,6 @@ public class LetterPDFMaker extends AbstractPDFMaker {
 
             // 日付
             String dateStr = getDateString(model.getConfirmed());
-            // 和暦コード例
-            //Locale locale = new Locale("ja","JP","JP");
-            //SimpleDateFormat frmt = new SimpleDateFormat("GGGGy年M月d日", locale);
-            //String dateStr = frmt.format(model.getConfirmed());
             para = new Paragraph(dateStr, bodyFont);
             para.setAlignment(Element.ALIGN_RIGHT);
             document.add(para);
