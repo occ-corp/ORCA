@@ -68,6 +68,9 @@ public class LetterPDFMaker extends AbstractPDFMaker {
 
             // 日付
             String dateStr = getDateString(model.getConfirmed());
+            //Locale locale = new Locale("ja","JP","JP"); 
+            //SimpleDateFormat frmt = new SimpleDateFormat("GGGGy年M月d日", locale); 
+            //String dateStr = frmt.format(model.getConfirmed()); 
             para = new Paragraph(dateStr, bodyFont);
             para.setAlignment(Element.ALIGN_RIGHT);
             document.add(para);
