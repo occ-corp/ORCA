@@ -1,6 +1,7 @@
 package open.dolphin.client;
 
 import java.awt.FlowLayout;
+import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -752,7 +753,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(newKarte, KeyEvent.VK_N);
         file.add(newKarte);
         if (chart != null) {
-            JButton newKarteBtn = new JButton();
+            //JButton newKarteBtn = new JButton();
+            JButton newKarteBtn = createButton();
             newKarteBtn.setAction(actionMap.get("newKarte"));
             newKarteBtn.setText(null);
             newKarteBtn.setToolTipText("カルテを新規に作成します。");
@@ -767,7 +769,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         newDocument.setAction(actionMap.get("newDocument"));
         file.add(newDocument);
         if (chart != null) {
-            JButton newDocBtn = new JButton();
+            //JButton newDocBtn = new JButton();
+            JButton newDocBtn = createButton();
             newDocBtn.setAction(actionMap.get("newDocument"));
             newDocBtn.setText(null);
             newDocBtn.setToolTipText("紹介状等の文書を新規に作成します。");
@@ -799,7 +802,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(save, KeyEvent.VK_S);
         file.add(save);
         if (chart != null) {
-            JButton saveBtn = new JButton();
+            //JButton saveBtn = new JButton();
+            JButton saveBtn = createButton();
             saveBtn.setAction(actionMap.get("save"));
             saveBtn.setText(null);
             saveBtn.setToolTipText("カルテや文書を保存します。");
@@ -831,7 +835,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(print, KeyEvent.VK_P);
         file.add(print);
         if (chart != null) {
-            JButton printBtn = new JButton();
+            //JButton printBtn = new JButton();
+            JButton printBtn = createButton();
             printBtn.setAction(actionMap.get("print"));
             printBtn.setText(null);
             printBtn.setToolTipText("印刷します。");
@@ -862,7 +867,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(modifyKarte, KeyEvent.VK_M);
         edit.add(modifyKarte);
         if (chart != null) {
-            JButton modifyKarteBtn = new JButton();
+            //JButton modifyKarteBtn = new JButton();
+            JButton modifyKarteBtn = createButton();
             modifyKarteBtn.setAction(actionMap.get("modifyKarte"));
             modifyKarteBtn.setText(null);
             modifyKarteBtn.setToolTipText("カルテや文書を修正します。");
@@ -880,7 +886,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(undo, KeyEvent.VK_Z);
         edit.add(undo);
         if (chart != null) {
-            JButton undoBtn = new JButton();
+            //JButton undoBtn = new JButton();
+            JButton undoBtn = createButton();
             undoBtn.setAction(actionMap.get("undo"));
             undoBtn.setText(null);
             undoBtn.setToolTipText("操作をやり直します。");
@@ -896,7 +903,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(redo, KeyEvent.VK_Z, true);
         edit.add(redo);
         if (chart != null) {
-            JButton redoBtn = new JButton();
+            //JButton redoBtn = new JButton();
+            JButton redoBtn = createButton();
             redoBtn.setAction(actionMap.get("redo"));
             redoBtn.setText(null);
             redoBtn.setToolTipText("操作を再実行します。");
@@ -914,7 +922,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(cut, KeyEvent.VK_X);
         edit.add(cut);
         if (chart != null) {
-            JButton cutBtn = new JButton();
+            //JButton cutBtn = new JButton();
+            JButton cutBtn = createButton();
             cutBtn.setAction(actionMap.get("cut"));
             cutBtn.setText(null);
             cutBtn.setToolTipText("テキスト、スタンプ、画像をカットします。");
@@ -930,7 +939,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(copy, KeyEvent.VK_C);
         edit.add(copy);
         if (chart != null) {
-            JButton copyBtn = new JButton();
+            //JButton copyBtn = new JButton();
+            JButton copyBtn = createButton();
             copyBtn.setAction(actionMap.get("copy"));
             copyBtn.setText(null);
             copyBtn.setToolTipText("テキスト、スタンプ、画像をコピーします。");
@@ -946,7 +956,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         setAccelerator(paste, KeyEvent.VK_V);
         edit.add(paste);
         if (chart != null) {
-            JButton pasteBtn = new JButton();
+            //JButton pasteBtn = new JButton();
+            JButton pasteBtn = createButton();
             pasteBtn.setAction(actionMap.get("paste"));
             pasteBtn.setText(null);
             pasteBtn.setToolTipText("テキスト、スタンプ、画像をペーストします。");
@@ -1395,6 +1406,13 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
     private void setAccelerator(JMenuItem item, int key, boolean shiftMask) {
         item.setAccelerator(
                         KeyStroke.getKeyStroke(key, (java.awt.event.InputEvent.SHIFT_MASK | (Toolkit.getDefaultToolkit().getMenuShortcutKeyMask()))));
+    }
+    
+    private JButton createButton() {
+        JButton btn = new JButton();
+        btn.setBorder(null);
+        btn.setMargin(new Insets(5, 5, 5, 5));
+        return btn;
     }
 }
 
