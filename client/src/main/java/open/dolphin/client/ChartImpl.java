@@ -265,6 +265,9 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                if (tabbedPane == null) {
+                    return;
+                }
                 int cnt = tabbedPane.getTabCount();
                 if (index >= 0 && index <= cnt - 1 && index != tabbedPane.getSelectedIndex()) {
                     tabbedPane.setSelectedIndex(index);
