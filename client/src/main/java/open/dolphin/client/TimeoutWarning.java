@@ -15,7 +15,6 @@ public class TimeoutWarning {
 
     public TimeoutWarning(Component parent, String title, String message) {
         this.parent = parent;
-        this.parent = parent;
         this.message = message;
     }
 
