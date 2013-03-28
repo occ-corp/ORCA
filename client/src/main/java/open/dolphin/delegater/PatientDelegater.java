@@ -1,6 +1,8 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
@@ -8,8 +10,6 @@ import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.dto.PatientSearchSpec;
 import open.dolphin.infomodel.HealthInsuranceModel;
 import open.dolphin.infomodel.PatientModel;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 
 /**
  * 患者関連の Business Delegater　クラス。
@@ -53,8 +53,8 @@ public class  PatientDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -81,7 +81,7 @@ public class  PatientDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         PatientModel patient = (PatientModel)
                 getConverter().fromJson(is, PatientModel.class);
@@ -131,7 +131,7 @@ public class  PatientDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
@@ -153,8 +153,8 @@ public class  PatientDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -181,7 +181,7 @@ public class  PatientDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
@@ -204,7 +204,7 @@ public class  PatientDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<HealthInsuranceModel>>(){};
         List<HealthInsuranceModel> list = (List<HealthInsuranceModel>)

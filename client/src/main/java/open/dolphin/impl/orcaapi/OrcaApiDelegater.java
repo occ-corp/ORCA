@@ -1,5 +1,8 @@
 package open.dolphin.impl.orcaapi;
 
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.IOException;
 import java.io.StringReader;
 import java.text.SimpleDateFormat;
@@ -12,9 +15,6 @@ import open.dolphin.client.KarteSenderResult;
 import open.dolphin.dao.SyskanriInfo;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientRequest;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.jdom2.Attribute;
 import org.jdom2.Document;
 import org.jdom2.Element;
@@ -85,8 +85,8 @@ public class OrcaApiDelegater implements IOrcaApi {
 
         ClientResponse response = getClientRequest(path, qmap)
                 .accept(MEDIATYPE_XML_UTF8)
-                .body(MEDIATYPE_XML_UTF8, xml)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_XML_UTF8)
+                .post(ClientResponse.class, xml);
 
         int status = response.getStatus();
         String resXml = (String) response.getEntity(String.class);
@@ -124,8 +124,8 @@ public class OrcaApiDelegater implements IOrcaApi {
 
         ClientResponse response = getClientRequest(path, qmap)
                 .accept(MEDIATYPE_XML_UTF8)
-                .body(MEDIATYPE_XML_UTF8, xml)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_XML_UTF8)
+                .post(ClientResponse.class, xml);
 
         int status = response.getStatus();
         String resXml = (String) response.getEntity(String.class);
@@ -161,8 +161,8 @@ public class OrcaApiDelegater implements IOrcaApi {
 
         ClientResponse response = getClientRequest(path, qmap)
                 .accept(MEDIATYPE_XML_UTF8)
-                .body(MEDIATYPE_XML_UTF8, xml)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_XML_UTF8)
+                .post(ClientResponse.class, xml);
 
         int status = response.getStatus();
         String resXml = (String) response.getEntity(String.class);
@@ -218,12 +218,12 @@ public class OrcaApiDelegater implements IOrcaApi {
         return xml;
     }
 
-    private ClientRequest getClientRequest(String path, MultivaluedMap<String, String> qmap) {
-        return OrcaApiClient.getInstance().getClientRequest(path, qmap);
+    private WebResource.Builder getClientRequest(String path, MultivaluedMap<String, String> qmap) {
+        return OrcaApiClient.getInstance().getResource(path, qmap);
     }
     
     private void isHTTP200(int status) throws Exception {
-        if (status != 200) {
+        if (status / 100 != 2) {
             String msg = "HTTP" + String.valueOf(status);
             throw new Exception(msg);
         }

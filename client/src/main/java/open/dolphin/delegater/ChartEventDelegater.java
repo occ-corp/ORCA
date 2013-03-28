@@ -1,8 +1,8 @@
 package open.dolphin.delegater;
 
-import java.io.InputStream;
+import com.sun.jersey.api.client.ClientResponse;
+import java.util.concurrent.Future;
 import open.dolphin.infomodel.ChartEventModel;
-import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * State変化関連のデレゲータ
@@ -32,9 +32,9 @@ public class ChartEventDelegater extends BusinessDelegater {
         
         String json = getConverter().toJson(evt);
 
-        ClientResponse response = getClientRequest(PUT_EVENT_PATH)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+        ClientResponse response = getClientRequest(PUT_EVENT_PATH, null)
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -44,17 +44,13 @@ public class ChartEventDelegater extends BusinessDelegater {
         return Integer.parseInt(enityStr);
     }
 
-    public InputStream subscribe() throws Exception {
+    public Future<ClientResponse> subscribe() throws Exception {
         
-        ClientResponse response = getClientRequest(SUBSCRIBE_PATH, null)
+        Future<ClientResponse> future = getAsyncClientRequest(SUBSCRIBE_PATH)
                 .accept(MEDIATYPE_JSON_UTF8)
                 .get(ClientResponse.class);
 
-        int status = response.getStatus();
-        isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
-        
-        return is;
+        return future;
     }
 
     @Override

@@ -1,12 +1,12 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.jersey.api.client.ClientResponse;
 import java.io.InputStream;
 import java.util.List;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.project.Project;
-import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * User 関連の Business Delegater　クラス。
@@ -40,10 +40,14 @@ public class UserDelegater extends BusinessDelegater {
         sb.append(uid);
         String fidUid = sb.toString();
 
-        RESTEasyClient restEasy = RESTEasyClient.getInstance();
+        //RESTEasyClient restEasy = RESTEasyClient.getInstance();
+        //String baseURI = Project.getBaseURI();
+        //restEasy.setBaseURI(baseURI);
+        //restEasy.setUpAuthentication(fidUid, password, false);
+        JerseyClient jersey = JerseyClient.getInstance();
         String baseURI = Project.getBaseURI();
-        restEasy.setBaseURI(baseURI);
-        restEasy.setUpAuthentication(fidUid, password, false);
+        jersey.setBaseURI(baseURI);
+        jersey.setUpAuthentication(fidUid, password, false);
         
         if (DEBUG) {
             System.out.println(baseURI);
@@ -69,7 +73,7 @@ public class UserDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         UserModel userModel = (UserModel) 
                 getConverter().fromJson(is, UserModel.class);
@@ -89,7 +93,7 @@ public class UserDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<UserModel>>(){};
         List<UserModel> list  = (List<UserModel>) 
@@ -105,8 +109,8 @@ public class UserDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -125,8 +129,8 @@ public class UserDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)   
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -161,8 +165,8 @@ public class UserDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);

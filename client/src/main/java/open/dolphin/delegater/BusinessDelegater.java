@@ -1,5 +1,7 @@
 package open.dolphin.delegater;
 
+import com.sun.jersey.api.client.AsyncWebResource;
+import com.sun.jersey.api.client.WebResource;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -10,7 +12,6 @@ import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
-import org.jboss.resteasy.client.ClientRequest;
 
 
 /**
@@ -38,12 +39,12 @@ public class BusinessDelegater {
         DEBUG = (logger.getLevel() == Level.DEBUG);
     }
 
-    protected ClientRequest getClientRequest(String path, MultivaluedMap<String, String> qmap) {
-        return RESTEasyClient.getInstance().getClientRequest(path, qmap);
+    protected WebResource.Builder getClientRequest(String path, MultivaluedMap<String, String> qmap) {
+        return JerseyClient.getInstance().getResource(path, qmap);
     }
     
-    protected ClientRequest getClientRequest(String path) {
-        return RESTEasyClient.getInstance().getClientRequest(path);
+    protected AsyncWebResource.Builder getAsyncClientRequest(String path) {
+        return JerseyClient.getInstance().getAsyncResource(path);
     }
 
     protected void debug(int status, String entity) {

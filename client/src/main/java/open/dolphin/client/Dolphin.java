@@ -43,8 +43,8 @@ import open.dolphin.server.PVTServer;
 import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.setting.ProjectSettingDialog;
 import open.dolphin.stampbox.StampBoxPlugin;
-import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
-import org.jboss.resteasy.spi.ResteasyProviderFactory;
+//import org.jboss.resteasy.plugins.providers.RegisterBuiltin;
+//import org.jboss.resteasy.spi.ResteasyProviderFactory;
 
 /**
  * アプリケーションのメインウインドウクラス。
@@ -182,7 +182,7 @@ public class Dolphin implements MainWindow {
     private void startServices() {
 
         // RestEasyを初期化
-        RegisterBuiltin.register(ResteasyProviderFactory.getInstance());
+        //RegisterBuiltin.register(ResteasyProviderFactory.getInstance());
         
         // プラグインのプロバイダマップを生成する
         setProviders(new HashMap<String, MainService>());

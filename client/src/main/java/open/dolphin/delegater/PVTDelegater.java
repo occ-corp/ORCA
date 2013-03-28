@@ -1,10 +1,10 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.jersey.api.client.ClientResponse;
 import java.io.InputStream;
 import java.util.List;
 import open.dolphin.infomodel.PatientVisitModel;
-import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * PVT 関連の Business Delegater　クラス。
@@ -45,8 +45,8 @@ public class PVTDelegater extends BusinessDelegater {
         // resource post
         String path = RES_PVT;
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -89,7 +89,7 @@ public class PVTDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PatientVisitModel>>(){};
         List<PatientVisitModel> pvtList = (List<PatientVisitModel>)

@@ -1,13 +1,13 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.util.*;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.*;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 
 /**
  * Stamp関連の Delegater クラス。
@@ -56,8 +56,8 @@ public class StampDelegater extends BusinessDelegater {
         String path = RES_STAMP_TREE;
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -79,7 +79,7 @@ public class StampDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         UserStampTreeModel ret = (UserStampTreeModel) getConverter()
                 .fromJson(is, UserStampTreeModel.class);
@@ -123,8 +123,8 @@ public class StampDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -168,8 +168,8 @@ public class StampDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -194,8 +194,8 @@ public class StampDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         debug(status, "put response");
@@ -216,7 +216,7 @@ public class StampDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PublishedTreeModel>>(){};
         List<PublishedTreeModel> ret = (List<PublishedTreeModel>)
@@ -254,8 +254,8 @@ public class StampDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -321,8 +321,8 @@ public class StampDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -350,8 +350,8 @@ public class StampDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)    
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -398,7 +398,7 @@ public class StampDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         ret = (StampModel)
                 getConverter().fromJson(is, StampModel.class);
@@ -447,7 +447,7 @@ public class StampDelegater extends BusinessDelegater {
             //String entityStr = (String) response.getEntity(String.class);
             //debug(status, entityStr);
             isHTTP200(status);
-            InputStream is = (InputStream) response.getEntity(InputStream.class);
+            InputStream is = response.getEntityInputStream();
 
             TypeReference typeRef = new TypeReference<List<StampModel>>(){};
             List<StampModel> smList = (List<StampModel>)

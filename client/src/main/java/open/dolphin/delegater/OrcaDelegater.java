@@ -1,5 +1,6 @@
 package open.dolphin.delegater;
 
+import com.sun.jersey.api.client.ClientResponse;
 import java.io.InputStream;
 import open.dolphin.client.ClaimMessageEvent;
 import open.dolphin.client.KarteSenderResult;
@@ -8,7 +9,6 @@ import open.dolphin.impl.claim.DiagnosisSender;
 import open.dolphin.infomodel.ClaimMessageModel;
 import open.dolphin.infomodel.OrcaSqlModel;
 import open.dolphin.project.Project;
-import org.jboss.resteasy.client.ClientResponse;
 
 /**
  * OrcaDelegater
@@ -39,14 +39,14 @@ public class OrcaDelegater extends BusinessDelegater {
         String path = "orca/query";
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         sqlModel = (OrcaSqlModel) 
                 getConverter().fromJson(is, OrcaSqlModel.class);
@@ -82,14 +82,14 @@ public class OrcaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_JSON_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
         
         ClaimMessageModel resModel = (ClaimMessageModel)
                 getConverter().fromJson(is, ClaimMessageModel.class);

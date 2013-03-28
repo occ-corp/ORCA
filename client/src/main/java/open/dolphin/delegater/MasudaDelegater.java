@@ -1,14 +1,14 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.util.Date;
 import java.util.List;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 
 /**
  * MasudaDelegater
@@ -52,7 +52,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<RoutineMedModel>>(){};
         List<RoutineMedModel> list = (List<RoutineMedModel>) 
@@ -80,7 +80,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         RoutineMedModel model = (RoutineMedModel)
                 getConverter().fromJson(is, RoutineMedModel.class);
@@ -115,8 +115,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -131,8 +131,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -153,7 +153,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<DisconItemModel>>(){};
         List<DisconItemModel> list = (List<DisconItemModel>)
@@ -169,8 +169,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -198,8 +198,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -220,7 +220,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<UsingDrugModel>>(){};
         List<UsingDrugModel> list = (List<UsingDrugModel>)
@@ -236,8 +236,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
 
         ClientResponse response = getClientRequest(path, null)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .post(ClientResponse.class);
+                    .type(MEDIATYPE_JSON_UTF8)
+                    .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -265,8 +265,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(model);
 
         ClientResponse response = getClientRequest(path, null)
-                    .body(MEDIATYPE_JSON_UTF8, json)
-                    .put(ClientResponse.class);
+                    .type(MEDIATYPE_JSON_UTF8)
+                    .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -297,7 +297,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<ModuleModel>>(){};
         List<ModuleModel> list = (List<ModuleModel>)
@@ -327,7 +327,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         PatientVisitModel model = (PatientVisitModel)
                 getConverter().fromJson(is, PatientVisitModel.class);
@@ -355,7 +355,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
         List<DocInfoModel> list = (List<DocInfoModel>)
@@ -402,7 +402,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
@@ -431,7 +431,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         SearchResultModel model = (SearchResultModel)
                 getConverter().fromJson(is, SearchResultModel.class);
@@ -456,7 +456,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<ExamHistoryModel>>(){};
         List<ExamHistoryModel> list = (List<ExamHistoryModel>)
@@ -483,7 +483,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>)
@@ -505,7 +505,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<InFacilityLaboItem>>(){};
         List<InFacilityLaboItem> list = (List<InFacilityLaboItem>)
@@ -521,8 +521,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(list);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -539,8 +539,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(list);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String ret = (String) response.getEntity(String.class);
@@ -589,7 +589,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<SanteiHistoryModel>>(){};
         List<SanteiHistoryModel> list = (List<SanteiHistoryModel>)
@@ -616,7 +616,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<List<RpModel>>>(){};
         List<List<RpModel>> list = (List<List<RpModel>>)
@@ -632,8 +632,8 @@ public class MasudaDelegater extends BusinessDelegater {
         String json = getConverter().toJson(list);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String enityStr = (String) response.getEntity(String.class);
@@ -653,7 +653,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<UserPropertyModel>>(){};
         List<UserPropertyModel> list = (List<UserPropertyModel>) 
@@ -678,7 +678,7 @@ public class MasudaDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<PatientModel>>(){};
         List<PatientModel> list = (List<PatientModel>) 

@@ -1,6 +1,8 @@
 package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Date;
@@ -13,8 +15,6 @@ import open.dolphin.dto.ImageSearchSpec;
 import open.dolphin.dto.ModuleSearchSpec;
 import open.dolphin.infomodel.*;
 import open.dolphin.util.BeanUtils;
-import org.jboss.resteasy.client.ClientResponse;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 
 /**
  * Session と Document の送受信を行う Delegater クラス。
@@ -63,7 +63,8 @@ public class  DocumentDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        //InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
         
         KarteBean karte = (KarteBean)
                 getConverter().fromJson(is, KarteBean.class);
@@ -87,8 +88,8 @@ public class  DocumentDelegater extends BusinessDelegater {
         String path = "karte/document";
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -115,7 +116,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         int status = response.getStatus();
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<DocumentModel>>(){};
         List<DocumentModel> list = (List<DocumentModel>)
@@ -155,7 +156,7 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         int status = response.getStatus();
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<DocInfoModel>>(){};
         List<DocInfoModel> list = (List<DocInfoModel>)
@@ -177,7 +178,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
         
         TypeReference typeRef = new TypeReference<List<LetterModule>>(){};
         List<LetterModule> list = (List<LetterModule>)
@@ -247,8 +248,8 @@ public class  DocumentDelegater extends BusinessDelegater {
 
             ClientResponse response = getClientRequest(path, null)
                     .accept(MEDIATYPE_TEXT_UTF8)
-                    .body(MEDIATYPE_TEXT_UTF8, docInfo.getTitle())
-                    .put(ClientResponse.class);
+                    .type(MEDIATYPE_TEXT_UTF8)
+                    .put(ClientResponse.class, docInfo.getTitle());
 
             int status = response.getStatus();
             String entityStr = (String) response.getEntity(String.class);
@@ -305,7 +306,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<List<ModuleModel>>>(){};
         List<List<ModuleModel>> ret = (List<List<ModuleModel>>) 
@@ -336,7 +337,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         SchemaModel model = (SchemaModel) 
                 getConverter().fromJson(is, SchemaModel.class);
@@ -434,8 +435,8 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -454,8 +455,8 @@ public class  DocumentDelegater extends BusinessDelegater {
         String json = getConverter().toJson(list);
 
         ClientResponse response = getClientRequest(path, null)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         isHTTP200(status);
@@ -504,7 +505,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<RegisteredDiagnosisModel>>(){};
         List<RegisteredDiagnosisModel> list = (List<RegisteredDiagnosisModel>)
@@ -522,8 +523,8 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .post(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .post(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -562,8 +563,8 @@ public class  DocumentDelegater extends BusinessDelegater {
 
         ClientResponse response = getClientRequest(path, null)
                 .accept(MEDIATYPE_TEXT_UTF8)
-                .body(MEDIATYPE_JSON_UTF8, json)
-                .put(ClientResponse.class);
+                .type(MEDIATYPE_JSON_UTF8)
+                .put(ClientResponse.class, json);
 
         int status = response.getStatus();
         String entityStr = (String) response.getEntity(String.class);
@@ -611,7 +612,7 @@ public class  DocumentDelegater extends BusinessDelegater {
         //String entityStr = (String) response.getEntity(String.class);
         //debug(status, entityStr);
         isHTTP200(status);
-        InputStream is = (InputStream) response.getEntity(InputStream.class);
+        InputStream is = response.getEntityInputStream();
 
         TypeReference typeRef = new TypeReference<List<List<AppointmentModel>>>(){};
         List<List<AppointmentModel>> ret = (List<List<AppointmentModel>>)
