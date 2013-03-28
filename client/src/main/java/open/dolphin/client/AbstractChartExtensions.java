@@ -1,5 +1,6 @@
 package open.dolphin.client;
 
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -48,7 +49,7 @@ public abstract class AbstractChartExtensions {
     protected void addCommonBtn(JToolBar myToolBar) {
 
         // toolBarに基本料入力ボタンと処方ラベル印刷ボタンを追加
-            baseChargeBtn = new JButton();
+            baseChargeBtn = createButton();
             baseChargeBtn.setEnabled(false);
             baseChargeBtn.setIcon(ICON_WIZ);
             baseChargeBtn.setToolTipText("基本料スタンプを挿入します。");
@@ -64,7 +65,7 @@ public abstract class AbstractChartExtensions {
         // 空白なら不使用として非表示
         String lblPrtAddress = Project.getString(MiscSettingPanel.LBLPRT_ADDRESS, null);
         if (lblPrtAddress != null && !"".equals(lblPrtAddress)) {
-            rpLabelBtn = new JButton();
+            rpLabelBtn = createButton();
             rpLabelBtn.setEnabled(false);
             rpLabelBtn.setIcon(ICON_LBL);
             rpLabelBtn.setToolTipText("処方ラベルを印刷します。");
@@ -174,5 +175,12 @@ public abstract class AbstractChartExtensions {
             rpLabelBtn.setEnabled(b);
             rpLabelBtn.setVisible(b);
         }
+    }
+    
+    // quaqua9でボタンボーダーが増えた？
+    protected JButton createButton() {
+        JButton btn = new JButton();
+        btn.putClientProperty("Quaqua.Component.visualMargin", new Insets(0, 0, 0, 0));
+        return btn;
     }
 }

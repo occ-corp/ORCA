@@ -47,7 +47,7 @@ public class ChartImplExtensions extends AbstractChartExtensions {
     private void addChartBtn(JToolBar myToolBar) {
         // FEV-40
         if (Project.getBoolean(MiscSettingPanel.USE_FEV, false)) {
-            JButton ecgBtn = new JButton();
+            JButton ecgBtn = createButton();
             ecgBtn.setIcon(ICON_ECG);
             ecgBtn.setToolTipText("心電図を開きます。");
             myToolBar.add(ecgBtn);
@@ -61,7 +61,7 @@ public class ChartImplExtensions extends AbstractChartExtensions {
         }
 
         // 薬剤相互作用検索関連
-        JButton interactionBtn = new JButton();
+        JButton interactionBtn = createButton();
         interactionBtn.setIcon(ICON_MED);
         interactionBtn.setToolTipText("薬剤併用情報を調べます。");
         myToolBar.add(interactionBtn);
