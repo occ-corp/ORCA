@@ -1,6 +1,5 @@
 package open.dolphin.client;
 
-import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -49,7 +48,7 @@ public abstract class AbstractChartExtensions {
     protected void addCommonBtn(JToolBar myToolBar) {
 
         // toolBarに基本料入力ボタンと処方ラベル印刷ボタンを追加
-            baseChargeBtn = createButton();
+            baseChargeBtn = new JButton();
             baseChargeBtn.setEnabled(false);
             baseChargeBtn.setIcon(ICON_WIZ);
             baseChargeBtn.setToolTipText("基本料スタンプを挿入します。");
@@ -65,7 +64,7 @@ public abstract class AbstractChartExtensions {
         // 空白なら不使用として非表示
         String lblPrtAddress = Project.getString(MiscSettingPanel.LBLPRT_ADDRESS, null);
         if (lblPrtAddress != null && !"".equals(lblPrtAddress)) {
-            rpLabelBtn = createButton();
+            rpLabelBtn = new JButton();
             rpLabelBtn.setEnabled(false);
             rpLabelBtn.setIcon(ICON_LBL);
             rpLabelBtn.setToolTipText("処方ラベルを印刷します。");
@@ -175,12 +174,5 @@ public abstract class AbstractChartExtensions {
             rpLabelBtn.setEnabled(b);
             rpLabelBtn.setVisible(b);
         }
-    }
-    
-    protected JButton createButton() {
-        JButton btn = new JButton();
-        btn.setBorder(null);
-        btn.setMargin(new Insets(5, 5, 5, 5));
-        return btn;
     }
 }
