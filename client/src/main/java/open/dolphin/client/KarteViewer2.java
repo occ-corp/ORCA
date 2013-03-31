@@ -94,7 +94,6 @@ public class KarteViewer2 extends KarteViewer {
     @Override
     public void stop() {
         soaPane.clear();
-        soaPane = null;
         pPane.clear();
         pPane = null;
         // memory leak?

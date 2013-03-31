@@ -90,11 +90,6 @@ public class DicomViewer {
         
         // memory leak?
         thumbnailTableModel.clear();
-        thumbnailTableModel = null;
-        frame = null;
-        
-        // ViewerPanelを始末
-        viewerPanel = null;
         
         try {
             exec.shutdown();

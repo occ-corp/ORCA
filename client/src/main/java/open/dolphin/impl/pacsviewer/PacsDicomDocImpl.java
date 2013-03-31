@@ -129,11 +129,9 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         // memory leak?
         if (imagePanel != null) {
             imagePanel.removeAll();
-            imagePanel = null;
         }
         if (listTableModel != null) {
             listTableModel.clear();
-            listTableModel = null;
         }
 
         if (pacsService != null) {

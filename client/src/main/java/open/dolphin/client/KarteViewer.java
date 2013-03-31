@@ -153,7 +153,6 @@ public abstract class KarteViewer extends AbstractChartDocument {
     // memory leak?
     protected final void dispose() {
         kartePanel.removeAll();
-        kartePanel = null;
     }
 
     public final String getDocType() {
