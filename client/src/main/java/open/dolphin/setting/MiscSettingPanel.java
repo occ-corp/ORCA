@@ -80,6 +80,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     
     public static final String ZEBRA_COLOR = "zebraColor";
     public static final String HL7_FORMAT = "hl7format";
+    
+    public static final String USE_SSL = "useSSL";
 
     // preferencesのdefault
     public static final String DEFAULT_LBLPRT_ADDRESS = null;
@@ -127,6 +129,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     public static final boolean DEFAULT_PACS_SHOW_IMAGEINFO = true;
     
     public static final String DEFAULT_HL7_FORMAT = "wakayama";
+    public static final boolean DEFAULT_USE_SSL = false;
 
     // GUI staff
     private JTextField tf_lblPrtAddress;
@@ -161,6 +164,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
     private JButton btn_openBase;
     private JButton btn_saveProp;
     private JButton btn_loadProp;
+    
+    private JCheckBox cb_useSSL;
     
 /*    
     private JLabel lbl_rsbURL;
@@ -617,6 +622,14 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         JPanel pacsSetting = gbl.getProduct();
 
         // 設定３
+        // SSL
+        gbl = new GridBagBuilder("暗号化通信");
+        label = new JLabel("SSL通信を有効化");
+        cb_useSSL = new JCheckBox();
+        gbl.add(cb_useSSL, 0, row, GridBagConstraints.EAST);
+        gbl.add(label, 1, row, GridBagConstraints.WEST);
+        JPanel ssl = gbl.getProduct();
+        
         // Labo
         gbl = new GridBagBuilder("ラボ");
         row = 0;
@@ -712,9 +725,10 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         
         // 全体レイアウト
         gbl = new GridBagBuilder();
-        gbl.add(color, 0, 0, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
-        gbl.add(labo, 0, 1, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
-        gbl.add(hs, 0, 2, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        gbl.add(ssl, 0, 0, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        gbl.add(color, 0, 1, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        gbl.add(labo, 0, 2, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
+        gbl.add(hs, 0, 3, GridBagConstraints.HORIZONTAL, 1.0, 0.0);
         JPanel setting3 = gbl.getProduct();
         
         JTabbedPane tabbedPane = new JTabbedPane();
@@ -955,6 +969,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         val = val != null ? val : "";
         tf_weasis.setText(val);
         
+        // SSL
+        cb_useSSL.setSelected(model.useSSL);
         // 色
         val = String.valueOf(model.zebraColor);
         val = val != null ? val : "";
@@ -1045,6 +1061,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         // Chart stateをサーバーと同期
         //model.useJms = cb_useJms.isSelected();
         
+        // SSL
+        model.useSSL = cb_useSSL.isSelected();
         // 色
         model.zebraColor = tf_zebra.getText().trim();
         if (rb_wakayamaHl7.isSelected()) {
@@ -1104,6 +1122,8 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         private String hl7Format;
         private String falcoOutputPath;
         private String falcoFacilityId;
+        
+        private boolean useSSL;
 
         public void populate() {
 
@@ -1165,6 +1185,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             hl7Format = Project.getString(HL7_FORMAT, DEFAULT_HL7_FORMAT);
             falcoFacilityId = Project.getString(Project.SEND_LABTEST_FACILITY_ID, "");
             falcoOutputPath = Project.getString(Project.SEND_LABTEST_PATH, "");
+            
+            // SSL
+            useSSL = Project.getBoolean(USE_SSL, DEFAULT_USE_SSL);
         }
 
         public void restore() {
@@ -1221,6 +1244,9 @@ public class MiscSettingPanel extends AbstractSettingPanel {
             Project.setBoolean(Project.SEND_LABTEST, sendLaboTest);
             Project.setString(Project.SEND_LABTEST_FACILITY_ID, falcoFacilityId);
             Project.setString(Project.SEND_LABTEST_PATH, falcoOutputPath);
+            
+            // SSL
+            Project.setBoolean(USE_SSL, useSSL);
         }
     }
 

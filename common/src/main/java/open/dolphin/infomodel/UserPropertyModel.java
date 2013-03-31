@@ -16,7 +16,8 @@ public class UserPropertyModel implements Serializable {
         "baseURI", "facilityId", "jmariCode",
         "claimAddress", "claimPort", "CLAIM01", "claimHostName", "orcaUserId", "orcaUserPassword",
         "pvtOnServer", "fevOnServer", "fevSharePath",
-        "pacsServerIp", "pacsServerPort", "pacsServerAE"
+        "pacsServerIp", "pacsServerPort", "pacsServerAE",
+        "useSSL"
     };
     
     @Id
