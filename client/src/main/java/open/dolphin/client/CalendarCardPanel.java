@@ -88,6 +88,7 @@ public class CalendarCardPanel extends JPanel  {
         JButton[] buttons = {backBtn, stopBtn, forwardBtn, upBtn};
         for (JButton btn : buttons) {
             btn.setPreferredSize(new Dimension(15, 15));
+            btn.setBackground(null);
             btn.setBorderPainted(false);
             btn.setContentAreaFilled(false);
             btn.setFocusPainted(false);
