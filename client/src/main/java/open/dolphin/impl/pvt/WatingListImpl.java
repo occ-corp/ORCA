@@ -7,7 +7,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.beans.EventHandler;
-import java.beans.PropertyChangeEvent;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -165,7 +164,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private PVTDelegater pvtDelegater;
     
     private String clientUUID;
-    private ChartEventHandler cel;
+    private ChartEventListener cel;
     private String orcaId;
 
     /**
@@ -173,7 +172,7 @@ public class WatingListImpl extends AbstractMainComponent {
      */
     public WatingListImpl() {
         setName(NAME);
-        cel = ChartEventHandler.getInstance();
+        cel = ChartEventListener.getInstance();
         clientUUID = cel.getClientUUID();
         orcaId = Project.getUserModel().getOrcaId();
     }
@@ -484,7 +483,7 @@ public class WatingListImpl extends AbstractMainComponent {
     private void startSyncMode() {
         setStatusInfo();
         getFullPvt();
-        cel.addPropertyChangeListener(this);
+        cel.addListener(this);
         timerTask = new UpdatePvtInfoTask();
         restartTimer();
         enter();
@@ -534,7 +533,7 @@ public class WatingListImpl extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removePropertyChangeListener(this);
+        cel.removeListener(this);
     }
 
 
@@ -1219,9 +1218,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // ChartEventListener
     // 待合リストを更新する
     @Override
-    public void propertyChange(PropertyChangeEvent e) {
-        
-        ChartEventModel evt = (ChartEventModel) e.getNewValue();
+    public void onEvent(ChartEventModel evt) {
 
         ChartEventModel.EVENT eventType = evt.getEventType();
         List<PatientVisitModel> tableDataList = pvtTableModel.getDataProvider();

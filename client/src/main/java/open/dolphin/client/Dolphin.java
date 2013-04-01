@@ -103,7 +103,7 @@ public class Dolphin implements MainWindow {
     private PacsService pacsService;
 
     // 状態変化リスナー
-    private ChartEventHandler scl;
+    private ChartEventListener scl;
     
     // clientのUUID
     private String clientUUID;
@@ -441,7 +441,7 @@ public class Dolphin implements MainWindow {
         FocusPropertyChangeListener.getInstance().register();
 
         // ChartStateListenerを開始する
-        scl = ChartEventHandler.getInstance();
+        scl = ChartEventListener.getInstance();
         scl.start();
 //masuda$
         

@@ -1,8 +1,6 @@
 package open.dolphin.client;
 
 import com.sun.jersey.api.client.ClientResponse;
-import java.beans.PropertyChangeListener;
-import java.beans.PropertyChangeSupport;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -22,11 +20,8 @@ import open.dolphin.util.NamedThreadFactory;
  * カルテオープンなどの状態の変化をまとめて管理する
  * @author masuda, Masuda Naika
  */
-public class ChartEventHandler {
-    
-    // propName
-    private static final String CHART_EVENT_PROP = "chartEvent";
-    
+public class ChartEventListener {
+
      // このクライアントのパラメーター類
     private String clientUUID;
     private String orcaId;
@@ -37,7 +32,7 @@ public class ChartEventHandler {
     private String jmariCode;
     private String facilityId;
 
-    private PropertyChangeSupport boundSupport;
+    private List<IChartEventListener> listeners;
     
     // ChartEvent監視タスク
     private EventListenThread listenThread;
@@ -45,17 +40,17 @@ public class ChartEventHandler {
     // 状態変化を各listenerに通知するタスク
     private ExecutorService onEventExec;
     
-    private static final ChartEventHandler instance;
+    private static final ChartEventListener instance;
 
     static {
-        instance = new ChartEventHandler();
+        instance = new ChartEventListener();
     }
 
-    private ChartEventHandler() {
+    private ChartEventListener() {
         init();
      }
 
-    public static ChartEventHandler getInstance() {
+    public static ChartEventListener getInstance() {
         return instance;
     }
     
@@ -68,24 +63,19 @@ public class ChartEventHandler {
         userId = Project.getUserModel().getUserId();
         jmariCode = Project.getString(Project.JMARI_CODE);
         facilityId = Project.getFacilityId();
+        listeners = new ArrayList<IChartEventListener>();
     }
     
     public String getClientUUID() {
         return clientUUID;
     }
 
-    public void addPropertyChangeListener(PropertyChangeListener l) {
-        if (boundSupport == null) {
-            boundSupport = new PropertyChangeSupport(this);
-        }
-        boundSupport.addPropertyChangeListener(CHART_EVENT_PROP, l);
+    public void addListener(IChartEventListener listener) {
+        listeners.add(listener);
     }
-
-    public void removePropertyChangeListener(PropertyChangeListener l) {
-        if (boundSupport == null) {
-            boundSupport = new PropertyChangeSupport(this);
-        }
-        boundSupport.removePropertyChangeListener(CHART_EVENT_PROP, l);
+    
+    public void removeListener(IChartEventListener listener) {
+        listeners.remove(listener);
     }
 
     // 状態変更処理の共通入り口
@@ -220,8 +210,13 @@ public class ChartEventHandler {
         public void run() {
             
             // まずは自クライアントを更新
-            boundSupport.firePropertyChange(CHART_EVENT_PROP, null, evt);
-
+            for (IChartEventListener listener : listeners) {
+                try {
+                    listener.onEvent(evt);
+                } catch (Exception ex) {
+                }
+            }
+            
             // サーバーに更新を通知
             ChartEventDelegater del = ChartEventDelegater.getInstance();
             try {
@@ -261,7 +256,12 @@ public class ChartEventHandler {
             }
             
             // 各リスナーで更新処理をする
-            boundSupport.firePropertyChange(CHART_EVENT_PROP, null, evt);
+            for (IChartEventListener listener : listeners) {
+                try {
+                    listener.onEvent(evt);
+                } catch (Exception ex) {
+                }
+            }
         }
     }
     

@@ -4,13 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.Point;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
 import java.util.GregorianCalendar;
 import java.util.List;
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
-import open.dolphin.client.ChartEventHandler;
+import open.dolphin.client.ChartEventListener;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.Dolphin;
 import open.dolphin.client.IChartEventListener;
@@ -65,7 +64,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     
     private String clientUUID;
     
-    private ChartEventHandler cel;
+    private ChartEventListener cel;
     
     
     private static final TempKarteCheckDialog instance;
@@ -86,7 +85,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     
     private void setup() {
         
-        cel = ChartEventHandler.getInstance();
+        cel = ChartEventListener.getInstance();
         clientUUID = cel.getClientUUID();
         
         // ColumnSpecHelperを準備する
@@ -250,9 +249,9 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
             return;
         }
         if (b) {
-            cel.addPropertyChangeListener(instance);
+            cel.addListener(instance);
         } else {
-            cel.removePropertyChangeListener(instance);
+            cel.removeListener(instance);
             setModal(false);
         }
         super.setVisible(b);
@@ -270,7 +269,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
     private void openKarte() {
         
         PatientModel patient = getSelectedPatient();
-        PatientVisitModel pvt = ChartEventHandler.getInstance().createFakePvt(patient);
+        PatientVisitModel pvt = ChartEventListener.getInstance().createFakePvt(patient);
         
         // カルテコンテナを生成する
         Dolphin.getInstance().openKarte(pvt);
@@ -283,10 +282,8 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
 
     // ChartEventListener
     @Override
-    public void propertyChange(PropertyChangeEvent e) {
-        
-        ChartEventModel evt = (ChartEventModel) e.getNewValue();
-        
+    public void onEvent(ChartEventModel evt) {
+
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();

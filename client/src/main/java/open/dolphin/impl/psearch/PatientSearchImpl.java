@@ -5,7 +5,6 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
 import java.beans.EventHandler;
-import java.beans.PropertyChangeEvent;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -85,13 +84,13 @@ public class PatientSearchImpl extends AbstractMainComponent {
     private AbstractAction copyAction;
     
     private String clientUUID;
-    private ChartEventHandler cel;
+    private ChartEventListener cel;
 
     
     /** Creates new PatientSearch */
     public PatientSearchImpl() {
         setName(NAME);
-        cel = ChartEventHandler.getInstance();
+        cel = ChartEventListener.getInstance();
         clientUUID = cel.getClientUUID();
     }
 
@@ -126,7 +125,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removePropertyChangeListener(this);
+        cel.removeListener(this);
     }
 
     public PatientModel getSelectedPatient() {
@@ -431,7 +430,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
         // ColumnHelperでカラム変更関連イベントを設定する
         columnHelper.connect();
         // ChartEventListenerに登録する
-        cel.addPropertyChangeListener(this);
+        cel.addListener(this);
 
         EventAdapter adp = new EventAdapter(view.getKeywordFld(), view.getTable());
 
@@ -1119,9 +1118,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void propertyChange(PropertyChangeEvent e) {
-        
-        ChartEventModel evt = (ChartEventModel) e.getNewValue();
+    public void onEvent(ChartEventModel evt) {
 
         int sRow = -1;
         long ptPk = evt.getPtPk();

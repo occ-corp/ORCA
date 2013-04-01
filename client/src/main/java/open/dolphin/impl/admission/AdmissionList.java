@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
-import java.beans.PropertyChangeEvent;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.ExecutionException;
@@ -12,7 +11,7 @@ import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import open.dolphin.client.AbstractMainComponent;
-import open.dolphin.client.ChartEventHandler;
+import open.dolphin.client.ChartEventListener;
 import open.dolphin.client.GUIConst;
 import open.dolphin.dao.SqlMiscDao;
 import open.dolphin.delegater.PatientDelegater;
@@ -78,12 +77,12 @@ public class AdmissionList extends AbstractMainComponent {
     private Action copyAction;
     
     private String clientUUID;
-    private ChartEventHandler cel;
+    private ChartEventListener cel;
     
     
     public AdmissionList() {
         setName(NAME);
-        cel = ChartEventHandler.getInstance();
+        cel = ChartEventListener.getInstance();
         clientUUID = cel.getClientUUID();
         statusInfo = INFO_MSG;
     }
@@ -104,7 +103,7 @@ public class AdmissionList extends AbstractMainComponent {
             columnHelper.saveProperty();
         }
         // ChartStateListenerから除去する
-        cel.removePropertyChangeListener(this);
+        cel.removeListener(this);
     }
     /**
      * メインウインドウのタブで受付リストに切り替わった時 コールされる。
@@ -180,7 +179,7 @@ public class AdmissionList extends AbstractMainComponent {
         // ColumnHelperでカラム変更関連イベントを設定する
         columnHelper.connect();
         // ChartEventListenerに登録する
-        cel.addPropertyChangeListener(this);
+        cel.addListener(this);
         
         // 来院リストテーブル 選択
         table.getSelectionModel().addListSelectionListener(new ListSelectionListener() {
@@ -282,7 +281,7 @@ public class AdmissionList extends AbstractMainComponent {
     private void openKarte() {
         
         PatientModel patient = getSelectedPatient();
-        PatientVisitModel pvt = ChartEventHandler.getInstance().createFakePvt(patient);
+        PatientVisitModel pvt = ChartEventListener.getInstance().createFakePvt(patient);
         
         // カルテコンテナを生成する
         getContext().openKarte(pvt);
@@ -478,9 +477,8 @@ public class AdmissionList extends AbstractMainComponent {
 
     // ChartEventListener
     @Override
-    public void propertyChange(PropertyChangeEvent e) {
+    public void onEvent(ChartEventModel evt) {
         
-        ChartEventModel evt = (ChartEventModel) e.getNewValue();
         int sRow = -1;
         long ptPk = evt.getPtPk();
         List<PatientModel> list = tableModel.getDataProvider();

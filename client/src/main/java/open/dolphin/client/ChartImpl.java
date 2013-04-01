@@ -742,7 +742,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             @Override
             public void windowOpened(WindowEvent e) {
                 // Windowオープン時に状態変化を通知する
-                ChartEventHandler scl = ChartEventHandler.getInstance();
+                ChartEventListener scl = ChartEventListener.getInstance();
                 scl.publishKarteOpened(getPatientVisit());
             }
 
@@ -757,7 +757,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
             @Override
             public void windowClosed(WindowEvent e) {
                 // Windowクローズ時に状態変化を通知する
-                ChartEventHandler scl = ChartEventHandler.getInstance();
+                ChartEventListener scl = ChartEventListener.getInstance();
                 scl.publishKarteClosed(getPatientVisit());
             }
 
