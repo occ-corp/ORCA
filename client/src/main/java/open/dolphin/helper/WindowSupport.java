@@ -27,21 +27,6 @@ public class WindowSupport implements MenuListener {
     private static final ImageIcon icon = 
             ClientContext.getClientContextStub().getImageIcon("dolphinIcon.png");
     
-    // JFrameとWindowSupportのマップ　フォーカス処理にも使用
-    private static Map<JFrame, WindowSupport> allWindows;
-    
-    // allChartsはChartImplから移動
-    private static List<ChartImpl> allCharts;
-    
-    // allEditorFramesはEditorFrameから移動
-    private static List<EditorFrame> allEditorFrames;
-    
-    static {
-        allWindows = new ConcurrentHashMap<JFrame, WindowSupport>();
-        allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
-        allCharts = new CopyOnWriteArrayList<ChartImpl>();
-    }
-    
     // Window support が提供するスタッフ
     // フレーム
     private JFrame frame;
@@ -107,24 +92,26 @@ public class WindowSupport implements MenuListener {
         // インスタンスを生成する
         final WindowSupport windowSupport
                 = new WindowSupport(frame, menuBar, windowMenu, windowAction);
-        
+
         // WindowEvent をこのクラスに通知しリストの管理を行う
         frame.setDefaultCloseOperation(WindowConstants.DO_NOTHING_ON_CLOSE);
         frame.addWindowListener(new WindowAdapter() {
             
             @Override
             public void windowOpened(WindowEvent e) {
-                allWindows.put(frame, windowSupport);
+                WindowHolder holder = WindowHolder.getInstance();
+                holder.getAllWindows().put(frame, windowSupport);
                 if (chartImpl != null) {
-                    allCharts.add(chartImpl);
+                    holder.getAllCharts().add(chartImpl);
                 }
             }
             
             @Override
             public void windowClosed(WindowEvent e) {
-                allWindows.remove(frame);
+                WindowHolder holder = WindowHolder.getInstance();
+                holder.getAllWindows().remove(frame);
                 if (chartImpl != null) {
-                    allCharts.remove(chartImpl);
+                    holder.getAllCharts().remove(chartImpl);
                 }
             }
         });
@@ -136,7 +123,7 @@ public class WindowSupport implements MenuListener {
     }
     
     public static Object getMediator(JFrame frame) {
-        WindowSupport ws = allWindows.get(frame);
+        WindowSupport ws = WindowHolder.getInstance().getAllWindows().get(frame);
         if (ws != null) {
             return ws.getMediator();
         }
@@ -144,30 +131,12 @@ public class WindowSupport implements MenuListener {
     }
     
     public static List<EditorFrame> getAllEditorFrames() {
-        return allEditorFrames;
+        return WindowHolder.getInstance().getAllEditorFrames();
     }
 
     public static List<ChartImpl> getAllCharts() {
-        return allCharts;
+        return WindowHolder.getInstance().getAllCharts();
     }
-/*
-    public static List<WindowSupport> getAllWindows() {
-        return (List<WindowSupport>) allWindows.values();
-    }
-    
-    public static void windowOpened(WindowSupport opened) {
-        allWindows.put(opened.getFrame(), opened);
-    }
-    
-    public static void windowClosed(WindowSupport closed) {
-        // Mapから削除する
-        allWindows.remove(closed.getFrame());
-    }
-    
-    public static boolean contains(WindowSupport toCheck) {
-        return allWindows.containsValue(toCheck);
-    }
-*/
     
     public JFrame getFrame() {
         return frame;
@@ -205,6 +174,7 @@ public class WindowSupport implements MenuListener {
         wm.removeAll();
         
         // リストから新規に生成する
+        Map<JFrame, WindowSupport> allWindows = WindowHolder.getInstance().getAllWindows();
         for (WindowSupport ws : allWindows.values()) {
             Action action = ws.getWindowAction();
             wm.add(action);
@@ -217,5 +187,43 @@ public class WindowSupport implements MenuListener {
     
     @Override
     public void menuCanceled(MenuEvent e) {
+    }
+    
+    
+    // シングルトン化
+    private static class WindowHolder {
+        
+        // JFrameとWindowSupportのマップ　フォーカス処理にも使用
+        private Map<JFrame, WindowSupport> allWindows;
+        // allChartsはChartImplから移動
+        private List<ChartImpl> allCharts;
+        // allEditorFramesはEditorFrameから移動
+        private List<EditorFrame> allEditorFrames;
+        
+        private static final WindowHolder instance;
+
+        static {
+            instance = new WindowHolder();
+        }
+
+        private WindowHolder() {
+            allWindows = new ConcurrentHashMap<JFrame, WindowSupport>();
+            allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
+            allCharts = new CopyOnWriteArrayList<ChartImpl>();
+        }
+
+        private static WindowHolder getInstance() {
+            return instance;
+        }
+        
+        private Map<JFrame, WindowSupport> getAllWindows() {
+            return allWindows;
+        }
+        private List<ChartImpl> getAllCharts() {
+            return allCharts;
+        }
+        private List<EditorFrame> getAllEditorFrames() {
+            return allEditorFrames;
+        }
     }
 }

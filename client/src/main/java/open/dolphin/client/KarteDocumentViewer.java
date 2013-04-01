@@ -189,11 +189,12 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
 
     @Override
     public void stop() {
+/*
         for (Map.Entry entry : karteViewerMap.entrySet()) {
             KarteViewer viewer = (KarteViewer) entry.getValue();
             viewer.stop();
         }
-        
+*/
         karteViewerMap.clear();
         karteViewerMap = null;
 
