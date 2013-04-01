@@ -56,11 +56,9 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     // docInfo.getDocId() (=String)ではなくgetDocPk() (=long)であることに注意
     private Map<Long, KarteViewer> karteViewerMap;
     // 今選択されているDocInfoModelの配列
-    private DocInfoModel[] docInfoArray;
+    private List<DocInfoModel> docInfoList;
     // ScrollerPaneに入っている、KarteViewerを含んだPanal
     private KarteScrollerPanel scrollerPanel;
-    // scrollerPanelに表示するKarteViewerのリスト
-    private List<KarteViewer> viewerList;
     
     private Logger logger;
     
@@ -133,7 +131,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         super();
         setTitle(TITLE);
         newWindow = Project.getBoolean(Project.KARTE_PLACE_MODE, true);
-        viewerList = new ArrayList<KarteViewer>();
 
         vsc = Project.getBoolean(Project.KARTE_SCROLL_DIRECTION, true);
         scrollerPanel = new KarteScrollerPanel(this);
@@ -165,11 +162,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             }
         };
     }
-
-    // KarteViewerのリストを返す。ScrollerPanelから参照
-    public List<KarteViewer> getViewerList() {
-        return viewerList;
-    }
     
     public JScrollPane getScrollPane() {
         return scroller;
@@ -177,7 +169,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     public boolean isVsc() {
         return vsc;
     }
-
 
     /**
      * busy かどうかを返す。
@@ -198,17 +189,13 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
 
     @Override
     public void stop() {
-
-        for (Iterator itr = karteViewerMap.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : karteViewerMap.entrySet()) {
             KarteViewer viewer = (KarteViewer) entry.getValue();
             viewer.stop();
         }
         
         karteViewerMap.clear();
         karteViewerMap = null;
-        viewerList.clear();
-        viewerList = null;
 
         // ScrollerPanelの後片付け
         scrollerPanel.dispose();
@@ -320,20 +307,23 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     public void showDocuments(final DocInfoModel[] selectedHistories, final JScrollPane scroller) {
 
         this.scroller = scroller;
-        this.docInfoArray = selectedHistories;
+        docInfoList = Arrays.asList(selectedHistories);
 
         if (selectedHistories == null || selectedHistories.length == 0) {
-//masuda^   文書がないならパネルをクリアする。フィルタリングで該当なしの場合にわかりにくいので
-            scrollerPanel.removeAll();
-            scroller.setViewportView(scrollerPanel);
-//masuda$
+            initScrollerPanel();
             return;
         }
-
-        List<Long> added = new ArrayList<Long>();
+        
+        // ここでソートしておく
+        if (ascending) {
+            Collections.sort(docInfoList);
+        } else {
+            Collections.sort(docInfoList, Collections.reverseOrder());
+        }
 
         // 選択リストにあって 現在の karteViewerMap にないものはデータベースから取得する
-        for (DocInfoModel docInfo : selectedHistories) {
+        List<Long> added = new ArrayList<Long>();
+        for (DocInfoModel docInfo : docInfoList) {
             long docPk = docInfo.getDocPk();
             if (!karteViewerMap.containsKey(docPk)) {
                 added.add(docPk);
@@ -349,68 +339,38 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             task.execute();
         }
     }
+    
+    private void initScrollerPanel() {
+        // 古いのを除去
+        scrollerPanel.removeAll();
+        scroller.setViewportView(scrollerPanel);
 
-    private KarteViewer createKarteViewer(DocInfoModel docInfo) {
-
-        // サマリー対応
-        if (docInfo != null) {
-            if (docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE)
-                    || docInfo.getDocType().equals(IInfoModel.DOCTYPE_SUMMARY)) {
-                return KarteViewer.createKarteViewer(KarteViewer.MODE.SINGLE);
-            }
+        // 縦並びかどうかに応じてレイアウトを設定
+        if (vsc) {
+            scrollerPanel.setLayout(new BoxLayout(scrollerPanel, BoxLayout.Y_AXIS));
+        } else {
+            scrollerPanel.setLayout(new BoxLayout(scrollerPanel, BoxLayout.X_AXIS));
         }
-        return KarteViewer.createKarteViewer(KarteViewer.MODE.DOUBLE);
     }
 
-    @SuppressWarnings("unchecked")
     private void showKarteViewers() {
 
-        //final LapTimer timer = new LapTimer();
-        //timer.start();
-        
         SwingWorker worker = new SwingWorker<Void, KarteViewer>() {
 
             @Override
             protected Void doInBackground() throws Exception {
-                // まずは古いのを除去
-                scrollerPanel.removeAll();
-                scroller.setViewportView(scrollerPanel);
-
-                // 縦並びかどうかに応じてレイアウトを設定
-                if (vsc) {
-                    scrollerPanel.setLayout(new BoxLayout(scrollerPanel, BoxLayout.Y_AXIS));
-                } else {
-                    scrollerPanel.setLayout(new BoxLayout(scrollerPanel, BoxLayout.X_AXIS));
-                }
-
-                // scrollerPanelに表示するKarteViewerのリスト
-                viewerList.clear();
+                
+                initScrollerPanel();
 
                 // 選択されているDocInfoに対応するKarteViewerをviewerListに追加する
-                for (DocInfoModel docInfo : docInfoArray) {
+                for (int i = 0; i < docInfoList.size(); ++i) {
+                    DocInfoModel docInfo = docInfoList.get(i);
                     KarteViewer viewer = karteViewerMap.get(docInfo.getDocPk());
                     if (viewer != null) {
-                        viewerList.add(viewer);
-                    } else {
-                        logger.debug("KarteDocumentViewer: KarteViewer is null :-(");
+                        scrollerPanel.add(viewer.getUI());
                     }
-                    
-                }
-                // 時間軸でソート
-                if (ascending) {
-                    Collections.sort(viewerList, new KarteViewerComparator());
-                } else {
-                    Collections.sort(viewerList, Collections.reverseOrder(new KarteViewerComparator()));
                 }
 
-                // scrollerPanelに追加する
-                for (int i = 0; i < viewerList.size(); ++i) {
-                    KarteViewer viewer = viewerList.get(i);
-                    // skip scrollのためにindexを振る
-                    viewer.setIndex(i);
-                    JPanel ui = viewer.getUI();
-                    scrollerPanel.add(ui);
-                }
                 return null;
             }
 
@@ -419,17 +379,16 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 // 文書履歴タブに変更
                 getContext().showDocument(0);
                 // 一つ目を選択し、フォーカスを設定する。フォーカスがないとキー移動できない
-                if (!viewerList.isEmpty()) {
+                int size = scrollerPanel.getComponentCount();
+                if (size != 0) {
                     KarteViewer kv = ascending
-                            ? viewerList.get(viewerList.size() - 1) 
-                            : viewerList.get(0);
+                            ? scrollerPanel.getKarteViewerAt(size - 1) 
+                            : scrollerPanel.getKarteViewerAt(0);
                     setSelectedKarte(kv);
                     kv.getUI().requestFocusInWindow();
                 }
                 // 先頭にスクロール
                 scrollerPanel.scrollRectToVisible(new Rectangle(0, 0, 1, 1));
-                
-                //timer.stop("Show KarteViewers");
             }
         };
         
@@ -527,8 +486,8 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     private void makePDF(boolean asc) {
 
         List<DocumentModel> docList = new ArrayList<DocumentModel>();
-        for (KarteViewer viewer : viewerList) {
-            docList.add(viewer.getModel());
+        for (DocInfoModel docInfo : docInfoList) {
+            docList.add(karteViewerMap.get(docInfo.getDocPk()).getModel());
         }
 
         KartePDFMaker maker = new KartePDFMaker();
@@ -543,7 +502,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
 
         // ブザイクなんだけど、あまり使わない機能なのでこれでヨシとする
         // 背景色が緑だとインクがもったいないので白にする。選択も解除しておく。
-        for (DocInfoModel docInfo : docInfoArray) {
+        for (DocInfoModel docInfo : docInfoList) {
             KarteViewer viwer = karteViewerMap.get(docInfo.getDocPk());
             viwer.setBackground(Color.WHITE);
         }
@@ -556,7 +515,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         PrintKarteDocumentView.printComponent(scrollerPanel, name, id);
 
         // 背景色を戻しておく
-        for (DocInfoModel docInfo : docInfoArray) {
+        for (DocInfoModel docInfo : docInfoList) {
             KarteViewer viwer = karteViewerMap.get(docInfo.getDocPk());
             viwer.setBackground(viwer.getSOAPane().getUneditableColor());
         }
@@ -691,52 +650,6 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         task.execute();
     }
 
-    /**
-     * データベースから取得したDocumentModelからKarteViewerを追加作成し表示する
-     *
-     * @param models KarteModel
-     */
-/*
-    private void addKarteViewer(List<DocumentModel> models) {
-
-        if (models == null) {
-            return;
-        }
-
-        // マルチスレッド化
-        //LapTimer timer = new LapTimer();
-        //timer.start();
-        
-        // タスクリストを準備する
-        List<Callable<KarteViewer>> taskList = new ArrayList<Callable<KarteViewer>>();
-        for (DocumentModel docModel : models) {
-            Callable<KarteViewer> task = new MakeViewerTask(docModel);
-            taskList.add(task);
-        }
-        
-        // タスクリストを実行する
-        MultiTaskExecutor exec = new MultiTaskExecutor(taskList);
-        try {
-            List<Future<KarteViewer>> futures = exec.execute();
-            for (Future<KarteViewer> future : futures) {
-                try {
-                    // karteViewerMapに登録する
-                    KarteViewer viewer = future.get();
-                    karteViewerMap.put(viewer.getModel().getId(), viewer);
-                } catch (ExecutionException ex) {
-                    logger.debug(ex);
-                }
-            }
-        } catch (InterruptedException ex) {
-            logger.debug(ex);
-        }
-        
-        //後片付け
-        exec.dispose();
-
-        //timer.stop("KarteRendering");
-    }
-*/
     
     private class MakeViewerTask implements Callable {
 
@@ -767,7 +680,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             }
             
             // DocumentModelにDocInfoModelを設定する
-            for (DocInfoModel info : docInfoArray) {
+            for (DocInfoModel info : docInfoList) {
                 if (docModel.getId() == info.getDocPk()) {
                     docModel.setDocInfoModel(info);
                     break;
@@ -795,6 +708,18 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             
             return viewer;
         }
+    }
+
+    private KarteViewer createKarteViewer(DocInfoModel docInfo) {
+
+        // サマリー対応
+        if (docInfo != null) {
+            if (docInfo.getDocType().equals(IInfoModel.DOCTYPE_S_KARTE)
+                    || docInfo.getDocType().equals(IInfoModel.DOCTYPE_SUMMARY)) {
+                return KarteViewer.createKarteViewer(KarteViewer.MODE.SINGLE);
+            }
+        }
+        return KarteViewer.createKarteViewer(KarteViewer.MODE.DOUBLE);
     }
 
     /**

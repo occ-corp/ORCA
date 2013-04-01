@@ -38,9 +38,6 @@ public abstract class KarteViewer extends AbstractChartDocument {
     // 選択されているかどうかのフラグ
     private boolean selected;
     
-    // KarteDocumentViewerの登録順 skip scrollで使用
-    private int index;
-    
     // １号用紙か２号用紙
     public static enum MODE {SINGLE, DOUBLE};
 
@@ -67,13 +64,6 @@ public abstract class KarteViewer extends AbstractChartDocument {
                 return new KarteViewer2();
         }
         return null;
-    }
-
-    public void setIndex(int index) {
-        this.index = index;
-    }
-    public int getIndex() {
-        return index;
     }
     
     protected final void setTitle() {

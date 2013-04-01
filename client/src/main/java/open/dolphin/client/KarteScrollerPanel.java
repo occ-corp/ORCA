@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.*;
-import java.util.List;
 import javax.swing.*;
 import javax.swing.text.DefaultEditorKit;
 import open.dolphin.project.Project;
@@ -59,6 +58,22 @@ public class KarteScrollerPanel extends JPanel {
 
     private JScrollPane getScrollPane() {
         return docViewer.getScrollPane();
+    }
+    
+    private int getKarteViewerIndex(Component c) {
+        Component[] comps = getComponents();
+        int size = comps.length;
+        for (int i = 0; i < size; ++i) {
+            if (comps[i] == c) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    public KarteViewer getKarteViewerAt(int index) {
+        JPanel panel = (JPanel) getComponent(index);
+        return (KarteViewer) panel.getClientProperty("KarteViewer");
     }
 
     // キー移動アクションを設定する
@@ -166,6 +181,7 @@ public class KarteScrollerPanel extends JPanel {
 
             if (scroller == null) {
                 scrollTimer.stop();
+                return;
             }
 
             if (i == DIV) {
@@ -345,21 +361,16 @@ public class KarteScrollerPanel extends JPanel {
 
         // currentLocのComponentを取得する。
         Component comp = this.getComponentAt(p);
-        // どのKarteViewerか調べる
-        List<KarteViewer> viewerList = docViewer.getViewerList();
-        KarteViewer viewer = null;
-        for (KarteViewer kv : viewerList) {
-            if (kv.getUI() == comp) {
-                viewer = kv;
-                break;
-            }
+        int index = getKarteViewerIndex(comp);
+        if (index == -1) {
+            return;
         }
+        // KarteViwerを取得
+        KarteViewer viewer = getKarteViewerAt(index);
         if (viewer == null) {
-            return; 
+            return;
         }
-
         Rectangle rect = viewer.getUI().getBounds();
-        int index = viewer.getIndex();
 
         // 下向きスクロールで、今のカルテの最下部が欠けて表示されているときは、unitScrollする
         Point top = rect.getLocation();
@@ -372,7 +383,7 @@ public class KarteScrollerPanel extends JPanel {
 
         // 次に表示すべきKarteViewerのindexを得る
         if (downward) {
-            index = Math.min(index + 1, viewerList.size() - 1);
+            index = Math.min(index + 1, getComponentCount() - 1);
         } else if (timerRunning || scroller.getViewport().getViewRect().contains(top)) {
             // Timerがrunningか、上向きでかつ今のカルテの先頭が表示されているなら前のKarteViewer
             // 表示されていないならば今のカルテの先頭から表示、indexは変更なし。
@@ -380,7 +391,10 @@ public class KarteScrollerPanel extends JPanel {
         }
 
         // 次に表示すべきKarteViewerを取得
-        KarteViewer kvNext = viewerList.get(index);
+        KarteViewer kvNext = getKarteViewerAt(index);
+        if (kvNext == null) {
+            return;
+        }
         // KarteViewerの位置を取得
         Point destPoint = kvNext.getUI().getLocation();
 
@@ -402,20 +416,15 @@ public class KarteScrollerPanel extends JPanel {
 
         // currentLocのComponentを取得する。
         Component comp = this.getComponentAt(p);
-        // どのKarteViewerか調べる
-        List<KarteViewer> viewerList = docViewer.getViewerList();
-        KarteViewer viewer = null;
-        for (KarteViewer kv : viewerList) {
-            if (kv.getUI() == comp) {
-                viewer = kv;
-                break;
-            }
+        int index = getKarteViewerIndex(comp);
+        if (index == -1) {
+            return;
         }
+        // KarteViwerを取得
+        KarteViewer viewer = getKarteViewerAt(index);
         if (viewer == null) {
             return;
         }
-
-        int index = viewer.getIndex();
         Rectangle rect = viewer.getUI().getBounds();
         
         // 右向きスクロールで、今のカルテの最右部が欠けて表示されているときは、unitScrollする
@@ -430,7 +439,7 @@ public class KarteScrollerPanel extends JPanel {
 
         // 次に表示すべきKarteViewerのindexを得る
         if (rightward) {
-            index = Math.min(index + 1, viewerList.size() - 1);
+            index = Math.min(index + 1, getComponentCount() - 1);
         } else if (timerRunning || scroller.getViewport().getViewRect().contains(left)) {
             // Timerがrunningか、左向きでかつ今のカルテの先頭が表示されているなら前のKarteViewer
             // 表示されていないならば今のカルテの先頭から表示、indexは変更なし。
@@ -438,7 +447,10 @@ public class KarteScrollerPanel extends JPanel {
         }
 
         // 次に表示すべきKarteViewerを取得
-        KarteViewer kvNext = viewerList.get(index);
+        KarteViewer kvNext = getKarteViewerAt(index);
+        if (kvNext == null) {
+            return;
+        }
         // KarteViewerの位置を取得
         Point destPoint = kvNext.getUI().getLocation();
 

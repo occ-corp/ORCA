@@ -40,6 +40,7 @@ public class KarteViewer1 extends KarteViewer {
         
         // KarteViewerをJTextPaneに保存しておく
         soaPane.getTextPane().putClientProperty("KarteViewer", this);
+        kartePanel.putClientProperty("KarteViewer", this);
     }
 
     /**
