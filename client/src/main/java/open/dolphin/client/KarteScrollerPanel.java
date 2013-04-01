@@ -59,22 +59,6 @@ public class KarteScrollerPanel extends JPanel {
     private JScrollPane getScrollPane() {
         return docViewer.getScrollPane();
     }
-    
-    private int getKarteViewerIndex(Component c) {
-        Component[] comps = getComponents();
-        int size = comps.length;
-        for (int i = 0; i < size; ++i) {
-            if (comps[i] == c) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    
-    public KarteViewer getKarteViewerAt(int index) {
-        JPanel panel = (JPanel) getComponent(index);
-        return (KarteViewer) panel.getClientProperty("KarteViewer");
-    }
 
     // キー移動アクションを設定する
     private void setKeyAction(JComponent comp) {
@@ -360,17 +344,12 @@ public class KarteScrollerPanel extends JPanel {
         Point p = getViewportPoint();
 
         // currentLocのComponentを取得する。
-        Component comp = this.getComponentAt(p);
+        Component comp = getComponentAt(p);
         int index = getKarteViewerIndex(comp);
         if (index == -1) {
             return;
         }
-        // KarteViwerを取得
-        KarteViewer viewer = getKarteViewerAt(index);
-        if (viewer == null) {
-            return;
-        }
-        Rectangle rect = viewer.getUI().getBounds();
+        Rectangle rect = comp.getBounds();
 
         // 下向きスクロールで、今のカルテの最下部が欠けて表示されているときは、unitScrollする
         Point top = rect.getLocation();
@@ -391,12 +370,12 @@ public class KarteScrollerPanel extends JPanel {
         }
 
         // 次に表示すべきKarteViewerを取得
-        KarteViewer kvNext = getKarteViewerAt(index);
-        if (kvNext == null) {
+        Component compNext = getComponentAt(index);
+        if (compNext == null) {
             return;
         }
         // KarteViewerの位置を取得
-        Point destPoint = kvNext.getUI().getLocation();
+        Point destPoint = compNext.getLocation();
 
         // 次のKarteViewerの位置にViewportを移動
         scrollAction.moveTo(destPoint);
@@ -415,17 +394,12 @@ public class KarteScrollerPanel extends JPanel {
         Point p = getViewportPoint();
 
         // currentLocのComponentを取得する。
-        Component comp = this.getComponentAt(p);
+        Component comp = getComponentAt(p);
         int index = getKarteViewerIndex(comp);
         if (index == -1) {
             return;
         }
-        // KarteViwerを取得
-        KarteViewer viewer = getKarteViewerAt(index);
-        if (viewer == null) {
-            return;
-        }
-        Rectangle rect = viewer.getUI().getBounds();
+        Rectangle rect = comp.getBounds();
         
         // 右向きスクロールで、今のカルテの最右部が欠けて表示されているときは、unitScrollする
         Point left = rect.getLocation();
@@ -447,12 +421,12 @@ public class KarteScrollerPanel extends JPanel {
         }
 
         // 次に表示すべきKarteViewerを取得
-        KarteViewer kvNext = getKarteViewerAt(index);
-        if (kvNext == null) {
+        Component compNext = getComponentAt(index);
+        if (compNext == null) {
             return;
         }
         // KarteViewerの位置を取得
-        Point destPoint = kvNext.getUI().getLocation();
+        Point destPoint = compNext.getLocation();
 
         // 次のKarteViewerの位置にViewportを移動
         scrollAction.moveTo(destPoint);
@@ -495,5 +469,34 @@ public class KarteScrollerPanel extends JPanel {
         }
         scroller.getViewport().setViewPosition(p);
     }
-
+    
+/*
+    private int getKarteViewerIndex(Component c) {
+        Component[] comps = getComponents();
+        int size = comps.length;
+        for (int i = 0; i < size; ++i) {
+            if (comps[i] == c) {
+                return i;
+            }
+        }
+        return -1;
+    }
+ */
+    private int getKarteViewerIndex(Component c) {
+        try {
+            JPanel panel = (JPanel) c;
+            int index = (Integer) panel.getClientProperty("index");
+            return index;
+        } catch (Exception ex) {
+        }
+        return -1;
+    }
+    
+    private Component getComponentAt(int index) {
+        try {
+            return getComponent(index);
+        } catch (Exception ex) {
+        }
+        return null;
+    }
 }

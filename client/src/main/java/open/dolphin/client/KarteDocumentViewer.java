@@ -368,7 +368,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                     DocInfoModel docInfo = docInfoList.get(i);
                     KarteViewer viewer = karteViewerMap.get(docInfo.getDocPk());
                     if (viewer != null) {
-                        scrollerPanel.add(viewer.getUI());
+                        JPanel panel = viewer.getUI();
+                        // skip scroll用にインデックスを振る
+                        panel.putClientProperty("index", i);
+                        scrollerPanel.add(panel);
                     }
                 }
 
@@ -380,11 +383,9 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 // 文書履歴タブに変更
                 getContext().showDocument(0);
                 // 一つ目を選択し、フォーカスを設定する。フォーカスがないとキー移動できない
-                int size = scrollerPanel.getComponentCount();
-                if (size != 0) {
-                    KarteViewer kv = ascending
-                            ? scrollerPanel.getKarteViewerAt(size - 1) 
-                            : scrollerPanel.getKarteViewerAt(0);
+                int index = (ascending) ? docInfoList.size() - 1 : 0;
+                KarteViewer kv = karteViewerMap.get(docInfoList.get(index).getDocPk());
+                if (kv != null) {
                     setSelectedKarte(kv);
                     kv.getUI().requestFocusInWindow();
                 }
