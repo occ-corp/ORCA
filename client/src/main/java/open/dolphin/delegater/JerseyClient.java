@@ -18,8 +18,6 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
 import javax.ws.rs.core.MultivaluedMap;
 import open.dolphin.client.Dolphin;
-import open.dolphin.project.Project;
-import open.dolphin.setting.MiscSettingPanel;
 import open.dolphin.util.HashUtil;
 
 /**
@@ -82,10 +80,6 @@ public class JerseyClient {
 
         if (baseURI == null || baseURI.equals(oldURI)) {
             return;
-        }
-        boolean useSSL = Project.getBoolean(MiscSettingPanel.USE_SSL, MiscSettingPanel.DEFAULT_USE_SSL);
-        if (useSSL) {
-            baseURI = baseURI.replace("http", "https").replace(":8080", ":8443");
         }
 
         int readTimeout = TIMEOUT1 * 1000;

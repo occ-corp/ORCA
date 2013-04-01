@@ -105,6 +105,9 @@ public class BaseURISettingPanel extends AbstractSettingPanel {
         label = new JLabel(baseURIText, SwingConstants.RIGHT);
         gb.add(label,            0, row, GridBagConstraints.EAST);
         gb.add(baseURIField, 1, row, GridBagConstraints.WEST);
+        String txt = "<html>通常はhttp://xxx.xxx.xxx.xxx:8080<br>"
+                + "SSLの場合はhttps://xxx.xxx.xxx.xxx:8443</html>";
+        baseURIField.setToolTipText(txt);
         
         JPanel sip = gb.getProduct();
         
