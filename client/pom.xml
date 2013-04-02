@@ -33,13 +33,13 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.1.10.Final</version>
+            <version>4.1.11.Final</version>
             <type>jar</type>
         </dependency>
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4.5</version>
+            <version>1.4.7</version>
         </dependency>
         <dependency>
             <groupId>log4j</groupId>
@@ -49,7 +49,7 @@
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-log4j12</artifactId>
-            <version>1.7.2</version>
+            <version>1.7.5</version>
         </dependency>
 <!--
         <dependency>
@@ -131,7 +131,7 @@
         <dependency>
             <groupId>org.apache.tomcat</groupId>
             <artifactId>tomcat-jdbc</artifactId>
-            <version>7.0.37</version>
+            <version>7.0.39</version>
         </dependency>
 <!-- 以下は自分でローカルリポジトリに追加する -->
         <dependency>
@@ -193,8 +193,8 @@
                 <artifactId>maven-compiler-plugin</artifactId>
                 <version>2.5.1</version>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                 </configuration>
             </plugin>
         </plugins>
