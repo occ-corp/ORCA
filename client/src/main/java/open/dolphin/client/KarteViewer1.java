@@ -39,7 +39,7 @@ public class KarteViewer1 extends KarteViewer {
         soaPane.setDocStatus(status);
         
         // KarteViewerをJTextPaneに保存しておく
-        soaPane.getTextPane().putClientProperty("KarteViewer", this);
+        soaPane.getTextPane().putClientProperty(GUIConst.PROP_KARTE_VIEWER, this);
     }
 
     /**

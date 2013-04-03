@@ -317,7 +317,6 @@ public class KarteStyledDocument extends DefaultStyledDocument {
     }
 
     // KartePaneを返す。SOA/PTransferHandlerでインポート先を、JTextPane->KarteStyledDocument->KartePaneとたぐることができる
-    // JTextPane textPane.getClientProperty("kartePane")でもＯＫ？
     public KartePane getKartePane() {
         return kartePane;
     }

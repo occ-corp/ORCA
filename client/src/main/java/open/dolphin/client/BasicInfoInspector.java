@@ -121,7 +121,7 @@ public class BasicInfoInspector {
         basePanel.setOpaque(true);
 
         fixHeight(basePanel, PANEL_HEIGHT);
-        basePanel.putClientProperty("fixedHeight", true);
+        basePanel.putClientProperty(GUIConst.PROP_FIXED_HEIGHT, true);
         
 //masuda^ サマリー表示
         DocumentModel summary = context.getKarte().getSummary();

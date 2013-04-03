@@ -221,7 +221,7 @@ public class KartePane implements DocumentListener, MouseListener,
         if (this.textPane != null) {
             KarteStyledDocument doc = new KarteStyledDocument();
             this.textPane.setDocument(doc);
-            this.textPane.putClientProperty("karteCompositor", this);
+            this.textPane.putClientProperty(GUIConst.PROP_KARTE_COMPOSITOR, this);
 
             doc.setParent(this);
         }

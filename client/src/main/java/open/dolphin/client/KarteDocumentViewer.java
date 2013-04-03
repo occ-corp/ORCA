@@ -148,7 +148,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 }
 
                 JTextPane pane = (JTextPane) src;
-                KarteViewer viewer = (KarteViewer) pane.getClientProperty("KarteViewer");
+                KarteViewer viewer = (KarteViewer) pane.getClientProperty(GUIConst.PROP_KARTE_VIEWER);
                 if (viewer != null) {
                     int cnt = e.getClickCount();
                     if (cnt == 2) {
@@ -370,7 +370,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                     if (viewer != null) {
                         JPanel panel = viewer.getUI();
                         // skip scroll用にインデックスを振る
-                        panel.putClientProperty("index", i);
+                        panel.putClientProperty(GUIConst.PROP_VIEWER_INDEX, i);
                         scrollerPanel.add(panel);
                     }
                 }

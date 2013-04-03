@@ -172,7 +172,7 @@ public class CalendarCardPanel extends JPanel  {
                 fixHeight(CalendarCardPanel.this, h);
             }
         });
-        this.putClientProperty("fixedHeight", true);
+        this.putClientProperty(GUIConst.PROP_FIXED_HEIGHT, true);
         
         boundSupport = new PropertyChangeSupport(this);
     }

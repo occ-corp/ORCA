@@ -129,7 +129,7 @@ public class ChartSplitPanel extends JPanel {
         for (int i = 0; i < comps.length; ++i) {
             d = (i < list.size()) ? list.get(i) : DEFAULT_SIZE;
             JComponent comp = (JComponent) comps[i];
-            Boolean fixedHeight = (Boolean) comp.getClientProperty("fixedHeight");
+            Boolean fixedHeight = (Boolean) comp.getClientProperty(GUIConst.PROP_FIXED_HEIGHT);
             if (fixedHeight == null || !fixedHeight) {
                 comp.setPreferredSize(d);
             }
@@ -316,7 +316,7 @@ public class ChartSplitPanel extends JPanel {
                 int currY = markY.get(i);
                 int nextY = markY.get(i + 1);
                 JComponent comp = (JComponent) comps[i];
-                Boolean fixedHeight = (Boolean) comp.getClientProperty("fixedHeight");
+                Boolean fixedHeight = (Boolean) comp.getClientProperty(GUIConst.PROP_FIXED_HEIGHT);
                 if (fixedHeight != null && fixedHeight) {
                     nextY = currY + comp.getSize().height;
                     markY.set(i + 1, nextY);

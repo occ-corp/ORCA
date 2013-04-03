@@ -485,7 +485,7 @@ public class KarteScrollerPanel extends JPanel {
     private int getKarteViewerIndex(Component c) {
         try {
             JPanel panel = (JPanel) c;
-            int index = (Integer) panel.getClientProperty("index");
+            int index = (Integer) panel.getClientProperty(GUIConst.PROP_VIEWER_INDEX);
             return index;
         } catch (Exception ex) {
         }

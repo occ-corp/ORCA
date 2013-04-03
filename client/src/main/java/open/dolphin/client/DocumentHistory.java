@@ -681,7 +681,7 @@ public class DocumentHistory {
         column.setCellEditor(new DefaultCellEditor2(tf));
         
 //pns^  クリックしただけで，キャレットを表示しないまま編集が始まってしまうのを防ぐ
-        view.getTable().putClientProperty("JTable.autoStartsEdit", Boolean.FALSE);
+        view.getTable().putClientProperty("JTable.autoStartsEdit", false);
 //pns$
 //masuda^   ストライプテーブル
         // 奇数偶数レンダラを設定する

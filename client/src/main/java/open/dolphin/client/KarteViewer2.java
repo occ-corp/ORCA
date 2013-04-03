@@ -58,8 +58,8 @@ public class KarteViewer2 extends KarteViewer {
         pPane.setDocStatus(status);
         
         // KarteViewerをJTextPaneに保存しておく
-        soaPane.getTextPane().putClientProperty("KarteViewer", this);
-        pPane.getTextPane().putClientProperty("KarteViewer", this);
+        soaPane.getTextPane().putClientProperty(GUIConst.PROP_KARTE_VIEWER, this);
+        pPane.getTextPane().putClientProperty(GUIConst.PROP_KARTE_VIEWER, this);
     }
 
     /**

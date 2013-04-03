@@ -20,7 +20,7 @@ import javax.swing.*;
 public abstract class AbstractComponentHolder extends JLabel implements MouseListener, DragGestureListener{
 
     public AbstractComponentHolder() {
-        putClientProperty("karteCompositor", AbstractComponentHolder.this);
+        putClientProperty(GUIConst.PROP_KARTE_COMPOSITOR, AbstractComponentHolder.this);
         setFocusable(true);
         addMouseListener(AbstractComponentHolder.this);
         addMouseListener(new PopupListner());
