@@ -486,6 +486,10 @@ public class MasudaServiceBean {
     // 保険情報とPvtDateを設定する
     // thx to Dr. pns
     private void setInsuranceAndPvtDate(String fid, List<PatientModel> pmList) {
+        
+        if (pmList == null || pmList.isEmpty()) {
+            return;
+        }
 
         final int CANCEL_PVT = 1 << 6;  // BIT_CANCEL = 6;
         final String sqlPvt = "from PatientVisitModel p where p.facilityId = :fid " +
