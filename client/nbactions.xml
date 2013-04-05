@@ -32,8 +32,8 @@
                 <goal>org.codehaus.mojo:exec-maven-plugin:1.2:exec</goal>
             </goals>
             <properties>
-                <exec.args>${profiler.args} -verbose:gc -Xms128m -Xmx512m -classpath %classpath open.dolphin.client.Dolphin</exec.args>
-                <exec.executable>${profiler.java}</exec.executable>
+                <exec.args> -verbose:gc -Xms128m -Xmx512m -classpath %classpath open.dolphin.client.Dolphin</exec.args>
+                <exec.executable>java</exec.executable>
                 <profiler.action>profile</profiler.action>
             </properties>
         </action>
