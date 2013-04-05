@@ -1,5 +1,6 @@
 package open.dolphin.helper;
 
+import java.awt.Frame;
 import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
@@ -99,6 +100,7 @@ public class WindowSupport implements MenuListener {
         Action windowAction = new AbstractAction(title) {
             @Override
             public void actionPerformed(ActionEvent e) {
+                frame.setExtendedState(Frame.NORMAL);
                 frame.toFront();
             }
         };
