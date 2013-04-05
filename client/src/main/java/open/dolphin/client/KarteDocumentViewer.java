@@ -308,12 +308,14 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     public void showDocuments(final DocInfoModel[] selectedHistories, final JScrollPane scroller) {
 
         this.scroller = scroller;
-        docInfoList = Arrays.asList(selectedHistories);
 
         if (selectedHistories == null || selectedHistories.length == 0) {
             initScrollerPanel();
+            docInfoList = Collections.emptyList();
             return;
         }
+        
+        docInfoList = Arrays.asList(selectedHistories);
         
         // ここでソートしておく
         if (ascending) {
