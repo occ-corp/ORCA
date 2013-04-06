@@ -56,8 +56,8 @@ public class TouchaServiceBean {
     private static final String QUERY_DOC = "from DocumentModel d where d.karte.patient.patientId = :pid "
             + "and d.karte.patient.facilityId = :fid and (d.status='F' or d.status='T') ";
     private static final String QUERY_DOCUMENT_LATEST = QUERY_DOC + "order by d.started desc";
-    private static final String QUERY_DOCUMENT_PREV = QUERY_DOC + "and d.id < :id order by d.started desc";
-    private static final String QUERY_DOCUMENT_NEXT = QUERY_DOC + "and d.id > :id order by d.started asc";
+    private static final String QUERY_DOCUMENT_PREV = QUERY_DOC + "and d.started < :date order by d.started desc";
+    private static final String QUERY_DOCUMENT_NEXT = QUERY_DOC + "and d.started > :date order by d.started asc";
     private static final String QUERY_DOCUMENT_DATE = QUERY_DOC + "and d.started >= :date order by d.started asc";
     
     private static final String QUERY_PATIENT
@@ -272,10 +272,11 @@ public class TouchaServiceBean {
                 long id = Long.valueOf(docPkStr);
                 if ("prev".equals(direction)) {
                     try {
+                        DocumentModel doc = em.find(DocumentModel.class, id);
                         model = (DocumentModel) em.createQuery(QUERY_DOCUMENT_PREV)
                                 .setParameter(PID, ptId)
                                 .setParameter(FID, fid)
-                                .setParameter(ID, id)
+                                .setParameter(DATE, doc.getStarted())
                                 .setMaxResults(1)
                                 .getSingleResult();
                         docPk = model.getId();
@@ -283,10 +284,11 @@ public class TouchaServiceBean {
                     }
                 } else if ("next".equals(direction)) {
                     try {
+                        DocumentModel doc = em.find(DocumentModel.class, id);
                         model = (DocumentModel) em.createQuery(QUERY_DOCUMENT_NEXT)
                                 .setParameter(PID, ptId)
                                 .setParameter(FID, fid)
-                                .setParameter(ID, id)
+                                .setParameter(DATE, doc.getStarted()) 
                                 .setMaxResults(1)
                                 .getSingleResult();
                         docPk = model.getId();
