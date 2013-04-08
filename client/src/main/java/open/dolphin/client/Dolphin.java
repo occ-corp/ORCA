@@ -1542,6 +1542,8 @@ public class Dolphin implements MainWindow {
         boolean isWin = ClientContext.isWin();
         if (isWin && quaquaCls.equals(userLaf)) {
             System.setProperty("awt.useSystemAAFontSettings","off");
+        } else {
+            System.setProperty("awt.useSystemAAFontSettings","on");
         }
         ClientContext.getClientContextStub().setUI();
         

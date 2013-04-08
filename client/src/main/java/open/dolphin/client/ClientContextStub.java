@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.util.List;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.plaf.basic.BasicTextPaneUI;
 import javax.swing.text.DefaultEditorKit;
 import open.dolphin.exception.DolphinException;
 import open.dolphin.infomodel.DepartmentModel;
@@ -51,6 +52,8 @@ public final class ClientContextStub {
     private String pathToDolphin;
 
     private boolean dolphinPro;
+    
+    private boolean isNimbus;
 
     //private URLClassLoader pluginClassLoader;
 
@@ -643,11 +646,12 @@ public final class ClientContextStub {
         final String defaultLaf = UIManager.getSystemLookAndFeelClassName();
         final String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
         final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-        //String userLaf = Project.getString("lookAndFeel", nimbusCls);
         String userLaf = Project.getString("lookAndFeel", nimbusCls);
+        boolean isQuaqua = quaquaCls.equals(userLaf);
+        isNimbus = nimbusCls.equals(userLaf);
 
         // Quaqua設定
-        if (quaquaCls.equals(userLaf)) {
+        if (isQuaqua) {
             // QuaquaのFileChooserは慣れないので使用しない。
             if (!isMac()) {
                 Set<String> excludes = new HashSet<String>();
@@ -657,32 +661,28 @@ public final class ClientContextStub {
             }
 
             System.setProperty("Quaqua.tabLayoutPolicy", "wrap");
-            UIManager.put("ComboBox.maximumRowCount", 20);
-            UIManager.put("TextComponent.autoSelect", Boolean.FALSE);
-            UIManager.put("OptionPane.cancelButtonText", "キャンセル");
-            UIManager.put("OptionPane.okButtonText", "OK");
-            UIManager.put("OptionPane.yesButtonText", "はい");
-            UIManager.put("OptionPane.noButtonText", "いいえ");
             //UIManager.put("Component.visualMargin", new Insets(0,0,0,0));
             //UIManager.put("TabbedPane.contentBorderPainted", false);
             //UIManager.put("Quaqua.Debug.showVisualBounds", true);
             //UIManager.put("Quaqua.Debug.showClipBounds", true);
         }
-
+        
+        // MacにNimbusはない
+        if (isMac() && nimbusCls.equals(userLaf)) {
+            userLaf = defaultLaf;
+        }
+        
         try {
-            if (isMac() && nimbusCls.equals(userLaf)) {
-                userLaf = defaultLaf;
-            }
             UIManager.setLookAndFeel(userLaf);
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
             getBootLogger().warn(e.getMessage());
         }
-
-        // quaquaでもHOME/ENDは行頭/行末に移動するためにInputMapを上書きする
-        if (quaquaCls.equals(userLaf)) {
-
+        
+        // 上書き設定群
+        if (isQuaqua) {
+            // quaquaでもHOME/ENDは行頭/行末に移動するためにInputMapを上書きする
             UIDefaults defaults = UIManager.getLookAndFeelDefaults();
             final String focusInputMaps[] = {
                 "TextPane.focusInputMap",
@@ -694,34 +694,61 @@ public final class ClientContextStub {
                 map.put(KeyStroke.getKeyStroke(KeyEvent.VK_END, 0), DefaultEditorKit.endLineAction);
                 defaults.put(key, map);
             }
+            
+            Font font12 = new Font("SansSerif", Font.PLAIN, 12);
+            UIManager.put("Label.font", font12);
+            UIManager.put("Button.font", font12);
+            UIManager.put("ToggleButton.font", font12);
+            UIManager.put("Menu.font", font12);
+            UIManager.put("MenuItem.font", font12);
+            UIManager.put("CheckBox.font", font12);
+            UIManager.put("CheckBoxMenuItem.font", font12);
+            UIManager.put("RadioButton.font", font12);
+            UIManager.put("RadioButtonMenuItem.font", font12);
+            UIManager.put("ToolBar.font", font12);
+            UIManager.put("ComboBox.font", font12);
+            UIManager.put("TabbedPane.font", font12);
+            UIManager.put("TitledBorder.font", font12);
+            UIManager.put("List.font", font12);
+            
+        } else {
+            Font font12 = new Font("SansSerif", Font.PLAIN, 12);
+            Font font13 = new Font("SansSerif", Font.PLAIN, 13);
+            UIManager.put("Label.font", font12);
+            UIManager.put("Button.font", font12);
+            UIManager.put("ToggleButton.font", font12);
+            UIManager.put("Menu.font", font12);
+            UIManager.put("MenuItem.font", font12);
+            UIManager.put("CheckBox.font", font12);
+            UIManager.put("CheckBoxMenuItem.font", font12);
+            UIManager.put("RadioButton.font", font12);
+            UIManager.put("RadioButtonMenuItem.font", font12);
+            UIManager.put("ToolBar.font", font12);
+            UIManager.put("ComboBox.font", font12);
+            UIManager.put("TabbedPane.font", font12);
+            UIManager.put("TitledBorder.font", font12);
+            UIManager.put("List.font", font12);
+            UIManager.put("TextPane.font", font13);     // 大き目
+            UIManager.put("TextField.font", font12);
+            UIManager.put("PasswordField.font", font12);
+            UIManager.put("Table.font", font12);
+            UIManager.put("TableHeader.font", font12);
+            UIManager.put("Tree.rowHeight", 20);        // 高さ指定
         }
-
-        if (isWin() || isLinux()) {
-            int size = isLinux() ? 13: 12;
-            Font font = new Font("SansSerif", Font.PLAIN, size);
-            UIManager.put("Label.font", font);
-            UIManager.put("Button.font", font);
-            UIManager.put("ToggleButton.font", font);
-            UIManager.put("Menu.font", font);
-            UIManager.put("MenuItem.font", font);
-            UIManager.put("CheckBox.font", font);
-            UIManager.put("CheckBoxMenuItem.font", font);
-            UIManager.put("RadioButton.font", font);
-            UIManager.put("RadioButtonMenuItem.font", font);
-            UIManager.put("ToolBar.font", font);
-            UIManager.put("ComboBox.font", font);
-            UIManager.put("TabbedPane.font", font);
-            UIManager.put("TitledBorder.font", font);
-            UIManager.put("List.font", font);
-
-            getBootLogger().debug("デフォルトのフォントを変更しました。");
+        
+        // Nimbusの背景色workaround
+        if (isNimbus) {
+            UIManager.put("TextPaneUI", BasicTextPaneUI.class.getName());
         }
+        
+        UIManager.put("ComboBox.maximumRowCount", 20);
+        UIManager.put("TextComponent.autoSelect", Boolean.FALSE);
+        UIManager.put("OptionPane.cancelButtonText", "キャンセル");
+        UIManager.put("OptionPane.okButtonText", "OK");
+        UIManager.put("OptionPane.yesButtonText", "はい");
+        UIManager.put("OptionPane.noButtonText", "いいえ");
 
-        // defaultLafではカルテのフォントをちょっと大きく
-        if (isWin() && defaultLaf.equals(userLaf)) {
-            Font font = new Font("SansSerif", Font.PLAIN, 13);
-            UIManager.put("TextPane.font", font);
-        }
+        getBootLogger().debug("デフォルトのフォントを変更しました。");
     }
     
     public Color getZebraColor() {
