@@ -697,8 +697,8 @@ public final class ClientContextStub {
         if (userLaf.startsWith("com.jtattoo.plaf.acryl")) {
             com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme("Default", "", "");
         }
-        if (userLaf.startsWith("com.jtattoo.plaf.noire")) {
-            com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme("Default", "", "");
+        if (userLaf.startsWith("com.jtattoo.plaf.aluminium")) {
+            com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme("Default", "", "");
         }
         
         try {
