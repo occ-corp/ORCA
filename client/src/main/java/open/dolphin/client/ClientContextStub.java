@@ -648,7 +648,6 @@ public final class ClientContextStub {
         final String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
         final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
         String userLaf = Project.getString("lookAndFeel", nimbusCls);
-        userLaf = winLafCls;
         boolean isQuaqua = quaquaCls.equals(userLaf);
         isNimbus = nimbusCls.equals(userLaf);
 
