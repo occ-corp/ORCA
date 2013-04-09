@@ -724,6 +724,7 @@ public final class ClientContextStub {
             Font font11 = new Font("SansSerif", Font.PLAIN, 11);
             Font font12 = new Font("SansSerif", Font.PLAIN, 12);
             Font font13 = new Font("SansSerif", Font.PLAIN, 13);
+            
             UIManager.put("Label.font", font12);
             UIManager.put("Button.font", font12);
             UIManager.put("ToggleButton.font", font12);
@@ -745,6 +746,8 @@ public final class ClientContextStub {
             UIManager.put("TableHeader.font", font11);  // 小さ目
             UIManager.put("Tree.rowHeight", 20);        // 高さ指定
             UIManager.put("TabbedPane.font", font13);
+            UIManager.put("OptionPane.font", font13);
+            UIManager.put("OptionPane.messageFont", font13);
         }
         
         // Nimbusの背景色workaround
