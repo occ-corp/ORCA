@@ -596,6 +596,9 @@ public class Dolphin implements MainWindow {
         
         // このクライアントでChartImplとEditorFrameを開いていた場合の処理
         PatientModel pm = pvt.getPatientModel();
+        if (pm == null) {
+            return;
+        }
         boolean opened = false;
         long ptId = pm.getId();
         for (ChartImpl chart : WindowSupport.getAllCharts()) {
@@ -1448,6 +1451,11 @@ public class Dolphin implements MainWindow {
             mediator.enabledAction("nimbusLookAndFeel", true);
             mediator.enabledAction("nativeLookAndFeel", true);
             mediator.enabledAction("quaquaLookAndFeel", true);
+            mediator.enabledAction("metalLookAndFeel", true);
+            mediator.enabledAction("jgoodiesLookAndFeel", true);
+            //mediator.enabledAction("substanceLookAndFeel", true);
+            //mediator.enabledAction("seaglassLookAndFeel", true);
+            //mediator.enabledAction("webLookAndFeel", true);
 //masuda$
 
             Action addUserAction = mediator.getAction(GUIConst.ACTION_ADD_USER);
@@ -1506,6 +1514,10 @@ public class Dolphin implements MainWindow {
 
     public static void main(String[] args) {
 //masuda^
+        // アンチエイリアスの設定は最初がいい？
+        System.setProperty("awt.useSystemAAFontSettings","on");
+        settingForMac();
+        
         boolean pro = false;
         boolean server = false;
         String userId = null;
@@ -1529,22 +1541,10 @@ public class Dolphin implements MainWindow {
             new StandAlonePVTServer(pro, null, userId, userPassword);
             return;
         }
-        
-        settingForMac();
-        
-        // quaquaの場合systemのantialiasをoffにする
-        final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-        final String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-        
+
         ClientContext.setClientContextStub(new ClientContextStub(pro));
         Project.setProjectStub(new ProjectStub());
-        String userLaf = Project.getString("lookAndFeel", nimbusCls);
-        boolean isWin = ClientContext.isWin();
-        if (isWin && quaquaCls.equals(userLaf)) {
-            System.setProperty("awt.useSystemAAFontSettings","off");
-        } else {
-            System.setProperty("awt.useSystemAAFontSettings","on");
-        }
+        // configure LAF/UI
         ClientContext.getClientContextStub().setUI();
         
         instance = new Dolphin();
@@ -1601,8 +1601,7 @@ public class Dolphin implements MainWindow {
 
     public void nimbusLookAndFeel() {
         try {
-            String nimbus = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-            Project.setString("lookAndFeel", nimbus);
+            Project.setString("lookAndFeel", ClientContextStub.NIMBUS_LAF_CLS);
             requestReboot();
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -1611,8 +1610,7 @@ public class Dolphin implements MainWindow {
 
     public void nativeLookAndFeel() {
         try {
-            String nativeLaf = UIManager.getSystemLookAndFeelClassName();
-            Project.setString("lookAndFeel", nativeLaf);
+            Project.setString("lookAndFeel", ClientContextStub.SYSTEM_LAF_CLS);
             requestReboot();
         } catch (Exception e) {
             e.printStackTrace(System.err);
@@ -1621,14 +1619,58 @@ public class Dolphin implements MainWindow {
 
     public void quaquaLookAndFeel() {
         try {
-            final String quaqua = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-            Project.setString("lookAndFeel", quaqua);
+            Project.setString("lookAndFeel", ClientContextStub.QUAQUA_LAF_CLS);
             requestReboot();
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
     }
 
+    public void metalLookAndFeel() {
+        try {
+            Project.setString("lookAndFeel", ClientContextStub.METAL_LAF_CLS);
+            requestReboot();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
+
+    public void jgoodiesLookAndFeel() {
+        try {
+            Project.setString("lookAndFeel", ClientContextStub.JGOODIES_LAF_CLS);
+            requestReboot();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
+
+    public void seaglassLookAndFeel() {
+        try {
+            Project.setString("lookAndFeel", ClientContextStub.SEAGLASS_LAF_CLS);
+            requestReboot();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
+
+    public void webLookAndFeel() {
+        try {
+            Project.setString("lookAndFeel", ClientContextStub.WEB_LAF_CLS);
+            requestReboot();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
+    
+    public void substanceLookAndFeel() {
+        try {
+            Project.setString("lookAndFeel", ClientContextStub.SUBSTANCE_LAF_CLS);
+            requestReboot();
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
+    
     private void requestReboot() {
 
         // LAFの変更やPropertyのインポート・初期化はいったん再起動させることとする

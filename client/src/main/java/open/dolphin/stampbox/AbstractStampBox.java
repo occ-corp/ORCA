@@ -56,7 +56,9 @@ public abstract class AbstractStampBox extends JTabbedPane implements IStampBox 
         boolean found = false;
         StampTree tree = null;
         for (int i = 0; i < count; i++) {
+//masuda^
             StampTreePanel panel = (StampTreePanel) this.getComponentAt(i);
+//masuda$
             tree = panel.getTree();
             if (entity.equals(tree.getEntity())) {
                 found = true;
@@ -70,7 +72,9 @@ public abstract class AbstractStampBox extends JTabbedPane implements IStampBox 
     @Override
     public StampTree getStampTree(int index) {
         if (index >=0 && index < this.getTabCount()) {
+//masuda^
             StampTreePanel panel = (StampTreePanel) this.getComponentAt(index);
+//masuda$
             return panel.getTree();
         }
         return null;
@@ -94,7 +98,9 @@ public abstract class AbstractStampBox extends JTabbedPane implements IStampBox 
         List<TreeInfo> ret = new ArrayList<TreeInfo>();
         int cnt = this.getTabCount();
         for (int i = 0; i < cnt; i++) {
-            StampTreePanel tp = (StampTreePanel) this.getComponent(i);
+//masuda^
+            StampTreePanel tp = (StampTreePanel) this.getComponentAt(i);
+//masuda$
             StampTree tree = tp.getTree();
             TreeInfo info = tree.getTreeInfo();
             ret.add(info);
@@ -111,7 +117,9 @@ public abstract class AbstractStampBox extends JTabbedPane implements IStampBox 
         List<StampTree> ret = new ArrayList<StampTree>();
         int cnt = this.getTabCount();
         for (int i = 0; i < cnt; i++) {
-            StampTreePanel tp = (StampTreePanel) this.getComponent(i);
+//masuda^
+            StampTreePanel tp = (StampTreePanel) this.getComponentAt(i);
+//masuda$
             StampTree tree = tp.getTree();
             ret.add(tree);
         }
@@ -128,7 +136,9 @@ public abstract class AbstractStampBox extends JTabbedPane implements IStampBox 
         int cnt = this.getTabCount();
         
         for (int i = 0; i < cnt; i++) {
-            StampTreePanel tp = (StampTreePanel) this.getComponent(i);
+//masuda^
+            StampTreePanel tp = (StampTreePanel) this.getComponentAt(i);
+//masuda$
             StampTree tree = tp.getTree();
             //
             // 病名StampTree はスキップする

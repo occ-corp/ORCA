@@ -133,6 +133,25 @@
             <artifactId>tomcat-jdbc</artifactId>
             <version>7.0.39</version>
         </dependency>
+        <dependency>
+            <groupId>com.jgoodies</groupId>
+            <artifactId>jgoodies-looks</artifactId>
+            <version>2.5.2</version>
+            <type>jar</type>
+        </dependency>
+<!--
+        <dependency>
+            <groupId>com.github.insubstantial</groupId>
+            <artifactId>substance</artifactId>
+            <version>7.2.1</version>
+            <type>jar</type>
+        </dependency>
+        <dependency>
+            <groupId>com.seaglasslookandfeel</groupId>
+            <artifactId>seaglasslookandfeel</artifactId>
+            <version>0.2</version>
+        </dependency>
+-->
 <!-- 以下は自分でローカルリポジトリに追加する -->
         <dependency>
             <groupId>com.lowagie</groupId>
@@ -152,6 +171,13 @@
             <version>9.0.0.1</version>
             <type>jar</type>
         </dependency>
+<!--
+        <dependency>
+            <groupId>com.alee</groupId>
+            <artifactId>weblookandfeel</artifactId>
+            <version>1.4.0-preview</version>
+        </dependency>
+-->
     </dependencies>
   
     <build>

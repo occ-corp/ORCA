@@ -30,6 +30,17 @@ import org.apache.velocity.app.Velocity;
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
 public final class ClientContextStub {
+    
+    // LAF
+    public static final String SYSTEM_LAF_CLS = UIManager.getSystemLookAndFeelClassName();
+    public static final String WIN_LAF_CLS = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+    public static final String NIMBUS_LAF_CLS = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+    public static final String QUAQUA_LAF_CLS = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
+    public static final String METAL_LAF_CLS = "javax.swing.plaf.metal.MetalLookAndFeel";
+    public static final String JGOODIES_LAF_CLS = "com.jgoodies.looks.plastic.Plastic3DLookAndFeel";
+    public static final String SEAGLASS_LAF_CLS = "com.seaglasslookandfeel.SeaGlassLookAndFeel";
+    public static final String WEB_LAF_CLS = "com.alee.laf.WebLookAndFeel";
+    public static final String SUBSTANCE_LAF_CLS = "org.pushingpixels.substance.api.skin.SubstanceBusinessLookAndFeel";
 
     //--------------------------------------------------------------------------
     private final String RESOURCE_LOCATION = "/open/dolphin/resources/";
@@ -643,13 +654,11 @@ public final class ClientContextStub {
      */
     public void setUI() {
 
-        final String defaultLaf = UIManager.getSystemLookAndFeelClassName();
-        final String winLafCls = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-        final String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-        final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-        String userLaf = Project.getString("lookAndFeel", nimbusCls);
-        boolean isQuaqua = quaquaCls.equals(userLaf);
-        isNimbus = nimbusCls.equals(userLaf);
+        //Locale locale = Locale.getDefault();
+        String userLaf = Project.getString("lookAndFeel", NIMBUS_LAF_CLS);
+        //userLaf = QUAQUA_LAF_CLS;
+        boolean isQuaqua = QUAQUA_LAF_CLS.equals(userLaf);
+        isNimbus = NIMBUS_LAF_CLS.equals(userLaf);
 
         // Quaqua設定
         if (isQuaqua) {
@@ -669,13 +678,12 @@ public final class ClientContextStub {
         }
         
         // MacにNimbusはない
-        if (isMac() && nimbusCls.equals(userLaf)) {
-            userLaf = defaultLaf;
+        if (isMac() && isNimbus) {
+            userLaf = SYSTEM_LAF_CLS;
         }
         
         try {
             UIManager.setLookAndFeel(userLaf);
-
         } catch (Exception e) {
             e.printStackTrace(System.err);
             getBootLogger().warn(e.getMessage());
@@ -742,10 +750,12 @@ public final class ClientContextStub {
         // Nimbusの背景色workaround
         if (isNimbus) {
             UIManager.put("TextPaneUI", BasicTextPaneUI.class.getName());
+            UIManager.put("TextPane.selectionBackground", new Color(57,105,138));
+            UIManager.put("TextPane.selectionForeground", Color.WHITE);
         }
         
         // Windows LAF テーブル選択背景色変更
-        if (winLafCls.equals(userLaf)) {
+        if (WIN_LAF_CLS.equals(userLaf)) {
             final Color c = new Color(56, 117, 215);
             UIManager.put("Table.selectionBackground", c);
             UIManager.put("Tree.selectionBackground", c);
@@ -760,6 +770,9 @@ public final class ClientContextStub {
         UIManager.put("OptionPane.noButtonText", "いいえ");
 
         getBootLogger().debug("デフォルトのフォントを変更しました。");
+        
+        // Web Look and Feelがロケールを書き換えやがるので戻す
+        //Locale.setDefault(locale);
     }
     
     public Color getZebraColor() {

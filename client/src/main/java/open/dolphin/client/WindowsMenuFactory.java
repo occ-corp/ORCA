@@ -11,7 +11,6 @@ import java.util.Map;
 import java.util.ResourceBundle;
 import javax.swing.*;
 import open.dolphin.helper.MenuSupport;
-import open.dolphin.project.Project;
 
 /**
  * Menu Factory for Mac. 
@@ -688,6 +687,56 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         };
         map.put("nativeLookAndFeel", nativeLookAndFeel);
 
+        text = resource.getString("metalLookAndFeel.Action.text");
+        AbstractAction metalLookAndFeel = new AbstractAction(text) {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("metalLookAndFeel");
+            }
+        };
+        map.put("metalLookAndFeel", metalLookAndFeel);
+        
+        text = resource.getString("seaglassLookAndFeel.Action.text");
+        AbstractAction seaglassLookAndFeel = new AbstractAction(text) {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("seaglassLookAndFeel");
+            }
+        };
+        map.put("seaglassLookAndFeel", seaglassLookAndFeel);
+        
+        text = resource.getString("jgoodiesLookAndFeel.Action.text");
+        AbstractAction jgoodiesLookAndFeel = new AbstractAction(text) {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("jgoodiesLookAndFeel");
+            }
+        };
+        map.put("jgoodiesLookAndFeel", jgoodiesLookAndFeel);
+        
+        text = resource.getString("webLookAndFeel.Action.text");
+        AbstractAction webLookAndFeel = new AbstractAction(text) {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("webLookAndFeel");
+            }
+        };
+        map.put("webLookAndFeel", webLookAndFeel);
+        
+        text = resource.getString("substanceLookAndFeel.Action.text");
+        AbstractAction sbstantialLaf = new AbstractAction(text) {
+
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("substanceLookAndFeel");
+            }
+        };
+        map.put("substanceLookAndFeel", sbstantialLaf);
+        
         text = resource.getString("editDisconItem.Action.text");
         AbstractAction editDisconItem = new AbstractAction(text) {
 
@@ -1067,23 +1116,61 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         quaquaLaf.setName("quaquaLookAndFeel");
         quaquaLaf.setAction(actionMap.get("quaquaLookAndFeel"));
         lookAndFeel.add(quaquaLaf);
+        
+        JRadioButtonMenuItem metalLaf = new JRadioButtonMenuItem();
+        metalLaf.setName("metalLookAndFeel");
+        metalLaf.setAction(actionMap.get("metalLookAndFeel"));
+        lookAndFeel.add(metalLaf);
 
+        JRadioButtonMenuItem jgoodiesLaf = new JRadioButtonMenuItem();
+        jgoodiesLaf.setName("jgoodiesLookAndFeel");
+        jgoodiesLaf.setAction(actionMap.get("jgoodiesLookAndFeel"));
+        lookAndFeel.add(jgoodiesLaf);
+/*
+        JRadioButtonMenuItem substanceLaf = new JRadioButtonMenuItem();
+        substanceLaf.setName("substanceLookAndFeel");
+        substanceLaf.setAction(actionMap.get("substanceLookAndFeel"));
+        lookAndFeel.add(substanceLaf);
+
+        JRadioButtonMenuItem seaglassLaf = new JRadioButtonMenuItem();
+        seaglassLaf.setName("seaglassLookAndFeel");
+        seaglassLaf.setAction(actionMap.get("seaglassLookAndFeel"));
+        lookAndFeel.add(seaglassLaf);
+        
+        JRadioButtonMenuItem webLaf = new JRadioButtonMenuItem();
+        webLaf.setName("weblLookAndFeel");
+        webLaf.setAction(actionMap.get("webLookAndFeel"));
+        lookAndFeel.add(webLaf);
+*/
         ButtonGroup lafbg = new ButtonGroup();
         lafbg.add(nimbusLaf);
         lafbg.add(nativeLaf);
         lafbg.add(quaquaLaf);
+        lafbg.add(metalLaf);
+        lafbg.add(jgoodiesLaf);
+        //lafbg.add(substanceLaf);
+        //lafbg.add(seaglassLaf);
+        //lafbg.add(webLaf);
 
-        String systemLaf = UIManager.getSystemLookAndFeelClassName();
-        String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-        String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
-        String userLaf = Project.getString("lookAndFeel", nimbusCls);
-
-        if (userLaf.equals(systemLaf)) {
-            nativeLaf.setSelected(true);
-        } else if (userLaf.equals(quaquaCls)) {
+        String currentLaf = UIManager.getLookAndFeel().getClass().getName();
+        if (ClientContextStub.QUAQUA_LAF_CLS.equals(currentLaf)) {
             quaquaLaf.setSelected(true);
-        } else {
+        } else if (ClientContextStub.NIMBUS_LAF_CLS.equals(currentLaf)) {
             nimbusLaf.setSelected(true);
+        } else if (ClientContextStub.METAL_LAF_CLS.equals(currentLaf)) {
+            metalLaf.setSelected(true);
+        } else if (ClientContextStub.JGOODIES_LAF_CLS.equals(currentLaf)) {
+            jgoodiesLaf.setSelected(true);
+/*       
+        } else if (ClientContextStub.SUBSTANCE_LAF_CLS.equals(currentLaf)) {
+            substanceLaf.setSelected(true);
+        } else if (ClientContextStub.SEAGLASS_LAF_CLS.equals(currentLaf)) {
+            seaglassLaf.setSelected(true);
+        } else if (ClientContextStub.WEB_LAF_CLS.equals(currentLaf)) {
+            webLaf.setSelected(true);
+*/
+        } else {
+            nativeLaf.setSelected(true);
         }
 //masuda$
         
