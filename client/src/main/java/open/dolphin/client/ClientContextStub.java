@@ -694,10 +694,10 @@ public final class ClientContextStub {
         if (isMac() && isNimbus) {
             userLaf = SYSTEM_LAF_CLS;
         }
-        if (userLaf.startsWith("com.jtattoo.plaf.acryl")) {
+        if (ClientContextStub.JTATTOO_ACRYL_LAF_CLS.equals(userLaf)) {
             com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme("Default", "", "");
         }
-        if (userLaf.startsWith("com.jtattoo.plaf.aluminium")) {
+        if (ClientContextStub.JTATTOO_ALUMINIUM_LAF_CLS.equals(userLaf)) {
             com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme("Default", "", "");
         }
         
