@@ -1448,14 +1448,16 @@ public class Dolphin implements MainWindow {
             mediator.enableMenus(enables);
             
 //masuda^   LAF
-            mediator.enabledAction("nimbusLookAndFeel", true);
-            mediator.enabledAction("nativeLookAndFeel", true);
-            mediator.enabledAction("quaquaLookAndFeel", true);
-            mediator.enabledAction("metalLookAndFeel", true);
-            mediator.enabledAction("jgoodiesLookAndFeel", true);
-            //mediator.enabledAction("substanceLookAndFeel", true);
-            //mediator.enabledAction("seaglassLookAndFeel", true);
-            //mediator.enabledAction("webLookAndFeel", true);
+            mediator.enabledAction(ClientContextStub.NIMBUS_LAF, true);
+            mediator.enabledAction(ClientContextStub.SYSTEM_LAF, true);
+            mediator.enabledAction(ClientContextStub.QUAQUA_LAF, true);
+            mediator.enabledAction(ClientContextStub.METAL_LAF, true);
+            mediator.enabledAction(ClientContextStub.JGOODIES_LAF, true);
+            mediator.enabledAction(ClientContextStub.JTATTOO_ACRYL_LAF, true);
+            mediator.enabledAction(ClientContextStub.JTATTOO_ALUMINIUM_LAF, true);
+            //mediator.enabledAction(ClientContextStub.SUBSTANCE_LAF, true);
+            //mediator.enabledAction(ClientContextStub.SEAGLASS_LAF, true);
+            //mediator.enabledAction(ClientContextStub.WEB_LAF, true);
 //masuda$
 
             Action addUserAction = mediator.getAction(GUIConst.ACTION_ADD_USER);
@@ -1598,79 +1600,16 @@ public class Dolphin implements MainWindow {
             }
         });
     }
-
-    public void nimbusLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.NIMBUS_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-
-    public void nativeLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.SYSTEM_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-
-    public void quaquaLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.QUAQUA_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-
-    public void metalLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.METAL_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-
-    public void jgoodiesLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.JGOODIES_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-
-    public void seaglassLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.SEAGLASS_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-
-    public void webLookAndFeel() {
-        try {
-            Project.setString("lookAndFeel", ClientContextStub.WEB_LAF_CLS);
-            requestReboot();
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
     
-    public void substanceLookAndFeel() {
+    public void changeLaf(String lafCls) {
         try {
-            Project.setString("lookAndFeel", ClientContextStub.SUBSTANCE_LAF_CLS);
+            Project.setString("lookAndFeel", lafCls);
             requestReboot();
         } catch (Exception e) {
             e.printStackTrace(System.err);
         }
     }
-    
+
     private void requestReboot() {
 
         // LAFの変更やPropertyのインポート・初期化はいったん再起動させることとする

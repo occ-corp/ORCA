@@ -41,7 +41,20 @@ public final class ClientContextStub {
     public static final String SEAGLASS_LAF_CLS = "com.seaglasslookandfeel.SeaGlassLookAndFeel";
     public static final String WEB_LAF_CLS = "com.alee.laf.WebLookAndFeel";
     public static final String SUBSTANCE_LAF_CLS = "org.pushingpixels.substance.api.skin.SubstanceBusinessLookAndFeel";
-
+    public static final String JTATTOO_ACRYL_LAF_CLS = "com.jtattoo.plaf.acryl.AcrylLookAndFeel";
+    public static final String JTATTOO_ALUMINIUM_LAF_CLS = "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel";
+    
+    public static final String SYSTEM_LAF ="nativeLookAndFeel";
+    public static final String NIMBUS_LAF = "nimbusLookAndFeel";
+    public static final String QUAQUA_LAF = "quaquaLookAndFeel";
+    public static final String METAL_LAF = "metalLookAndFeel";
+    public static final String JGOODIES_LAF = "jgoodiesLookAndFeel";
+    public static final String SEAGLASS_LAF = "seaglassLookAndFeel";
+    public static final String WEB_LAF = "webLookAndFeel";
+    public static final String SUBSTANCE_LAF = "substanceLookAndFeel";
+    public static final String JTATTOO_ACRYL_LAF = "jtattooAcrylLookAndFeel";
+    public static final String JTATTOO_ALUMINIUM_LAF = "jtattooAluminiumLookAndFeel";
+    
     //--------------------------------------------------------------------------
     private final String RESOURCE_LOCATION = "/open/dolphin/resources/";
     private final String TEMPLATE_LOCATION = "/open/dolphin/resources/templates/";
@@ -680,6 +693,12 @@ public final class ClientContextStub {
         // MacにNimbusはない
         if (isMac() && isNimbus) {
             userLaf = SYSTEM_LAF_CLS;
+        }
+        if (userLaf.startsWith("com.jtattoo.plaf.acryl")) {
+            com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme("Default", "", "");
+        }
+        if (userLaf.startsWith("com.jtattoo.plaf.noire")) {
+            com.jtattoo.plaf.noire.NoireLookAndFeel.setTheme("Default", "", "");
         }
         
         try {
