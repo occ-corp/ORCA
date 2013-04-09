@@ -644,9 +644,11 @@ public final class ClientContextStub {
     public void setUI() {
 
         final String defaultLaf = UIManager.getSystemLookAndFeelClassName();
+        final String winLafCls = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
         final String nimbusCls = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
         final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
         String userLaf = Project.getString("lookAndFeel", nimbusCls);
+        userLaf = winLafCls;
         boolean isQuaqua = quaquaCls.equals(userLaf);
         isNimbus = nimbusCls.equals(userLaf);
 
@@ -712,6 +714,7 @@ public final class ClientContextStub {
             UIManager.put("List.font", font12);
             
         } else {
+            Font font11 = new Font("SansSerif", Font.PLAIN, 11);
             Font font12 = new Font("SansSerif", Font.PLAIN, 12);
             Font font13 = new Font("SansSerif", Font.PLAIN, 13);
             UIManager.put("Label.font", font12);
@@ -732,13 +735,22 @@ public final class ClientContextStub {
             UIManager.put("TextField.font", font12);
             UIManager.put("PasswordField.font", font12);
             UIManager.put("Table.font", font12);
-            UIManager.put("TableHeader.font", font12);
+            UIManager.put("TableHeader.font", font11);  // 小さ目
             UIManager.put("Tree.rowHeight", 20);        // 高さ指定
+            UIManager.put("TabbedPane.font", font13);
         }
         
         // Nimbusの背景色workaround
         if (isNimbus) {
             UIManager.put("TextPaneUI", BasicTextPaneUI.class.getName());
+        }
+        
+        // Windows LAF テーブル選択背景色変更
+        if (winLafCls.equals(userLaf)) {
+            final Color c = new Color(56, 117, 215);
+            UIManager.put("Table.selectionBackground", c);
+            UIManager.put("Tree.selectionBackground", c);
+            UIManager.put("List.selectionBackground", c);
         }
         
         UIManager.put("ComboBox.maximumRowCount", 20);
