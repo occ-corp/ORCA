@@ -5,6 +5,7 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -1336,28 +1337,50 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
             }
         };
         
+        // システム提供のLAF
         for (UIManager.LookAndFeelInfo lafInfo : UIManager.getInstalledLookAndFeels()) {
-            JRadioButtonMenuItem lafItem = new JRadioButtonMenuItem();
-            lafItem.setHideActionText(true);
-            lafItem.setAction(lafAction);
-            lafItem.setActionCommand(lafInfo.getClassName());
-            lafItem.setText(lafInfo.getName());
-            lafItem.setSelected(lafInfo.getClassName().equals(currentLaf));
-            bg.add(lafItem);
+            String lafName = lafInfo.getName();
+            String lafCls = lafInfo.getClassName();
+            JRadioButtonMenuItem lafItem = createRadioMenuItem(lafName, lafCls, currentLaf, lafAction, bg);
             menu.add(lafItem);
         }
         
-        for (String[] lafInfo : ClientContextStub.EXT_LAF_INFO) {
-            JRadioButtonMenuItem lafItem = new JRadioButtonMenuItem();
-            lafItem.setHideActionText(true);
-            lafItem.setAction(lafAction);
-            lafItem.setActionCommand(lafInfo[1]);
-            lafItem.setText(lafInfo[0]);
-            lafItem.setSelected(lafInfo[1].equals(currentLaf));
-            bg.add(lafItem);
-            menu.add(lafItem);
+        // 外部LAF
+        Map<String, JMenu> subMenuMap = new HashMap<String, JMenu>();
+        for (String[] lafInfo : ILookAndFeelConst.EXT_LAF_INFO) {
+            String group = lafInfo[0];
+            String lafName = lafInfo[1];
+            String lafCls = lafInfo[2];
+            if (group == null) {
+                JRadioButtonMenuItem lafItem = createRadioMenuItem(lafName, lafCls, currentLaf, lafAction, bg);
+                menu.add(lafItem);
+            } else {
+                JMenu subMenu = subMenuMap.get(group);
+                if (subMenu == null) {
+                    subMenu = new JMenu(group);
+                    subMenuMap.put(group, subMenu);
+                    menu.add(subMenu);
+                }
+                JRadioButtonMenuItem lafItem = createRadioMenuItem(lafName, lafCls, currentLaf, lafAction, bg);
+                subMenu.add(lafItem);
+            }
         }
+        subMenuMap.clear();
         
         return menu;
+    }
+    
+    private JRadioButtonMenuItem createRadioMenuItem(String lafName, String lafCls, 
+            String currentLaf, AbstractAction lafAction, ButtonGroup bg) {
+
+        JRadioButtonMenuItem lafItem = new JRadioButtonMenuItem();
+        lafItem.setHideActionText(true);
+        lafItem.setAction(lafAction);
+        lafItem.setActionCommand(lafCls);
+        lafItem.setText(lafName);
+        lafItem.setSelected(lafCls.equals(currentLaf));
+        bg.add(lafItem);
+
+        return lafItem;
     }
 }

@@ -33,28 +33,6 @@ import org.apache.velocity.app.Velocity;
  */
 public final class ClientContextStub {
     
-    // LAF
-    public static final String WIN_LAF_CLS = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-    public static final String NIMBUS_LAF_CLS = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
-    
-    public static final String QUAQUA_LAF_CLS = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-    public static final String JGOODIES_P3D_LAF_CLS = "com.jgoodies.looks.plastic.Plastic3DLookAndFeel";
-    public static final String JTATTOO_ACRYL_LAF_CLS = "com.jtattoo.plaf.acryl.AcrylLookAndFeel";
-    public static final String JTATTOO_ALUMINIUM_LAF_CLS = "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel";
-    //public static final String SEAGLASS_LAF_CLS = "com.seaglasslookandfeel.SeaGlassLookAndFeel";
-    //public static final String WEB_LAF_CLS = "com.alee.laf.WebLookAndFeel";
-    //public static final String SUBSTANCE_BUSINESS_LAF_CLS = "org.pushingpixels.substance.api.skin.SubstanceBusinessLookAndFeel";
-    
-    public static final String[][] EXT_LAF_INFO = {
-        {"QuaQua", QUAQUA_LAF_CLS},
-        {"JGoodies Plastic3D", JGOODIES_P3D_LAF_CLS},
-        {"JTattoo Acryl", JTATTOO_ACRYL_LAF_CLS},
-        {"JTattoo Aluminium", JTATTOO_ALUMINIUM_LAF_CLS}
-        //{"Seaglass", SEAGLASS_LAF_CLS},
-        //{"Web Look And Feel", WEB_LAF_CLS},
-        //{"Substance Business", SUBSTANCE_BUSINESS_LAF_CLS},
-    };
-    
     //--------------------------------------------------------------------------
     private final String RESOURCE_LOCATION = "/open/dolphin/resources/";
     private final String TEMPLATE_LOCATION = "/open/dolphin/resources/templates/";
@@ -669,9 +647,9 @@ public final class ClientContextStub {
 
         String sytemLafCls = UIManager.getSystemLookAndFeelClassName();
         //Locale locale = Locale.getDefault();
-        String userLaf = Project.getString("lookAndFeel", NIMBUS_LAF_CLS);
+        String userLaf = Project.getString("lookAndFeel", ILookAndFeelConst.NIMBUS_LAF_CLS);
         //userLaf = QUAQUA_LAF_CLS;
-        boolean isQuaqua = QUAQUA_LAF_CLS.equals(userLaf);
+        boolean isQuaqua = ILookAndFeelConst.QUAQUA_LAF_CLS.equals(userLaf);
         isNimbus = userLaf.contains("nimbus");
 
         // Quaqua設定
@@ -697,7 +675,7 @@ public final class ClientContextStub {
         }
         
         // JTattooの設定
-        if (userLaf.startsWith("com.jtattoo.plaf")) {
+        if (userLaf.startsWith(ILookAndFeelConst.JTATTOO)) {
             try {
                 Class cls = Class.forName(userLaf);
                 Method method = cls.getMethod("setTheme", new Class[]{String.class, String.class, String.class});
@@ -784,7 +762,7 @@ public final class ClientContextStub {
         }
         
         // Windows LAF テーブル選択背景色変更
-        if (WIN_LAF_CLS.equals(userLaf)) {
+        if (ILookAndFeelConst.WIN_LAF_CLS.equals(userLaf)) {
             final Color c = new Color(56, 117, 215);
             UIManager.put("Table.selectionBackground", c);
             UIManager.put("Tree.selectionBackground", c);
@@ -802,6 +780,9 @@ public final class ClientContextStub {
         
         // Web Look and Feelがロケールを書き換えやがるので戻す
         //Locale.setDefault(locale);
+        // ウィンドウフレームの装飾
+        //JFrame.setDefaultLookAndFeelDecorated(true);
+        //JDialog.setDefaultLookAndFeelDecorated(true);
     }
     
     public Color getZebraColor() {

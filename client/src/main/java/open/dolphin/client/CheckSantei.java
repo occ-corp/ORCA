@@ -20,7 +20,7 @@ import open.dolphin.util.MMLDate;
  *
  * @author masuda, Masuda Naika
  */
-public class CheckSantei extends CheckSanteiConst {
+public class CheckSantei implements ICheckSanteiConst {
     
     protected Chart context;
 

@@ -17,7 +17,7 @@ import open.dolphin.util.MMLDate;
  * 
  * @author masuda, Masuda Naika
  */
-public class CheckSantei2 extends CheckSanteiConst {
+public class CheckSantei2 implements ICheckSanteiConst {
 /*
     protected Chart context;
     private KartePane kp;

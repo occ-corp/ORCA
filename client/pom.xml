@@ -21,6 +21,12 @@
             <name>www.dcm4che.org/maven2</name>
             <url>http://www.dcm4che.org/maven2/</url>
         </repository>
+<!--
+        <repository>
+            <id>athou-repo</id>
+            <url>https://github.com/Athou/maven-repository/raw/master/repo</url>
+        </repository>
+-->
     </repositories>
 
     <dependencies>
@@ -144,6 +150,11 @@
            <artifactId>JTattoo</artifactId>
            <version>1.6.7</version>
          </dependency>
+        <dependency>
+            <groupId>com.seaglasslookandfeel</groupId>
+            <artifactId>seaglasslookandfeel</artifactId>
+            <version>0.2</version>
+        </dependency>
 <!--
         <dependency>
             <groupId>com.github.insubstantial</groupId>
@@ -152,9 +163,9 @@
             <type>jar</type>
         </dependency>
         <dependency>
-            <groupId>com.seaglasslookandfeel</groupId>
-            <artifactId>seaglasslookandfeel</artifactId>
-            <version>0.2</version>
+            <groupId>com.alee</groupId>
+            <artifactId>weblookandfeel</artifactId>
+            <version>1.4.0-preview</version>
         </dependency>
 -->
 <!-- 以下は自分でローカルリポジトリに追加する -->
@@ -176,13 +187,6 @@
             <version>9.0.0.1</version>
             <type>jar</type>
         </dependency>
-<!--
-        <dependency>
-            <groupId>com.alee</groupId>
-            <artifactId>weblookandfeel</artifactId>
-            <version>1.4.0-preview</version>
-        </dependency>
--->
     </dependencies>
   
     <build>
