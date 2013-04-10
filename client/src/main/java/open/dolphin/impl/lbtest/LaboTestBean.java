@@ -245,30 +245,19 @@ public class LaboTestBean extends AbstractChartDocument {
         sb.append(" - ");
         sb.append(Project.getUserModel().getFacilityModel().getFacilityName());
         String footer = sb.toString();
-        
+
+        // 印刷不具合対策。quaquaが原因じゃなかった？
+        JTableHeader header = table.getTableHeader();
+        Font tableFont = table.getFont();
+        Font headerFont = header.getFont();
+        table.setFont(new Font(Font.MONOSPACED, tableFont.getStyle(), tableFont.getSize()));
+        header.setFont(new Font(Font.MONOSPACED, headerFont.getStyle(), headerFont.getSize()));
         try {
-            // quaqua使用時の不具合対策
-            final String currentLaf = UIManager.getLookAndFeel().getClass().getName();
-            final String quaquaCls = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-            boolean quaqua = quaquaCls.equals(currentLaf);
-            
-            if (quaqua) {
-                JTableHeader header = table.getTableHeader();
-                Font tableFont = table.getFont();
-                Font headerFont = header.getFont();
-                table.setFont(new Font(Font.MONOSPACED, tableFont.getStyle(), tableFont.getSize()));
-                header.setFont(new Font(Font.MONOSPACED, headerFont.getStyle(), headerFont.getSize()));
-                
-                table.print(PrintMode.FIT_WIDTH, null, new MessageFormat(footer));
-                
-                table.setFont(tableFont);
-                header.setFont(headerFont);
-            } else {
-                table.print(PrintMode.FIT_WIDTH, null, new MessageFormat(footer));
-            }
+            table.print(PrintMode.FIT_WIDTH, null, new MessageFormat(footer));
         } catch (PrinterException ex) {
         }
-
+        table.setFont(tableFont);
+        header.setFont(headerFont);
     }
     
     @Override
