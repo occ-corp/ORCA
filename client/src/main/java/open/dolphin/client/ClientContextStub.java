@@ -743,8 +743,9 @@ public final class ClientContextStub {
             UIManager.put("TitledBorder.font", font12);
             UIManager.put("List.font", font12);
             UIManager.put("TextPane.font", font13);     // 大き目
-            UIManager.put("TextField.font", font12);
-            UIManager.put("PasswordField.font", font12);
+            UIManager.put("TextField.font", font13);
+            UIManager.put("PasswordField.font", font13);
+            //UIManager.put("TextArea.font", font13);
             UIManager.put("Table.font", font12);
             UIManager.put("TableHeader.font", font11);  // 小さ目
             UIManager.put("Tree.rowHeight", 20);        // 高さ指定
