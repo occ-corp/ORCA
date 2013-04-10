@@ -7,10 +7,10 @@ import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.nio.channels.FileChannel;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
@@ -153,6 +153,14 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
         return false;
     }
 
+    // ゴミ箱にDnDしたらちゃんと消える！
+    @Override
+    protected void exportDone(JComponent source, Transferable data, int action) {
+        ImagePanel imagePanel = (ImagePanel) source;
+        AbstractBrowser browser = (AbstractBrowser) imagePanel.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
+        browser.scan();
+    }
+
     @Override
     public boolean canImport(TransferSupport support) {
 
@@ -220,7 +228,7 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
                         throw new DolphinException("画像用のディレクトリを作成できません。");
                     }
                 }
-
+/*
                 for (File src : imageFiles) {
                     File dest = new File(dirStr, src.getName());
                     FileChannel in = (new FileInputStream(src)).getChannel();
@@ -237,7 +245,18 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
                         delete.delete();
                     }
                 }
-
+*/
+                // java.nio.file.Filesを使ってみる
+                for (File src : imageFiles) {
+                    Path srcPath = src.toPath();
+                    Path destPath = new File(dirStr, src.getName()).toPath();
+                    if (context.dropIsMove()) {
+                        Files.move(srcPath, destPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                    } else {
+                        Files.copy(srcPath, destPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
+                    }
+                    
+                }
                 return null;
             }
 
