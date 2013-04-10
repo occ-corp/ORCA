@@ -749,7 +749,7 @@ public final class ClientContextStub {
             UIManager.put("Table.font", font12);
             UIManager.put("TableHeader.font", font11);  // 小さ目
             UIManager.put("Tree.rowHeight", 20);        // 高さ指定
-            UIManager.put("TabbedPane.font", font13);
+            UIManager.put("TabbedPane.font", font12);
             UIManager.put("OptionPane.font", font13);
             UIManager.put("OptionPane.messageFont", font13);
         }

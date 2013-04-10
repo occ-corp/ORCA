@@ -62,7 +62,7 @@ public interface ILookAndFeelConst {
     public static final String SUBSTANCE_EMERALD_DUSK_LAF_CLS = SUBSTANCE + "SubstanceEmeraldDuskLookAndFeel";
 
     public static final String[][] EXT_LAF_INFO = {
-        {null, "QuaQua", QUAQUA_LAF_CLS},
+        {null, "Quaqua", QUAQUA_LAF_CLS},
         
         {"JGoodies", "Windows", JGOODIES_WINDOWS_LAF_CLS},
         {"JGoodies", "Plastic", JGOODIES_PLASTIC_LAF_CLS},
