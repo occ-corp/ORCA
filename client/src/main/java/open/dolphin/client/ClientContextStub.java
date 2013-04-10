@@ -4,6 +4,7 @@ import ch.randelshofer.quaqua.QuaquaManager;
 import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.io.*;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DateFormat;
 import java.util.List;
@@ -694,13 +695,18 @@ public final class ClientContextStub {
         if (isMac() && isNimbus) {
             userLaf = sytemLafCls;
         }
-        if (JTATTOO_ACRYL_LAF_CLS.equals(userLaf)) {
-            com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme("Default", "", "");
-        }
-        if (JTATTOO_ALUMINIUM_LAF_CLS.equals(userLaf)) {
-            com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme("Default", "", "");
-        }
         
+        // JTattooの設定
+        if (userLaf.startsWith("com.jtattoo.plaf")) {
+            try {
+                Class cls = Class.forName(userLaf);
+                Method method = cls.getMethod("setTheme", new Class[]{String.class, String.class, String.class});
+                method.invoke(cls.newInstance(), "Default", "", "");
+            } catch (Exception ex) {
+            }
+        }
+
+        // UIManagerにLAFを設定する
         try {
             UIManager.setLookAndFeel(userLaf);
         } catch (Exception e) {
