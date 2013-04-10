@@ -269,8 +269,7 @@ public class ChartEventServiceBean {
         
         Map<String, List<PatientVisitModel>> map = contextHolder.getPvtListMap();
         
-        for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : map.entrySet()) {
             List<PatientVisitModel> pvtList = (List<PatientVisitModel>) entry.getValue();
             
             List<PatientVisitModel> toRemove = new ArrayList<PatientVisitModel>();

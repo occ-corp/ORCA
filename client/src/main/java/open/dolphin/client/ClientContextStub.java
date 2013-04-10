@@ -32,28 +32,26 @@ import org.apache.velocity.app.Velocity;
 public final class ClientContextStub {
     
     // LAF
-    public static final String SYSTEM_LAF_CLS = UIManager.getSystemLookAndFeelClassName();
     public static final String WIN_LAF_CLS = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
     public static final String NIMBUS_LAF_CLS = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+    
     public static final String QUAQUA_LAF_CLS = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
-    public static final String METAL_LAF_CLS = "javax.swing.plaf.metal.MetalLookAndFeel";
-    public static final String JGOODIES_LAF_CLS = "com.jgoodies.looks.plastic.Plastic3DLookAndFeel";
-    public static final String SEAGLASS_LAF_CLS = "com.seaglasslookandfeel.SeaGlassLookAndFeel";
-    public static final String WEB_LAF_CLS = "com.alee.laf.WebLookAndFeel";
-    public static final String SUBSTANCE_LAF_CLS = "org.pushingpixels.substance.api.skin.SubstanceBusinessLookAndFeel";
+    public static final String JGOODIES_P3D_LAF_CLS = "com.jgoodies.looks.plastic.Plastic3DLookAndFeel";
     public static final String JTATTOO_ACRYL_LAF_CLS = "com.jtattoo.plaf.acryl.AcrylLookAndFeel";
     public static final String JTATTOO_ALUMINIUM_LAF_CLS = "com.jtattoo.plaf.aluminium.AluminiumLookAndFeel";
+    //public static final String SEAGLASS_LAF_CLS = "com.seaglasslookandfeel.SeaGlassLookAndFeel";
+    //public static final String WEB_LAF_CLS = "com.alee.laf.WebLookAndFeel";
+    //public static final String SUBSTANCE_BUSINESS_LAF_CLS = "org.pushingpixels.substance.api.skin.SubstanceBusinessLookAndFeel";
     
-    public static final String SYSTEM_LAF ="nativeLookAndFeel";
-    public static final String NIMBUS_LAF = "nimbusLookAndFeel";
-    public static final String QUAQUA_LAF = "quaquaLookAndFeel";
-    public static final String METAL_LAF = "metalLookAndFeel";
-    public static final String JGOODIES_LAF = "jgoodiesLookAndFeel";
-    public static final String SEAGLASS_LAF = "seaglassLookAndFeel";
-    public static final String WEB_LAF = "webLookAndFeel";
-    public static final String SUBSTANCE_LAF = "substanceLookAndFeel";
-    public static final String JTATTOO_ACRYL_LAF = "jtattooAcrylLookAndFeel";
-    public static final String JTATTOO_ALUMINIUM_LAF = "jtattooAluminiumLookAndFeel";
+    public static final String[][] EXT_LAF_INFO = {
+        {"QuaQua", QUAQUA_LAF_CLS},
+        {"JGoodies Plastic3D", JGOODIES_P3D_LAF_CLS},
+        {"JTattoo Acryl", JTATTOO_ACRYL_LAF_CLS},
+        {"JTattoo Aluminium", JTATTOO_ALUMINIUM_LAF_CLS}
+        //{"Seaglass", SEAGLASS_LAF_CLS},
+        //{"Web Look And Feel", WEB_LAF_CLS},
+        //{"Substance Business", SUBSTANCE_BUSINESS_LAF_CLS},
+    };
     
     //--------------------------------------------------------------------------
     private final String RESOURCE_LOCATION = "/open/dolphin/resources/";
@@ -667,6 +665,7 @@ public final class ClientContextStub {
      */
     public void setUI() {
 
+        String sytemLafCls = UIManager.getSystemLookAndFeelClassName();
         //Locale locale = Locale.getDefault();
         String userLaf = Project.getString("lookAndFeel", NIMBUS_LAF_CLS);
         //userLaf = QUAQUA_LAF_CLS;
@@ -692,12 +691,12 @@ public final class ClientContextStub {
         
         // MacにNimbusはない
         if (isMac() && isNimbus) {
-            userLaf = SYSTEM_LAF_CLS;
+            userLaf = sytemLafCls;
         }
-        if (ClientContextStub.JTATTOO_ACRYL_LAF_CLS.equals(userLaf)) {
+        if (JTATTOO_ACRYL_LAF_CLS.equals(userLaf)) {
             com.jtattoo.plaf.acryl.AcrylLookAndFeel.setTheme("Default", "", "");
         }
-        if (ClientContextStub.JTATTOO_ALUMINIUM_LAF_CLS.equals(userLaf)) {
+        if (JTATTOO_ALUMINIUM_LAF_CLS.equals(userLaf)) {
             com.jtattoo.plaf.aluminium.AluminiumLookAndFeel.setTheme("Default", "", "");
         }
         

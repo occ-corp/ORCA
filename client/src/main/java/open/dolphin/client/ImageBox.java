@@ -318,10 +318,7 @@ public class ImageBox extends AbstractMainTool {
                 map.put(folderName, urlList);
             }
         }
-
-        // imagePaletteに設定する
-        for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : map.entrySet()) {
             String folderName = (String) entry.getKey();
             List<URL> urlList = (List<URL>) entry.getValue();
             ImagePalette imagePalette = new ImagePalette(null, 0, imageWidth, imageHeight);

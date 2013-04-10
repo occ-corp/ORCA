@@ -1833,16 +1833,7 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         PluginLister<NChartDocument> lister = PluginLister.list(NChartDocument.class);
         LinkedHashMap<String, String> nproviders = lister.getProviders();
         if (nproviders != null) {
-//masuda^
-/*
-             * Iterator<String> iter = nproviders.keySet().iterator(); while
-             * (iter.hasNext()) { String cmd = iter.next(); String clsName =
-             * nproviders.get(cmd); NameValuePair pair = new NameValuePair(cmd,
-             * clsName); documents.add(pair); if (DEBUG) {
-             * ClientContext.getBootLogger().debug(cmd + " = " + clsName); } }
-             */
-            for (Iterator itr = nproviders.entrySet().iterator(); itr.hasNext();) {
-                Map.Entry entry = (Map.Entry) itr.next();
+            for (Map.Entry entry : nproviders.entrySet()) {
                 String cmd = (String) entry.getKey();
                 String clsName = (String) entry.getValue();
                 NameValuePair pair = new NameValuePair(cmd, clsName);
@@ -2284,9 +2275,8 @@ public class ChartImpl extends AbstractMainTool implements Chart, IInfoModel {
         }
         // 別ウィンドウで開いていたら閉じるように警告する
         if (inactiveProvidersMap != null && !inactiveProvidersMap.isEmpty()) {
-            for (Iterator itr = inactiveProvidersMap.entrySet().iterator(); itr.hasNext();) {
+            for (Map.Entry entry : inactiveProvidersMap.entrySet()) {
                 String title = ClientContext.getFrameTitle("インスペクタ");
-                Map.Entry entry = (Map.Entry) itr.next();
                 JFrame frame = (JFrame) entry.getValue();
                 frame.setExtendedState(Frame.NORMAL);
                 JOptionPane.showMessageDialog(frame,

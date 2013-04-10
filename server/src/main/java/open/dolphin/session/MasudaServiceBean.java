@@ -669,9 +669,7 @@ public class MasudaServiceBean {
         mmList = null;
         // 患者毎に処方切れかどうか調べる
         List<PatientModel> ret = new ArrayList<PatientModel>();
-
-        for (Iterator itr = pmmmMap.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : pmmmMap.entrySet()) {
             PatientModel model = (PatientModel) entry.getKey();
             
             List<ModuleModel> list = (List<ModuleModel>) entry.getValue();
@@ -691,8 +689,7 @@ public class MasudaServiceBean {
             Date oldestDate = new Date();
             Date lastDate = ModelUtils.AD1800;
             int totalBundleNumber = 0;
-            for (Iterator itr1 = dateNumberMap.entrySet().iterator(); itr1.hasNext();) {
-                Map.Entry entry1 = (Map.Entry) itr1.next();
+            for (Map.Entry entry1 : dateNumberMap.entrySet()) {
                 Date date = (Date) entry1.getKey();
                 int bundleNumber = (Integer) entry1.getValue();
                 if (date.before(oldestDate)) {

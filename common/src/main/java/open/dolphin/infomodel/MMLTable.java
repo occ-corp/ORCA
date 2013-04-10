@@ -1,7 +1,6 @@
 package open.dolphin.infomodel;
 
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 /**
@@ -227,8 +226,7 @@ public final class MMLTable {
         if (code == null) {
             return null;
         }
-        for (Iterator itr = departmentCode.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : departmentCode.entrySet()) {
             String value = (String) entry.getValue();
             if (code.equals(value)) {
                 return (String) entry.getKey();

@@ -1447,19 +1447,6 @@ public class Dolphin implements MainWindow {
             };
             mediator.enableMenus(enables);
             
-//masuda^   LAF
-            mediator.enabledAction(ClientContextStub.NIMBUS_LAF, true);
-            mediator.enabledAction(ClientContextStub.SYSTEM_LAF, true);
-            mediator.enabledAction(ClientContextStub.QUAQUA_LAF, true);
-            mediator.enabledAction(ClientContextStub.METAL_LAF, true);
-            mediator.enabledAction(ClientContextStub.JGOODIES_LAF, true);
-            mediator.enabledAction(ClientContextStub.JTATTOO_ACRYL_LAF, true);
-            mediator.enabledAction(ClientContextStub.JTATTOO_ALUMINIUM_LAF, true);
-            //mediator.enabledAction(ClientContextStub.SUBSTANCE_LAF, true);
-            //mediator.enabledAction(ClientContextStub.SEAGLASS_LAF, true);
-            //mediator.enabledAction(ClientContextStub.WEB_LAF, true);
-//masuda$
-
             Action addUserAction = mediator.getAction(GUIConst.ACTION_ADD_USER);
             boolean admin = false;
             Collection<RoleModel> roles = Project.getUserModel().getRoles();
@@ -1601,9 +1588,9 @@ public class Dolphin implements MainWindow {
         });
     }
     
-    public void changeLaf(String lafCls) {
+    public void changeLookAndFeel(String lafClassName) {
         try {
-            Project.setString("lookAndFeel", lafCls);
+            Project.setString("lookAndFeel", lafClassName);
             requestReboot();
         } catch (Exception e) {
             e.printStackTrace(System.err);

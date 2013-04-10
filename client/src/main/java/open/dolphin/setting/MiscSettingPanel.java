@@ -1305,8 +1305,7 @@ public class MiscSettingPanel extends AbstractSettingPanel {
         String userId = Project.getUserModel().getUserId();
         String facilityId = Project.getFacilityId();
         
-        for (Iterator itr = prop.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : prop.entrySet()) {
             String key = (String) entry.getKey();
             String value = (String) entry.getValue();
             UserPropertyModel propModel = new UserPropertyModel();

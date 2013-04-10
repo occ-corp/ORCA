@@ -79,8 +79,7 @@ public class RoutineMedUpdater extends AbstractUpdaterModule {
 
                 // msd_routinemedテーブルにidリストを記録する
                 ps = con.prepareStatement(sql2);
-                for (Iterator itr = map.entrySet().iterator(); itr.hasNext();) {
-                    Map.Entry entry = (Map.Entry) itr.next();
+                for (Map.Entry entry : map.entrySet()) {
                     Long moduleId = (Long) entry.getKey();
                     String ids = (String) entry.getValue();
                     ps.setString(1, ids);

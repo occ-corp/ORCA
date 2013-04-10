@@ -5,7 +5,6 @@ import java.awt.Insets;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
@@ -18,9 +17,7 @@ import open.dolphin.helper.MenuSupport;
  * @author Minagawa, Kazushi
  */
 public class WindowsMenuFactory extends AbstractMenuFactory {
-    
-    private static final String CHANGE_LAF_METHOD = "changeLaf";
-    
+        
     private MenuSupport main;
     
     private MenuSupport chart;
@@ -659,96 +656,6 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         };
         map.put("selectAll", selectAll);
 
-        AbstractAction quaquaLookAndFeel = new AbstractAction("QuaQua") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.QUAQUA_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.QUAQUA_LAF, quaquaLookAndFeel);
-
-        AbstractAction nimbusLookAndFeel = new AbstractAction("Nimubs") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.NIMBUS_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.NIMBUS_LAF, nimbusLookAndFeel);
-
-        AbstractAction nativeLookAndFeel = new AbstractAction("Native") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.SYSTEM_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.SYSTEM_LAF, nativeLookAndFeel);
-
-        AbstractAction metalLookAndFeel = new AbstractAction("Metal") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.METAL_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.METAL_LAF, metalLookAndFeel);
-        
-        AbstractAction seaglassLookAndFeel = new AbstractAction("Seaglass") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.SEAGLASS_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.SEAGLASS_LAF, seaglassLookAndFeel);
-        
-        AbstractAction jgoodiesLookAndFeel = new AbstractAction("Jgoodies") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.JGOODIES_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.JGOODIES_LAF, jgoodiesLookAndFeel);
-        
-        AbstractAction webLookAndFeel = new AbstractAction("WebLAF") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.WEB_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.WEB_LAF, webLookAndFeel);
-        
-        AbstractAction sbstantialLaf = new AbstractAction("Substance") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.SUBSTANCE_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.SUBSTANCE_LAF, sbstantialLaf);
-        
-        AbstractAction jtattooAcrylLaf = new AbstractAction("JTattoo Acryl") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.JTATTOO_ACRYL_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.JTATTOO_ACRYL_LAF, jtattooAcrylLaf);
-        
-        AbstractAction jtattooHiFiLaf = new AbstractAction("JTattoo Aluminium") {
-
-            @Override
-            public void actionPerformed(ActionEvent ae) {
-                main.sendToChain(CHANGE_LAF_METHOD, ClientContextStub.JTATTOO_ALUMINIUM_LAF_CLS);
-            }
-        };
-        map.put(ClientContextStub.JTATTOO_ALUMINIUM_LAF, jtattooHiFiLaf);
-        
         text = resource.getString("editDisconItem.Action.text");
         AbstractAction editDisconItem = new AbstractAction(text) {
 
@@ -1109,97 +1016,8 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         
 //masuda^
         // Look&Feel
-        JMenu lookAndFeel = new JMenu();
-        //lookAndFeel.setName("lookAndFeel");
-        lookAndFeel.setText("ルック & フィール");
+        JMenu lookAndFeel = createLafMenu();
         karte.add(lookAndFeel);
-
-        JRadioButtonMenuItem nimbusLaf = new JRadioButtonMenuItem();
-        nimbusLaf.setName("nimbusLookAndFeel");
-        nimbusLaf.setAction(actionMap.get("nimbusLookAndFeel"));
-        lookAndFeel.add(nimbusLaf);
-
-        JRadioButtonMenuItem nativeLaf = new JRadioButtonMenuItem();
-        nativeLaf.setName("nativeLookAndFeel");
-        nativeLaf.setAction(actionMap.get("nativeLookAndFeel"));
-        lookAndFeel.add(nativeLaf);
-
-        JRadioButtonMenuItem quaquaLaf = new JRadioButtonMenuItem();
-        quaquaLaf.setName(ClientContextStub.QUAQUA_LAF);
-        quaquaLaf.setAction(actionMap.get(ClientContextStub.QUAQUA_LAF));
-        lookAndFeel.add(quaquaLaf);
-        
-        JRadioButtonMenuItem metalLaf = new JRadioButtonMenuItem();
-        metalLaf.setName(ClientContextStub.METAL_LAF);
-        metalLaf.setAction(actionMap.get(ClientContextStub.METAL_LAF));
-        lookAndFeel.add(metalLaf);
-
-        JRadioButtonMenuItem jgoodiesLaf = new JRadioButtonMenuItem();
-        jgoodiesLaf.setName(ClientContextStub.JGOODIES_LAF);
-        jgoodiesLaf.setAction(actionMap.get(ClientContextStub.JGOODIES_LAF));
-        lookAndFeel.add(jgoodiesLaf);
-
-        JRadioButtonMenuItem jtattooAcrylLaf = new JRadioButtonMenuItem();
-        jtattooAcrylLaf.setName(ClientContextStub.JTATTOO_ACRYL_LAF);
-        jtattooAcrylLaf.setAction(actionMap.get(ClientContextStub.JTATTOO_ACRYL_LAF));
-        lookAndFeel.add(jtattooAcrylLaf);
-        
-        JRadioButtonMenuItem jtattooAluminiumLaf = new JRadioButtonMenuItem();
-        jtattooAluminiumLaf.setName(ClientContextStub.JTATTOO_ALUMINIUM_LAF);
-        jtattooAluminiumLaf.setAction(actionMap.get(ClientContextStub.JTATTOO_ALUMINIUM_LAF));
-        lookAndFeel.add(jtattooAluminiumLaf);
-/*
-        JRadioButtonMenuItem substanceLaf = new JRadioButtonMenuItem();
-        substanceLaf.setName(ClientContextStub.SUBSTANCE_LAF);
-        substanceLaf.setAction(actionMap.get(ClientContextStub.SUBSTANCE_LAF));
-        lookAndFeel.add(substanceLaf);
-
-        JRadioButtonMenuItem seaglassLaf = new JRadioButtonMenuItem();
-        seaglassLaf.setName(ClientContextStub.SEAGLASS_LAF);
-        seaglassLaf.setAction(actionMap.get(ClientContextStub.SEAGLASS_LAF));
-        lookAndFeel.add(seaglassLaf);
-        
-        JRadioButtonMenuItem webLaf = new JRadioButtonMenuItem();
-        webLaf.setName(ClientContextStub.WEB_LAF);
-        webLaf.setAction(actionMap.get(ClientContextStub.WEB_LAF));
-        lookAndFeel.add(webLaf);
-*/
-        ButtonGroup lafbg = new ButtonGroup();
-        lafbg.add(nimbusLaf);
-        lafbg.add(nativeLaf);
-        lafbg.add(quaquaLaf);
-        lafbg.add(metalLaf);
-        lafbg.add(jgoodiesLaf);
-        lafbg.add(jtattooAcrylLaf);
-        lafbg.add(jtattooAluminiumLaf);
-        //lafbg.add(substanceLaf);
-        //lafbg.add(seaglassLaf);
-        //lafbg.add(webLaf);
-
-        String currentLaf = UIManager.getLookAndFeel().getClass().getName();
-        if (ClientContextStub.QUAQUA_LAF_CLS.equals(currentLaf)) {
-            quaquaLaf.setSelected(true);
-        } else if (ClientContextStub.NIMBUS_LAF_CLS.equals(currentLaf)) {
-            nimbusLaf.setSelected(true);
-        } else if (ClientContextStub.METAL_LAF_CLS.equals(currentLaf)) {
-            metalLaf.setSelected(true);
-        } else if (ClientContextStub.JGOODIES_LAF_CLS.equals(currentLaf)) {
-            jgoodiesLaf.setSelected(true);
-        } else if (ClientContextStub.JTATTOO_ACRYL_LAF_CLS.equals(currentLaf)) {
-            jtattooAcrylLaf.setSelected(true);
-        } else if (ClientContextStub.JTATTOO_ALUMINIUM_LAF_CLS.equals(currentLaf)) {
-            jtattooAluminiumLaf.setSelected(true);
-/*
-        } else if (ClientContextStub.SUBSTANCE_LAF_CLS.equals(currentLaf)) {
-            substanceLaf.setSelected(true);
-        } else if (ClientContextStub.SEAGLASS_LAF_CLS.equals(currentLaf)) {
-            seaglassLaf.setSelected(true);
-        } else if (ClientContextStub.WEB_LAF_CLS.equals(currentLaf)) {
-            webLaf.setSelected(true);
-*/
-        } else {
-            nativeLaf.setSelected(true);
-        }
 //masuda$
         
         /******************************************************/
@@ -1413,26 +1231,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
             
             tool.add(new JSeparator());
 //masuda^
-/*
-            Iterator<String> iter = toolProviders.keySet().iterator();
-            
-            while (iter.hasNext()) {
-                String cmd = iter.next();
-                final String className = toolProviders.get(cmd);
-                JMenuItem mItem = new JMenuItem();
-                AbstractAction a = new AbstractAction() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        main.sendToChain("invokeToolPlugin", className);
-                    }
-                };
-                mItem.setAction(a);
-                mItem.setText(cmd);
-                tool.add(mItem);
-            }
-*/
-            for (Iterator itr = toolProviders.entrySet().iterator(); itr.hasNext();) {
-                Map.Entry entry = (Map.Entry) itr.next();
+            for (Map.Entry entry : toolProviders.entrySet()) {
                 String cmd = (String) entry.getKey();
                 final String className = (String) entry.getValue();
                 JMenuItem mItem = new JMenuItem();
@@ -1519,19 +1318,46 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         btn.putClientProperty("Quaqua.Component.visualMargin", new Insets(0, 0, 0, 0));
         return btn;
     }
+    
+    // LAF menu
+    private JMenu createLafMenu() {
+        
+        JMenu menu = new JMenu("ルック & フィール");
+        String currentLaf = UIManager.getLookAndFeel().getClass().getName();
+        final ButtonGroup bg = new ButtonGroup();
+        
+        AbstractAction lafAction = new AbstractAction() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                ButtonModel bm = bg.getSelection();
+                String lafClassName = bm.getActionCommand();
+                // Dolphin.changeLookAndFeelを呼ぶ
+                main.sendToChain("changeLookAndFeel", lafClassName);
+            }
+        };
+        
+        for (UIManager.LookAndFeelInfo lafInfo : UIManager.getInstalledLookAndFeels()) {
+            JRadioButtonMenuItem lafItem = new JRadioButtonMenuItem();
+            lafItem.setHideActionText(true);
+            lafItem.setAction(lafAction);
+            lafItem.setActionCommand(lafInfo.getClassName());
+            lafItem.setText(lafInfo.getName());
+            lafItem.setSelected(lafInfo.getClassName().equals(currentLaf));
+            bg.add(lafItem);
+            menu.add(lafItem);
+        }
+        
+        for (String[] lafInfo : ClientContextStub.EXT_LAF_INFO) {
+            JRadioButtonMenuItem lafItem = new JRadioButtonMenuItem();
+            lafItem.setHideActionText(true);
+            lafItem.setAction(lafAction);
+            lafItem.setActionCommand(lafInfo[1]);
+            lafItem.setText(lafInfo[0]);
+            lafItem.setSelected(lafInfo[1].equals(currentLaf));
+            bg.add(lafItem);
+            menu.add(lafItem);
+        }
+        
+        return menu;
+    }
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

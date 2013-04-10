@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import javax.swing.*;
@@ -279,8 +278,7 @@ public abstract class AbstractOrderView extends JPanel {
         cb.addItem("診療行為区分指定");
         List<ShinkuItem> shinkuItems = new ArrayList<ShinkuItem>();
         Map<String,String> mmlMap = MMLTable.getClaimClassCodeMap();
-        for (Iterator<Map.Entry<String, String>> itr = mmlMap.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry<String, String> entry = itr.next();
+        for (Map.Entry<String, String> entry : mmlMap.entrySet()) {
             String number = entry.getKey();
             String name = entry.getValue();
             shinkuItems.add(new ShinkuItem(number, name));

@@ -279,8 +279,7 @@ public class Orca21ApiKarteSender implements IKarteSender {
         
         // ClaimBundleに戻す
         List<ClaimBundle> ret = new ArrayList<ClaimBundle>();
-        for (Iterator itr = ciMap.entrySet().iterator(); itr.hasNext();) {
-            Map.Entry entry = (Map.Entry) itr.next();
+        for (Map.Entry entry : ciMap.entrySet()) {
             int houksnkbn = (Integer) entry.getKey();
             List<ClaimItem> ciList = (List<ClaimItem>) entry.getValue();
             // ＯＳＣに問い合わせたところ、下記の返答 2012/09/26
