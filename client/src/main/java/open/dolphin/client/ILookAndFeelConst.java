@@ -24,7 +24,7 @@ public interface ILookAndFeelConst {
     public static final String JTATTOO_ALUMINIUM_LAF_CLS = JTATTOO + "aluminium.AluminiumLookAndFeel";
     public static final String JTATTOO_BERNSTEIN_LAF_CLS = JTATTOO + "bernstein.BernsteinLookAndFeel";
     public static final String JTATTOO_FAST_LAF_CLS = JTATTOO + "fast.FastLookAndFeel";
-    public static final String JTATTOO_HIFI_LAF_CLS = JTATTOO + "hifi.HiFiLookAndFeel ";
+    public static final String JTATTOO_HIFI_LAF_CLS = JTATTOO + "hifi.HiFiLookAndFeel";
     public static final String JTATTOO_MCWIN_LAF_CLS = JTATTOO + "mcwin.McWinLookAndFeel";
     public static final String JTATTOO_MINT_LAF_CLS = JTATTOO + "mint.MintLookAndFeel";
     public static final String JTATTOO_NOIRE_LAF_CLS = JTATTOO + "noire.NoireLookAndFeel";
