@@ -9,6 +9,7 @@ import java.text.DateFormat;
 import java.util.List;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicTextPaneUI;
 import javax.swing.text.DefaultEditorKit;
 import open.dolphin.exception.DolphinException;
@@ -33,7 +34,7 @@ public final class ClientContextStub {
     
     // LAF
     public static final String WIN_LAF_CLS = "com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
-    public static final String NIMBUS_LAF_CLS = "com.sun.java.swing.plaf.nimbus.NimbusLookAndFeel";
+    public static final String NIMBUS_LAF_CLS = "javax.swing.plaf.nimbus.NimbusLookAndFeel";
     
     public static final String QUAQUA_LAF_CLS = "ch.randelshofer.quaqua.QuaquaLookAndFeel";
     public static final String JGOODIES_P3D_LAF_CLS = "com.jgoodies.looks.plastic.Plastic3DLookAndFeel";
@@ -670,7 +671,7 @@ public final class ClientContextStub {
         String userLaf = Project.getString("lookAndFeel", NIMBUS_LAF_CLS);
         //userLaf = QUAQUA_LAF_CLS;
         boolean isQuaqua = QUAQUA_LAF_CLS.equals(userLaf);
-        isNimbus = NIMBUS_LAF_CLS.equals(userLaf);
+        isNimbus = userLaf.contains("nimbus");
 
         // Quaqua設定
         if (isQuaqua) {
@@ -773,6 +774,7 @@ public final class ClientContextStub {
             UIManager.put("TextPaneUI", BasicTextPaneUI.class.getName());
             UIManager.put("TextPane.selectionBackground", new Color(57,105,138));
             UIManager.put("TextPane.selectionForeground", Color.WHITE);
+            UIManager.put("TextPane.border", new EmptyBorder(4, 6, 4, 6));
         }
         
         // Windows LAF テーブル選択背景色変更
