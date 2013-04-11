@@ -374,9 +374,7 @@ public class KarteServiceBean {
 */
     public List<DocumentModel> getDocuments(List<Long> ids) {
 
-        //long t = System.currentTimeMillis();
-
-        // まとめて query改
+        // まとめてquery改改
         List<DocumentModel> documentList =
                 em.createQuery("from DocumentModel m where m.id in (:ids)")
                 .setParameter("ids", ids)
@@ -391,45 +389,37 @@ public class KarteServiceBean {
                 em.createQuery("from SchemaModel m where m.document.id in (:ids)")
                 .setParameter("ids", ids)
                 .getResultList();
-
+        
+        // DocumentModelのMapを作る
         HashMap<Long, DocumentModel> dmMap = new HashMap<Long, DocumentModel>();
         for (DocumentModel dm : documentList) {
+            // LazyFetchのdetached objectsは一旦バッサリ消す！
+            dm.setModules(null);
+            dm.setSchema(null);
             dmMap.put(dm.getId(), dm);
         }
-
-        HashMap<Long, List<ModuleModel>> mmMap = new HashMap<Long, List<ModuleModel>>();
+        
+        // ModuleModelを登録しなおす
         for (ModuleModel mm : moduleList) {
-            long id = mm.getDocumentModel().getId();
-            List<ModuleModel> mmList = mmMap.get(id);
-            if (mmList == null) {
-                mmList = new ArrayList<ModuleModel>();
-                mmMap.put(id, mmList);
+            long docPk = mm.getDocumentModel().getId();
+            DocumentModel docModel = dmMap.get(docPk);
+            if (docModel != null) {
+                docModel.addModule(mm);
             }
-            mmList.add(mm);
         }
-
-        HashMap<Long, List<SchemaModel>> smMap = new HashMap<Long, List<SchemaModel>>();
+        
+        // SchemaModelを登録しなおす
         for (SchemaModel sm : schemaList) {
-            long id = sm.getDocumentModel().getId();
-            List<SchemaModel> smList = smMap.get(id);
-            if (smList == null) {
-                smList = new ArrayList<SchemaModel>();
-                smMap.put(id, smList);
+            long docPk = sm.getDocumentModel().getId();
+            DocumentModel docModel = dmMap.get(docPk);
+            if (docModel != null) {
+                docModel.addSchema(sm);
             }
-            smList.add(sm);
         }
-
-        List<DocumentModel> ret = new ArrayList<DocumentModel>(documentList.size());
-        for (long id : ids) {
-            DocumentModel dm = dmMap.get(id);
-            List<ModuleModel> mmList = mmMap.get(id);
-            dm.setModules(mmList != null ? mmList : new ArrayList<ModuleModel>(0));
-            List<SchemaModel> smList = smMap.get(id);
-            dm.setSchema(smList != null ? smList : new ArrayList<SchemaModel>(0));
-            ret.add(dm);
-        }
-        //System.out.println(System.currentTimeMillis() - t);
-        return ret;
+        
+        dmMap.clear();
+        
+        return documentList;
     }
 //masuda$
     
