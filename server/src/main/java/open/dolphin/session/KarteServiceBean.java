@@ -416,9 +416,20 @@ public class KarteServiceBean {
                 docModel.addSchema(sm);
             }
         }
-        
         dmMap.clear();
         
+        // ソートする！
+        for (DocumentModel dm : documentList) {
+            List<ModuleModel> modules = dm.getModules();
+            if (modules != null && !modules.isEmpty()) {
+                Collections.sort(modules);
+            }
+            List<SchemaModel> schemas = dm.getSchema();
+            if (schemas != null && !schemas.isEmpty()) {
+                Collections.sort(schemas);
+            }
+        }
+
         return documentList;
     }
 //masuda$
