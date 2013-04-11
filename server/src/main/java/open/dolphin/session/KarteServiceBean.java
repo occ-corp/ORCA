@@ -3,10 +3,12 @@ package open.dolphin.session;
 import java.text.SimpleDateFormat;
 import java.util.*;
 import javax.ejb.Stateless;
+import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
 import open.dolphin.infomodel.*;
+import open.dolphin.mbean.ServletContextHolder;
 import org.hibernate.search.jpa.FullTextEntityManager;
 import org.hibernate.search.jpa.Search;
 
@@ -94,6 +96,9 @@ public class KarteServiceBean {
             = "from ModuleModel m where m.document.id = :id "
             + "and m.moduleInfo.role = 'soaSpec' and m.moduleInfo.name = 'progressCourse'";
 //masuda$
+    
+    @Inject
+    private ServletContextHolder contextHolder;
     
     @PersistenceContext
     private EntityManager em;
@@ -372,9 +377,80 @@ public class KarteServiceBean {
         return ret;
     }
 */
+    
     public List<DocumentModel> getDocuments(List<Long> ids) {
+        boolean mysql = contextHolder.getDatabase().toLowerCase().contains("mysql");
+        if (mysql) {
+            return getDocumentsMySQL(ids);
+        } else {
+            return getDocumentsPSQL(ids);
+        }
+    }
 
-        // まとめてquery改改改
+    // まとめてquery改改
+    public List<DocumentModel> getDocumentsPSQL(List<Long> ids) {
+
+        List<DocumentModel> documentList =
+                em.createQuery("from DocumentModel m where m.id in (:ids)")
+                .setParameter("ids", ids)
+                .getResultList();
+        
+        List<ModuleModel> moduleList =
+                em.createQuery("from ModuleModel m where m.document.id in (:ids)")
+                .setParameter("ids", ids)
+                .getResultList();
+        
+        List<SchemaModel> schemaList =
+                em.createQuery("from SchemaModel m where m.document.id in (:ids)")
+                .setParameter("ids", ids)
+                .getResultList();
+        
+        // DocumentModelのMapを作る
+        HashMap<Long, DocumentModel> dmMap = new HashMap<Long, DocumentModel>();
+        for (DocumentModel dm : documentList) {
+            // LazyFetchのdetached objectsは一旦バッサリ消す！
+            dm.setModules(null);
+            dm.setSchema(null);
+            dmMap.put(dm.getId(), dm);
+        }
+        
+        // ModuleModelを登録しなおす
+        for (ModuleModel mm : moduleList) {
+            long docPk = mm.getDocumentModel().getId();
+            DocumentModel docModel = dmMap.get(docPk);
+            if (docModel != null) {
+                docModel.addModule(mm);
+            }
+        }
+        
+        // SchemaModelを登録しなおす
+        for (SchemaModel sm : schemaList) {
+            long docPk = sm.getDocumentModel().getId();
+            DocumentModel docModel = dmMap.get(docPk);
+            if (docModel != null) {
+                docModel.addSchema(sm);
+            }
+        }
+        dmMap.clear();
+/*
+        // ソートする！
+        for (DocumentModel dm : documentList) {
+            List<ModuleModel> modules = dm.getModules();
+            if (modules != null && !modules.isEmpty()) {
+                Collections.sort(modules);
+            }
+            List<SchemaModel> schemas = dm.getSchema();
+            if (schemas != null && !schemas.isEmpty()) {
+                Collections.sort(schemas);
+            }
+        }
+*/
+        return documentList;
+    }
+
+    // まとめてquery改改改 postgresでは遅い
+    public List<DocumentModel> getDocumentsMySQL(List<Long> ids) {
+
         List<DocumentModel> documentList =
                 em.createQuery("from DocumentModel m where m.id in (:ids)")
                 .setParameter("ids", ids)
@@ -406,6 +482,7 @@ public class KarteServiceBean {
 
         return documentList;
     }
+
 //masuda$
     
     /**

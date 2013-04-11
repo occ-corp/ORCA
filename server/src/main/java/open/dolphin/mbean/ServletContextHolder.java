@@ -30,6 +30,9 @@ public class ServletContextHolder {
     
     // ユーザーのキャッシュ
     private Map<String, String> userMap;
+    
+    // データベースのタイプ
+    private String database;
 
     
     public ServletContextHolder() {
@@ -99,5 +102,13 @@ public class ServletContextHolder {
     
     public Map<String, String> getUserMap() {
         return userMap;
+    }
+    
+    public String getDatabase() {
+        return database;
+    }
+    
+    public void setDatabase(String database) {
+        this.database = database;
     }
 }

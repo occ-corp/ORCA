@@ -1,6 +1,10 @@
 package open.dolphin.mbean;
 
+import java.sql.Connection;
+import java.sql.DatabaseMetaData;
+import java.sql.SQLException;
 import java.util.Timer;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -9,8 +13,11 @@ import javax.ejb.Singleton;
 import javax.ejb.Startup;
 import javax.ejb.Timeout;
 import javax.inject.Inject;
+import javax.persistence.EntityManager;
+import javax.persistence.PersistenceContext;
 import open.dolphin.session.ChartEventServiceBean;
 import open.dolphin.updater.Updater;
+import org.hibernate.Session;
 
 /**
  * スタートアップ時にUpdaterとStateServiceBeanを自動実行
@@ -27,11 +34,18 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     
     @Inject
     private Updater updater;
+    
+    @Inject
+    private ServletContextHolder contextHolder;
+    
+    @PersistenceContext
+    private EntityManager em;
 
     @PostConstruct
     public void init() {
         updater.start();
         eventServiceBean.start();
+        setupDatabaseType();
     }
 
     @PreDestroy
@@ -46,5 +60,21 @@ private static final Logger logger = Logger.getLogger(ServletStartup.class.getSi
     @Timeout
     public void timeout(Timer timer) {
         logger.warning("ServletStartup: timeout occurred");
+    }
+    
+    private void setupDatabaseType() {
+        Session hibernateSession = em.unwrap(Session.class);
+        hibernateSession.doWork(new DetectDatabaseWork());
+    }
+    
+    private class DetectDatabaseWork implements org.hibernate.jdbc.Work {
+
+        @Override
+        public void execute(Connection con) throws SQLException {
+            DatabaseMetaData dmd = con.getMetaData();
+            String database = dmd.getDatabaseProductName();
+            contextHolder.setDatabase(database);
+            logger.log(Level.INFO, "Database is {0}", database);
+        }
     }
 }
