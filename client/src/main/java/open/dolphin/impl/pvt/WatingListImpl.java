@@ -1236,9 +1236,12 @@ public class WatingListImpl extends AbstractMainComponent {
                     }
                 }
                 int sRow = selectedRow;
-                pvtTableModel.addObject(model);
                 // 番号を振る
-                model.setNumber(tableDataList.size());
+                int num = tableDataList.size() + 1;
+                model.setNumber(num);
+                // テーブルに追加
+                pvtTableModel.addObject(model);
+                
                 // 選択中の行を保存
                 // 保存した選択中の行を選択状態にする
                 pvtTable.getSelectionModel().addSelectionInterval(sRow, sRow);
@@ -1311,7 +1314,7 @@ public class WatingListImpl extends AbstractMainComponent {
                     PatientVisitModel pvt = pvtList.get(i);
                     if (pvt.getId() == evt.getPvtPk()) {
                         // 受付番号を継承
-                        int num = pvt.getNumber();
+                        num = pvt.getNumber();
                         toMerge.setNumber(num);
                         pvtList.set(i, toMerge);
                     }
