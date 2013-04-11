@@ -646,7 +646,7 @@ public final class ClientContextStub {
      */
     public void setUI() {
 
-        String sytemLafCls = UIManager.getSystemLookAndFeelClassName();
+        //String sytemLafCls = UIManager.getSystemLookAndFeelClassName();
         //Locale locale = Locale.getDefault();
         String userLaf = Project.getString("lookAndFeel", ILookAndFeelConst.NIMBUS_LAF_CLS);
         //userLaf = QUAQUA_LAF_CLS;
@@ -670,10 +670,10 @@ public final class ClientContextStub {
             //UIManager.put("Quaqua.Debug.showClipBounds", true);
         }
         
-        // MacにNimbusはない
-        if (isMac() && isNimbus) {
-            userLaf = sytemLafCls;
-        }
+        // MacにもNimbusあった
+        //if (isMac() && isNimbus) {
+        //    userLaf = sytemLafCls;
+        //}
         
         // JTattooの設定
         if (userLaf.startsWith(ILookAndFeelConst.JTATTOO)) {
