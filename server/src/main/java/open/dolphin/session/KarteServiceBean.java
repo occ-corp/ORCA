@@ -374,52 +374,25 @@ public class KarteServiceBean {
 */
     public List<DocumentModel> getDocuments(List<Long> ids) {
 
-        // まとめてquery改改
+        // まとめてquery改改改
         List<DocumentModel> documentList =
                 em.createQuery("from DocumentModel m where m.id in (:ids)")
                 .setParameter("ids", ids)
                 .getResultList();
         
-        List<ModuleModel> moduleList =
-                em.createQuery("from ModuleModel m where m.document.id in (:ids)")
-                .setParameter("ids", ids)
-                .getResultList();
-        
-        List<SchemaModel> schemaList =
-                em.createQuery("from SchemaModel m where m.document.id in (:ids)")
-                .setParameter("ids", ids)
-                .getResultList();
-        
-        // DocumentModelのMapを作る
-        HashMap<Long, DocumentModel> dmMap = new HashMap<Long, DocumentModel>();
+        // Lazy fetchのやつらを取得するtrick
+        // http://stackoverflow.com/questions/3421314/jpa-lazy-loading-lazyinitializationexception-when-not-accessing-child-coll
+        // Lazy means that collection items will be loaded when someone will call get(index) 
+        // or other method which needs to operate with fully initialized collection. size() 
+        // doesn't initialize collection.
         for (DocumentModel dm : documentList) {
-            // LazyFetchのdetached objectsは一旦バッサリ消す！
-            dm.setModules(null);
-            dm.setSchema(null);
-            dmMap.put(dm.getId(), dm);
-        }
-        
-        // ModuleModelを登録しなおす
-        for (ModuleModel mm : moduleList) {
-            long docPk = mm.getDocumentModel().getId();
-            DocumentModel docModel = dmMap.get(docPk);
-            if (docModel != null) {
-                docModel.addModule(mm);
-            }
-        }
-        
-        // SchemaModelを登録しなおす
-        for (SchemaModel sm : schemaList) {
-            long docPk = sm.getDocumentModel().getId();
-            DocumentModel docModel = dmMap.get(docPk);
-            if (docModel != null) {
-                docModel.addSchema(sm);
-            }
-        }
-        dmMap.clear();
-        
-        // ソートする！
-        for (DocumentModel dm : documentList) {
+
+            // サイズを取得するだけでfetchできる
+            dm.getModules().size();
+            dm.getSchema().size();
+/*
+            // サーバー側でソート
+            // しなくても大丈夫そうだし結構時間かかるので省く
             List<ModuleModel> modules = dm.getModules();
             if (modules != null && !modules.isEmpty()) {
                 Collections.sort(modules);
@@ -428,6 +401,7 @@ public class KarteServiceBean {
             if (schemas != null && !schemas.isEmpty()) {
                 Collections.sort(schemas);
             }
+*/
         }
 
         return documentList;
