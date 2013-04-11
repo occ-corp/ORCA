@@ -150,12 +150,12 @@
            <artifactId>JTattoo</artifactId>
            <version>1.6.7</version>
          </dependency>
+<!-- 
         <dependency>
             <groupId>com.seaglasslookandfeel</groupId>
             <artifactId>seaglasslookandfeel</artifactId>
             <version>0.2</version>
         </dependency>
-<!--
         <dependency>
             <groupId>com.github.insubstantial</groupId>
             <artifactId>substance</artifactId>

@@ -664,6 +664,7 @@ public final class ClientContextStub {
             }
 
             System.setProperty("Quaqua.tabLayoutPolicy", "wrap");
+            System.setProperty("Quaqua.design", "snowleopard");
             //UIManager.put("Component.visualMargin", new Insets(0,0,0,0));
             //UIManager.put("TabbedPane.contentBorderPainted", false);
             //UIManager.put("Quaqua.Debug.showVisualBounds", true);

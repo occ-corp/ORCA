@@ -82,10 +82,9 @@ public interface ILookAndFeelConst {
         {"JTattoo", "Luna", JTATTOO_LUNA_LAF_CLS},
         {"JTattoo", "Texture", JTATTOO_TEXTURE_LAF_CLS},
         
+/*
         {null, "Seaglass", SEAGLASS_LAF_CLS},
-/*        
         {null, "Web Look And Feel", WEB_LAF_CLS},
-
         {"Substance", "Business", SUBSTANCE_BUSINESS_LAF_CLS},
         {"Substance", "Business Blue Steel", SUBSTANCE_BUSINESS_BLUE_STEEL_LAF_CLS},
         {"Substance", "Business Black Steel", SUBSTANCE_BUSINESS_BLACK_STEEL_LAF_CLS},
