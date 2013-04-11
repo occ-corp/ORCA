@@ -10,6 +10,7 @@ import java.text.DateFormat;
 import java.util.List;
 import java.util.*;
 import javax.swing.*;
+import javax.swing.border.BevelBorder;
 import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicTextPaneUI;
 import javax.swing.text.DefaultEditorKit;
@@ -745,7 +746,7 @@ public final class ClientContextStub {
             UIManager.put("TextPane.font", font13);     // 大き目
             UIManager.put("TextField.font", font13);
             UIManager.put("PasswordField.font", font13);
-            //UIManager.put("TextArea.font", font13);
+            UIManager.put("TextArea.font", font13);
             UIManager.put("Table.font", font12);
             UIManager.put("TableHeader.font", font11);  // 小さ目
             UIManager.put("Tree.rowHeight", 20);        // 高さ指定
@@ -754,12 +755,14 @@ public final class ClientContextStub {
             UIManager.put("OptionPane.messageFont", font13);
         }
         
-        // Nimbusの背景色workaround
+        // NimbusのUI調節
         if (isNimbus) {
             UIManager.put("TextPaneUI", BasicTextPaneUI.class.getName());
-            UIManager.put("TextPane.selectionBackground", new Color(57,105,138));
+            UIManager.put("TextPane.selectionBackground", new Color(57, 105, 138));
             UIManager.put("TextPane.selectionForeground", Color.WHITE);
-            UIManager.put("TextPane.border", new EmptyBorder(4, 6, 4, 6));
+            UIManager.put("TextPane.border", new EmptyBorder(8, 8, 8, 8));
+            UIManager.put("TextArea.contentMargins", new Insets(0, 0, 0, 0));
+            UIManager.put("TitledBorder.border", new BevelBorder(BevelBorder.LOWERED));
         }
         
         // Windows LAF テーブル選択背景色変更
