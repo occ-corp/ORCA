@@ -219,7 +219,7 @@ public class MakeBaseChargeStamp extends CheckSantei {
         
         // CheckSanteiの初期化
         try {
-            init(editor.getContext(), stamps, editor.getModel().getDocInfoModel().getFirstConfirmDate());
+            init(editor.getContext(), stamps, editor.getModel().getDocInfoModel().getFirstConfirmDate(), null);
         } catch (Exception ex) {
             return;
         }

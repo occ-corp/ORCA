@@ -845,8 +845,9 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
             boolean selfIns = docInfo.getHealthInsurance().startsWith(IInfoModel.INSURANCE_SELF_PREFIX);
             if (check && !inHospital && !selfIns) {
                 try {
+                    String text = soaPane.getTextPane().getText();
                     CheckSantei cs = new CheckSantei();
-                    cs.init(context, stamps, docInfo.getFirstConfirmDate());
+                    cs.init(context, stamps, docInfo.getFirstConfirmDate(), text);
                     if (cs.checkOnSave()) {
                         // 算定チェックが問題なければfalseで返ってくる masuda
                         return;

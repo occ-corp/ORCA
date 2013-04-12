@@ -432,8 +432,8 @@ public class KarteServiceBean {
             }
         }
         dmMap.clear();
-/*
-        // ソートする！
+        
+        // ソートする！　しなくても大丈夫そうだが
         for (DocumentModel dm : documentList) {
             List<ModuleModel> modules = dm.getModules();
             if (modules != null && !modules.isEmpty()) {
@@ -444,7 +444,7 @@ public class KarteServiceBean {
                 Collections.sort(schemas);
             }
         }
-*/
+        
         return documentList;
     }
 
@@ -466,9 +466,8 @@ public class KarteServiceBean {
             // サイズを取得するだけでfetchできる
             dm.getModules().size();
             dm.getSchema().size();
-/*
-            // サーバー側でソート
-            // しなくても大丈夫そうだし結構時間かかるので省く
+
+            // ソートする！　しなくても大丈夫そうだが、結構時間がかかる
             List<ModuleModel> modules = dm.getModules();
             if (modules != null && !modules.isEmpty()) {
                 Collections.sort(modules);
@@ -477,7 +476,6 @@ public class KarteServiceBean {
             if (schemas != null && !schemas.isEmpty()) {
                 Collections.sort(schemas);
             }
-*/
         }
 
         return documentList;

@@ -7,6 +7,14 @@ package open.dolphin.client;
  */
 public interface ICheckSanteiConst {
     
+    public static final String[][] SANTEI_MORE_CHECK_DATA = {
+        {"尿検査：", "160000310", "尿検査算定していますか？"},
+        {"血糖：", "160019410", "グルコース算定していますか？"},
+        {"ＵＣＧ：", "160072510", "ＵＣＧ算定していますか？"},
+        {"ＵＳ：", "160072210", "ＵＳ算定していますか？"},
+        {"ＥＣＧ：", "160068410", "ＥＣＧ算定していますか？"},
+        {"ＸＰ：", "170027910", "ＸＰ算定していますか？"},};
+
     public final static String srycdFrmtStr = "000000000";
     
     // ClaimItemのsrycd
