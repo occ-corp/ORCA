@@ -91,15 +91,15 @@ public class StripeTableCellRenderer extends DefaultTableCellRenderer {
             final Rectangle clipBounds = g.getClipBounds();
             final int rowHeight = table.getRowHeight();
             final int endY = clipBounds.y + clipBounds.height;
-            final int rowAtPoint = clipBounds.y / rowHeight;
 
             int topY = clipBounds.y;
-            int currentRow = rowAtPoint < 0 ? 0 : rowAtPoint;
+            int currentRow = clipBounds.y / rowHeight;
             int height = rowHeight - topY % rowHeight;
+            
             while (topY < endY) {
-                int bottomY = Math.min(topY + height, endY);
+                int bottomY = topY + height;
                 g.setColor(ROW_COLORS[currentRow & 1]);
-                g.fillRect(clipBounds.x, topY, clipBounds.width, bottomY);
+                g.fillRect(clipBounds.x, topY, clipBounds.width, Math.min(bottomY, endY));
                 topY = bottomY;
                 height = rowHeight;
                 currentRow++;
