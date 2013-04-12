@@ -665,6 +665,7 @@ public final class ClientContextStub {
 
             System.setProperty("Quaqua.tabLayoutPolicy", "wrap");
             System.setProperty("Quaqua.design", "snowleopard");
+            System.setProperty("Quaqua.showNonEditableCaret", "false");
             //UIManager.put("Component.visualMargin", new Insets(0,0,0,0));
             //UIManager.put("TabbedPane.contentBorderPainted", false);
             //UIManager.put("Quaqua.Debug.showVisualBounds", true);
@@ -773,7 +774,7 @@ public final class ClientContextStub {
             UIManager.put("Tree.selectionBackground", c);
             UIManager.put("List.selectionBackground", c);
         }
-        
+
         UIManager.put("ComboBox.maximumRowCount", 20);
         UIManager.put("TextComponent.autoSelect", Boolean.FALSE);
         UIManager.put("OptionPane.cancelButtonText", "キャンセル");

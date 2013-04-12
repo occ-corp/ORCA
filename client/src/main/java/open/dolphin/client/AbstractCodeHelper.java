@@ -23,35 +23,35 @@ import open.dolphin.tr.LocalStampTreeNodeTransferable;
 public abstract class AbstractCodeHelper {
     
     /** キーワードの境界となる文字 */
-    static final String[] WORD_SEPARATOR = {" ", " ", "、", "。", "\n", "\t"};
+    private static final String[] WORD_SEPARATOR = {" ", " ", "、", "。", "\n", "\t"};
     
-    static final String LISTENER_METHOD = "importStamp";
+    private static final String LISTENER_METHOD = "importStamp";
     
-    static final Icon icon = ClientContext.getImageIcon("foldr_16.gif");
+    protected static final Icon icon = ClientContext.getImageIcon("foldr_16.gif");
     
     /** 対象の KartePane */
-    KartePane kartePane;
+    private KartePane kartePane;
     
     /** KartePane の JTextPane */
-    JTextPane textPane;
+    private JTextPane textPane;
     
     /** 補完リストメニュー */
-    JPopupMenu popup;
+    protected JPopupMenu popup;
     
     /** キーワードパターン */
-    Pattern pattern;
+    protected Pattern pattern;
     
     /** キーワードの開始位置 */
-    int start;
+    private int start;
     
     /** キーワードの終了位置 */
-    int end;
+    private int end;
     
     /** ChartMediator */
-    ChartMediator mediator;
+    private ChartMediator mediator;
     
     /** 修飾キー */
-    int MODIFIER;
+    private int MODIFIER;
     
     
     /** 
@@ -108,7 +108,7 @@ public abstract class AbstractCodeHelper {
         }
         
         popup = new JPopupMenu();
-        
+
         HashMap<Object, Object> ht = new HashMap<Object, Object>(5, 0.75f);
         
         DefaultMutableTreeNode rootNode = (DefaultMutableTreeNode) tree.getModel().getRoot();

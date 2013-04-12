@@ -108,6 +108,8 @@ public abstract class KartePanel extends Panel2 {
         JTextPane textPane = new JTextPane();
         textPane.setMargin(TEXT_PANE_MARGIN);
         textPane.setEditorKit(new KartePanelEditorKit(editor));
+        // これをセットしないと，勝手に cut copy paste のポップアップがセットされてしまう。 thx to Dr. pns
+        textPane.putClientProperty("Quaqua.TextComponent.showPopup", false);
         return textPane;
     }
 
