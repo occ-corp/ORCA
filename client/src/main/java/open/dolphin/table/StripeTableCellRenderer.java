@@ -93,7 +93,7 @@ public class StripeTableCellRenderer extends DefaultTableCellRenderer {
             final int endY = clipBounds.y + clipBounds.height;
 
             int topY = clipBounds.y;
-            int currentRow = clipBounds.y / rowHeight;
+            int currentRow = topY / rowHeight;
             int height = rowHeight - topY % rowHeight;
             
             while (topY < endY) {
