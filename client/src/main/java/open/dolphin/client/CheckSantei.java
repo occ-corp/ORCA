@@ -67,6 +67,7 @@ public class CheckSantei implements ICheckSanteiConst {
     private boolean pastZaitakuInMed;
     private boolean allHokatsuMed;
     private boolean hasTumorMarkers;
+    private boolean hasLabo;
 
     protected boolean homeCare;
     protected boolean nursingHomeCare;
@@ -403,18 +404,23 @@ public class CheckSantei implements ICheckSanteiConst {
     
     private String checkSanteiMore() {
         
-        if (soaPaneText == null || soaPaneText.isEmpty()) {
-            return "";
-        }
-        
         StringBuilder sb = new StringBuilder();
-        for (String[] data : SANTEI_MORE_CHECK_DATA) {
-            String text = data[0];
-            String srycd = data[1];
-            String msg = data[2];
-            if (soaPaneText.contains(text)) {
-                if (!allClaimItems.containsKey(srycd)) {
-                    sb.append(msg).append("\n");
+        
+        boolean cancerCare = context.getPatient().getSanteiInfoModel().isCancerCare();
+        if (cancerCare && hasLabo) {
+            sb.append("マーカーチェックは要りませんか？");
+        }
+
+        // カルテ記述から算定漏れ検索
+        if (soaPaneText != null && !soaPaneText.isEmpty()) {
+            for (String[] data : SANTEI_MORE_CHECK_DATA) {
+                String text = data[0];
+                String srycd = data[1];
+                String msg = data[2];
+                if (soaPaneText.contains(text)) {
+                    if (!allClaimItems.containsKey(srycd)) {
+                        sb.append(msg).append("\n");
+                    }
                 }
             }
         }
@@ -678,6 +684,7 @@ public class CheckSantei implements ICheckSanteiConst {
     private void setupCurrentSanteiHistory() {
 
         allClaimItems = new HashMap<String, ClaimItem>();
+        hasLabo = false;
 
         // 現在のカルテにある全てのsrycdをとりあえず列挙する
         for (ModuleModel stamp : stamps) {
@@ -722,6 +729,12 @@ public class CheckSantei implements ICheckSanteiConst {
                     shm.setSanteiDate(karteDate);
                     currentSanteiList.add(shm);
                 }
+            }
+            
+            // ついでにラボがあるかどうかチェック
+            String entity = mm.getModuleInfoBean().getEntity();
+            if (IInfoModel.ENTITY_LABO_TEST.equals(entity)) {
+                hasLabo = true;
             }
         }
     }
