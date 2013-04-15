@@ -408,7 +408,16 @@ public class CheckSantei implements ICheckSanteiConst {
         
         boolean cancerCare = context.getPatient().getSanteiInfoModel().isCancerCare();
         if (cancerCare && hasLabo) {
-            sb.append("マーカーチェックは要りませんか？");
+            boolean found = false;
+            for (String srycd : TM_KANRI_SRYCD) {
+                if (allClaimItems.containsKey(srycd)) {
+                    found = true;
+                    break;
+                }
+            }
+            if (!found) {
+                sb.append("マーカーチェックは要りませんか？");
+            }
         }
 
         // カルテ記述から算定漏れ検索
