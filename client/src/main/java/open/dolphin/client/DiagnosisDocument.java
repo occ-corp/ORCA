@@ -36,6 +36,7 @@ import open.dolphin.table.StripeTableCellRenderer;
 import open.dolphin.tr.DiagnosisTransferHandler;
 import open.dolphin.util.BeanUtils;
 import open.dolphin.util.MMLDate;
+import open.dolphin.util.PopupMenuUtil;
 import org.apache.log4j.Logger;
 
 /**
@@ -244,6 +245,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 
             @Override
             public void actionPerformed(ActionEvent ae) {
+                
             }
         };
         JButton addButton = new JButton(addAction);
@@ -255,7 +257,8 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 if (!e.isPopupTrigger()) {
                     // ASP StampBox が選択されていて傷病名Treeがない場合がある
                     if (hasTree(IInfoModel.ENTITY_DIAGNOSIS)) {
-                        JPopupMenu popup = new JPopupMenu();
+                        //JPopupMenu popup = new JPopupMenu();
+                        JPopupMenu popup = PopupMenuUtil.createPopupMenu();
                         getContext().getChartMediator().addDiseaseMenu(popup);
                         popup.show(e.getComponent(), e.getX(), e.getY());
                     } else {

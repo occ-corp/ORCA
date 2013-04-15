@@ -43,7 +43,6 @@ import open.dolphin.tr.*;
 import open.dolphin.util.BeanUtils;
 import open.dolphin.util.DicomImageEntry;
 import open.dolphin.util.ImageTool;
-import open.dolphin.util.MenuScroller;
 import open.dolphin.util.PopupMenuUtil;
 import org.apache.log4j.Logger;
 
@@ -460,8 +459,8 @@ public class KartePane implements DocumentListener, MouseListener,
     // ペイン内の右クリックメニューを生成する
     protected JPopupMenu createMenus() {
 
-        final JPopupMenu contextMenu = new JPopupMenu();
-        MenuScroller.setScrollerFor(contextMenu, 30);
+        //final JPopupMenu contextMenu = new JPopupMenu();
+        final JPopupMenu contextMenu = PopupMenuUtil.createPopupMenu();
         
         // cut, copy, paste メニューを追加する
         contextMenu.add(mediator.getAction(GUIConst.ACTION_CUT));
@@ -513,8 +512,7 @@ public class KartePane implements DocumentListener, MouseListener,
                 @Override
                 public void run() {
                     JPopupMenu contextMenu = createMenus();
-                    //contextMenu.show(e.getComponent(), e.getX(), e.getY());
-                    PopupMenuUtil.showPopup(textPane, contextMenu, e.getX(), e.getY());
+                    contextMenu.show(e.getComponent(), e.getX(), e.getY());
                 }
             });
 //masuda$
