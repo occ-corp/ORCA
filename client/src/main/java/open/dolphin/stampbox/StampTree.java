@@ -33,8 +33,8 @@ public class StampTree extends JTree implements TreeModelListener {
 
     public static final String SELECTED_NODE_PROP = "selectedNodeProp";
     private static final int TOOLTIP_LENGTH = 35;
-    private static final ImageIcon ASP_ICON = ClientContext.getImageIcon("move2_16.gif");
-    private static final ImageIcon LOCAL_ICON = ClientContext.getImageIcon("move2_16.gif");
+    private static final ImageIcon ASP_ICON = ClientContext.getImageIcon("os_world_16.png");
+    private static final ImageIcon LOCAL_ICON = ClientContext.getImageIcon("os_folder_vertical_document_16.png");
     private static final String NEW_FOLDER_NAME = "新規フォルダ";
     private static final String STAMP_SAVE_TASK_NAME = "スタンプ保存";
     // ASP Tree かどうかのフラグ 

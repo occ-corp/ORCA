@@ -58,11 +58,11 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 
     // GUI コンポーネント定義
     private static final String RESOURCE_BASE = "/open/dolphin/resources/images/";
-    private static final String DELETE_BUTTON_IMAGE     = "del_16.gif";
-    private static final String ADD_BUTTON_IMAGE        = "add_16.gif";
-    private static final String UPDATE_BUTTON_IMAGE     = "save_16.gif";
-    private static final String ORCA_VIEW_IMAGE         = "impt_16.gif";
-    private static final String ORCA_IMPORT_IMAGE       = "favs_16.gif";
+    private static final String DELETE_BUTTON_IMAGE     = "os_delete_16.png";
+    private static final String ADD_BUTTON_IMAGE        = "os_add_16.png";
+    private static final String UPDATE_BUTTON_IMAGE     = "document-save-5_16.png";
+    private static final String ORCA_VIEW_IMAGE         = "document-save-2_16.png";
+    private static final String ORCA_IMPORT_IMAGE       = "os_star_16.png";
 
     /** JTableレンダラ用のカラー */
     private static final Color ORCA_BACK = new Color(227, 250, 207); //ClientContext.getColor("color.CALENDAR_BACK");

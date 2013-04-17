@@ -165,8 +165,8 @@ public class KartePDFMaker extends AbstractPDFMaker {
                 }
 
                 // 念のためソート
-                //Collections.sort(soaModules);
-                //Collections.sort(pModules);
+                Collections.sort(soaModules);
+                Collections.sort(pModules);
 
                 // テーブルを作成する
                 KarteTable table;

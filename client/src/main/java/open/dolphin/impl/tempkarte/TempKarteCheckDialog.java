@@ -50,7 +50,7 @@ public class TempKarteCheckDialog extends JDialog implements IChartEventListener
         String.class};
     private final int[] COLUMN_WIDTH = {50, 100, 120, 30, 100, 20};
     
-    private static final ImageIcon INFO_ICON = ClientContext.getImageIcon("about_16.gif");
+    private static final ImageIcon INFO_ICON = ClientContext.getImageIcon("os_information_16.png");
     
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "tempKarteChecker.column.spec";

@@ -26,7 +26,7 @@ public class BaseURISettingPanel extends AbstractSettingPanel {
     private String ipAddressPattern = "[A-Za-z0-9.\\-_:/]*";
     private static final String ID = "hostSetting";
     private static final String TITLE = "サーバ";
-    private static final String ICON = "ntwrk_16.gif";
+    private static final String ICON = "os_house_16.png";
     
     // 設定用の GUI components
     private JTextField facilityIdField;

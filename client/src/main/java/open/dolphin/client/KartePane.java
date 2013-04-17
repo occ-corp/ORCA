@@ -983,7 +983,7 @@ public class KartePane implements DocumentListener, MouseListener,
                             ClientContext.getFrameTitle(title),
                             JOptionPane.DEFAULT_OPTION,
                             JOptionPane.INFORMATION_MESSAGE,
-                            ClientContext.getImageIcon("about_32.gif"),
+                            ClientContext.getImageIcon("os_information_32.png"),
                             new String[]{"縮小する", "取消す"}, "縮小する");
         return option == 0;
     }

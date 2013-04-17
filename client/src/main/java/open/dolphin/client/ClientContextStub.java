@@ -810,4 +810,10 @@ public final class ClientContextStub {
         }
         return c;
     }
+    
+//minagawa^ Icon Server
+    public ImageIcon getImageIconArias(String name) {
+        return this.getImageIcon(getString(name));
+    }
+//minagawa$ 
 }

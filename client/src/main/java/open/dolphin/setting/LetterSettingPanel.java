@@ -17,7 +17,7 @@ public class LetterSettingPanel extends AbstractSettingPanel {
     
     private static final String ID = "letterSetting";
     private static final String TITLE = "紹介状等";
-    private static final String ICON = "mail_16.gif";
+    private static final String ICON = "mail-unread-new_16.png";
 
     private LetterSettingView view;
     private LetterSettingModel model;

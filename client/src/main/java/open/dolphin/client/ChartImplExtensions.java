@@ -15,9 +15,9 @@ import open.dolphin.setting.MiscSettingPanel;
  */
 public class ChartImplExtensions extends AbstractChartExtensions {
     
-    private static final ImageIcon ICON_ECG = ClientContext.getImageIcon("ecg_24.gif");
+    private static final ImageIcon ICON_ECG = ClientContext.getImageIcon("utilities-system-monitor-24.png");
     private static final ImageIcon ICON_MED = ClientContext.getImageIcon("med_24.gif");
-    private static final ImageIcon ICON_RSB = ClientContext.getImageIcon("rsb_24.gif");
+    //private static final ImageIcon ICON_RSB = ClientContext.getImageIcon("rsb_24.gif");
     
     public ChartImplExtensions(Chart context) {
         this.context = context;

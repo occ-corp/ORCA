@@ -30,7 +30,7 @@ public class KarteSettingPanel extends AbstractSettingPanel {
 
     private static final String ID = "karteSetting";
     private static final String TITLE = "カルテ";
-    private static final String ICON = "hist_16.gif";
+    private static final String ICON = "os_plain_document_16.png";
     
     // インスペクタ画面
     private JComboBox topCompo;
@@ -289,7 +289,7 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         gbb.add(label, 0, row, 1, 1, GridBagConstraints.EAST);
         gbb.add(forthCompo, 1, row, 1, 1, GridBagConstraints.WEST);
         row++;
-        label = new JLabel(ClientContext.getImageIcon("about_16.gif"));
+        label = new JLabel(ClientContext.getImageIcon("os_information_16.png"));
         gbb.add(label, 0, row, 1, 1, GridBagConstraints.EAST);
         gbb.add(infoLabel, 1, row, 1, 1, GridBagConstraints.WEST);
 

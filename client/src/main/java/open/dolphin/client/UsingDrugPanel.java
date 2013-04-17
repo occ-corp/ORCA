@@ -34,9 +34,9 @@ public class UsingDrugPanel {
     private static final int LIMIT_COL = 5;
     private static final int START_NUM_ROWS = 1;
     
-    private static final ImageIcon cancelIcon = ClientContext.getImageIcon("cancl_16.gif");
-    private static final ImageIcon removeIcon = ClientContext.getImageIcon("del_16.gif");
-    private static final ImageIcon saveIcon = ClientContext.getImageIcon("save_16.gif");
+    private static final ImageIcon cancelIcon = ClientContext.getImageIcon("os_cancel_16.png");
+    private static final ImageIcon removeIcon = ClientContext.getImageIcon("os_delete_16.png");
+    private static final ImageIcon saveIcon = ClientContext.getImageIcon("os_save_16.png");
     
     private ListTableModel<UsingDrugModel> tableModel;
     private JDialog dialog;

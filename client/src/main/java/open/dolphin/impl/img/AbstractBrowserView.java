@@ -20,7 +20,7 @@ public class AbstractBrowserView extends JPanel {
 
     protected AbstractBrowserView() {
         
-        dirLbl = new JLabel(ClientContext.getImageIcon("about_16.gif"));
+        dirLbl = new JLabel(ClientContext.getImageIcon("os_information_16.png"));
         north = new JPanel();
         north.setLayout(new BoxLayout(north, BoxLayout.X_AXIS));
         north.add(dirLbl);

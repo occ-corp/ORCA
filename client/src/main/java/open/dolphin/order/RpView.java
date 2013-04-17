@@ -11,7 +11,7 @@ import open.dolphin.client.ClientContext;
  */
 public class RpView extends AbstractOrderView {
 
-    private static final ImageIcon yakkaIcon = ClientContext.getImageIcon("calc_16.gif");
+    private static final ImageIcon yakkaIcon = ClientContext.getImageIcon("accessories-calculator-3_16.png");
     
     private JCheckBox medicineCheck;
     private JCheckBox usageCheck;

@@ -21,7 +21,7 @@ public class SendMmlSettingPanel extends AbstractSettingPanel {
     
     private static final String ID = "mmlSetting";
     private static final String TITLE = "MML出力";
-    private static final String ICON = "cd_16.gif";
+    private static final String ICON = "os_sql_join_outer_16.png";
     
     // MML送信関係コンポーネント
     private JRadioButton sendMML;

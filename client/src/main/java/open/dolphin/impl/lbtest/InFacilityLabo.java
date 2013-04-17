@@ -49,9 +49,9 @@ public class InFacilityLabo {
     private static final int NORMAL_COL = 3;
     private static final int UNIT_COL = 4;
     
-    private static final ImageIcon closeIcon = ClientContext.getImageIcon("cancl_16.gif");
-    private static final ImageIcon deleteIcon = ClientContext.getImageIcon("del_16.gif");
-    private static final ImageIcon saveIcon = ClientContext.getImageIcon("save_16.gif");
+    private static final ImageIcon closeIcon = ClientContext.getImageIcon("os_cancel_16.png");
+    private static final ImageIcon deleteIcon = ClientContext.getImageIcon("os_delete_16.png");
+    private static final ImageIcon saveIcon = ClientContext.getImageIcon("os_save_16.png");
     
     private static final String DEFAULT_DATE_FORMAT = "yyyy-MM-dd HH:mm";
     

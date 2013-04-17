@@ -100,7 +100,7 @@ public class DefaultBrowser extends AbstractBrowser {
 
         ActionMap ret = new ActionMap();
 
-        ImageIcon icon = ClientContext.getImageIcon("ref_16.gif");
+        ImageIcon icon = ClientContext.getImageIcon("os_refresh_16.png");
         AbstractAction refresh = new AbstractAction("更新", icon) {
 
             @Override
@@ -110,7 +110,7 @@ public class DefaultBrowser extends AbstractBrowser {
         };
         ret.put("refresh", refresh);
 
-        icon = ClientContext.getImageIcon("confg_16.gif");
+        icon = ClientContext.getImageIcon("os_wrench_16.png");
         AbstractAction doSetting = new AbstractAction("設定", icon) {
 
             @Override

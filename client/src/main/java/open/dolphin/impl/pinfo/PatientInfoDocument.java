@@ -37,7 +37,7 @@ public class PatientInfoDocument extends AbstractChartDocument {
     };
     
     // Info アイコン
-    private static final String INFO_BUTTON_IMAGE   = "about_16.gif";
+    private static final String INFO_BUTTON_IMAGE   = "os_information_16.png";
     
     private static final String INFO = "* の項目は編集が可能です";
     
@@ -51,7 +51,7 @@ public class PatientInfoDocument extends AbstractChartDocument {
 //masuda$
     
     // 保存アイコン
-    private static final String SAVE_ICON = "save_16.gif";
+    private static final String SAVE_ICON = "os_save_16.png";
     
     // 保存ボタン
     private JButton saveBtn;

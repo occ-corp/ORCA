@@ -10,9 +10,9 @@ import open.dolphin.infomodel.ChartEventModel;
 public interface IChartEventListener {
     
     // オープンアイコン
-    public static final ImageIcon OPEN_ICON = ClientContext.getImageIcon("open_16.gif");
+    public static final ImageIcon OPEN_ICON = ClientContext.getImageIcon("os_folder_blue_16.png");
     // ネットワークアイコン
-    public static final ImageIcon NETWORK_ICON = ClientContext.getImageIcon("ntwrk_16.gif");
+    public static final ImageIcon NETWORK_ICON = ClientContext.getImageIcon("network-error-2_16.png");
     
     // 変更処理 
     public void onEvent(ChartEventModel evt) throws Exception;

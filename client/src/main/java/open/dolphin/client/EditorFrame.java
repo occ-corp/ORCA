@@ -453,17 +453,17 @@ public class EditorFrame extends AbstractMainTool implements Chart {
         frame.getContentPane().add(content, BorderLayout.CENTER);
         frame.getContentPane().add((JPanel) statusPanel, BorderLayout.SOUTH);
         // Injection
-        textBtn.setIcon(ClientContext.getImageIcon(resource.getString("textBtn.icon")));
+        textBtn.setIcon(ClientContext.getImageIcon("text-field_24.png"));
         textBtn.setText(null);
         textBtn.setToolTipText(resource.getString("textBtn.toolTipText"));
         //textBtn.setMargin(new Insets(5,5,5,5));
 
-        schemaBtn.setIcon(ClientContext.getImageIcon(resource.getString("schemaBtn.icon")));
+        schemaBtn.setIcon(ClientContext.getImageIcon("folder-image_24.png"));
         schemaBtn.setText(null);
         schemaBtn.setToolTipText(resource.getString("schemaBtn.toolTipText"));
         //schemaBtn.setMargin(new Insets(5,5,5,5));
 
-        stampBtn.setIcon(ClientContext.getImageIcon(resource.getString("stampBtn.icon")));
+        stampBtn.setIcon(ClientContext.getImageIcon("folder-tar_24.png"));
         stampBtn.setText(null);
         stampBtn.setToolTipText(resource.getString("stampBtn.toolTipText"));
         //stampBtn.setMargin(new Insets(5,5,5,5));
@@ -473,7 +473,7 @@ public class EditorFrame extends AbstractMainTool implements Chart {
 //        chgBtn.setToolTipText(resource.getString("chgBtn.toolTipText"));
 //        chgBtn.setMargin(new Insets(5,5,5,5));
 
-        insBtn.setIcon(ClientContext.getImageIcon(resource.getString("insBtn.icon")));
+        insBtn.setIcon(ClientContext.getImageIcon("user-info_24.png"));
         insBtn.setText(null);
         insBtn.setToolTipText(resource.getString("insBtn.toolTipText"));
         //insBtn.setMargin(new Insets(5,5,5,5));

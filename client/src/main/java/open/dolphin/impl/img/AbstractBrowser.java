@@ -55,8 +55,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 
 //    protected static final String[] OTHER_DOC_TYPES =
 //        {"pdf", "txt", "rtf", "htm","html", "doc","docx", "xls", "xlsx", "ppt","pptx","pages", "numbers", "key"};
-    protected static final String DEFAULT_DOC_ICON = "docs_32.gif";
-    protected static final String ICON_HAS_IMAGE = "/open/dolphin/resources/images/play_16.gif";
+    protected static final String DEFAULT_DOC_ICON = "os_plain_document_32.png";
+    protected static final String ICON_HAS_IMAGE = "play_16.png";
 
     protected static SimpleDateFormat SDF = new SimpleDateFormat("yyyy年MM月dd日");
 

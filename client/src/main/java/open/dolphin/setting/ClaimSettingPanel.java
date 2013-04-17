@@ -27,7 +27,7 @@ public class ClaimSettingPanel extends AbstractSettingPanel {
     
     private static final String ID = "claimSetting";
     private static final String TITLE = "レセコン";
-    private static final String ICON = "calc_16.gif";
+    private static final String ICON = "os_server_information_16.png";
     
     // GUI staff
     private JRadioButton sendClaimYes;

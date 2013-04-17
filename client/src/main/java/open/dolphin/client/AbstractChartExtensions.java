@@ -28,8 +28,8 @@ public abstract class AbstractChartExtensions {
     protected JButton baseChargeBtn;
     protected JButton rpLabelBtn;
     
-    private static final ImageIcon ICON_WIZ = ClientContext.getImageIcon("wiz_24.gif");
-    private static final ImageIcon ICON_LBL = ClientContext.getImageIcon("prtpv_24.gif");
+    private static final ImageIcon ICON_WIZ = ClientContext.getImageIcon("tools-wizard-24.png");
+    private static final ImageIcon ICON_LBL = ClientContext.getImageIcon("document-print-frame-4_24.png");
     
     protected Chart context;
     // タイマー、ChartImplから移動

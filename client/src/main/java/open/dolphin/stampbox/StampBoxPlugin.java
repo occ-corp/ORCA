@@ -249,7 +249,7 @@ public class StampBoxPlugin extends AbstractMainTool {
         //
         // スタンプメーカを起動するためのボタンを生成する
         //
-        toolBtn = new JToggleButton(ClientContext.getImageIcon("tools_24.gif"));
+        toolBtn = new JToggleButton(ClientContext.getImageIcon("system-software-installer-3_24.png"));
         toolBtn.setToolTipText("スタンプメーカを起動します");
         toolBtn.addActionListener(new ActionListener() {
             @Override
@@ -275,21 +275,21 @@ public class StampBoxPlugin extends AbstractMainTool {
         //
         // スタンプ公開ボタンを生成する
         //
-        publishBtn = new JButton(ClientContext.getImageIcon("exp_24.gif"));
+        publishBtn = new JButton(ClientContext.getImageIcon("svn-commit_24.png"));
         publishBtn.setToolTipText("スタンプの公開を管理をします");
         publishBtn.addActionListener(new ReflectActionListener(this, "publishStamp"));
         
         //
         // インポートボタンを生成する
         //
-        importBtn = new JButton(ClientContext.getImageIcon("impt_24.gif"));
+        importBtn = new JButton(ClientContext.getImageIcon("svn-update_24.png"));
         importBtn.setToolTipText("スタンプのインポートを管理をします");
         importBtn.addActionListener(new ReflectActionListener(this, "importStamp"));
         
 //pns^  ロックボタンを生成する
         lockBtn = new JToggleButton();
-        lockBtn.setIcon(ClientContext.getImageIcon("lockOn.gif"));
-        lockBtn.setSelectedIcon(ClientContext.getImageIcon("lockOff.gif"));
+        lockBtn.setIcon(ClientContext.getImageIcon("lockOn_32.gif"));
+        lockBtn.setSelectedIcon(ClientContext.getImageIcon("lockOff_32.gif"));
         lockBtn.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         lockBtn.setToolTipText("ツリー内での入れ替えのロック／解除");
         lockBtn.setPreferredSize(new java.awt.Dimension(40,40));
@@ -309,7 +309,7 @@ public class StampBoxPlugin extends AbstractMainTool {
         });
         // 特別メニューボタンを生成する
         JLabel extraBtn = new JLabel();
-        extraBtn.setIcon(ClientContext.getImageIcon("apps_16.gif"));
+        extraBtn.setIcon(ClientContext.getImageIcon("os_cog_16.png"));
         extraBtn.setToolTipText("+SHIFTで特別メニューを開きます");
         extraBtn.setFocusable(false);
         extraBtn.addMouseListener(new StampBoxPluginExtraMenu(this));

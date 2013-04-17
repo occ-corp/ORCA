@@ -26,7 +26,7 @@ public class AreaNetWorkSettingPanel extends AbstractSettingPanel {
     
     private static final String ID = "areaNetwork";
     private static final String TITLE = "地域連携";
-    private static final String ICON = "web_16.gif";
+    private static final String ICON = "os_world_16.png";
     
     // 地域連携用コンポーネント
     private JRadioButton joinAreaNetwork;

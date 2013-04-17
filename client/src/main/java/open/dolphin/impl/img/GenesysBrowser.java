@@ -169,7 +169,7 @@ public class GenesysBrowser extends AbstractBrowser {
         ActionMap ret = new ActionMap();
 
         String text = resource.getString("refresh.Action.text");
-        ImageIcon icon = ClientContext.getImageIcon("ref_16.gif");
+        ImageIcon icon = ClientContext.getImageIcon("os_refresh_16.png");
         AbstractAction refresh = new AbstractAction(text, icon) {
 
             @Override
@@ -180,7 +180,7 @@ public class GenesysBrowser extends AbstractBrowser {
         ret.put("refresh", refresh);
 
         text = resource.getString("doSetting.Action.text");
-        icon = ClientContext.getImageIcon("confg_16.gif");
+        icon = ClientContext.getImageIcon("os_wrench_16.png");
         AbstractAction doSetting = new AbstractAction(text, icon) {
 
             @Override
@@ -235,7 +235,7 @@ public class GenesysBrowser extends AbstractBrowser {
             }
         };
         ret.put("doSetting", doSetting);
-        icon = ClientContext.getImageIcon("web_16.gif");
+        icon = ClientContext.getImageIcon("os_world_16.png");
         text = resource.getString("viewGenesys.Action.text");
 
          AbstractAction viewGenesys = new AbstractAction(text, icon) {

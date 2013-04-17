@@ -115,8 +115,8 @@ public class WatingListImpl extends AbstractMainComponent {
     // Chart State を表示するアイコン
     private ImageIcon[] chartIconArray = {
         OPEN_ICON, 
-        ClientContext.getImageIcon("sinfo_16.gif"), 
-        ClientContext.getImageIcon("flag_16.gif")};
+        ClientContext.getImageIcon("pin_16.png"), 
+        ClientContext.getImageIcon("os_flag_orange_16.png")};
     // State ComboBox
     //private Integer[] userBitArray = {0, 3, 4, 5, 6};
     private Integer[] userBitArray = {
@@ -128,11 +128,11 @@ public class WatingListImpl extends AbstractMainComponent {
         PatientVisitModel.BIT_SAVE_CLAIM};
     private ImageIcon[] userIconArray = {
         null, 
-        ClientContext.getImageIcon("apps_16.gif"), 
-        ClientContext.getImageIcon("fastf_16.gif"), 
-        ClientContext.getImageIcon("cart_16.gif"), 
-        ClientContext.getImageIcon("cancl_16.gif"),
-        ClientContext.getImageIcon("flag_16.gif")};
+        ClientContext.getImageIcon("os_cog_16.png"), 
+        ClientContext.getImageIcon("os_hot_16.png"), 
+        ClientContext.getImageIcon("os_cart_16.png"), 
+        ClientContext.getImageIcon("os_cancel_16.png"),
+        ClientContext.getImageIcon("os_flag_orange_16.png")};
     private ImageIcon modifySendIcon;
     
     // Status　情報　メインウィンドウの左下に表示される内容
@@ -206,9 +206,9 @@ public class WatingListImpl extends AbstractMainComponent {
         
         // 修正送信アイコンを決める
         if (Project.getBoolean("change.icon.modify.send", true)) {
-            modifySendIcon = ClientContext.getImageIcon("sinfo_16.gif");
+            modifySendIcon = ClientContext.getImageIcon("pin_16.png");
         } else {
-            modifySendIcon = ClientContext.getImageIcon("flag_16.gif");
+            modifySendIcon = ClientContext.getImageIcon("os_flag_orange_16.png");
         }
         chartIconArray[INDEX_MODIFY_SEND_ICON] = modifySendIcon;
 
@@ -350,7 +350,7 @@ public class WatingListImpl extends AbstractMainComponent {
                                 ClientContext.getFrameTitle(getName()),
                                 JOptionPane.YES_NO_CANCEL_OPTION,
                                 JOptionPane.QUESTION_MESSAGE,
-                                ClientContext.getImageIcon("cancl_32.gif"),
+                                ClientContext.getImageIcon("os_exclamation_png.png"),
                                 cstOptions, "はい");
 
                         System.err.println("select=" + select);
@@ -782,9 +782,9 @@ public class WatingListImpl extends AbstractMainComponent {
 
         // 修正送信アイコンを決める
         if (Project.getBoolean("change.icon.modify.send", true)) {
-            modifySendIcon = ClientContext.getImageIcon("sinfo_16.gif");
+            modifySendIcon = ClientContext.getImageIcon("pin_16.png");
         } else {
-            modifySendIcon = ClientContext.getImageIcon("flag_16.gif");
+            modifySendIcon = ClientContext.getImageIcon("os_flag_orange_16.png");
         }
         chartIconArray[INDEX_MODIFY_SEND_ICON] = modifySendIcon;
 
@@ -884,7 +884,7 @@ public class WatingListImpl extends AbstractMainComponent {
                 ClientContext.getFrameTitle(getName()),
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                ClientContext.getImageIcon("cancl_32.gif"),
+                ClientContext.getImageIcon("os_exclamation_png.png"),
                 cstOptions, cstOptions[1]);
         return (select == 0);
     }

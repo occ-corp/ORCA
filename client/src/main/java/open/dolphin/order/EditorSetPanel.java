@@ -35,8 +35,8 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
     private static final String TITLE_TO_LAB = "検体";
     private static final String TITLE_TO_PHYSIO = "生体";
     private static final String TITLE_TO_BACTERIA = "細菌";
-    private static final String ICON_FORWARD = "forwd_16.gif";
-    private static final String ICON_BACK = "back_16.gif";
+    private static final String ICON_FORWARD = "arrow_green_right_16.png";
+    private static final String ICON_BACK = "arrow_green_left_16.png";
     private static final String TITLE_FROM_EDITOR = "エディタから発行...";
 
     // エディタ の組

@@ -83,7 +83,7 @@ public class InjectionView extends AbstractOrderView {
         cmdPanel2.add(rtCheck);
         cmdPanel2.add(partialCheck);
         btn_comment = new JButton();
-        btn_comment.setIcon(ClientContext.getImageIcon("sinfo_16.gif"));
+        btn_comment.setIcon(ClientContext.getImageIcon("insert-comments_16.png"));
         btn_comment.setToolTipText("コメントコードを検索します。");
         cmdPanel2.add(btn_comment);
         cmdPanel2.add(new JSeparator(JSeparator.VERTICAL));
