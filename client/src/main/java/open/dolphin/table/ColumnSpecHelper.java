@@ -1,5 +1,6 @@
 package open.dolphin.table;
 
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -273,7 +274,7 @@ public class ColumnSpecHelper {
     
     public JMenu createMenuItem() {
 
-        JMenu menu = new JMenu("表示カラム");
+        final JMenu menu = new JMenu("表示カラム");
         for (ColumnSpec cs : columnSpecs) {
             final MyCheckBoxMenuItem cbm = new MyCheckBoxMenuItem(cs.getName());
             cbm.setColumnSpec(cs);
@@ -284,6 +285,18 @@ public class ColumnSpecHelper {
 
                 @Override
                 public void actionPerformed(ActionEvent e) {
+                    // 全部非表示にしちゃう人があるらしい… ٩(๑`^´๑)۶
+                    boolean allHide = true;
+                    for (Component c : menu.getMenuComponents()) {
+                        JCheckBoxMenuItem cbm = (JCheckBoxMenuItem) c;
+                        if (cbm.isSelected()) {
+                            allHide = false;
+                            break;
+                        }
+                    }
+                    if (allHide) {
+                        return;
+                    }
                     if (cbm.isSelected()) {
                         cbm.getColumnSpec().setWidth(50);
                     } else {
