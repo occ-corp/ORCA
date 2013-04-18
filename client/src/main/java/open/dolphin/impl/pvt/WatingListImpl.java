@@ -73,6 +73,8 @@ public class WatingListImpl extends AbstractMainComponent {
     private final String[] AGE_METHOD = {"getPatientAgeBirthday", "getPatientBirthday"};
     // カラム仕様名
     private static final String COLUMN_SPEC_NAME = "pvtTable.column.spec";
+    // state Clumn Identifier
+    private static final String COLUMN_IDENTIFIER_STATE = "stateColumn";
     // カラム仕様ヘルパー
     private ColumnSpecHelper columnHelper;
 
@@ -415,7 +417,8 @@ public class WatingListImpl extends AbstractMainComponent {
 
         // PVT状態設定エディタ
         pvtTable.getColumnModel().getColumn(stateColumn).setCellEditor(new DefaultCellEditor(stateCmb));
-
+        pvtTable.getColumnModel().getColumn(stateColumn).setIdentifier(COLUMN_IDENTIFIER_STATE);
+        
         // カラム幅更新
         columnHelper.updateColumnWidth();
     }
@@ -937,9 +940,12 @@ public class WatingListImpl extends AbstractMainComponent {
                     }
                 }
             }
-
-            if (value != null && col == stateColumn) {
-
+            
+//minagawa^
+            Object identifier = pvtTable.getColumnModel().getColumn(col).getIdentifier();
+            //if (value != null && col == stateColumn) {
+            if (value != null && COLUMN_IDENTIFIER_STATE.equals(identifier)) {
+//minagawa$
                 ImageIcon icon = null;
 
                 // 最初に chart bit をテストする
