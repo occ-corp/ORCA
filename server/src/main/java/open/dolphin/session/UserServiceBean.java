@@ -221,4 +221,24 @@ public class UserServiceBean {
         return 1;
     }
 
+    public String login(String fidUid, String clientUUID, boolean force) {
+        UserModel user = getUser(fidUid);
+        String currentUUID = user.getClientUUID();
+        if (currentUUID == null || force) {
+            currentUUID = clientUUID;
+            user.setClientUUID(currentUUID);
+            em.merge(user);
+        }
+        return currentUUID;
+    }
+    
+    public String logout(String fidUid, String clientUUID) {
+        UserModel user = getUser(fidUid);
+        String oldUUID = user.getClientUUID();
+        if (clientUUID.equals(oldUUID)) {
+            user.setClientUUID(null);
+            em.merge(user);
+        }
+        return oldUUID;
+    }
 }

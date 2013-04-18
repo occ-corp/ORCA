@@ -129,6 +129,26 @@ public class UserResource extends AbstractResource {
 
         return Response.ok(cntStr).build();
     }
+    
+    @GET
+    @Path("login/")
+    public Response login(@QueryParam("fidUid") String fidUid, 
+            @QueryParam("clientUUID") String clientUUID,
+            @QueryParam("force") String forceStr) {
+        
+        boolean force = Boolean.parseBoolean(forceStr);
+        String uuid = userServiceBean.login(fidUid, clientUUID, force);
+        return Response.ok(uuid).build();
+    }
+    
+    @GET
+    @Path("logout/")
+    public Response logout(@QueryParam("fidUid") String fidUid, 
+            @QueryParam("clientUUID") String clientUUID) {
+        
+        String uuid = userServiceBean.logout(fidUid, clientUUID);
+        return Response.ok(uuid).build();
+    }
 
     @Override
     protected void debug(String msg) {

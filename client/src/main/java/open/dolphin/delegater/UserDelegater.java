@@ -2,8 +2,11 @@ package open.dolphin.delegater;
 
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.core.util.MultivaluedMapImpl;
 import java.io.InputStream;
 import java.util.List;
+import javax.ws.rs.core.MultivaluedMap;
+import open.dolphin.client.Dolphin;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.UserModel;
 import open.dolphin.project.Project;
@@ -176,6 +179,45 @@ public class UserDelegater extends BusinessDelegater {
         int cnt = Integer.parseInt(entityStr);
 
         return cnt;
+    }
+    
+    public String login(String fidUid, String clientUUID, boolean force) throws Exception {
+        
+        String path = RES_USER + "login";
+        
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("fidUid", fidUid);
+        qmap.add("clientUUID", clientUUID);
+        qmap.add("force", String.valueOf(force));
+        
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .get(ClientResponse.class);
+        int status = response.getStatus();
+        String currentUUID = (String) response.getEntity(String.class);
+        debug(status, currentUUID);
+        isHTTP200(status);
+        
+        return currentUUID;
+    }
+    
+    public String logout(String fidUid, String clientUUID) throws Exception {
+        
+        String path = RES_USER + "logout";
+        
+        MultivaluedMap<String, String> qmap = new MultivaluedMapImpl();
+        qmap.add("fidUid", fidUid);
+        qmap.add("clientUUID", clientUUID);
+        
+        ClientResponse response = getClientRequest(path, qmap)
+                .accept(MEDIATYPE_TEXT_UTF8)
+                .get(ClientResponse.class);
+        int status = response.getStatus();
+        String oldUUID = (String) response.getEntity(String.class);
+        debug(status, oldUUID);
+        isHTTP200(status);
+        
+        return oldUUID;
     }
     
     @Override

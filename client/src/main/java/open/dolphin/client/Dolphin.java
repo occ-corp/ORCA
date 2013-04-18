@@ -27,6 +27,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import open.dolphin.delegater.PatientDelegater;
 import open.dolphin.delegater.StampDelegater;
+import open.dolphin.delegater.UserDelegater;
 import open.dolphin.helper.ComponentMemory;
 import open.dolphin.helper.MenuSupport;
 import open.dolphin.helper.SimpleWorker;
@@ -160,6 +161,7 @@ public class Dolphin implements MainWindow {
 
                 switch (result) {
                     case AUTHENTICATED:
+                        registerLogin();
                         startServices();
                         loadStampTree();
                         break;
@@ -174,6 +176,31 @@ public class Dolphin implements MainWindow {
             
         });
         login.start();
+    }
+    
+    // 排他処理、another implementation
+    private void registerLogin() {
+        try {
+            String fidUid = Project.getUserModel().getUserId();
+            String uuid = UserDelegater.getInstance().login(fidUid, clientUUID, false);
+            if (!clientUUID.equals(uuid)) {
+                // ダイアログで確認する
+                String[] options = {"ならない", "プライマリになる"};
+                String msg = "他端末で同一ユーザーがログイン中です。\n"
+                        + "不整合を避けるため同時ログインはお勧めしません。";
+                int val = JOptionPane.showOptionDialog(
+                        null, msg, "同時ログイン",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+                switch (val) {
+                    case 1:     // プライマリになる
+                        UserDelegater.getInstance().login(fidUid, clientUUID, true);
+                        break;
+                    default:
+                        break;
+                }
+            }
+        } catch (Exception ex) {
+        }
     }
 
     /**
@@ -1085,6 +1112,34 @@ public class Dolphin implements MainWindow {
         FocusPropertyChangeListener.getInstance().dispose();
 //masuda$
         
+        // ログアウト処理
+        try {
+            String fidUid = Project.getUserModel().getUserId();
+            String uuid = UserDelegater.getInstance().logout(fidUid, clientUUID);
+            if (clientUUID.equals(uuid)) {
+                saveStampTree();
+            } else {
+                // ダイアログで確認する
+                String[] options = {"保存しない", "強制保存"};
+                String msg = "他端末で同一ユーザーがスタンプ箱を保存した可能性があります。\n"
+                        + "不整合を避けるためスタンプ箱は保存しないことをお勧めします。";
+                int val = JOptionPane.showOptionDialog(
+                        null, msg, "スタンプ箱保存",
+                        JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
+                switch (val) {
+                    case 1:     // 強制保存"
+                        saveStampTree();
+                        break;
+                    default:
+                        shutdown();
+                        break;
+                }
+            }
+        } catch (Exception ex) {
+        }
+    }
+
+    private void saveStampTree() {
         // Stamp 保存
         final IStampTreeModel treeTosave = stampBox.getUsersTreeTosave();
         
@@ -1155,7 +1210,7 @@ public class Dolphin implements MainWindow {
 
         worker.execute();
     }
-
+    
     /**
      * 未保存のドキュメントがある場合の警告を表示する。
      */

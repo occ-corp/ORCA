@@ -65,9 +65,9 @@ public class UserModel extends InfoModel {
 
     private String orcaId;
     
-    // raw password
-    //private String passwd;
-
+    // 排他処理
+    private String clientUUID;
+    
     /**
      * UserModelオブジェクトを生成する。
      */
@@ -231,15 +231,15 @@ public class UserModel extends InfoModel {
     public void setOrcaId(String orcaId) {
         this.orcaId = orcaId;
     }
-/*
-    public String getPasswd() {
-        return passwd;
+
+    public String getClientUUID() {
+        return clientUUID;
     }
     
-    public void setPasswd(String passwd) {
-        this.passwd = passwd;
+    public void setClientUUID(String clientUUID) {
+        this.clientUUID = clientUUID;
     }
-*/
+    
     @Override
     public int hashCode() {
         final int PRIME = 31;
