@@ -617,6 +617,16 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         map.put("showAbout", showAbout);
         
 //masuda^
+        // GitHub
+        text = resource.getString("browseGitHub.Action.text");
+        AbstractAction browseGitHub = new AbstractAction(text) {
+            @Override
+            public void actionPerformed(ActionEvent ae) {
+                main.sendToChain("browseGitHub");
+            }
+        };
+        map.put("browseGitHub", browseGitHub);
+        
         text = resource.getString("findFirst.Action.text");
         AbstractAction findFirst = new AbstractAction(text) {
 
@@ -1271,6 +1281,11 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
         browseMedXml.setName("browseMedXml");
         browseMedXml.setAction(actionMap.get("browseMedXml"));
         help.add(browseMedXml);
+        
+        JMenuItem brouseGitHub = new JMenuItem();
+        browseMedXml.setName("browseGitHub");
+        brouseGitHub.setAction(actionMap.get("browseGitHub"));
+        help.add(brouseGitHub);
         
         help.add(new JSeparator());
         

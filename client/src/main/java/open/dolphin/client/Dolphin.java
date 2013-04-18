@@ -1321,6 +1321,11 @@ public class Dolphin implements MainWindow {
         ResourceBundle resource = ClientContext.getBundle(this.getClass());
         browseURL(resource.getString("menu.seaGaiaUrl"));
     }
+    
+    public void browseGitHub() {
+        ResourceBundle resource = ClientContext.getBundle(this.getClass());
+        browseURL(resource.getString("menu.githubUrl"));
+    }
 
     /**
      * URLをオープンする。
@@ -1440,6 +1445,7 @@ public class Dolphin implements MainWindow {
                 GUIConst.ACTION_BROWS_MEDXML,
                 GUIConst.ACTION_SHOW_ABOUT,
 //masuda^   中止項目と採用薬編集
+                GUIConst.ACTION_BROWS_GITHUB,
                 GUIConst.ACTION_EDIT_DISCONITEM,
                 GUIConst.ACTION_EDIT_USINGDRUG,
                 GUIConst.ACTION_CHECK_TEMP_KARTE
