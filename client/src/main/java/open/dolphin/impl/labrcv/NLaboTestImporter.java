@@ -160,7 +160,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
                     ClientContext.getFrameTitle(getName()),
                     JOptionPane.YES_NO_OPTION,
                     JOptionPane.QUESTION_MESSAGE,
-                    ClientContext.getImageIcon("os_information_32.png"));
+                    ClientContext.getImageIconAlias("icon_info"));
             
             if (option != JOptionPane.YES_OPTION) {
                 return;

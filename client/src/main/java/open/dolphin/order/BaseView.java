@@ -51,7 +51,7 @@ public class BaseView extends AbstractOrderView {
         cmdPanel1.add(commentField);
         cmdPanel1.add(Box.createHorizontalGlue());
         btn_laboTest = new JButton();
-        btn_laboTest.setIcon(ClientContext.getImageIcon("os_legend_16.png"));
+        btn_laboTest.setIcon(ClientContext.getImageIconAlias("icon_labo_panel_small"));
         btn_laboTest.setToolTipText("検査エディタを開きます。");
         cmdPanel1.add(btn_laboTest);
         cmdPanel1.add(deleteBtn);
@@ -65,7 +65,7 @@ public class BaseView extends AbstractOrderView {
         cmdPanel2.add(rtCheck);
         cmdPanel2.add(partialCheck);
         btn_comment = new JButton();
-        btn_comment.setIcon(ClientContext.getImageIcon("insert-comments_16.png"));
+        btn_comment.setIcon(ClientContext.getImageIconAlias("icon_comment_small"));
         btn_comment.setToolTipText("コメントコードを検索します。");
         cmdPanel2.add(btn_comment);
 

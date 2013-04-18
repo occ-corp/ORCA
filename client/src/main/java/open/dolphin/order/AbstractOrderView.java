@@ -22,12 +22,12 @@ public abstract class AbstractOrderView extends JPanel {
 
     protected static final int TEXTFIELD_WIDTH = 20;
     private static final Border border = BorderFactory.createEtchedBorder();
-    private static final ImageIcon infoIcon    = ClientContext.getImageIcon("os_information_16.png");
-    private static final ImageIcon deleteIcon  = ClientContext.getImageIcon("os_delete_16.png");
-    private static final ImageIcon clearIcon   = ClientContext.getImageIcon("edit-clear-3_24.png");
-    private static final ImageIcon okIcon      = ClientContext.getImageIcon("os_accept_16.png");
-    private static final ImageIcon okCntIcon   = ClientContext.getImageIcon("os_add_16.png");
-    private static final ImageIcon loupeIcon   = ClientContext.getImageIcon("system-search-4_16.png");
+    private static final ImageIcon infoIcon    = ClientContext.getImageIconAlias("icon_info_small");
+    private static final ImageIcon deleteIcon  = ClientContext.getImageIconAlias("icon_delete_small");
+    private static final ImageIcon clearIcon   = ClientContext.getImageIconAlias("icon_clear_small");
+    private static final ImageIcon okIcon      = ClientContext.getImageIconAlias("icon_accept_small");
+    private static final ImageIcon okCntIcon   = ClientContext.getImageIconAlias("icon_gear_small");
+    private static final ImageIcon loupeIcon   = ClientContext.getImageIconAlias("icon_search_small");
     
     private static final String setTableToolTip     = "セット内容は Drag & Drop で順番を入れ替えることができます。";
     private static final String stampNameFldToolTip = "セット名を編集します。";

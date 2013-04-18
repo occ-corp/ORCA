@@ -22,7 +22,7 @@ public class WatingListView extends JPanel {
         panel.setLayout(new BoxLayout(panel, BoxLayout.X_AXIS));
 
         kutuBtn = new JButton();
-        kutuBtn.setIcon(ClientContext.getImageIcon("kutu01.gif"));
+        kutuBtn.setIcon(ClientContext.getImageIconAlias("icon_akai_kutsu"));
         kutuBtn.setAlignmentY(BOTTOM_ALIGNMENT);
         panel.add(kutuBtn);
 
@@ -33,7 +33,7 @@ public class WatingListView extends JPanel {
         panel.add(Box.createHorizontalGlue());
 
 	JLabel underGoLbl = new JLabel();
-	underGoLbl.setIcon(ClientContext.getImageIcon("os_cog_16.png"));
+	underGoLbl.setIcon(ClientContext.getImageIconAlias("icon_under_treatment_small"));
 	underGoLbl.setText("検査・処置等");
 	underGoLbl.setAlignmentY(BOTTOM_ALIGNMENT);
 	panel.add(underGoLbl);
@@ -45,7 +45,7 @@ public class WatingListView extends JPanel {
         panel.add(openLbl);
 */
         JLabel flagLbl = new JLabel();
-        flagLbl.setIcon(ClientContext.getImageIcon("os_flag_orange_16.png"));
+        flagLbl.setIcon(ClientContext.getImageIconAlias("icon_sent_claim_small"));
         flagLbl.setText("診察終了");
         flagLbl.setAlignmentY(BOTTOM_ALIGNMENT);
         panel.add(flagLbl);

@@ -15,8 +15,8 @@ public class KartePanelEditorKit extends StyledEditorKit {
     private static final Color COLOR = Color.GRAY;
     //private static final String CR = "↲";
     //private static final String EOF = "◀";
-    private static final Image CR_ICON = ClientContext.getImageIcon("cr.png").getImage();
-    private static final Image EOF_ICON = ClientContext.getImageIcon("eof.png").getImage();
+    private static final Image CR_ICON = ClientContext.getImageIconAlias("icon_cr").getImage();
+    private static final Image EOF_ICON = ClientContext.getImageIconAlias("icon_eof").getImage();
     private static final int crMargin = 20;
     private boolean showCr;
 

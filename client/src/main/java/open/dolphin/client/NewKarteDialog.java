@@ -232,7 +232,7 @@ public final class NewKarteDialog {
         JPanel ip = new JPanel(new BorderLayout(9, 0));
         ip.setBorder(BorderFactory.createTitledBorder(SELECT_INS));
         ip.add(insuranceList, BorderLayout.CENTER);
-        ip.add(new JLabel(ClientContext.getImageIcon("os_health_insurance_32.png")), BorderLayout.WEST);
+        ip.add(new JLabel(ClientContext.getImageIconAlias("icon_new_karte_dialog")), BorderLayout.WEST);
         
         // 前回処方適用 / 全コピー / 空白
         emptyNew = new JRadioButton(EMPTY_NEW);

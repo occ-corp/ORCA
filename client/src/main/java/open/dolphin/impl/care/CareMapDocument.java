@@ -128,7 +128,7 @@ public final class CareMapDocument extends AbstractChartDocument {
         p.add(c2);
         
         // カレンダーの範囲を１ケ月以に戻すボタン
-        JButton prevBtn = new JButton(ClientContext.getImageIcon("arrow_green_left_16.png"));
+        JButton prevBtn = new JButton(ClientContext.getImageIconAlias("icon_back_small"));
         
         prevBtn.addActionListener(new ActionListener() {
             
@@ -181,8 +181,7 @@ public final class CareMapDocument extends AbstractChartDocument {
         });
         
         // カレンダーの範囲を１ケ月送るボタン
-        JButton nextBtn = new JButton(ClientContext
-                .getImageIcon("arrow_green_right_16.png"));
+        JButton nextBtn = new JButton(ClientContext.getImageIconAlias("icon_forward_small"));
         
         nextBtn.addActionListener(new ActionListener() {
             
@@ -231,7 +230,7 @@ public final class CareMapDocument extends AbstractChartDocument {
         });
         
         // 予約表テーブルを生成する
-        updateAppoBtn = new JButton(ClientContext.getImageIcon("os_save_16.png"));
+        updateAppoBtn = new JButton(ClientContext.getImageIconAlias("icon_save_small"));
         updateAppoBtn.setEnabled(false);
         updateAppoBtn.addActionListener(new ActionListener() {
             @Override

@@ -191,7 +191,7 @@ public final class ProjectSettingDialog implements PropertyChangeListener {
             logger.debug("text = " + text);
             logger.debug("icon = " + iconStr);
             //System.err.println("icon = " + iconStr);
-            ImageIcon icon = ClientContext.getImageIcon(iconStr);
+            ImageIcon icon = ClientContext.getImageIconAlias(iconStr);
             JToggleButton tb = new JToggleButton(text, icon);
             if (ClientContext.isWin()) {
                 tb.setMargin(new Insets(0, 0, 0, 0));

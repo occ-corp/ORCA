@@ -57,12 +57,12 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
     private static final int END_DATE_COL   = 4;
 
     // GUI コンポーネント定義
-    private static final String RESOURCE_BASE = "/open/dolphin/resources/images/";
-    private static final String DELETE_BUTTON_IMAGE     = "os_delete_16.png";
-    private static final String ADD_BUTTON_IMAGE        = "os_add_16.png";
-    private static final String UPDATE_BUTTON_IMAGE     = "document-save-5_16.png";
-    private static final String ORCA_VIEW_IMAGE         = "document-save-2_16.png";
-    private static final String ORCA_IMPORT_IMAGE       = "os_star_16.png";
+    //private static final String RESOURCE_BASE = "/open/dolphin/resources/images/";
+    private static final String DELETE_BUTTON_IMAGE     = "icon_delete_small";
+    private static final String ADD_BUTTON_IMAGE        = "icon_add_small";
+    private static final String UPDATE_BUTTON_IMAGE     = "icon_save_small";
+    private static final String ORCA_VIEW_IMAGE         = "icon_import_orca_diagnosis";
+    private static final String ORCA_IMPORT_IMAGE       = "icon_import_orca_star";
 
     /** JTableレンダラ用のカラー */
     private static final Color ORCA_BACK = new Color(227, 250, 207); //ClientContext.getColor("color.CALENDAR_BACK");
@@ -1968,7 +1968,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 //masuda^   ORCAの病名を参照したらボタンをインポートボタンに変更する     
                     updateIkouTokutei2(result);
                     allDiagnosis.addAll(result);
-                    orcaButton.setIcon(ClientContext.getImageIcon(ORCA_IMPORT_IMAGE));
+                    orcaButton.setIcon(ClientContext.getImageIconAlias(ORCA_IMPORT_IMAGE));
                     orcaButton.setToolTipText("ORCAの病名をインポートします。");
                     importBtnEnabled = true;
                     filterDiagnosis();
@@ -1985,8 +1985,9 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
      * ImageIcon を返す
      */
     private ImageIcon createImageIcon(String name) {
-        String res = RESOURCE_BASE + name;
-        return new ImageIcon(this.getClass().getResource(res));
+        //String res = RESOURCE_BASE + name;
+        //return new ImageIcon(this.getClass().getResource(res));
+        return ClientContext.getImageIconAlias(name);
     }
     
 //masuda^   Orcaの病名をOpenDolphinにインポート

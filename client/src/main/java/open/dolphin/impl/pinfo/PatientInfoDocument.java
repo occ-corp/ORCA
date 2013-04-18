@@ -37,7 +37,7 @@ public class PatientInfoDocument extends AbstractChartDocument {
     };
     
     // Info アイコン
-    private static final String INFO_BUTTON_IMAGE   = "os_information_16.png";
+    private static final String INFO_BUTTON_IMAGE   = "icon_info_small";
     
     private static final String INFO = "* の項目は編集が可能です";
     
@@ -51,7 +51,7 @@ public class PatientInfoDocument extends AbstractChartDocument {
 //masuda$
     
     // 保存アイコン
-    private static final String SAVE_ICON = "os_save_16.png";
+    private static final String SAVE_ICON = "icon_save_small";
     
     // 保存ボタン
     private JButton saveBtn;
@@ -81,9 +81,9 @@ public class PatientInfoDocument extends AbstractChartDocument {
         // 保存ボタンを生成する
         //
         JPanel cmdPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
-        cmdPanel.add(new JLabel(ClientContext.getImageIcon(INFO_BUTTON_IMAGE)));
+        cmdPanel.add(new JLabel(ClientContext.getImageIconAlias(INFO_BUTTON_IMAGE)));
         cmdPanel.add(new JLabel(INFO));
-        saveBtn = new JButton(ClientContext.getImageIcon(SAVE_ICON));
+        saveBtn = new JButton(ClientContext.getImageIconAlias(SAVE_ICON));
         saveBtn.setEnabled(false);
         //saveBtn.setMargin(new Insets(0,0,0,0));
         saveBtn.addActionListener(new ActionListener() {

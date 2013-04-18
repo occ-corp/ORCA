@@ -35,8 +35,8 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
     private static final String TITLE_TO_LAB = "検体";
     private static final String TITLE_TO_PHYSIO = "生体";
     private static final String TITLE_TO_BACTERIA = "細菌";
-    private static final String ICON_FORWARD = "arrow_green_right_16.png";
-    private static final String ICON_BACK = "arrow_green_left_16.png";
+    private static final String ICON_FORWARD = "icon_arrow_right_small";
+    private static final String ICON_BACK = "icon_arrow_left_small";
     private static final String TITLE_FROM_EDITOR = "エディタから発行...";
 
     // エディタ の組
@@ -484,21 +484,21 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
     private void initComponent() {
         
         // 編集したスタンプをボックスへ登録する右向きボタンを生成する
-        rightNew = new JButton(TITLE_NEW, ClientContext.getImageIcon(ICON_FORWARD));
+        rightNew = new JButton(TITLE_NEW, ClientContext.getImageIconAlias(ICON_FORWARD));
         rightNew.setEnabled(false);
 
         // 編集したスタンプを上書きする右向きボタンを生成する
-        rightReplace = new JButton(TITLE_REPLACE, ClientContext.getImageIcon(ICON_FORWARD));
+        rightReplace = new JButton(TITLE_REPLACE, ClientContext.getImageIconAlias(ICON_FORWARD));
         rightReplace.setEnabled(false);
 
         // 診区 600 （検体、生体、細菌）入れ替えボタン
-        right6001 = new JButton(ClientContext.getImageIcon(ICON_FORWARD));
-        right6002 = new JButton(ClientContext.getImageIcon(ICON_FORWARD));
+        right6001 = new JButton(ClientContext.getImageIconAlias(ICON_FORWARD));
+        right6002 = new JButton(ClientContext.getImageIconAlias(ICON_FORWARD));
         right6001.setVisible(false);
         right6002.setVisible(false);
         
         // スタンプボックスのスタンプをセットテーブルへ取り込む左向きのボタンを生成する
-        leftImport = new JButton(TITLE_IMPORT, ClientContext.getImageIcon(ICON_BACK));
+        leftImport = new JButton(TITLE_IMPORT, ClientContext.getImageIconAlias(ICON_BACK));
         leftImport.setEnabled(false);
 
         //-----------------------------------

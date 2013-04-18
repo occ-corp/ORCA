@@ -258,7 +258,7 @@ public class SearchResultInspector {
         searchFld.addFocusListener(AutoKanjiListener.getInstance());
         // 虫眼鏡
         loope = new JLabel("検索");
-        loope.setIcon(ClientContext.getImageIcon("system-search-4_24.png"));
+        loope.setIcon(ClientContext.getImageIconAlias("icon_search"));
         JPanel north = new JPanel();
         north.setLayout(new BorderLayout());
         north.add(Box.createVerticalStrut(5), BorderLayout.NORTH);

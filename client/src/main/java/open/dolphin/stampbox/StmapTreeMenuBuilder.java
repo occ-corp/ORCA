@@ -15,7 +15,7 @@ import open.dolphin.tr.LocalStampTreeNodeTransferable;
  */
 public class StmapTreeMenuBuilder {
     
-    private static final Icon icon = ClientContext.getImageIcon("os_folder_blue_16.png");
+    private static final Icon icon = ClientContext.getImageIconAlias("icon_stamp_drag_leaf");
     
     private HashMap<Object, JMenu> parents;
     

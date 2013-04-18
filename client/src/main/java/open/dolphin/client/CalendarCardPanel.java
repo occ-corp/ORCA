@@ -28,14 +28,14 @@ public class CalendarCardPanel extends JPanel  {
     private JPanel cardPanel;
     private CardLayout cardLayout;
 
-    private static final ImageIcon backIcon = ClientContext.getImageIcon("arrow-left.gif");
-    private static final ImageIcon stopIcon = ClientContext.getImageIcon("arrow-down.gif");
-    private static final ImageIcon forwardIcon = ClientContext.getImageIcon("arrow-right.gif");
-    private static final ImageIcon upIcon = ClientContext.getImageIcon("arrow-up.gif");
+    private static final ImageIcon leftIcon = ClientContext.getImageIconAlias("icon_calendar_left");
+    private static final ImageIcon downIcon = ClientContext.getImageIconAlias("icon_calendar_down");
+    private static final ImageIcon rightIcon = ClientContext.getImageIconAlias("icon_calendar_right");
+    private static final ImageIcon upIcon = ClientContext.getImageIconAlias("icon_calendar_up");
     private JButton upBtn = new JButton(upIcon);
-    private JButton backBtn = new JButton(backIcon);
-    private JButton stopBtn = new JButton(stopIcon);
-    private JButton forwardBtn = new JButton(forwardIcon);
+    private JButton leftBtn = new JButton(leftIcon);
+    private JButton downBtn = new JButton(downIcon);
+    private JButton rightBtn = new JButton(rightIcon);
 
     private int current;
     private int[] range;
@@ -85,7 +85,7 @@ public class CalendarCardPanel extends JPanel  {
         cardPanel.setLayout(cardLayout);
         cardPanel.add(lc, name);
 
-        JButton[] buttons = {backBtn, stopBtn, forwardBtn, upBtn};
+        JButton[] buttons = {leftBtn, downBtn, rightBtn, upBtn};
         for (JButton btn : buttons) {
             btn.setPreferredSize(new Dimension(15, 15));
             btn.setBackground(null);
@@ -94,7 +94,7 @@ public class CalendarCardPanel extends JPanel  {
             btn.setFocusPainted(false);
         }
 
-        backBtn.addActionListener(new ActionListener() {
+        leftBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 current -= 1;
@@ -103,7 +103,7 @@ public class CalendarCardPanel extends JPanel  {
             }
         });
 
-        stopBtn.addActionListener(new ActionListener() {
+        downBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 current = 0;
@@ -112,7 +112,7 @@ public class CalendarCardPanel extends JPanel  {
             }
         });
 
-        forwardBtn.addActionListener(new ActionListener() {
+        rightBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 current+=1;
@@ -236,25 +236,25 @@ public class CalendarCardPanel extends JPanel  {
     private void controlNavigation() {
         if (range != null) {
             if (current == range[0]) {
-                if (backBtn.isEnabled()) {
-                    backBtn.setEnabled(false);
+                if (leftBtn.isEnabled()) {
+                    leftBtn.setEnabled(false);
                 }
-                if (! forwardBtn.isEnabled()) {
-                    forwardBtn.setEnabled(true);
+                if (! rightBtn.isEnabled()) {
+                    rightBtn.setEnabled(true);
                 }
             } else if (current == range[1]) {
-                if (forwardBtn.isEnabled()) {
-                    forwardBtn.setEnabled(false);
+                if (rightBtn.isEnabled()) {
+                    rightBtn.setEnabled(false);
                 }
-                if (! backBtn.isEnabled()) {
-                    backBtn.setEnabled(true);
+                if (! leftBtn.isEnabled()) {
+                    leftBtn.setEnabled(true);
                 }
             } else {
-                if (! backBtn.isEnabled()) {
-                    backBtn.setEnabled(true);
+                if (! leftBtn.isEnabled()) {
+                    leftBtn.setEnabled(true);
                 }
-                if (! forwardBtn.isEnabled()) {
-                    forwardBtn.setEnabled(true);
+                if (! rightBtn.isEnabled()) {
+                    rightBtn.setEnabled(true);
                 }
             }
         }
@@ -290,9 +290,9 @@ public class CalendarCardPanel extends JPanel  {
         cmd.add(Box.createHorizontalStrut(10));
         cmd.setOpaque(false);
 //masuda$
-        cmd.add(backBtn);
-        cmd.add(stopBtn);
-        cmd.add(forwardBtn);
+        cmd.add(leftBtn);
+        cmd.add(downBtn);
+        cmd.add(rightBtn);
         return cmd;
     }
 

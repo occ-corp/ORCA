@@ -59,7 +59,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // New Karte
         String text = resource.getString("newKarte.Action.text");
-        ImageIcon icon = ClientContext.getImageIcon("document-new-5_24.png");
+        ImageIcon icon = ClientContext.getImageIconAlias("icon_new_karte");
         AbstractAction newKarte = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -70,7 +70,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // New Document
         text = resource.getString("newDocument.Action.text");
-        icon = ClientContext.getImageIcon("mail-new-2_24.png");
+        icon = ClientContext.getImageIconAlias("icon_new_document");
         AbstractAction newDocument = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -101,7 +101,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Save
         text = resource.getString("save.Action.text");
-        icon = ClientContext.getImageIcon("document-save-5_24.png");
+        icon = ClientContext.getImageIconAlias("icon_save");
         AbstractAction save = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -132,7 +132,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Print
         text = resource.getString("print.Action.text");
-        icon = ClientContext.getImageIcon("document-print_24.png");
+        icon = ClientContext.getImageIconAlias("icon_printer");
         AbstractAction print = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -153,7 +153,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Modify
         text = resource.getString("modifyKarte.Action.text");
-        icon = ClientContext.getImageIcon("document-edit_24.png");
+        icon = ClientContext.getImageIconAlias("icon_edit_karte_document");
         AbstractAction modifyKarte = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -164,7 +164,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Undo
         text = resource.getString("undo.Action.text");
-        icon = ClientContext.getImageIcon("edit-undo-4_24.png");
+        icon = ClientContext.getImageIconAlias("icon_undo");
         AbstractAction undo = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -175,7 +175,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Redo
         text = resource.getString("redo.Action.text");
-        icon = ClientContext.getImageIcon("edit-redo-4_24.png");
+        icon = ClientContext.getImageIconAlias("icon_redo");
         AbstractAction redo = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -186,7 +186,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Cut
         text = resource.getString("cut.Action.text");
-        icon = ClientContext.getImageIcon("edit-cut-5_24.png");
+        icon = ClientContext.getImageIconAlias("icon_cut");
         AbstractAction cut = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -197,7 +197,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Copy
         text = resource.getString("copy.Action.text");
-        icon = ClientContext.getImageIcon("edit-copy-2_24.png");
+        icon = ClientContext.getImageIconAlias("icon_copy");
         AbstractAction copy = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {
@@ -208,7 +208,7 @@ public class WindowsMenuFactory extends AbstractMenuFactory {
 
         // Paste
         text = resource.getString("paste.Action.text");
-        icon = ClientContext.getImageIcon("edit-paste-2_24.png");
+        icon = ClientContext.getImageIconAlias("icon_paste");
         AbstractAction paste = new AbstractAction(text, icon) {
             @Override
             public void actionPerformed(ActionEvent ae) {

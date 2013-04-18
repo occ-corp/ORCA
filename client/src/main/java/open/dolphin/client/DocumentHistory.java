@@ -891,7 +891,7 @@ public class DocumentHistory {
                 ClientContext.getFrameTitle("削除"),
                 JOptionPane.YES_NO_CANCEL_OPTION,
                 JOptionPane.QUESTION_MESSAGE,
-                ClientContext.getImageIcon("os_exclamation_png.png"),
+                ClientContext.getImageIconAlias("icon_caution"),
                 cstOptions,"はい");
 
         if (select != 0) {

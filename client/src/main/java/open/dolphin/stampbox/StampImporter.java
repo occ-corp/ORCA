@@ -45,9 +45,9 @@ public class StampImporter {
     private static final Color ODD_COLOR = ClientContext.getColor("color.odd");
     //private static final Color EVEN_COLOR = ClientContext.getColor("color.even");
     private static final Color EVEN_COLOR = ClientContext.getZebraColor();
-    private static final ImageIcon WEB_ICON = ClientContext.getImageIcon("os_world_16.png");
-    private static final ImageIcon HOME_ICON = ClientContext.getImageIcon("os_house_16.png");
-    private static final ImageIcon FLAG_ICON = ClientContext.getImageIcon("os_flag_orange_16.png");
+    private static final ImageIcon WEB_ICON = ClientContext.getImageIconAlias("icon_world_small");
+    private static final ImageIcon HOME_ICON = ClientContext.getImageIconAlias("icon_hospital_small");
+    private static final ImageIcon FLAG_ICON = ClientContext.getImageIconAlias("icon_flag_blue_small");
     
     private String title = "スタンプインポート";
     private JFrame frame;

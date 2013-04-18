@@ -21,7 +21,7 @@ public class CodeHelperSettingPanel extends AbstractSettingPanel {
     
     private static final String ID = "codeHelperSetting";
     private static final String TITLE = "コード";
-    private static final String ICON = "os_help_16.png";
+    private static final String ICON = "icon_code_helper_settings_small";
     
     private JRadioButton ctrlMask;
     

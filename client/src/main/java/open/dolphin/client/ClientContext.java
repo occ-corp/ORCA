@@ -246,7 +246,7 @@ public class ClientContext {
 //masuda$
     
 //minagawa^ Icon Server
-    public static ImageIcon getImageIconArias(String name) {
+    public static ImageIcon getImageIconAlias(String name) {
         return stub.getImageIconArias(name);
     }
 //minagawa$ 

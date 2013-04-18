@@ -15,8 +15,8 @@ import open.dolphin.client.NameValuePair;
  */
 public class PdfOfficeIconRenderer extends DefaultListCellRenderer {
     
-    private static final ImageIcon ICON_PDF = ClientContext.getImageIcon("pdf_icon16.png");
-    private static final ImageIcon ICON_OFFICE = ClientContext.getImageIcon("os_plain_document_16.png");
+    private static final ImageIcon ICON_PDF = ClientContext.getImageIconAlias("icon_pdf_smal");
+    private static final ImageIcon ICON_OFFICE = ClientContext.getImageIconAlias("icon_plain_document_small");
     private static final Color DEFAULT_ODD_COLOR = ClientContext.getColor("color.odd");
     //private static final Color DEFAULT_EVENN_COLOR = ClientContext.getColor("color.even");
     private static final Color DEFAULT_EVENN_COLOR = ClientContext.getZebraColor();

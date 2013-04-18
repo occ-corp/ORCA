@@ -50,13 +50,13 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     protected static final String[] ACCEPT_FILE_TYPES = {"dcm","jpg", "png", "bmp", "gif", "tif"};
     protected static final String[] ACCEPT_DOC_TYPES = {"pdf", "doc","docx", "xls", "xlsx", "ppt","pptx", "odt"};
     protected static final String[] ACCEPT_DOC_ICONS = 
-        {"pdf_icon40px.gif", "Word-32-d.gif","Word-32-d.gif", "Excel-32-d.gif", "Excel-32-d.gif", 
-            "PowerPoint-32-d.gif", "PowerPoint-32-d.gif", "LibreWriterIcon.png"};
+        {"icon_pdf", "icon_word", "icon_word", "icon_excel", "icon_excel", 
+            "icon_power_point", "icon_power_point", "icon_libre_writer"};
 
 //    protected static final String[] OTHER_DOC_TYPES =
 //        {"pdf", "txt", "rtf", "htm","html", "doc","docx", "xls", "xlsx", "ppt","pptx","pages", "numbers", "key"};
-    protected static final String DEFAULT_DOC_ICON = "os_plain_document_32.png";
-    protected static final String ICON_HAS_IMAGE = "play_16.png";
+    protected static final String DEFAULT_DOC_ICON = "icon_default_document";
+    protected static final String ICON_HAS_IMAGE = "icon_indicate_has_iamges_or_pdfs";
 
     protected static SimpleDateFormat SDF = new SimpleDateFormat("yyyy年MM月dd日");
 
@@ -170,7 +170,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         PatientModel pm = ctx.getPatient();
         String pid = pm.getPatientId();
         if (hasImageOrPDF(pid)) {
-            icon = ClientContext.getImageIcon(ICON_HAS_IMAGE);
+            icon = ClientContext.getImageIconAlias(ICON_HAS_IMAGE);
         }
         return icon;
     }
@@ -403,8 +403,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                     ? AbstractBrowser.ACCEPT_DOC_ICONS[index] 
                     : null;
             icon = (iconStr != null) 
-                    ? ClientContext.getImageIcon(iconStr) 
-                    : ClientContext.getImageIcon(AbstractBrowser.DEFAULT_DOC_ICON);
+                    ? ClientContext.getImageIconAlias(iconStr) 
+                    : ClientContext.getImageIconAlias(AbstractBrowser.DEFAULT_DOC_ICON);
             entry.setImageIcon(icon);
         }
     }

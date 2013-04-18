@@ -27,7 +27,7 @@ public abstract class AbstractCodeHelper {
     
     private static final String LISTENER_METHOD = "importStamp";
     
-    protected static final Icon icon = ClientContext.getImageIcon("os_folder_blue_16.png");
+    protected static final Icon icon = ClientContext.getImageIconAlias("icon_foldr_small");
     
     /** 対象の KartePane */
     private KartePane kartePane;

@@ -31,7 +31,7 @@ public class PatientSearchView extends JPanel {
         panel.setBorder(new EmptyBorder(5, 0, 5, 0));
 
         loupeLbl = new JLabel();
-        loupeLbl.setIcon(ClientContext.getImageIcon("system-search-4_24.png"));
+        loupeLbl.setIcon(ClientContext.getImageIconAlias("icon_search"));
         loupeLbl.setToolTipText("popupから処方切れ患者を検索できます");
         panel.add(loupeLbl);
         panel.add(Box.createHorizontalStrut(5));

@@ -19,8 +19,8 @@ public class BasicInfoInspector {
     
     private JToggleButton summaryBtn;
 
-    private static final ImageIcon rightIcon = ClientContext.getImageIcon("arrow-right.gif");
-    private static final ImageIcon leftIcon = ClientContext.getImageIcon("arrow-left.gif");
+    private static final ImageIcon rightIcon = ClientContext.getImageIconAlias("icon_calendar_right");
+    private static final ImageIcon leftIcon = ClientContext.getImageIconAlias("icon_calendar_left");
     
     private static final Color foreground = ClientContext.getColor("patientInspector.basicInspector.foreground");
     private static final Color maleColor = new Color(230, 243, 243);    // やわらかい色に
