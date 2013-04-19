@@ -185,17 +185,20 @@ public class Dolphin implements MainWindow {
             String uuid = UserDelegater.getInstance().login(fidUid, clientUUID, false);
             if (!clientUUID.equals(uuid)) {
                 // ダイアログで確認する
-                String[] options = {"ならない", "プライマリになる"};
+                String[] options = {"ログアウト", "ならない", "プライマリになる"};
                 String msg = "他端末で同一ユーザーがログイン中です。\n"
                         + "不整合を避けるため同時ログインはお勧めしません。";
                 int val = JOptionPane.showOptionDialog(
                         null, msg, "同時ログイン",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
                 switch (val) {
-                    case 1:     // プライマリになる
+                    case 1:     // プライマリにならない
+                        break;
+                    case 2:     // プライマリになる
                         UserDelegater.getInstance().login(fidUid, clientUUID, true);
                         break;
-                    default:
+                    default:    // ログアウト
+                        System.exit(0);
                         break;
                 }
             }
