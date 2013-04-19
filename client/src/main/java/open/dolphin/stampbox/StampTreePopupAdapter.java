@@ -31,9 +31,14 @@ public class StampTreePopupAdapter extends MouseAdapter {
     private void maybePopup(MouseEvent evt) {
         
         if (evt.isPopupTrigger()) {
-            
+
             // イベントソースの StampTree を取得する
             StampTree tree = (StampTree) evt.getSource();
+//masuda^   ロック中はポップアップしない
+            if (tree.getStampBox().isLocked()) {
+                return;
+            }
+//masuda$
             int x = evt.getX();
             int y = evt.getY();
             

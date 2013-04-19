@@ -181,26 +181,31 @@ public class Dolphin implements MainWindow {
     // 排他処理、another implementation
     private void registerLogin() {
         try {
-            String fidUid = Project.getUserModel().getUserId();
+            UserModel user = Project.getUserModel();
+            String fidUid = user.getUserId();
             String uuid = UserDelegater.getInstance().login(fidUid, clientUUID, false);
             if (!clientUUID.equals(uuid)) {
                 // ダイアログで確認する
                 String[] options = {"ログアウト", "ならない", "プライマリになる"};
                 String msg = "他端末で同一ユーザーがログイン中です。\n"
+                        + "スタンプ箱の編集はできません。\n"
                         + "不整合を避けるため同時ログインはお勧めしません。";
                 int val = JOptionPane.showOptionDialog(
-                        null, msg, "同時ログイン",
+                        null, msg, "警告：同時ログイン",
                         JOptionPane.DEFAULT_OPTION, JOptionPane.ERROR_MESSAGE, null, options, options[0]);
                 switch (val) {
                     case 1:     // プライマリにならない
                         break;
                     case 2:     // プライマリになる
                         UserDelegater.getInstance().login(fidUid, clientUUID, true);
+                        user.setClientUUID(clientUUID);
                         break;
                     default:    // ログアウト
                         System.exit(0);
                         break;
                 }
+            } else {
+                user.setClientUUID(clientUUID);
             }
         } catch (Exception ex) {
         }
@@ -1122,6 +1127,7 @@ public class Dolphin implements MainWindow {
             if (clientUUID.equals(uuid)) {
                 saveStampTree();
             } else {
+/*
                 // ダイアログで確認する
                 String[] options = {"保存しない", "強制保存"};
                 String msg = "他端末で同一ユーザーがスタンプ箱を保存した可能性があります。\n"
@@ -1137,6 +1143,8 @@ public class Dolphin implements MainWindow {
                         shutdown();
                         break;
                 }
+*/
+                shutdown();
             }
         } catch (Exception ex) {
         }

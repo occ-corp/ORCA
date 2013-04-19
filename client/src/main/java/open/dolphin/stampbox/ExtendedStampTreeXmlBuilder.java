@@ -133,7 +133,19 @@ public class ExtendedStampTreeXmlBuilder {
 
         StampTreeNode myParent = (StampTreeNode) node.getParent();
         StampTreeNode curNode = getCurrentNode();
-
+        
+        ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
+        String stampId = info.getStampId();
+        
+        // ここで対応するstampBytesをデータベースから読み込む。
+        String stampHexBytes = getHexStampBytes(stampId);
+        // 実体のないスタンプの場合があった。なぜゾンビができたのだろう？？
+        if (stampId != null && stampHexBytes == null) {
+            //System.out.println("ゾンビ:" + stampId);
+            node.removeFromParent();
+            return;
+        }
+        
         if (myParent != curNode) {
             closeBeforeMyParent(myParent);
         }
@@ -142,8 +154,6 @@ public class ExtendedStampTreeXmlBuilder {
         writer.write("<stampInfo name=");
         String val = toXmlText(node.toString());
         writer.write(addQuote(val));
-
-        ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
 
         writer.write(" role=");
         writer.write(addQuote(info.getStampRole()));
@@ -166,13 +176,9 @@ public class ExtendedStampTreeXmlBuilder {
             val = info.getStampId();
             writer.write(" stampId=");
             writer.write(addQuote(val));
-            // ここで対応するstampBytesをデータベースから読み込み登録する。
-            String stampHexBytes = getHexStampBytes(val);
-            // 実態のないスタンプの場合があった。なぜゾンビができたのだろう？？
-            if (stampHexBytes != null) {
-                writer.write(" stampBytes=");
-                writer.write(addQuote(stampHexBytes));
-            }
+            // stampBytesを書き出す
+            writer.write(" stampBytes=");
+            writer.write(addQuote(stampHexBytes));
         }
 
         writer.write("/>\n");

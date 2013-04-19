@@ -57,6 +57,14 @@ public class StampBoxPlugin extends AbstractMainTool {
     
     // Logger
     private boolean DEBUG;
+
+//masuda^   排他処理
+    private boolean isEditable;
+    
+    public boolean isEditable() {
+        return isEditable;
+    }
+//masuda$
     
 //pns^  ツリー入れ替えロックボタン
     private JToggleButton lockBtn;
@@ -293,15 +301,14 @@ public class StampBoxPlugin extends AbstractMainTool {
         lockBtn.setBorder(javax.swing.BorderFactory.createEmptyBorder());
         lockBtn.setToolTipText("ツリー内での入れ替えのロック／解除");
         lockBtn.setPreferredSize(new java.awt.Dimension(40,40));
-
+        
         lockBtn.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 // 選択されていたらロック解除
                 if (lockBtn.isSelected()) {
                     setLocked(false);
-                }
-                else {
+                } else {
                     setLocked(true);
                 }
             }
@@ -312,9 +319,21 @@ public class StampBoxPlugin extends AbstractMainTool {
         extraBtn.setIcon(ClientContext.getImageIconAlias("icon_stamp_memu"));
         extraBtn.setToolTipText("+SHIFTで特別メニューを開きます");
         extraBtn.setFocusable(false);
-        extraBtn.addMouseListener(new StampBoxPluginExtraMenu(this));
-//pns$
-        
+//pns$        
+//masuda^   スタンプ箱排他処理　プライマリユーザーでないなら編集不可
+        String clientUUID = Dolphin.getInstance().getClientUUID();
+        String userUUID = Project.getUserModel().getClientUUID();
+        isEditable = clientUUID.equals(userUUID);
+        if (isEditable) {
+            extraBtn.addMouseListener(new StampBoxPluginExtraMenu(this));
+        } else {
+            lockBtn.setEnabled(false);
+            toolBtn.setEnabled(false);
+            publishBtn.setEnabled(false);
+            importBtn.setEnabled(false);
+        }
+//masuda$
+
         //
         // curBoxInfoラベルを生成する
         //
@@ -376,7 +395,7 @@ public class StampBoxPlugin extends AbstractMainTool {
                 if (editing) {
                     toolBtn.doClick();
 //pns
-                if (!isLocked) {
+                    if (!isLocked) {
                         lockBtn.doClick();
                     }
 
@@ -430,10 +449,10 @@ public class StampBoxPlugin extends AbstractMainTool {
         curBoxInfo.setText(info);
         
         if (getCurrentBox() == userBox) {
-            publishBtn.setEnabled(true);
+            publishBtn.setEnabled(isEditable);
             int index2 = userBox.getSelectedIndex();
             boolean enabled = userBox.isHasEditor(index2);
-            toolBtn.setEnabled(enabled);
+            toolBtn.setEnabled(enabled && isEditable);
             
         } else {
             toolBtn.setEnabled(false);
@@ -471,7 +490,7 @@ public class StampBoxPlugin extends AbstractMainTool {
                 StampTree tree = userBox.getStampTree(index);
                 tree.enter();
                 boolean enabled = userBox.isHasEditor(index);
-                toolBtn.setEnabled(enabled);
+                toolBtn.setEnabled(enabled && isEditable);
                 
             } else {
                 // スタンプメーカ起動中の時
