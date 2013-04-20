@@ -785,9 +785,9 @@ public class WatingListImpl extends AbstractMainComponent {
 
         // 修正送信アイコンを決める
         if (Project.getBoolean("change.icon.modify.send", true)) {
-            modifySendIcon = ClientContext.getImageIconAlias("icon_sent_claim_small");
-        } else {
             modifySendIcon = ClientContext.getImageIconAlias("icon_karte_modified_small");
+        } else {
+            modifySendIcon = ClientContext.getImageIconAlias("icon_sent_claim_small");
         }
         chartIconArray[INDEX_MODIFY_SEND_ICON] = modifySendIcon;
 
