@@ -96,6 +96,7 @@ public class KarteRenderer_2 {
         // 念のためソート
         Collections.sort(soaModules);
         Collections.sort(pModules);
+        Collections.sort(schemas);
 
         // この処理はなんだろう？ soaPaneにスタンプホルダ―？？？
         if (soaSpec != null && pSpec != null) {
