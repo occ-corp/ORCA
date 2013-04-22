@@ -120,7 +120,7 @@ public class WatingListImpl extends AbstractMainComponent {
     // save_claim, modify_claim
     private static final int[] SAVED_BITS = {1, 2};
     // others
-    private static final int[] USER_BITS = {3, 4, 5, 6};
+    private static final int[] USER_BITS = {1, 2, 3, 4, 5, 6};
     
     // Status　情報　メインウィンドウの左下に表示される内容
     private String statusInfo;
