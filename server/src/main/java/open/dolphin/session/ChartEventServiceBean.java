@@ -36,10 +36,6 @@ public class ChartEventServiceBean {
     public void notifyEvent(ChartEventModel evt) {
 
         String fid = evt.getFacilityId();
-        if (fid == null) {
-            logger.warning("Facility id is null.");
-            return;
-        }
 
         List<AsyncContext> acList = contextHolder.getAsyncContextList();
         synchronized (acList) {
@@ -51,7 +47,8 @@ public class ChartEventServiceBean {
                 String issuerUUID = evt.getIssuerUUID();
                 
                 // 同一施設かつChartEventModelの発行者でないクライアントに通知する
-                if (fid.equals(acFid) && !acUUID.equals(issuerUUID)) {
+                // fid == nullなら全部にブロードキャストする
+                if (fid == null || (fid.equals(acFid) && !acUUID.equals(issuerUUID))) {
                     itr.remove();
                     try {
                         ac.getRequest().setAttribute(ChartEventResource.KEY_NAME, evt);
@@ -85,6 +82,9 @@ public class ChartEventServiceBean {
                 break;
             case PVT_STATE:
                 processPvtStateEvent(evt);
+                break;
+            case MSG_BROADCAST:
+            case MSG_REPLY:
                 break;
             default:
                 return 0;

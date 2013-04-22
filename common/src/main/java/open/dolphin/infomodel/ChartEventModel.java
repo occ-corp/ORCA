@@ -23,9 +23,18 @@ public class ChartEventModel {
     private long ptPk;
     private PatientModel patient;
     
-    public static enum EVENT {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE};
+    // messaging
+    private String msgUUID;     // メッセージ固有ID
+    private String replyToUUID; // どのメッセージへの返答か
+    private String msgOwner;    // メッセージ発行者
+    private String msgTitle;    // JOptionPaneのタイトル
+    private String msgContent;  // JOptionPaneのメッセージ本文
+    private String[] msgOpts;   // JOptionPaneに表示するコマンド
+    private int msgTimeout;     // タイムアウト　未使用
     
-    
+    public static enum EVENT {PVT_STATE, PVT_ADD, PVT_DELETE, PVT_RENEW, PVT_MERGE, PM_MERGE, 
+        MSG_BROADCAST, MSG_REPLY, REQUEST_REBOOT};
+
     public ChartEventModel() {
     }
     
@@ -121,5 +130,50 @@ public class ChartEventModel {
     }
     public String getFacilityId() {
         return facilityId;
+    }
+    
+    // messaging
+    public void setMsgUUID(String msgUUID) {
+        this.msgUUID = msgUUID;
+    }
+    public void setReplyToUUID(String replyToUUID) {
+        this.replyToUUID = replyToUUID;
+    }
+    public void setMsgOwner(String msgOwner) {
+        this.msgOwner = msgOwner;
+    }
+    public void setMsgTitle(String msgTitle) {
+        this.msgTitle = msgTitle;
+    }
+    public void setMsgContent(String msgContent) {
+        this.msgContent = msgContent;
+    }
+    public void setMsgOpts(String[] msgOpts) {
+        this.msgOpts = msgOpts;
+    }
+    public void setMsgTimeout(int msgTimeout) {
+        this.msgTimeout = msgTimeout;
+    }
+    
+    public String getMsgUUID() {
+        return msgUUID;
+    }
+    public String getReplyToUUID() {
+        return replyToUUID;
+    }
+    public String getMsgOwner() {
+        return msgOwner;
+    }
+    public String getMsgTitle() {
+        return msgTitle;
+    }
+    public String getMsgContent() {
+        return msgContent;
+    }
+    public String[] getMsgOpts() {
+        return msgOpts;
+    }
+    public int getMsgTimeout() {
+        return msgTimeout;
     }
 }

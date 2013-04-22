@@ -7,13 +7,14 @@ import java.awt.GraphicsConfiguration;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
 import java.awt.Insets;
-import java.awt.LayoutManager;
+import java.awt.LayoutManager2;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JPopupMenu;
+import javax.swing.SwingConstants;
 
 /**
  * ポップアップの行数が多すぎる場合のworkaround
@@ -23,7 +24,7 @@ import javax.swing.JPopupMenu;
 public class PopupMenuUtil {
 
     public static JPopupMenu createPopupMenu() {
-        JPopupMenu popup = new MyPopupMenu();
+        JPopupMenu popup = new NonHidePopupMenu();
         popup.setLayout(new MultiColumnMenuLayout());
         return popup;
     }
@@ -66,10 +67,11 @@ public class PopupMenuUtil {
     }
 }
 
+
 /**
  * TaskBarに重ならないPopupMenu
  */
-class MyPopupMenu extends JPopupMenu {
+class NonHidePopupMenu extends JPopupMenu {
 
     @Override
     public void show(Component invoker, int x, int y) {
@@ -95,10 +97,10 @@ class MyPopupMenu extends JPopupMenu {
 /**
  * 画面サイズで折り返して複数列で表示するLayoutManager
  */
-class MultiColumnMenuLayout implements LayoutManager {
+class MultiColumnMenuLayout implements LayoutManager2 {
 
     private Dimension preferredSize = new Dimension();
-    private boolean layoutDone;
+    private boolean isInvalidLayout = true;
 
     @Override
     public void addLayoutComponent(String name, Component comp) {
@@ -110,7 +112,7 @@ class MultiColumnMenuLayout implements LayoutManager {
 
     @Override
     public Dimension preferredLayoutSize(Container parent) {
-        if (!layoutDone) {
+        if (isInvalidLayout) {
             doLayout(parent);
         }
         Insets i = parent.getInsets();
@@ -126,11 +128,15 @@ class MultiColumnMenuLayout implements LayoutManager {
     }
 
     @Override
+    public Dimension maximumLayoutSize(Container parent) {
+        return preferredLayoutSize(parent);
+    }
+    
+    @Override
     public void layoutContainer(Container parent) {
-        if (layoutDone) {
-            return;
+        if (isInvalidLayout) {
+            doLayout(parent);
         }
-        doLayout(parent);
     }
 
     private void doLayout(Container target) {
@@ -170,7 +176,7 @@ class MultiColumnMenuLayout implements LayoutManager {
 
         preferredSize.height = maxColumnHeight;
         preferredSize.width = rowRect.x;
-        layoutDone = true;
+        isInvalidLayout = false;
     }
 
     private void moveComponents(List<Component> list, int x, int y, int width) {
@@ -179,5 +185,24 @@ class MultiColumnMenuLayout implements LayoutManager {
             c.setBounds(x, y, width, height);
             y += height;
         }
+    }
+
+    @Override
+    public void addLayoutComponent(Component comp, Object constraints) {
+    }
+
+    @Override
+    public float getLayoutAlignmentX(Container parent) {
+        return SwingConstants.LEFT;
+    }
+
+    @Override
+    public float getLayoutAlignmentY(Container parent) {
+        return SwingConstants.CENTER;
+    }
+
+    @Override
+    public void invalidateLayout(Container parent) {
+        isInvalidLayout = true;
     }
 }

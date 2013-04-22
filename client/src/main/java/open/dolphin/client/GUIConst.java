@@ -94,6 +94,7 @@ public class GUIConst {
     
 //masuda^
     public static final String ACTION_BROWS_GITHUB = "browseGitHub";
+    public static final String ACTION_BROADCAST_MSG = "broadcastMsg";
     // clientPropertyで使用する定数
     public static final String PROP_KARTE_COMPOSITOR = "karteCompositor";
     public static final String PROP_FIXED_HEIGHT = "fixedHeight";

@@ -83,6 +83,12 @@ public class ChartEventListener {
         onEventExec.execute(new LocalOnEventTask(evt));
     }
     
+    public void publishMsg(ChartEventModel evt) {
+        evt.setIssuerUUID(clientUUID);
+        //evt.setFacilityId = Project.getFacilityId();
+        publish(evt);
+    }
+    
     public void publishPvtDelete(PatientVisitModel pvt) {
         
         ChartEventModel evt = new ChartEventModel(clientUUID);
