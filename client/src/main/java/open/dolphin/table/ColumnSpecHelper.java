@@ -95,12 +95,13 @@ public class ColumnSpecHelper {
                 tc.setMaxWidth(Integer.MAX_VALUE);
                 tc.setPreferredWidth(width);
                 tc.setWidth(width);
+                tc.setResizable(true);
             } else {
                 tc.setMaxWidth(0);
                 tc.setMinWidth(0);
                 tc.setPreferredWidth(0);
                 tc.setWidth(0);
-
+                tc.setResizable(false);
             }
         }
         table.repaint();

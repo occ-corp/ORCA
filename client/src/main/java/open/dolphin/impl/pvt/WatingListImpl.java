@@ -107,14 +107,22 @@ public class WatingListImpl extends AbstractMainComponent {
     
     // 状態ビット・アイコン配列
     private BitAndIconPair[] bitAndIconPairs = {
-        new BitAndIconPair(PatientVisitModel.BIT_OPEN, OPEN_ICON),
-        new BitAndIconPair(PatientVisitModel.BIT_SAVE_CLAIM, ClientContext.getImageIconAlias("icon_sent_claim_small")),
-        new BitAndIconPair(PatientVisitModel.BIT_MODIFY_CLAIM, ClientContext.getImageIconAlias("icon_karte_modified_small")),
-        new BitAndIconPair(PatientVisitModel.BIT_TREATMENT, ClientContext.getImageIconAlias("icon_under_treatment_small")),
-        new BitAndIconPair(PatientVisitModel.BIT_HURRY, ClientContext.getImageIconAlias("icon_emergency_small")),
-        new BitAndIconPair(PatientVisitModel.BIT_GO_OUT, ClientContext.getImageIconAlias("icon_under_shopping_small")),
-        new BitAndIconPair(PatientVisitModel.BIT_CANCEL, ClientContext.getImageIconAlias("icon_cancel_small"))
+        new BitAndIconPair(PatientVisitModel.BIT_OPEN, 
+            OPEN_ICON),
+        new BitAndIconPair(PatientVisitModel.BIT_SAVE_CLAIM, 
+            ClientContext.getImageIconAlias("icon_sent_claim_small")),
+        new BitAndIconPair(PatientVisitModel.BIT_MODIFY_CLAIM, 
+            ClientContext.getImageIconAlias("icon_karte_modified_small")),
+        new BitAndIconPair(PatientVisitModel.BIT_TREATMENT, 
+            ClientContext.getImageIconAlias("icon_under_treatment_small")),
+        new BitAndIconPair(PatientVisitModel.BIT_HURRY, 
+            ClientContext.getImageIconAlias("icon_emergency_small")),
+        new BitAndIconPair(PatientVisitModel.BIT_GO_OUT, 
+            ClientContext.getImageIconAlias("icon_under_shopping_small")),
+        new BitAndIconPair(PatientVisitModel.BIT_CANCEL, 
+            ClientContext.getImageIconAlias("icon_cancel_small"))
     };
+    
     // 修正送信アイコンの配列インデックス
     private static final int INDEX_MODIFY_SEND_ICON = 2;
     // save_claim, modify_claim
@@ -187,7 +195,6 @@ public class WatingListImpl extends AbstractMainComponent {
         memoColumn = columnHelper.getColumnPosition("getMemo");
         stateColumn = columnHelper.getColumnPosition("getStateInteger");
         numberColumn = columnHelper.getColumnPosition("getNumber");
-
         
         // 修正送信アイコンを決める
         ImageIcon modifySendIcon = Project.getBoolean("change.icon.modify.send", true)
