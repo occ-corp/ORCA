@@ -76,7 +76,9 @@ public class KarteHtmlRenderer {
         // 念のためソート
         Collections.sort(soaModules);
         Collections.sort(pModules);
-        Collections.sort(schemas);
+        if (schemas != null) {
+            Collections.sort(schemas);
+        }
         
         // SOA Pane をレンダリングする
         StringBuilder sb = new StringBuilder();

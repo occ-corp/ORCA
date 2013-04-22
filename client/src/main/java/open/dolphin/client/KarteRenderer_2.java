@@ -96,8 +96,10 @@ public class KarteRenderer_2 {
         // 念のためソート
         Collections.sort(soaModules);
         Collections.sort(pModules);
-        Collections.sort(schemas);
-
+        if (schemas != null) {
+            Collections.sort(schemas);
+        }
+        
         // この処理はなんだろう？ soaPaneにスタンプホルダ―？？？
         if (soaSpec != null && pSpec != null) {
             if (soaSpec.contains(NAME_STAMP_HOLDER)) {
