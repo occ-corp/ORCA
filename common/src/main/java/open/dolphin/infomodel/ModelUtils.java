@@ -436,82 +436,10 @@ public class ModelUtils implements IInfoModel {
     
     //// 西暦=>年号変換
     public static String toNengo(String mmlBirthday) {
-        int year;
-        int month;
-        int day;
-        String nengo;
-
-        year = Integer.valueOf(mmlBirthday.substring(0,4));
-        month = Integer.valueOf(mmlBirthday.substring(5,7));
-        day = Integer.valueOf(mmlBirthday.substring(8,10));
-
-        // 1990年より先は平成
-        if (year >= 1990) {
-            nengo = "H"; year = year - 1988;
-        }
-        // 1989年だったら，1月7日以前は昭和
-        else if (year == 1989) {
-            if (month == 1 && day <= 7) {
-                nengo = "S"; year = 64;
-            }
-            else {
-                nengo = "H"; year = 1;
-            }
-        }
-        // 1927年から1988年は昭和
-        else if (year >= 1927 && year <= 1988) {
-            nengo = "S"; year = year - 1925;
-        }
-        // 1926年だったら，12月25日以降は昭和
-        else if (year == 1926) {
-            if (month == 12 && day >= 25) {
-                nengo = "S"; year = 1;
-            }
-            else {
-                nengo = "T"; year = 15;
-            }
-        }
-        // 1913年から1925年は大正
-        else if (year >= 1913 && year <= 1925) {
-            nengo = "T"; year = year - 1911;
-        }
-        // 1912 年だったら，7/30 以降は大正
-        else if (year == 1912) {
-            if (month >= 8) {
-                nengo = "T"; year = 1;
-            }
-            else if (month <= 6) {
-                nengo = "M"; year = 45;
-            }
-            else if (day >= 30) {
-                nengo = "T"; year = 1;
-            }
-            else {
-                nengo = "M"; year = 45;
-            }
-        }
-        // 1911年以前は明治
-        else {
-            nengo = "M"; year = year - 1867;
-        }
-
-        StringBuilder buf = new StringBuilder();
-        buf.append(nengo);
-        if (year <= 9) {
-            buf.append("0");
-        }
-        buf.append(Integer.toString(year));
-        buf.append("-");
-        if (month <= 9) {
-            buf.append("0");
-        }
-        buf.append(Integer.toString(month));
-        buf.append("-");
-        if (day <= 9) {
-            buf.append("0");
-        }
-        buf.append(Integer.toString(day));
-        return buf.toString();
+        GregorianCalendar gc = getCalendar(mmlBirthday);
+        Locale locale = new Locale("ja","JP","JP"); 
+        SimpleDateFormat frmt = new SimpleDateFormat("Gyy-MM-dd", locale);
+        return frmt.format(gc.getTime());
     }
     
     public static String getByoKanrenKbnStr(int byoKanrenKbn) {

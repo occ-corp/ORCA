@@ -9,6 +9,7 @@ import java.awt.event.*;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 import java.util.*;
@@ -34,6 +35,7 @@ import open.dolphin.table.ListTableModel;
 import open.dolphin.table.ListTableSorter;
 import open.dolphin.table.StripeTableCellRenderer;
 import open.dolphin.tr.DiagnosisTransferHandler;
+import open.dolphin.util.AgeCalculator;
 import open.dolphin.util.BeanUtils;
 import open.dolphin.util.MMLDate;
 import open.dolphin.util.PopupMenuUtil;
@@ -639,11 +641,9 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                     case START_DATE_COL:
                     case END_DATE_COL:
                         String newDate = (String) value;
-                        try {
-                            newDate = convertToSeireki(newDate);  // 西暦に整形する
-                        } catch (Exception ex) {
+                        newDate = convertToSeireki(newDate);  // 西暦に整形する
+                        if (newDate == null) {
                             diagTable.getCellEditor(row, col).cancelCellEditing();
-                            break;
                         }
                         selectedRows = diagTable.getSelectedRows();
                         for (int tableRow : selectedRows) {
@@ -1518,7 +1518,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
             if (value != null) {
             // 和暦が選択されていたら、開始日・終了日のカラムは和暦に変換して表示する masuda
                 if (cb_wareki.isSelected() && (col == START_DATE_COL || col == END_DATE_COL)) {
-                    setText(ModelUtils.toNengo((String) value));
+                    setText(AgeCalculator.toNengo((String) value));
                 } else {
                     setText((String) value);
                 }
@@ -1852,66 +1852,38 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
     }
 
 //masuda^   和暦で入力したら変換する
-    private String convertToSeireki(String input) throws Exception {
-        final String separator = "[/\\.\\-]";
-        final String mtsh = "[MmTtSsHh]";
-
-        if ("".equals(input) || input == null) {
-            return null;
-        }
-        String output;
-        String nengo = input.substring(0, 1);
-        int year;
-        output = input;
-
-        // H21.1.1とか入力した場合の前処置
-        String ymd[] = output.split(separator);
-        if (ymd.length == 3) {
+    private String convertToSeireki(String input) {
+        
+        Locale locale = new Locale("ja","JP","JP"); 
+        SimpleDateFormat frmtWareki = new SimpleDateFormat("Gyy-MM-dd", locale);
+        SimpleDateFormat frmtSeireki = new SimpleDateFormat("yyyy-MM-dd");
+        
+        input = input.replaceAll("[/\\.]", "-");
+        int len = input.length();
+        
+        if (!input.contains("-") && len > 4) {
             StringBuilder sb = new StringBuilder();
-            String str;
-            if (nengo.matches(mtsh)) {
-                str = "00" + ymd[0].replaceAll(mtsh, "");
-                sb.append(str.substring(str.length() - 2, str.length()));
-                sb.insert(0, nengo);
-            } else {
-                str = "0000" + ymd[0];
-                sb.append(str.substring(str.length() - 4, str.length()));
-            }
-            str = "00" + ymd[1];
-            sb.append(str.substring(str.length() - 2, str.length()));
-            str = "00" + ymd[2];
-            sb.append(str.substring(str.length() - 2, str.length()));
-            output = sb.toString();
+            sb.append(input);
+            sb.insert(len - 2, "-");
+            sb.insert(len - 4, "-");
+            input = sb.toString();
         }
-
-        // 区切り文字[./-]はいったん消してしまう。
-        output = output.replaceAll(separator, "");
-
-        if (nengo.matches("[Mm]")) {
-            year = Integer.valueOf(output.substring(1, 3)) + 1867;
-            output = output.substring(3);
-        } else if (nengo.matches("[Tt]")) {
-            year = Integer.valueOf(output.substring(1, 3)) + 1911;
-            output = output.substring(3);
-        } else if (nengo.matches("[Ss]")) {
-            year = Integer.valueOf(output.substring(1, 3)) + 1925;
-            output = output.substring(3);
-        } else if (nengo.matches("[Hh]")) {
-            year = Integer.valueOf(output.substring(1, 3)) + 1988;
-            output = output.substring(3);
-        } else {
-            //どうやら西暦
-            year = Integer.valueOf(output.substring(0, 4));
-            output = output.substring(4);
+        
+        // 西暦に変換してみる
+        try {
+            Date d = frmtSeireki.parse(input);
+            return frmtSeireki.format(d);
+        } catch (ParseException ex) {
         }
-        output = Integer.toString(year) + "-"
-                + output.substring(0, 2) + "-" + output.substring(2, 4);
-        //YYYY-MM-DDの型かチェック
-        if (!output.matches("\\d{4}\\-\\d{2}\\-\\d{2}")) {
-            output = null;
+        
+        // 西暦がダメなら和暦？
+        try {
+            Date d = frmtWareki.parse(input);
+            return frmtSeireki.format(d);
+        } catch (ParseException ex) {
         }
-
-        return output;
+        
+        return null;
     }
 //masuda$
 

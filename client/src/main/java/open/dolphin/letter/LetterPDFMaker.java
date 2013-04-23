@@ -180,32 +180,8 @@ public class LetterPDFMaker extends AbstractPDFMaker {
             int width[] = new int[]{20, 60, 10, 10};
             pTable.setWidths(width);
             pTable.setWidth(100);
-//pns^
-            String birthdayNengo = AgeCalculator.toNengo(model.getPatientBirthday());
-            String ymd[] = birthdayNengo.split("-");
-            String nengo = ymd[0].substring(0,1);
-            int year = Integer.valueOf(ymd[0].substring(1));
-            int month = Integer.valueOf(ymd[1]);
-            int day = Integer.valueOf(ymd[2]);
-            
-            sb = new StringBuilder();
-            if (nengo.equals("H")) {
-                sb.append("平成 ");
-            } else if (nengo.equals("S")) {
-                sb.append("昭和 ");
-            } else if (nengo.equals("T")) {
-                sb.append("大正 ");
-            } else {
-                sb.append("明治 ");
-            }
-            sb.append(String.valueOf(year));
-            sb.append(" 年 ");
-            sb.append(String.valueOf(month));
-            sb.append(" 月 ");
-            sb.append(String.valueOf(day));
-            sb.append(" 日 ");
-            String birthday = sb.toString();
-//pns$
+
+            String birthday = AgeCalculator.toNengoKanji(model.getPatientBirthday());
             String sexStr = model.getPatientGender();
             pTable.addCell(new Phrase("患者氏名", bodyFont));
             
