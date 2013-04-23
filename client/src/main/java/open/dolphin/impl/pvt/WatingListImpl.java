@@ -961,10 +961,15 @@ public class WatingListImpl extends AbstractMainComponent {
                             } else {
                                 icon = NETWORK_ICON;
                             }
+                            break;
+                        } else if (i == PatientVisitModel.BIT_SAVE_CLAIM) {
+                            // SAVE_CLAIMとMODIFY_CLAIMは同時に立っていることがある
+                            // ここだけbreakなし
+                            icon = bitAndIconPairs[i].getIcon();
                         } else {
                             icon = bitAndIconPairs[i].getIcon();
+                            break;
                         }
-                        break;
                     }
                 }
                 
