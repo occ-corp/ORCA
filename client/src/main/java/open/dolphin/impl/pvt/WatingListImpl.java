@@ -952,24 +952,27 @@ public class WatingListImpl extends AbstractMainComponent {
 //minagawa$
                 ImageIcon icon = null;
                 
-                // 状態アイコン
+                // 状態アイコン　ラベル付きbreak文を使ってみる
+                bitLoop:
                 for (int i = 0; i < bitAndIconPairs.length; ++i) {
-                    if (pvt.getStateBit(bitAndIconPairs[i].getBit())) {
-                        if (i == PatientVisitModel.BIT_OPEN) {
+                    if (!pvt.getStateBit(bitAndIconPairs[i].getBit())) {
+                        continue;
+                    }
+                    switch (i) {
+                        case PatientVisitModel.BIT_OPEN:
                             if (clientUUID.equals(pvt.getPatientModel().getOwnerUUID())) {
                                 icon = bitAndIconPairs[i].getIcon();
                             } else {
                                 icon = NETWORK_ICON;
                             }
-                            break;
-                        } else if (i == PatientVisitModel.BIT_SAVE_CLAIM) {
+                            break bitLoop;
+                        case PatientVisitModel.BIT_SAVE_CLAIM:
                             // SAVE_CLAIMとMODIFY_CLAIMは同時に立っていることがある
-                            // ここだけbreakなし
-                            icon = bitAndIconPairs[i].getIcon();
-                        } else {
                             icon = bitAndIconPairs[i].getIcon();
                             break;
-                        }
+                        default:
+                            icon = bitAndIconPairs[i].getIcon();
+                            break bitLoop;
                     }
                 }
                 
