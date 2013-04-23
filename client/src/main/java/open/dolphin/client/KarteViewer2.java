@@ -54,8 +54,8 @@ public class KarteViewer2 extends KarteViewer {
         // DocumentModelのstatusをKartePaneに保存しておく
         // KarteViewerのpopup制御に利用
         String status = getModel().getDocInfoModel().getStatus();
-        soaPane.setDocStatus(status);
-        pPane.setDocStatus(status);
+        soaPane.getTextPane().putClientProperty(GUIConst.PROP_DOC_STATUS, status);
+        pPane.getTextPane().putClientProperty(GUIConst.PROP_DOC_STATUS, status);
         
         // KarteViewerをJTextPaneに保存しておく
         soaPane.getTextPane().putClientProperty(GUIConst.PROP_KARTE_VIEWER, this);

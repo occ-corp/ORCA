@@ -272,11 +272,7 @@ public class TensuMaster {
         if (srycd == null) {
             return null;
         }
-//masuda^   ウソ診療行為区分設定
-        if (srycd.startsWith(".")) {
-            return null;
-        }
-//masuda$
+        
         String ret;
 
         if (srycd.startsWith(ClaimConst.SYUGI_CODE_START)) {

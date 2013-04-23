@@ -100,6 +100,7 @@ public class GUIConst {
     public static final String PROP_FIXED_HEIGHT = "fixedHeight";
     public static final String PROP_KARTE_VIEWER = "karteViewer";
     public static final String PROP_VIEWER_INDEX = "viewerIndex";
+    public static final String PROP_DOC_STATUS = "docStatus";
 
     // 中止項目編集と採用薬編集
     public static final String ACTION_EDIT_DISCONITEM = "editDisconItem";

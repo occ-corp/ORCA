@@ -1,6 +1,5 @@
 package open.dolphin.client;
 
-import java.awt.Component;
 import java.awt.Frame;
 import java.awt.Point;
 import java.awt.Toolkit;
@@ -215,13 +214,14 @@ public class StampHolderFunction {
         }
 
         // KarteViewer、status finalのみ個人薬歴登録
-        if (IInfoModel.STATUS_FINAL.equals(kartePane.getDocStatus()) && isAllMedicine()) {
+        String docStatus = (String) kartePane.getTextPane().getClientProperty(GUIConst.PROP_DOC_STATUS);
+        if (IInfoModel.STATUS_FINAL.equals(docStatus) && isAllMedicine()) {
             // RoutineMed
             JMenuItem item = new JMenuItem(registRoutineMedAction);
             popup.add(item);
         }
 
-        popup.show((Component) selectedStampHolder, p.x, p.y);
+        popup.show(selectedStampHolder, p.x, p.y);
     }
     
     // 編集したスタンプホルダを更新する

@@ -96,21 +96,6 @@ public class KartePane implements DocumentListener, MouseListener,
     // 保存後及びブラウズ時の編集不可を表すカラー
     private Color uneditableColor = UNEDITABLE_COLOR;
 
-//masuda^
-    // このペインからDragg及びDroppされたスタンプの情報
-    //private ComponentHolder[] drragedStamp;
-    //private int draggedCount;
-    //private int droppedCount;
-    
-    // DocumentModelのステータス, KarteViewerのポップアップ制御で利用
-    private String docStatus;
-    public String getDocStatus() {
-        return docStatus;
-    }
-    public void setDocStatus(String status) {
-        docStatus = status;
-    }
-//masuda$
     private Logger logger;
 
     /** 
