@@ -1,4 +1,3 @@
-
 package open.dolphin.client;
 
 import java.awt.Toolkit;
@@ -234,41 +233,30 @@ public class CheckMedication {
         }
         if (list != null && !list.isEmpty()){
             for (DrugInteractionModel model : list){
-                StringBuilder tmp = new StringBuilder();
-                tmp.append("<併用禁忌> ");
-                tmp.append(drugCodeNameMap.get(model.getSrycd1()));
-                tmp.append(" と ");
-                tmp.append(drugCodeNameMap.get(model.getSrycd2()));
-                tmp.append("\n");
-                tmp.append(model.getSskijo());
-                tmp.append(" ");
-                tmp.append(model.getSyojyoucd());
-                tmp.append("\n");
-                sb.append(formatMsg(tmp.toString()));
+                sb.append("＜併用禁忌＞ ");
+                sb.append(drugCodeNameMap.get(model.getSrycd1()));
+                sb.append(" と ");
+                sb.append(drugCodeNameMap.get(model.getSrycd2()));
+                sb.append("\n");
+                sb.append(model.getSskijo());
+                sb.append(" ");
+                sb.append(model.getSyojyoucd());
+                sb.append("\n");
             }
         }
-        return sb.toString();
+        return formatMsg(sb.toString());
     }
 
     private String formatMsg(String str) {
-        final int width = 40;       // 桁数
-        int pos = 0;
-        StringBuilder buf = new StringBuilder();
-
-        for (int i = 0; i < str.length(); ++i) {
-            String c = str.substring(i, i + 1);
-            if ("\n".equals(c)){
-                pos = 0;
-            } else if (pos == width){
-                pos = 0;
-                buf.append("\n");
-            } else {
-                ++pos;
-            }
-            buf.append(c);
+        if (str.isEmpty()) {
+            return str;
         }
-
-        return buf.toString();
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html><body style='width:300px'><b>");
+        sb.append(str.replace("\n", "<br>"));
+        sb.append("</b></body></html>");
+        
+        return sb.toString();
     }
 
     // 処方切れの可能性のある患者を調べる
