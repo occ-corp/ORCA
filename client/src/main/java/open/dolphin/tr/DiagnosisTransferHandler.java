@@ -39,6 +39,8 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
     protected Transferable createTransferable(JComponent src) {
 
         startTransfer(src);
+        action = 0;
+        
         JTable sourceTable = (JTable) src;
 
 //masuda^   table sorter対応
