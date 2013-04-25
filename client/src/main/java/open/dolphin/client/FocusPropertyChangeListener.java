@@ -7,8 +7,8 @@ import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
 import javax.swing.TransferHandler;
-import javax.swing.text.JTextComponent;
 import open.dolphin.helper.WindowSupport;
+import open.dolphin.tr.DolphinTransferHandler;
 import open.dolphin.tr.IKarteTransferHandler;
 
 /**
@@ -72,12 +72,10 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
         if (newComp == null || newComp == oldComp) {
             return;
         }
-
-        // focusOwnerになるのはJTextComponent とComponentHolderとImagePanel
-        // native, numbusはコレしないとダメ。ボタンなどもfocus取ってしまう
-        if (!(newComp instanceof JTextComponent 
-                || newComp instanceof ComponentHolder 
-                || newComp instanceof ImagePanel)) {
+        
+        // DolphinTransferHandlerが設定されていない場合はChartMediator処理は不要
+        TransferHandler t = newComp.getTransferHandler();
+        if (t == null || !(t instanceof DolphinTransferHandler)) {
             return;
         }
 

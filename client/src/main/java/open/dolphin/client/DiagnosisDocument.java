@@ -1,10 +1,6 @@
 package open.dolphin.client;
 
 import java.awt.*;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDragEvent;
-import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.*;
 import java.beans.EventHandler;
 import java.beans.PropertyChangeEvent;
@@ -145,9 +141,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
 
 //masuda    最終受診日＝今日受診している場合は今日，していないばあいは最後の受診日
     private String lastVisit;
-
-//pns   Stamp から drop を受け取る場合のアクション
-    private int action; // 通常は MOVE で，ALT が押されていたら COPY になる
+    private DiagnosisTransferHandler tr;
 
     /**
      *  Creates new DiagnosisDocument
@@ -459,31 +453,10 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         pcl2.setCellEditor(de2);
 
         // TransferHandler を設定する
-        diagTable.setTransferHandler(new DiagnosisTransferHandler(this));
+        tr = new DiagnosisTransferHandler(this);
+        diagTable.setTransferHandler(tr);
         diagTable.setDragEnabled(true);
 
-//pns^  insertStamp() でALT キーで疑い病名に変換する機能をつけるため，action を記録する
-        // ALT 押した場合が COPY になり，押してないと MOVE
-        DropTarget dt = new DropTarget(diagTable, new DropTargetAdapter() {
-
-            @Override
-            public void dragEnter(DropTargetDragEvent dtde) {
-                action = dtde.getDropAction();
-            }
-
-            @Override
-            public void dropActionChanged(DropTargetDragEvent dtde) {
-                action = dtde.getDropAction();
-            }
-
-            @Override
-            public void drop(DropTargetDropEvent dtde) {
-                diagTable.getTransferHandler().importData(diagTable, dtde.getTransferable());
-                dtde.dropComplete(true); // これをしないとドラッグしてきたアイコンが逃げる
-            }
-        });
-        dt.setActive(true);
-//pns$
         // Layout
         JScrollPane scroller = new JScrollPane(diagTable,
                 JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
@@ -951,7 +924,8 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                 module.setCategoryDesc("疑い病名");
                 module.setCategoryCodeSys("MML0015");
             }
-            // ALT キーが押されていたら，疑いにセットする
+            // CTRLキー(Windows)が押されていたら，疑いにセットする
+            int action = tr.getTransferAction();
             if (action == java.awt.dnd.DnDConstants.ACTION_COPY) {
                 module.setCategory("suspectedDiagnosis");
                 module.setCategoryDesc("疑い病名");

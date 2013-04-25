@@ -1,8 +1,6 @@
-
 package open.dolphin.tr;
 
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import open.dolphin.infomodel.InFacilityLaboItem;
@@ -12,7 +10,7 @@ import open.dolphin.infomodel.InFacilityLaboItem;
  * 
  * @author masuda, Masuda Naka
  */
-public class InFacilityLaboItemTransferable implements Transferable {
+public class InFacilityLaboItemTransferable extends DolphinTransferable {
     
     public static DataFlavor inFacilityLaboItemFlavor = new DataFlavor(InFacilityLaboItem.class, "InFacilityLaboItem");
 
@@ -42,5 +40,10 @@ public class InFacilityLaboItemTransferable implements Transferable {
         } else {
             throw new UnsupportedFlavorException(flavor);
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "InFacilityLaboItem Transferable";
     }
 }

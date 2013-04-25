@@ -4,7 +4,6 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
 import javax.swing.JTable;
-import javax.swing.TransferHandler;
 import open.dolphin.infomodel.RegisteredDiagnosisModel;
 import open.dolphin.table.ListTableModel;
 
@@ -15,25 +14,28 @@ import open.dolphin.table.ListTableModel;
  * @author Minagawa,Kazushi
  * @author modified by masuda, Masuda Naika, from 1.4
  */
-public class RegisteredDiagnosisTransferHandler extends TransferHandler {
+public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
 
     private DataFlavor registeredDiagnosisFlavor = RegisteredDiagnosisTransferable.registeredDiagnosisFlavor;
 
-    private JTable sourceTable;
-    private boolean shouldRemove;
     private int fromIndex;
     private int toIndex;
 
-
     @Override
-    @SuppressWarnings("unchecked")
-    protected Transferable createTransferable(JComponent c) {
+    protected Transferable createTransferable(JComponent src) {
         
-        sourceTable = (JTable) c;
+        startTransfer(src);
+        
+        JTable sourceTable = (JTable) src;
         ListTableModel<RegisteredDiagnosisModel> tableModel = (ListTableModel<RegisteredDiagnosisModel>) sourceTable.getModel();
         fromIndex = sourceTable.getSelectedRow();
-        RegisteredDiagnosisModel dragItem = tableModel.getObject(fromIndex);
-        return dragItem != null ? new RegisteredDiagnosisTransferable(dragItem) : null;
+        RegisteredDiagnosisModel rd = tableModel.getObject(fromIndex);
+        if (rd != null) {
+            return new RegisteredDiagnosisTransferable(rd);
+        }
+        
+        endTransfer();
+        return null;
     }
 
     @Override
@@ -42,10 +44,10 @@ public class RegisteredDiagnosisTransferHandler extends TransferHandler {
     }
 
     @Override
-    @SuppressWarnings("unchecked")
     public boolean importData(TransferSupport support) {
         
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
 
@@ -55,25 +57,38 @@ public class RegisteredDiagnosisTransferHandler extends TransferHandler {
             ListTableModel<RegisteredDiagnosisModel> tableModel = (ListTableModel<RegisteredDiagnosisModel>) dropTable.getModel();
             JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
             toIndex = dropLocation.getRow();
-            shouldRemove = (dropTable == sourceTable);
-            if (shouldRemove) {
+            if (dropTable == srcComponent) {
                 tableModel.moveRow(fromIndex, (toIndex > fromIndex) ? --toIndex : toIndex);
+            } else {
+                RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) 
+                        support.getTransferable().getTransferData(registeredDiagnosisFlavor);
+                tableModel.addObject(toIndex, rd);
             }
-            sourceTable.getSelectionModel().setSelectionInterval(toIndex, toIndex);
+            importDataSuccess(dropTable);
             return true;
 
         } catch (Exception ioe) {
         }
         
+        importDataFailed();
         return false;
     }
 
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
 
-        shouldRemove = false;
+        // export先がOpenDolphin以外なら削除しない
+        if (isExportToOther()) {
+            endTransfer();
+            return;
+        }
+        
+        JTable sourceTable = (JTable) c;
+        sourceTable.getSelectionModel().setSelectionInterval(toIndex, toIndex);
+        
         fromIndex = -1;
         toIndex = -1;
+        endTransfer();
     }
 
     @Override

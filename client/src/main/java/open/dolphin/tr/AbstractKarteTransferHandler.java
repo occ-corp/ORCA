@@ -1,47 +1,25 @@
-
 package open.dolphin.tr;
 
-import java.awt.Component;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.InputEvent;
 import java.io.IOException;
-import javax.swing.ActionMap;
 import javax.swing.JComponent;
-import javax.swing.TransferHandler;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import javax.swing.text.Position;
 import open.dolphin.client.FocusPropertyChangeListener;
+import open.dolphin.client.KartePane;
+import open.dolphin.client.KarteStyledDocument;
 
 /**
  * AbstractKarteTransferHandler
  * 
  * @author masuda, Masuda Naika
  */
-public abstract class AbstractKarteTransferHandler extends TransferHandler implements IKarteTransferHandler{
-
-    protected static final DataFlavor stringFlavor = DataFlavor.stringFlavor;
-    protected static Component srcComponent;
-    protected static Component destComponent;
-    protected static Position startPos;
-    protected static Position endPos;
-
-    protected static final int SHORTCUTKEY_DOWN_MASK =
-            Toolkit.getDefaultToolkit().getMenuShortcutKeyMask() == InputEvent.CTRL_MASK
-            ? InputEvent.CTRL_DOWN_MASK     // windows
-            : InputEvent.META_DOWN_MASK;    // mac
-
-    @Override
-    public abstract void enter(JComponent jc, ActionMap map);
-
-    @Override
-    public abstract void exit(JComponent jc);
+public abstract class AbstractKarteTransferHandler extends DolphinTransferHandler implements IKarteTransferHandler{
 
     @Override
     public int getSourceActions(JComponent c) {
@@ -50,21 +28,32 @@ public abstract class AbstractKarteTransferHandler extends TransferHandler imple
 
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
-
+        
+        // export先がOpenDolphin以外なら削除しない
+        if (isExportToOther()) {
+            endTransfer();
+            return;
+        }
+        
         // 違うComponent間なら削除しない
         if (srcComponent != destComponent) {
+            endTransfer();
             return;
         }
 
         JTextComponent tc = (JTextComponent) c;
         if (action != MOVE || !tc.isEditable()) {
+            endTransfer();
             return;
         }
 
         if (startPos == null || endPos == null) {
+            endTransfer();
             return;
         }
+        
         if (startPos.getOffset() == endPos.getOffset()) {
+            endTransfer();
             return;
         }
 
@@ -75,6 +64,7 @@ public abstract class AbstractKarteTransferHandler extends TransferHandler imple
             tc.getDocument().remove(start, end - start);
         } catch (BadLocationException e) {
         }
+        endTransfer();
     }
 
     /**
@@ -90,6 +80,11 @@ public abstract class AbstractKarteTransferHandler extends TransferHandler imple
                 pane.replaceSelection("");
             }
         }
+    }
+    
+    protected final KartePane getKartePane(JTextComponent tc) {
+        KarteStyledDocument doc = (KarteStyledDocument) tc.getDocument();
+        return doc.getKartePane();
     }
     
     protected final boolean setSelectedTextArea(JTextComponent tc) {
@@ -126,13 +121,6 @@ public abstract class AbstractKarteTransferHandler extends TransferHandler imple
             return true;
         }
         return false;
-    }
-
-    public static void clearVariables() {
-        srcComponent =null;
-        destComponent = null;
-        startPos = null;
-        endPos = null;
     }
 
     // テキストをインポートする

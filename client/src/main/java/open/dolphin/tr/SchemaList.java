@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.io.Serializable;
 import open.dolphin.infomodel.SchemaModel;
 
 /**
@@ -7,11 +8,19 @@ import open.dolphin.infomodel.SchemaModel;
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
-public class SchemaList implements java.io.Serializable {
+public class SchemaList implements Serializable {
 
-    SchemaModel[] schemaList;
+    private SchemaModel[] schemaList;
 
     /** Creates new ImageList */
     public SchemaList() {
+    }
+    
+    public SchemaModel[] getSchemaList() {
+        return schemaList;
+    }
+    
+    public void setSchemaList(SchemaModel[] schemaList) {
+        this.schemaList = schemaList;
     }
 }

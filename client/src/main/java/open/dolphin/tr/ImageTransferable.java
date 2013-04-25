@@ -1,10 +1,8 @@
-
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 
 /**
@@ -12,12 +10,12 @@ import java.io.IOException;
  *
  * @author masuda, Masuda Naika
  */
-public class ImageTransferable implements Transferable {
+public class ImageTransferable extends DolphinTransferable {
 
-    private BufferedImage image;
+    private Image image;
     private DataFlavor[] flavor;
 
-    public ImageTransferable(BufferedImage image) {
+    public ImageTransferable(Image image) {
         this.image = image;
         flavor = new DataFlavor[]{DataFlavor.imageFlavor};
     }
@@ -39,5 +37,10 @@ public class ImageTransferable implements Transferable {
             throw new UnsupportedFlavorException(flavor);
         }
         return image;
+    }
+    
+    @Override
+    public String toString() {
+        return "java.awt.Image Transferable";
     }
 }

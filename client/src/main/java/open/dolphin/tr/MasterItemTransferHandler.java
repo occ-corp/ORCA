@@ -2,6 +2,8 @@ package open.dolphin.tr;
 
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
+import java.awt.datatransfer.UnsupportedFlavorException;
+import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import javax.swing.TransferHandler;
@@ -15,22 +17,25 @@ import open.dolphin.table.ListTableModel;
  * @author Minagawa,Kazushi. Digital Globe, Inc.
  *
  */
-public final class MasterItemTransferHandler extends TransferHandler {
+public final class MasterItemTransferHandler extends DolphinTransferHandler {
     
     private DataFlavor masterItemFlavor = MasterItemTransferable.masterItemFlavor;
     
-    private JTable sourceTable;
-    private MasterItem dragItem;
-    private boolean shouldRemove;
-    
     @Override
-    protected Transferable createTransferable(JComponent c) {
-        sourceTable = (JTable) c;
-        @SuppressWarnings("unchecked")
+    protected Transferable createTransferable(JComponent src) {
+        
+        startTransfer(src);
+        
+        JTable sourceTable = (JTable) src;
         ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) sourceTable.getModel();
         int fromIndex = sourceTable.getSelectedRow();
-        dragItem = tableModel.getObject(fromIndex);
-        return dragItem != null ? new MasterItemTransferable(dragItem) : null;
+        MasterItem mi = tableModel.getObject(fromIndex);
+        if (mi != null) {
+            return new MasterItemTransferable(mi);
+        } else {
+            endTransfer();
+            return null;
+        }
     }
     
     @Override
@@ -39,9 +44,10 @@ public final class MasterItemTransferHandler extends TransferHandler {
     }
     
     @Override
-    public boolean importData(TransferHandler.TransferSupport support) {
+    public boolean importData(TransferSupport support) {
         
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
 
@@ -52,37 +58,52 @@ public final class MasterItemTransferHandler extends TransferHandler {
                 Transferable t = support.getTransferable();
                 MasterItem dropItem = (MasterItem) t.getTransferData(masterItemFlavor);
                 JTable dropTable = (JTable) support.getComponent();
-                @SuppressWarnings("unchecked")
+                
                 ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) dropTable.getModel();
-                shouldRemove = (dropTable == sourceTable);
 
                 if (toIndex<tableModel.getObjectCount()) {
                     tableModel.addObject(toIndex, dropItem);
                 } else {
                     tableModel.addObject(dropItem);
                 }
-
+                
+                importDataSuccess(support.getComponent());
                 return true;
             }
         } catch (Exception ioe) {
             ioe.printStackTrace(System.err);
         }
         
+        importDataFailed();
         return false;
     }
     
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
-        if (action==MOVE && shouldRemove && (dragItem!=null)) {
-            ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) sourceTable.getModel();
-            tableModel.delete(dragItem);
+        
+        // export先がOpenDolphin以外なら削除しない
+        if (isExportToOther()) {
+            endTransfer();
+            return;
         }
-        shouldRemove = false;
-        dragItem = null;
+
+        boolean shouldRemove = (c == srcComponent);
+        
+        if (action == MOVE && shouldRemove) {
+            JTable src = (JTable) c;
+            ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) src.getModel();
+            try {
+                MasterItem mi = (MasterItem) data.getTransferData(masterItemFlavor);
+                tableModel.delete(mi);
+            } catch (UnsupportedFlavorException ex) {
+            } catch (IOException ex) {
+            }
+        }
+        endTransfer();
     }
 
     @Override
-    public boolean canImport(TransferHandler.TransferSupport support) {
+    public boolean canImport(TransferSupport support) {
         return (support.isDrop() && support.isDataFlavorSupported(masterItemFlavor));
     }
 }

@@ -9,22 +9,11 @@ import open.dolphin.stampbox.StampTreeNode;
  *
  * @author  Kazushi Minagawa
  */
-public class LocalStampTreeNodeTransferable implements Transferable, ClipboardOwner {
+public class LocalStampTreeNodeTransferable extends DolphinTransferable {
 
     /** Data Flavor of this class */
-    public static DataFlavor localStampTreeNodeFlavor;
-
-    static {
-        try {
-//masuda^   StampTreeNodeを移動させたので、余計な手間ｗ
-            //localStampTreeNodeFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=open.dolphin.client.StampTreeNode");
-            localStampTreeNodeFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=" + StampTreeNode.class.getName());
-//masuda$
-        } catch (Exception e) {
-            e.printStackTrace(System.err);
-        }
-    }
-    ;
+    public static DataFlavor localStampTreeNodeFlavor 
+            = new DataFlavor(StampTreeNode.class, "LocalStampTreeNode");
 
     public static final DataFlavor[] flavors = {LocalStampTreeNodeTransferable.localStampTreeNodeFlavor};
 
@@ -57,7 +46,7 @@ public class LocalStampTreeNodeTransferable implements Transferable, ClipboardOw
     }
     
     @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
-        AbstractKarteTransferHandler.clearVariables();
+    public String toString() {
+        return "LocalStampTreeNode Transferable";
     }
 }

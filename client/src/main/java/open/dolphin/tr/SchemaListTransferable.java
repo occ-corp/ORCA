@@ -8,10 +8,10 @@ import java.io.IOException;
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
-public final class SchemaListTransferable implements Transferable, ClipboardOwner {
+public final class SchemaListTransferable extends DolphinTransferable {
 
     /** Data Flavor of this class */
-    public static DataFlavor schemaListFlavor = new DataFlavor(open.dolphin.tr.SchemaList.class, "Schema List");
+    public static DataFlavor schemaListFlavor = new DataFlavor(SchemaList.class, "Schema List");
 
     public static final DataFlavor[] flavors = {SchemaListTransferable.schemaListFlavor};
 
@@ -45,11 +45,6 @@ public final class SchemaListTransferable implements Transferable, ClipboardOwne
 
     @Override
     public String toString() {
-        return "Icon List Transferable";
-    }
-
-    @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
-        AbstractKarteTransferHandler.clearVariables();
+        return "SchemaList Transferable";
     }
 }

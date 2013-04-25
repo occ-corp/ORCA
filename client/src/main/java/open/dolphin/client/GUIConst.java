@@ -96,7 +96,6 @@ public class GUIConst {
     public static final String ACTION_BROWS_GITHUB = "browseGitHub";
     public static final String ACTION_BROADCAST_MSG = "broadcastMsg";
     // clientPropertyで使用する定数
-    public static final String PROP_KARTE_COMPOSITOR = "karteCompositor";
     public static final String PROP_FIXED_HEIGHT = "fixedHeight";
     public static final String PROP_KARTE_VIEWER = "karteViewer";
     public static final String PROP_VIEWER_INDEX = "viewerIndex";

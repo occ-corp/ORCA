@@ -29,10 +29,10 @@ import open.dolphin.infomodel.IInfoModel;
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */ 
-public final class InfoModelTransferable implements Transferable, ClipboardOwner {
+public final class InfoModelTransferable extends DolphinTransferable {
 
     /** Data Flavor of this class */
-    public static DataFlavor infoModelFlavor = new DataFlavor(open.dolphin.infomodel.IInfoModel.class, "Info Model");
+    public static DataFlavor infoModelFlavor = new DataFlavor(IInfoModel.class, "Info Model");
 
     public static final DataFlavor[] flavors = {InfoModelTransferable.infoModelFlavor};
       
@@ -66,10 +66,6 @@ public final class InfoModelTransferable implements Transferable, ClipboardOwner
 
     @Override
     public String toString() {
-        return "InfoModelTransferable";
-    }
-  
-    @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
+        return "InfoModel Transferable";
     }
 }

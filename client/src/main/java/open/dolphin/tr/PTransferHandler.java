@@ -39,15 +39,16 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
     }
 
     @Override
-    protected Transferable createTransferable(JComponent c) {
+    protected Transferable createTransferable(JComponent src) {
+        
+        startTransfer(src);
 
-        JTextComponent source = (JTextComponent) c;
-        clearVariables();
-        srcComponent = c;
+        JTextComponent source = (JTextComponent) src;
 
         // テキストの選択範囲を記憶
         boolean b = setSelectedTextArea(source);
         if (!b) {
+            endTransfer();
             return null;
         }
 
@@ -60,15 +61,16 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
     public boolean importData(TransferSupport support) {
 
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
 
         Transferable tr = support.getTransferable();
-        JTextComponent tc = (JTextComponent) support.getComponent();
+        JTextComponent dest = (JTextComponent) support.getComponent();
 
         boolean imported = false;
 
-        KartePane destPane = (KartePane) tc.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
+        KartePane destPane = getKartePane(dest);
 
         if (tr.isDataFlavorSupported(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor)) {
             // StampTreeNodeをインポートする, SOA/P
@@ -80,11 +82,13 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
 
         } else if (tr.isDataFlavorSupported(stringFlavor)) {
             // テキストをインポートする SOA/P
-            imported = doTextDrop(tr, tc);
+            imported = doTextDrop(tr, dest);
         }
 
         if (imported) {
-            destComponent = tc;
+            importDataSuccess(dest);
+        } else {
+            importDataFailed();
         }
 
         return imported;
@@ -95,38 +99,39 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
      */
     @Override
     public boolean canImport(TransferSupport support) {
-
+        
         JTextComponent tc = (JTextComponent) support.getComponent();
 
         // 選択範囲内にDnDならtrue
         if (isDndOntoSelectedText(support)) {
             return false;
         }
-        if (tc.isEditable() && hasFlavor(support.getDataFlavors())) {
+        
+        if (tc.isEditable() && hasFlavor(support)) {
             return true;
         }
+        
         return false;
     }
 
     /**
      * Flavorリストのなかに受け入れられものがあるかどうかを返す。
      */
-    private boolean hasFlavor(DataFlavor[] flavors) {
+    private boolean hasFlavor(TransferSupport support) {
 
-        for (DataFlavor flavor : flavors) {
-            // String OK
-            if (DataFlavor.stringFlavor.equals(flavor)) {
-                return true;
-            }
-            // StampTreeNode(FromStampTree) OK
-            if (LocalStampTreeNodeTransferable.localStampTreeNodeFlavor.equals(flavor)) {
-                return true;
-            }
-            // OrderStamp List OK
-            if (OrderListTransferable.orderListFlavor.equals(flavor)) {
-                return true;
-            }
+        // String OK
+        if (support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            return true;
         }
+        // StampTreeNode(FromStampTree) OK
+        if (support.isDataFlavorSupported(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor)) {
+            return true;
+        }
+        // OrderStamp List OK
+        if (support.isDataFlavorSupported(OrderListTransferable.orderListFlavor)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -195,7 +200,7 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
         try {
             // スタンプのリストを取得する
             OrderList list = (OrderList) tr.getTransferData(OrderListTransferable.orderListFlavor);
-            ModuleModel[] stamps = list.orderList;
+            ModuleModel[] stamps = list.getOrderList();
 
 //masuda^   スタンプコピー時に別患者のカルテかどうかをチェックする
             boolean differentKarte = false;
@@ -253,7 +258,7 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
     @Override
     public void enter(JComponent jc, ActionMap map) {
 
-        KartePane pPane = (KartePane) jc.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
+        KartePane pPane = getKartePane((JTextComponent) jc);
         if (pPane.getTextPane().isEditable()) {
             map.get(GUIConst.ACTION_PASTE).setEnabled(canPaste(pPane));
             map.get(GUIConst.ACTION_INSERT_STAMP).setEnabled(true);

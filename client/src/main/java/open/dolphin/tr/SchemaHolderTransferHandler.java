@@ -20,7 +20,6 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
 
     private static final SchemaHolderTransferHandler instance;
 
-
     static {
         instance = new SchemaHolderTransferHandler();
     }
@@ -33,14 +32,14 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
     }
 
     @Override
-    protected Transferable createTransferable(JComponent c) {
+    protected Transferable createTransferable(JComponent src) {
 
-        clearVariables();
-        SchemaHolder source = (SchemaHolder) c;
-        srcComponent = source.getKartePane().getTextPane();
+        startTransfer(src);
+        
+        SchemaHolder source = (SchemaHolder) src;
         SchemaModel schema = source.getSchema();
         SchemaList list = new SchemaList();
-        list.schemaList = new SchemaModel[]{schema};
+        list.setSchemaList(new SchemaModel[]{schema});
         Transferable tr = new SchemaListTransferable(list);
         return tr;
     }
@@ -53,14 +52,22 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
 
+        // export先がOpenDolphin以外なら削除しない
+        if (isExportToOther()) {
+            endTransfer();
+            return;
+        }
+        
         SchemaHolder source = (SchemaHolder) c;
         KartePane sourcePane = source.getKartePane();
-
+        
         if (sourcePane.getTextPane() != destComponent) {
+            endTransfer();
             return;
         }
 
         if (action != MOVE || !sourcePane.getTextPane().isEditable()) {
+            endTransfer();
             return;
         }
 

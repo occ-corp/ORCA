@@ -1,7 +1,6 @@
 package open.dolphin.tr;
 
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import open.dolphin.order.MasterItem;
@@ -10,9 +9,9 @@ import open.dolphin.order.MasterItem;
  * マスタアイテム Transferable クラス。
  * @author Kazushi Minagawa.
  */
-public final class MasterItemTransferable implements Transferable {
+public final class MasterItemTransferable extends DolphinTransferable {
 
-    public static final DataFlavor masterItemFlavor = new DataFlavor(open.dolphin.order.MasterItem.class, "MasterItem");
+    public static final DataFlavor masterItemFlavor = new DataFlavor(MasterItem.class, "MasterItem");
     public static final DataFlavor[] flavors = {masterItemFlavor};
     private MasterItem masterItem;
 
@@ -39,5 +38,10 @@ public final class MasterItemTransferable implements Transferable {
         } else {
             throw new UnsupportedFlavorException(flavor);
         }
+    }
+    
+    @Override
+    public String toString() {
+        return "MasterItem Transferable";
     }
 }

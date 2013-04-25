@@ -10,7 +10,7 @@ import open.dolphin.client.*;
 import open.dolphin.delegater.LetterDelegater;
 import open.dolphin.helper.DBTask;
 import open.dolphin.infomodel.LetterModule;
-import open.dolphin.tr.BundleTransferHandler;
+import open.dolphin.tr.TextComponentTransferHandler;
 
 /**
  * レターのの抽象クラス
@@ -54,7 +54,7 @@ public abstract class AbstractLetterImpl extends AbstractChartDocument implement
         for (JTextComponent jc : jcs) {
             jc.getDocument().addDocumentListener(dl);
             jc.addFocusListener(AutoKanjiListener.getInstance());
-            jc.setTransferHandler(BundleTransferHandler.getInstance());
+            jc.setTransferHandler(TextComponentTransferHandler.getInstance());
             jc.addMouseListener(CutCopyPasteAdapter.getInstance());
         }
     }

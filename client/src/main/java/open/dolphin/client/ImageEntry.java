@@ -38,6 +38,18 @@ public class ImageEntry implements Serializable {
 
     private long lastModified;
     
+    private boolean isDirectory;
+
+//masuda^
+    private String iconText;
+    
+    public void setIconText(String iconText) {
+        this.iconText = iconText;
+    }
+    public String getIconText() {
+        return iconText;
+    }
+//masuda$
 
     /** Creates a new instance of ImageEntry */
     public ImageEntry() {
@@ -152,4 +164,12 @@ public class ImageEntry implements Serializable {
     public void setLastModified(long lastModified) {
         this.lastModified = lastModified;
     }
+    
+    public void setDirectory(boolean isDirectory) {
+        this.isDirectory = isDirectory;
+    }
+    public boolean isDirectory() {
+        return isDirectory;
+    }    
+    
 }

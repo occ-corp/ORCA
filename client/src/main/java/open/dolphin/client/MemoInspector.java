@@ -12,7 +12,7 @@ import open.dolphin.delegater.DocumentDelegater;
 import open.dolphin.infomodel.IInfoModel;
 import open.dolphin.infomodel.PatientMemoModel;
 import open.dolphin.project.Project;
-import open.dolphin.tr.BundleTransferHandler;
+import open.dolphin.tr.TextComponentTransferHandler;
 
 /**
  * 患者のメモを表示し編集するクラス。
@@ -61,7 +61,7 @@ public class MemoInspector {
         // TransferHandlerを設定する
 //masuda^
         //memoArea.setTransferHandler(new BundleTransferHandler(context.getChartMediator(), memoArea));
-        memoArea.setTransferHandler(BundleTransferHandler.getInstance());
+        memoArea.setTransferHandler(TextComponentTransferHandler.getInstance());
 //masuda
 
         // 右クリックによる編集メニューを登録する
@@ -82,8 +82,6 @@ public class MemoInspector {
      */
     private void initComponents() {
         memoArea = new JTextArea(5, 10);
-        //memoArea.putClientProperty("karteCompositor", this);
-        memoArea.putClientProperty(GUIConst.PROP_KARTE_COMPOSITOR, memoArea);
         memoArea.setLineWrap(true);
         memoArea.setMargin(new java.awt.Insets(3, 3, 2, 2));
         memoArea.addFocusListener(AutoKanjiListener.getInstance());

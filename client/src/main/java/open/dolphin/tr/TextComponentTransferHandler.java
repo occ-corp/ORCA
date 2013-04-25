@@ -11,32 +11,31 @@ import open.dolphin.client.GUIConst;
 import open.dolphin.infomodel.*;
 
 /**
- * BundleTransferHandler
+ * TextComponentTransferHandler (renamed from BundleTransferHandler)
  * @author Minagawa,Kazushi. Digital Globe, Inc.
  * @author modified by masuda, Masuda Naika
  */
-public class BundleTransferHandler extends AbstractKarteTransferHandler {
+public class TextComponentTransferHandler extends AbstractKarteTransferHandler {
 
-    private static final BundleTransferHandler instance;
+    private static final TextComponentTransferHandler instance;
 
     static {
-        instance = new BundleTransferHandler();
+        instance = new TextComponentTransferHandler();
     }
 
-    private BundleTransferHandler() {
+    private TextComponentTransferHandler() {
     }
 
-    public static BundleTransferHandler getInstance() {
+    public static TextComponentTransferHandler getInstance() {
         return instance;
     }
 
 
     @Override
-    protected Transferable createTransferable(JComponent c) {
+    protected Transferable createTransferable(JComponent src) {
 
-        JTextComponent source = (JTextComponent) c;
-        clearVariables();
-        srcComponent = c;
+        startTransfer(src);
+        JTextComponent source = (JTextComponent) src;
 
         // テキストの選択範囲を記憶
         boolean b = setSelectedTextArea(source);
@@ -52,28 +51,30 @@ public class BundleTransferHandler extends AbstractKarteTransferHandler {
     public boolean importData(TransferSupport support) {
 
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
 
         Transferable tr = support.getTransferable();
-        JTextComponent tc = (JTextComponent) support.getComponent();
+        JTextComponent dest = (JTextComponent) support.getComponent();
 
         boolean imported = false;
 
         if (tr.isDataFlavorSupported(OrderListTransferable.orderListFlavor)) {
             // KartePaneからのオーダスタンプをインポートする P
-            imported =  doStampDrop(tr, tc);
-
+            imported =  doStampDrop(tr, dest);
         } else if (tr.isDataFlavorSupported(stringFlavor)) {
             // テキストをインポートする SOA/P
-            imported = doTextDrop(tr, tc);
+            imported = doTextDrop(tr, dest);
 //masuda^   病名エディタからDropされるRegisteredDiagnosis Flavor
         } else if (tr.isDataFlavorSupported(InfoModelTransferable.infoModelFlavor)) {
-            imported = doDiagnosisDrop(tr, tc);
+            imported = doDiagnosisDrop(tr, dest);
         }
 //masuda$
         if (imported) {
-            destComponent = tc;
+            importDataSuccess(dest);
+        } else {
+            importDataFailed();
         }
 
         return imported;
@@ -84,7 +85,11 @@ public class BundleTransferHandler extends AbstractKarteTransferHandler {
      */
     @Override
     public boolean canImport(TransferSupport support) {
-
+        
+        if (!support.isDrop()) {
+            return false;
+        }
+        
         // 選択範囲内にDnDならtrue
         if (isDndOntoSelectedText(support)){
             return false;
@@ -111,7 +116,7 @@ public class BundleTransferHandler extends AbstractKarteTransferHandler {
         try {
             // スタンプのリストを取得する
             OrderList list = (OrderList) tr.getTransferData(OrderListTransferable.orderListFlavor);
-            ModuleModel[] stamps = list.orderList;
+            ModuleModel[] stamps = list.getOrderList();
             // pPaneにスタンプを挿入する
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < stamps.length; i++) {

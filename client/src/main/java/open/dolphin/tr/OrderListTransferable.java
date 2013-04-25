@@ -8,10 +8,10 @@ import java.io.IOException;
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
-public final class OrderListTransferable implements Transferable, ClipboardOwner {
+public final class OrderListTransferable extends DolphinTransferable {
 
     /** Data Flavor of this class */
-    public static DataFlavor orderListFlavor = new DataFlavor(open.dolphin.tr.OrderList.class, "Order List");
+    public static DataFlavor orderListFlavor = new DataFlavor(OrderList.class, "Order List");
 
     public static final DataFlavor[] flavors = {OrderListTransferable.orderListFlavor};
 
@@ -46,11 +46,6 @@ public final class OrderListTransferable implements Transferable, ClipboardOwner
 
     @Override
     public String toString() {
-        return "Order List Transferable";
-    }
-
-    @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
-        AbstractKarteTransferHandler.clearVariables();
+        return "OrderList Transferable";
     }
 }

@@ -54,9 +54,10 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
     }
 
     @Override
-    protected Transferable createTransferable(JComponent c) {
+    protected Transferable createTransferable(JComponent src) {
 
-        clearVariables();
+        startTransfer(src);
+        
         // 複数stampを含んだtransferableを返す
         List<ModuleModel> stampList = new ArrayList<ModuleModel>();
 
@@ -67,9 +68,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         }
         ModuleModel[] stamps = stampList.toArray(new ModuleModel[0]);
         OrderList list = new OrderList(stamps);
-        StampHolder source = (StampHolder) c;
-        // ドラッグ元を設定する
-        srcComponent = source.getKartePane().getTextPane();
+
         Transferable tr = new OrderListTransferable(list);
         return tr;
     }
@@ -80,37 +79,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
     }
 
     private void replaceStamp(final StampHolder target, final ModuleInfoBean stampInfo) {
-/*
-        Runnable r = new Runnable() {
 
-            @Override
-            public void run() {
-                try {
-                    StampDelegater sdl = StampDelegater.getInstance();
-                    StampModel getStamp = sdl.getStamp(stampInfo.getStampId());
-                    final ModuleModel stamp = new ModuleModel();
-                    if (getStamp != null) {
-                        stamp.setModel((IInfoModel) BeanUtils.xmlDecode(getStamp.getStampBytes()));
-                        stamp.setModuleInfoBean(stampInfo);
-                    }
-                    Runnable awt = new Runnable() {
-
-                        @Override
-                        public void run() {
-                            target.importStamp(stamp);
-                        }
-                    };
-                    EventQueue.invokeLater(awt);
-
-                } catch (Exception e) {
-                    e.printStackTrace(System.err);
-                }
-            }
-        };
-        Thread t = new Thread(r);
-        t.setPriority(Thread.NORM_PRIORITY);
-        t.start();
-*/
         SwingWorker worker = new SwingWorker<Void, Void>() {
 
             @Override
@@ -153,10 +122,11 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
     public boolean importData(TransferSupport support) {
 
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
 
-        final StampHolder target = (StampHolder) support.getComponent();
+        final StampHolder dest = (StampHolder) support.getComponent();
         Transferable tr = support.getTransferable();
         StampTreeNode droppedNode;
 
@@ -165,10 +135,12 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
         } catch (Exception e) {
             e.printStackTrace(System.err);
+            importDataFailed();
             return false;
         }
 
         if (droppedNode == null || (!droppedNode.isLeaf())) {
+            importDataFailed();
             return false;
         }
 
@@ -177,36 +149,47 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         String role = stampInfo.getStampRole();
 
         if (!role.equals(IInfoModel.ROLE_P)) {
+            importDataFailed();
             return false;
         }
 
         if (Project.getBoolean("replaceStamp", false)) {
-            replaceStamp(target, stampInfo);
+            replaceStamp(dest, stampInfo);
 
         } else {
             Runnable r = new Runnable() {
 
                 @Override
                 public void run() {
-                    confirmReplace(target, stampInfo);
+                    confirmReplace(dest, stampInfo);
                 }
             };
             EventQueue.invokeLater(r);
         }
+        
+        importDataSuccess(dest);
         return true;
     }
 
     @Override
     protected void exportDone(JComponent c, Transferable tr, int action) {
 
+        // export先がOpenDolphin以外なら削除しない
+        if (isExportToOther()) {
+            endTransfer();
+            return;
+        }
+        
         // ココはスタンプをドラッグしたあと、ドラッグもとを削除するかどうか
         StampHolder source = (StampHolder) c;
         KartePane sourcePane = source.getKartePane();
         if (sourcePane.getTextPane() != destComponent) {
+            endTransfer();
             return;
         }
 
         if (action != MOVE || !sourcePane.getTextPane().isEditable()) {
+            endTransfer();
             return;
         }
 
@@ -215,6 +198,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         }
 
         selectedStampHolder.clear();
+        endTransfer();
     }
 
     /**
@@ -222,21 +206,18 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
      */
     @Override
     public boolean canImport(TransferSupport support) {
-
-        StampHolder source = (StampHolder) support.getComponent();
-        DataFlavor[] flavors = support.getDataFlavors();
-        JTextPane tc = source.getKartePane().getTextPane();
-        if (tc.isEditable() && hasFlavor(flavors)) {
-            return true;
+        
+        if (!support.isDrop()) {
+            return false;
         }
-        return false;
-    }
-
-    protected boolean hasFlavor(DataFlavor[] flavors) {
-        for (DataFlavor flavor : flavors) {
-            if (LocalStampTreeNodeTransferable.localStampTreeNodeFlavor.equals(flavor)) {
-                return true;
-            }
+        
+        StampHolder source = (StampHolder) support.getComponent();
+        JTextPane tc = source.getKartePane().getTextPane();
+        if (!tc.isEditable()) {
+            return false;
+        }
+        if (support.isDataFlavorSupported(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor)) {
+            return true;
         }
         return false;
     }

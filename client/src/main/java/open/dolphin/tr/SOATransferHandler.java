@@ -46,12 +46,11 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
     }
 
     @Override
-    protected Transferable createTransferable(JComponent c) {
+    protected Transferable createTransferable(JComponent src) {
+        
+        startTransfer(src);
 
-        JTextComponent source = (JTextComponent) c;
-
-        clearVariables();
-        srcComponent = c;
+        JTextComponent source = (JTextComponent) src;
 
         // テキストの選択範囲を記憶
         boolean b = setSelectedTextArea(source);
@@ -68,15 +67,16 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
     public boolean importData(TransferSupport support) {
 
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
 
         Transferable tr = support.getTransferable();
-        JTextComponent tc = (JTextComponent) support.getComponent();
+        JTextComponent dest = (JTextComponent) support.getComponent();
 
         boolean imported = false;
 
-        KartePane destPane = (KartePane) tc.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
+        KartePane destPane = getKartePane(dest);
 
         if (tr.isDataFlavorSupported(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor)) {
             // StampTreeNodeをインポートする, SOA/P
@@ -84,7 +84,7 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
 
         } else if (tr.isDataFlavorSupported(stringFlavor)) {
             // テキストをインポートする SOA/P
-            imported = doTextDrop(tr, tc);
+            imported = doTextDrop(tr, dest);
 
         } else if (tr.isDataFlavorSupported(ImageEntryTransferable.imageEntryFlavor)) {
             // シェーマボックスからのDnDをインポートする SOA
@@ -104,7 +104,9 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
         }
 
         if (imported) {
-            destComponent = tc;
+            importDataSuccess(dest);
+        } else {
+            importDataFailed();
         }
 
         return imported;
@@ -115,14 +117,18 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
      */
     @Override
     public boolean canImport(TransferSupport support) {
-
+        
         JTextComponent tc = (JTextComponent) support.getComponent();
 
         // 選択範囲内にDnDならtrue
         if (isDndOntoSelectedText(support)) {
             return false;
         }
-        if (tc.isEditable() && hasFlavor(support.getDataFlavors())) {
+        if (!tc.isEditable()) {
+            return false;
+        }
+        
+        if (hasFlavor(support)) {
             return true;
         }
         return false;
@@ -131,34 +137,33 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
     /**
      * Flavorリストのなかに受け入れられものがあるかどうかを返す。
      */
-    private boolean hasFlavor(DataFlavor[] flavors) {
+    private boolean hasFlavor(TransferSupport support) {
 
-        for (DataFlavor flavor : flavors) {
-            // String ok
-            if (DataFlavor.stringFlavor.equals(flavor)) {
-                return true;
-            }
-            // StampTreeNode OK
-            if (LocalStampTreeNodeTransferable.localStampTreeNodeFlavor.equals(flavor)) {
-                return true;
-            }
-            // Schema OK
-            if (SchemaListTransferable.schemaListFlavor.equals(flavor)) {
-                return true;
-            }
-            // Image OK
-            if (ImageEntryTransferable.imageEntryFlavor.equals(flavor)) {
-                return true;
-            }
-            // File OK
-            if (DataFlavor.javaFileListFlavor.equals(flavor)) {
-                return true;
-            }
-            // クリップボードの画像 OK
-            if (DataFlavor.imageFlavor.equals(flavor)) {
-                return true;
-            }
+        // String ok
+        if (support.isDataFlavorSupported(DataFlavor.stringFlavor)) {
+            return true;
         }
+        // StampTreeNode OK
+        if (support.isDataFlavorSupported(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor)) {
+            return true;
+        }
+        // Schema OK
+        if (support.isDataFlavorSupported(SchemaListTransferable.schemaListFlavor)) {
+            return true;
+        }
+        // Image OK
+        if (support.isDataFlavorSupported(ImageEntryTransferable.imageEntryFlavor)) {
+            return true;
+        }
+        // File OK
+        if (support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
+            return true;
+        }
+        // クリップボードの画像 OK
+        if (support.isDataFlavorSupported(DataFlavor.imageFlavor)) {
+            return true;
+        }
+
         return false;
     }
 
@@ -224,7 +229,7 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
         try {
             // Schemaリストを取得する
             SchemaList list = (SchemaList) tr.getTransferData(SchemaListTransferable.schemaListFlavor);
-            SchemaModel[] schemas = list.schemaList;
+            SchemaModel[] schemas = list.getSchemaList();
 //masuda^   スタンプコピー時に別患者のカルテかどうかをチェックする
             boolean differentKarte = false;
             long destKarteId = soaPane.getParent().getContext().getKarte().getId();
@@ -335,7 +340,7 @@ public class SOATransferHandler extends AbstractKarteTransferHandler {
     @Override
     public void enter(JComponent jc, ActionMap map) {
 
-        KartePane pPane = (KartePane) jc.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
+        KartePane pPane = getKartePane((JTextComponent) jc);
         if (pPane.getTextPane().isEditable()) {
             map.get(GUIConst.ACTION_PASTE).setEnabled(canPaste(pPane));
             map.get(GUIConst.ACTION_INSERT_TEXT).setEnabled(true);

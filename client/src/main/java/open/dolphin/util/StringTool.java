@@ -1,5 +1,7 @@
 package open.dolphin.util;
 
+import java.awt.FontMetrics;
+
 /**
  * Utilities to handel String.
  *

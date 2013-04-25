@@ -1,9 +1,7 @@
 package open.dolphin.tr;
 
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.Transferable;
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,13 +9,12 @@ import java.util.List;
  *
  * @author Kazushi Minagawa. Digital Globe, Inc.
  */
-public final class FileListTransferable implements Transferable {
+public final class FileListTransferable extends DolphinTransferable {
     
     private List<File> fileList;
 
     public FileListTransferable(File[] files) {
-        fileList = new ArrayList<File>();
-        fileList.addAll(Arrays.asList(files));
+        fileList = Arrays.asList(files);
     }
 
     @Override
@@ -36,5 +33,10 @@ public final class FileListTransferable implements Transferable {
             return null;
         }
         return fileList;
+    }
+
+    @Override
+    public String toString() {
+        return "FileList Transferable";
     }
 }

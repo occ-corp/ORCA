@@ -1,5 +1,6 @@
 package open.dolphin.impl.img;
 
+import java.awt.BorderLayout;
 import java.awt.Desktop;
 import java.awt.event.ActionEvent;
 import java.io.File;
@@ -10,10 +11,10 @@ import java.util.ResourceBundle;
 import javax.swing.AbstractAction;
 import javax.swing.ActionMap;
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import open.dolphin.client.ClientContext;
-import open.dolphin.client.GUIConst;
 import open.dolphin.client.ImageEntry;
+import open.dolphin.client.ImageEntryJList;
 import open.dolphin.project.Project;
 
 /**
@@ -90,6 +91,9 @@ public class GenesysBrowser extends AbstractBrowser {
         } else {
             view.getDirLbl().setText(loc);
         }
+        
+        // rootPathを設定しておく
+        setRootPath(loc);
         
         return loc;
     }
@@ -174,7 +178,7 @@ public class GenesysBrowser extends AbstractBrowser {
 
             @Override
             public void actionPerformed(ActionEvent ae) {
-                scan();
+                scan(getImgLocation());
             }
         };
         ret.put("refresh", refresh);
@@ -230,7 +234,7 @@ public class GenesysBrowser extends AbstractBrowser {
                 if (!newBase.equals(oldBase)) {
                     setImageBase(newBase);
                 } else if (needsRefresh) {
-                    scan();
+                    scan(getImgLocation());
                 }
             }
         };
@@ -256,11 +260,21 @@ public class GenesysBrowser extends AbstractBrowser {
         ResourceBundle resource = ClientContext.getBundle(this.getClass());
         ActionMap map = getActionMap(resource);
         
-        // ImageTable
         view = new GenesysBrowserView();
-        JPanel imagePanel = view.getContentPanel();
-        imagePanel.putClientProperty(GUIConst.PROP_KARTE_COMPOSITOR, GenesysBrowser.this);
-        setImagePanel(imagePanel);
+        
+        // ImageTable
+        ImageEntryJList imageList = new ImageEntryJList(listModel);
+        imageList.setMaxIconTextWidth(imageSize);
+
+        // パネルに追加
+        JScrollPane scroll = new JScrollPane(imageList);
+        view.add(scroll, BorderLayout.CENTER);
+
+        // transferhandler
+        imageList.setTransferHandler(new ImageBrowserPanelTransferHandler(this));
+
+        // context menu
+        imageList.addMouseListener(new ImageListMouseAdapter());
 
         // buttons
         view.getSettingBtn().setAction(map.get("doSetting"));

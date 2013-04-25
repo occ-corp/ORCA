@@ -9,7 +9,7 @@ import open.dolphin.client.ImageEntry;
  *
  * @author  Kazushi Minagawa, Digital Globe, Inc.
  */
-public final class ImageEntryTransferable implements Transferable, ClipboardOwner {
+public final class ImageEntryTransferable extends DolphinTransferable {
 
     /** Data Flavor of this class */
     public static DataFlavor imageEntryFlavor = new DataFlavor(ImageEntry.class, "Image Entry");
@@ -45,10 +45,6 @@ public final class ImageEntryTransferable implements Transferable, ClipboardOwne
 
     @Override
     public String toString() {
-        return "Image Icon Transferable";
-    }
-
-    @Override
-    public void lostOwnership(Clipboard clipboard, Transferable contents) {
+        return "ImageEntry Transferable";
     }
 }

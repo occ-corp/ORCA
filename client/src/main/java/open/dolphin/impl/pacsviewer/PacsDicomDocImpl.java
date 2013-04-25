@@ -1,7 +1,6 @@
 package open.dolphin.impl.pacsviewer;
 
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
@@ -15,6 +14,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
@@ -43,7 +43,7 @@ import org.dcm4che2.data.Tag;
  * @author masuda, Masuda Naika
  */
 
-public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyChangeListener{
+public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyChangeListener {
 
     private static final String TITLE = "PACS";
     private static final ImageIcon ICON_WEASIS_S = ClientContext.getImageIcon("weasis_s.png");
@@ -62,7 +62,6 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     private boolean useSuffixSearch;
 
     private ListTableModel<ListDicomObject> listTableModel;
-    private List<DicomImageEntry> entryList;
     
     // カラム仕様ヘルパー
     private static final String COLUMN_SPEC_NAME = "pacsTable.column.spec";
@@ -78,8 +77,8 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     
     private ListTableSorter sorter;
 
-    private static final int MARGIN = 12;
-    private ImagePanel imagePanel;
+    private static final int MAX_ICON_WIDTH = ImageTool.MAX_ICON_SIZE.width;
+    private DefaultListModel<DicomImageEntry> listModel;
 
     private PacsService pacsService;
     private ExecutorService executor;
@@ -90,7 +89,6 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     public PacsDicomDocImpl() {
         
         setTitle(TITLE);
-        entryList = new ArrayList<DicomImageEntry>();
         
         // Weasisの設定
         String addr = Project.getString(MiscSettingPanel.PACS_WEASIS_ADDRESS, MiscSettingPanel.DEFAULT_PACS_WEASIS_ADDRESS);
@@ -123,13 +121,6 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
             columnHelper.saveProperty();
         }
         
-        entryList.clear();
-        entryList = null;
-        
-        // memory leak?
-        if (imagePanel != null) {
-            imagePanel.removeAll();
-        }
         if (listTableModel != null) {
             listTableModel.clear();
         }
@@ -194,11 +185,15 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         panel1.setPreferredSize(new Dimension(0, 300));
         panel.add(panel1);
 
-        // Image panel を生成する
-        imagePanel = new ImagePanel();
-        imagePanel.setTransferHandler(ImageEntryTransferHandler.getInstance());
+        // ImageList を生成する
+        listModel = new DefaultListModel();
+        ImageEntryJList<ImageEntry> imageList = new ImageEntryJList(listModel);
+        imageList.setMaxIconTextWidth(MAX_ICON_WIDTH);
+        
+        // transferHandler
+        imageList.setTransferHandler(ImageEntryTransferHandler.getInstance());
 
-        JScrollPane imageScroll = new JScrollPane(imagePanel);
+        JScrollPane imageScroll = new JScrollPane(imageList);
         panel1 = new JPanel();
         panel1.setLayout(new BorderLayout());
         panel1.add(new JLabel("Image"), BorderLayout.NORTH);
@@ -368,10 +363,7 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
 
         if (currentDicomObject != null) {
             statusLabel.setText("Start retrieving.");
-            entryList.clear();
-            imagePanel.removeAll();
-            imagePanel.repaint();
-
+            listModel.clear();
             try {
                 pacsService.retrieveDicomObject(currentDicomObject);
             } catch (Exception e) {
@@ -396,11 +388,17 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
     // 取得したDICOM画像を閲覧する
     private void openViewer() {
 
-        if (entryList == null || entryList.isEmpty()){
+        if (listModel.isEmpty()) {
             return;
         }
         DicomViewer viewer = new DicomViewer();
-        viewer.enter(entryList);
+        List<DicomImageEntry> list = new ArrayList<DicomImageEntry>();
+        Enumeration<DicomImageEntry> enu = listModel.elements();
+        while (enu.hasMoreElements()) {
+            list.add(enu.nextElement());
+        }
+        Collections.sort(list);
+        viewer.enter(list);
     }
     
     // Weasisで開く
@@ -489,7 +487,9 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
                 } else {
                     // studyが一致しても、同じものが既に存在すれば破棄
                     String sopInstanceUID = object.getString(Tag.SOPInstanceUID);
-                    for (ImageEntry entry : entryList) {
+                    Enumeration<DicomImageEntry> enu = listModel.elements();
+                    while (enu.hasMoreElements()) {
+                        DicomImageEntry entry = enu.nextElement();
                         String test = entry.getTitle();
                         if (test != null && test.equals(sopInstanceUID)) {
                             setStatusLabel(new String[]{"Another image has same sopInstanceUID, discarded :", sopInstanceUID});
@@ -511,31 +511,21 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         // ImageEntryを作成する
         DicomImageEntry entry = ImageTool.getImageEntryFromDicom(object);
         entry.setDicomObject(object);
-        entryList.add(entry);
-        Collections.sort(entryList);
-
-        ImageLabel newLbl = new ImageLabel(entry);
-        newLbl.setText(entry.getFileName());
-        newLbl.fixToImageSize(MARGIN, MARGIN);
-
-        Component[] components = imagePanel.getComponents();
+        
+        int size = listModel.getSize();
         boolean added = false;
-        for (int i = 0; i < components.length; ++i) {
-            Component c = components[i];
-            ImageLabel lbl = (ImageLabel) c;
-            DicomImageEntry test = (DicomImageEntry) lbl.getImageEntry();
+        for (int i = 0; i < size; ++i) {
+            DicomImageEntry test = listModel.getElementAt(i);
             if (entry.compareTo(test) < 0) {
-                imagePanel.add(newLbl, i);
+                listModel.add(i, entry);
                 added = true;
                 break;
             }
+        }
 
-        }
         if (!added) {
-            imagePanel.add(newLbl);
+            listModel.addElement(entry);
         }
-        imagePanel.revalidate();
-        imagePanel.repaint();
     }
 
     // Status Labelに表示

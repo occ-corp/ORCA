@@ -1,24 +1,24 @@
 package open.dolphin.impl.img;
 
-import java.awt.Container;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.event.MouseEvent;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
 import open.dolphin.client.*;
 import open.dolphin.exception.DolphinException;
-import open.dolphin.helper.WindowSupport;
-import open.dolphin.tr.AbstractImagePanelTransferHandler;
+import open.dolphin.tr.DolphinTransferHandler;
 import open.dolphin.tr.FileListTransferable;
 
 /**
@@ -26,78 +26,24 @@ import open.dolphin.tr.FileListTransferable;
  *
  * @author modified by masuda, Masuda Naika
  */
-public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransferHandler {
+public class ImageBrowserPanelTransferHandler extends DolphinTransferHandler {
 
-    private static ImageBrowserPanelTransferHandler instance;
-
-    static {
-        instance = new ImageBrowserPanelTransferHandler();
-    }
-
-    private ImageBrowserPanelTransferHandler() {
-    }
-
-    public static ImageBrowserPanelTransferHandler getInstance() {
-        return instance;
-    }
-
-
-    @Override
-    public void mouseClicked(MouseEvent e) {
-
-        ImagePanel imagePanel = (ImagePanel) e.getComponent();
-        ImageLabel imageLabel = imagePanel.getSelectedImageLabel();
-        if (imageLabel == null) {
-            return;
-        }
-
-        if (e.getClickCount() == 2) {
-            AbstractBrowser browser = (AbstractBrowser) imagePanel.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
-            browser.openImage(imageLabel.getImageEntry());
-        }
+    private AbstractBrowser browser;
+    
+    public ImageBrowserPanelTransferHandler(AbstractBrowser browser) {
+        this.browser = browser;
     }
 
     @Override
-    public void maybeShowPopup(MouseEvent e) {
+    protected Transferable createTransferable(JComponent src) {
 
-        ImagePanel imagePanel = (ImagePanel) e.getComponent();
-        ImageLabel imageLabel = imagePanel.getSelectedImageLabel();
-        if (imageLabel == null) {
-            return;
-        }
-
-        if (e.isPopupTrigger() && e.getClickCount() == 1) {
-            JPopupMenu contextMenu = new JPopupMenu();
-            JMenuItem micp = new JMenuItem("コピー");
-            Container c = imagePanel.getTopLevelAncestor();
-            if (c instanceof JFrame) {
-                JFrame frame = (JFrame) c;
-                Object objMediator = WindowSupport.getMediator(frame);
-                if (objMediator != null && objMediator instanceof ChartMediator) {
-                    ChartMediator mediator = (ChartMediator) objMediator;
-                    Action copy = mediator.getAction(GUIConst.ACTION_COPY);
-                    copy.setEnabled(imageLabel != null);
-                    micp.setAction(copy);
-                    contextMenu.add(micp);
-                }
-            }
-            contextMenu.show(imagePanel, e.getX(), e.getY());
-        }
-    }
-
-    @Override
-    protected Transferable createTransferable(JComponent c) {
-
-        ImagePanel imagePanel = (ImagePanel) c;
-        ImageLabel imageLabel = imagePanel.getSelectedImageLabel();
-        if (imageLabel == null) {
-            return null;
-        }
-        ImageEntry entry = imageLabel.getImageEntry();
-        if (entry != null) {
+        startTransfer(src);
+        JList imageList = (JList) src;
+        
+        ImageEntry entry = (ImageEntry) imageList.getSelectedValue();
+        if (entry != null && !entry.isDirectory()) {
             File f = new File(entry.getPath());
-            File[] files = new File[1];
-            files[0] = f;
+            File[] files = new File[]{f};
             Transferable tr = new FileListTransferable(files);
             return tr;
         }
@@ -105,13 +51,15 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
     }
 
     @Override
+    public int getSourceActions(JComponent c) {
+        return COPY_OR_MOVE;
+    }
+    
+    @Override
     public boolean importData(TransferHandler.TransferSupport support) {
 
         if (!canImport(support)) {
-            return false;
-        }
-
-        if (isCopyToSameDir(support)) {
+            importDataFailed();
             return false;
         }
 
@@ -136,29 +84,41 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
                 }
             }
 
-            if (allFiles.size() > 0) {
-                JPanel panel = (JPanel) support.getComponent();
-                AbstractBrowser browser = (AbstractBrowser) panel.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
-                if (browser != null) {
-                    parseFiles(allFiles, browser);
-                }
+            if (!allFiles.isEmpty()) {
+                parseFiles(allFiles);
+
             }
+            importDataSuccess(support.getComponent());
             return true;
 
         } catch (UnsupportedFlavorException ufe) {
             ufe.printStackTrace(System.err);
-        } catch (IOException ieo) {
-            ieo.printStackTrace(System.err);
+        } catch (IOException ioe) {
+            ioe.printStackTrace(System.err);
         }
+        
+        importDataFailed();
         return false;
     }
 
-    // ゴミ箱にDnDしたらちゃんと消える！
     @Override
     protected void exportDone(JComponent source, Transferable data, int action) {
-        ImagePanel imagePanel = (ImagePanel) source;
-        AbstractBrowser browser = (AbstractBrowser) imagePanel.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
-        browser.scan();
+
+        // ファイルが消去されてたらアイコンを消す
+        ImageEntryJList jlist = (ImageEntryJList) source;
+        DefaultListModel<ImageEntry> model = (DefaultListModel) jlist.getModel();
+        
+        Enumeration<ImageEntry> enu = model.elements();
+        FileSystem fs = FileSystems.getDefault();
+        while (enu.hasMoreElements()) {
+            ImageEntry entry = enu.nextElement();
+            String path = entry.getPath();
+            if (!Files.exists(fs.getPath(path))) {
+                model.removeElement(entry);
+            }
+        }
+
+        endTransfer();
     }
 
     @Override
@@ -170,55 +130,26 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
         if (!support.isDataFlavorSupported(DataFlavor.javaFileListFlavor)) {
             return false;
         }
-        /*
-        // canImportで同じフォルダかどうか調べたいがbugのためムリ ;_;
-        // http://bugs.sun.com/bugdatabase/view_bug.do?bug_id=6759788 bug!
-        if (isCopyToSameDir(support)) {
-        return false;
+        if (support.getComponent() == srcComponent) {
+            return false;
         }
-         */
+
         return true;
     }
 
-    // 同じフォルダ間のコピーかどうかを調べる
-    private boolean isCopyToSameDir(TransferSupport support) {
-
-        JPanel panel = (JPanel) support.getComponent();
-        // ImageBrowserを取得
-        AbstractBrowser browser = (AbstractBrowser) panel.getClientProperty(GUIConst.PROP_KARTE_COMPOSITOR);
-        if (browser != null) {
-            // browserから対象フォルダを取得
-            String imgLoc = browser.getImgLocation();
-            Transferable tr = support.getTransferable();
-            try {
-                List<File> files = (List<File>) tr.getTransferData(DataFlavor.javaFileListFlavor);
-                // ドラッグしたファイルがbrowserのフォルダならばtrueを返す
-                for (File file : files) {
-                    String filePath = file.getParent();
-                    if (imgLoc != null && imgLoc.equals(filePath)) {
-                        return true;
-                    }
-                }
-            } catch (UnsupportedFlavorException ex) {
-            } catch (IOException ex) {
-            }
-        }
-        return false;
-    }
-
-    private void parseFiles(final List<File> imageFiles, final AbstractBrowser context) {
+    private void parseFiles(final List<File> imageFiles) {
 
         SwingWorker worker = new SwingWorker<Void, Void>() {
 
             @Override
             protected Void doInBackground() throws Exception {
 
-                String baseDir = context.getImageBase();
+                String baseDir = browser.getImageBase();
                 if (baseDir == null) {
                     return null;
                 }
 
-                String patientId = context.getContext().getPatient().getPatientId();
+                String patientId = browser.getContext().getPatient().getPatientId();
                 StringBuilder sb = new StringBuilder();
                 sb.append(baseDir).append(File.separator).append(patientId);
                 String dirStr = sb.toString();
@@ -228,29 +159,12 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
                         throw new DolphinException("画像用のディレクトリを作成できません。");
                     }
                 }
-/*
-                for (File src : imageFiles) {
-                    File dest = new File(dirStr, src.getName());
-                    FileChannel in = (new FileInputStream(src)).getChannel();
-                    FileChannel out = (new FileOutputStream(dest)).getChannel();
-                    in.transferTo(0, src.length(), out);
-                    in.close();
-                    out.close();
-                    dest.setLastModified(src.lastModified());
-                }
 
-                if (context.dropIsMove()) {
-                    while (imageFiles.size() > 0) {
-                        File delete = imageFiles.remove(0);
-                        delete.delete();
-                    }
-                }
-*/
                 // java.nio.file.Filesを使ってみる
                 for (File src : imageFiles) {
                     Path srcPath = src.toPath();
                     Path destPath = new File(dirStr, src.getName()).toPath();
-                    if (context.dropIsMove()) {
+                    if (browser.dropIsMove()) {
                         Files.move(srcPath, destPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
                     } else {
                         Files.copy(srcPath, destPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
@@ -264,14 +178,14 @@ public class ImageBrowserPanelTransferHandler extends AbstractImagePanelTransfer
             protected void done() {
                 try {
                     get();
-                    context.scan();
+                    browser.scan(browser.getImgLocation());
                 } catch (InterruptedException ex) {
                     ClientContext.getBootLogger().warn(ex);
                 } catch (ExecutionException ex) {
                     ClientContext.getBootLogger().warn(ex);
-                    Window parent = SwingUtilities.getWindowAncestor(context.getUI());
+                    Window parent = SwingUtilities.getWindowAncestor(browser.getUI());
                     String message = "ファイルをコピーできません。\n" + ex.getMessage();
-                    String title = ClientContext.getFrameTitle(context.getTitle());
+                    String title = ClientContext.getFrameTitle(browser.getTitle());
                     JOptionPane.showMessageDialog(parent, message, title, JOptionPane.WARNING_MESSAGE);
                 }
             }

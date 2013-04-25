@@ -1,4 +1,3 @@
-
 package open.dolphin.tr;
 
 import java.awt.datatransfer.DataFlavor;
@@ -16,7 +15,7 @@ import open.dolphin.table.ListTableModel;
  * 
  * @author masuda, Masuda Naika
  */
-public class InFacilityLaboTransferHandler extends TransferHandler {
+public class InFacilityLaboTransferHandler extends DolphinTransferHandler {
 
     private DataFlavor inFacilityLaboItem = InFacilityLaboItemTransferable.inFacilityLaboItemFlavor;
     
@@ -26,12 +25,12 @@ public class InFacilityLaboTransferHandler extends TransferHandler {
         this.editable = editable;
     }
     
-    
     @Override
-    protected Transferable createTransferable(JComponent c) {
-        JTable sourceTable = (JTable) c;
+    protected Transferable createTransferable(JComponent src) {
+        
+        startTransfer(src);
+        JTable sourceTable = (JTable) src;
 
-        @SuppressWarnings("unchecked")
         ListTableModel<InFacilityLaboItem> tableModel = (ListTableModel<InFacilityLaboItem>) sourceTable.getModel();
         int[] selectedRows = sourceTable.getSelectedRows();
         List<InFacilityLaboItem> list = new ArrayList<InFacilityLaboItem>();
@@ -50,12 +49,14 @@ public class InFacilityLaboTransferHandler extends TransferHandler {
     }
     
     @Override
-    public boolean importData(TransferHandler.TransferSupport support) {
+    public boolean importData(TransferSupport support) {
         
         if (!canImport(support)) {
+            importDataFailed();
             return false;
         }
         if (!editable) {
+            importDataFailed();
             return false;
         }
 
@@ -90,9 +91,12 @@ public class InFacilityLaboTransferHandler extends TransferHandler {
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
         
-        if (!editable) {
+        // export先がOpenDolphin以外なら削除しない
+        if (isExportToOther()) {
+            endTransfer();
             return;
         }
+
         try {
             if (action == MOVE) {
                 JTable sourceTable = (JTable) c;
@@ -105,10 +109,12 @@ public class InFacilityLaboTransferHandler extends TransferHandler {
             }
         } catch (Exception e) {
         }
+        
+        endTransfer();
     }
 
     @Override
-    public boolean canImport(TransferHandler.TransferSupport support) {
+    public boolean canImport(TransferSupport support) {
         return support.isDrop() && support.isDataFlavorSupported(inFacilityLaboItem);
     }
     

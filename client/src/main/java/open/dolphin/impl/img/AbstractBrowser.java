@@ -1,16 +1,19 @@
 package open.dolphin.impl.img;
 
+import java.awt.Container;
 import java.awt.Desktop;
-import java.awt.image.BufferedImage;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -18,13 +21,18 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Properties;
-import javax.imageio.ImageIO;
+import javax.swing.Action;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
-import javax.swing.JPanel;
+import javax.swing.JFrame;
+import javax.swing.JList;
+import javax.swing.JMenuItem;
+import javax.swing.JPopupMenu;
 import javax.swing.SwingWorker;
 import open.dolphin.client.*;
-import open.dolphin.helper.ImageHelper;
+import open.dolphin.helper.WindowSupport;
 import open.dolphin.infomodel.PatientModel;
+import open.dolphin.util.FileIconMaker;
 import org.apache.log4j.Level;
 
 /**
@@ -47,18 +55,11 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     protected static final String PROP_SORT_ATTR        = "sortAttr";
     protected static final String PROP_SORT_ORDER       = "sortOrder";
 
-    protected static final String[] ACCEPT_FILE_TYPES = {"dcm","jpg", "png", "bmp", "gif", "tif"};
-    protected static final String[] ACCEPT_DOC_TYPES = {"pdf", "doc","docx", "xls", "xlsx", "ppt","pptx", "odt"};
-    protected static final String[] ACCEPT_DOC_ICONS = 
-        {"icon_pdf", "icon_word", "icon_word", "icon_excel", "icon_excel", 
-            "icon_power_point", "icon_power_point", "icon_libre_writer"};
-
-//    protected static final String[] OTHER_DOC_TYPES =
-//        {"pdf", "txt", "rtf", "htm","html", "doc","docx", "xls", "xlsx", "ppt","pptx","pages", "numbers", "key"};
-    protected static final String DEFAULT_DOC_ICON = "icon_default_document";
     protected static final String ICON_HAS_IMAGE = "icon_indicate_has_iamges_or_pdfs";
+    private static final String ICON_PARENT_FOLDER = "icon_parent_folder";
+    private static final String FOLDER_ICON = "icon_foldr";
 
-    protected static SimpleDateFormat SDF = new SimpleDateFormat("yyyy年MM月dd日");
+    protected static final String SDF_FORMAT = "yyyy年MM月dd日";
 
     protected Desktop desktop;
     protected boolean DEBUG;
@@ -66,17 +67,13 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     protected Properties properties;
     
 //masuda^
-    private int imageSize = MAX_IMAGE_SIZE;
-    
-    private JPanel imagePanel;
+    protected int imageSize = MAX_IMAGE_SIZE;
+    protected DefaultListModel<ImageEntry> listModel;
+    protected Path rootPath;
 
-    protected void setImagePanel(JPanel panel) {
-        imagePanel = panel;
-        imagePanel.setTransferHandler(ImageBrowserPanelTransferHandler.getInstance());
-        imagePanel.putClientProperty(GUIConst.PROP_KARTE_COMPOSITOR, AbstractBrowser.this);
-    }
-    public JPanel getImagePanel() {
-        return imagePanel;
+    protected void setRootPath(String strPath) {
+        FileSystem fs = FileSystems.getDefault();
+        rootPath = fs.getPath(strPath);
     }
 //masuda$
     
@@ -87,6 +84,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         } else {
             ClientContext.getBootLogger().warn("Desktop is not supported");
         }
+        listModel = new DefaultListModel<ImageEntry>();
     }
 
     /**
@@ -133,33 +131,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         int index = (path != null) ? path.lastIndexOf('.') : -1;
         return (index >= 0) ? path.substring(index + 1).toLowerCase() : null;
     }
-
-    protected boolean isImage(String ext) {
-        boolean ret = false;
-        if (ext != null) {
-            for (String str : AbstractBrowser.ACCEPT_FILE_TYPES) {
-                if (str.equals(ext)) {
-                    ret = true;
-                    break;
-                }
-            }
-        }
-        return ret;
-    }
-
-    protected int isDocument(String ext) {
-        int ret = -1;
-        if (ext!=null) {
-            for (int i=0; i < AbstractBrowser.ACCEPT_DOC_TYPES.length; i++) {
-                if (AbstractBrowser.ACCEPT_DOC_TYPES[i].equals(ext)) {
-                    ret = i;
-                    break;
-                }
-            }
-        }
-        return ret;
-    }
-
+    
     /**
      * Chart がプラグインをタブへ追加する場合にコールする。
      * 患者ディレクトリにファイルがあれば アイコンを返す。
@@ -222,7 +194,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         String old = this.imageBase;
         this.imageBase = base;
         if (!this.imageBase.equals(old)) {
-            scan();
+            scan(getImgLocation());
         }
     }
     
@@ -239,12 +211,9 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     /**
      * 患者フォルダをスキャンする。
      */
-    protected void scan() {
+    protected void scan(String imgLoc) {
         
-        imagePanel.removeAll();
-        imagePanel.repaint();
-
-        String imgLoc = getImgLocation();
+        listModel.clear();
 
         if (valueIsNullOrEmpty(imgLoc)) {
             return;
@@ -263,8 +232,18 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
             protected Void doInBackground() throws Exception {
                 
                 List<Path> pathList = new ArrayList<Path>();
-                for (Iterator<Path> itr = Files.newDirectoryStream(imagePath).iterator(); itr.hasNext();) {
-                    pathList.add(itr.next());
+                DirectoryStream<Path> ds = Files.newDirectoryStream(imagePath);
+                for (Path path : ds) {
+                    pathList.add(path);
+                }
+                
+                // 親フォルダに戻るアイコンを追加する
+                if (imagePath.compareTo(rootPath) > 0) {
+                    ImageEntry entry = createImageEntry(imagePath.getParent());
+                    entry.setImageIcon(ClientContext.getImageIconAlias(ICON_PARENT_FOLDER));
+                    entry.setIconText("一つ上へ");
+                    entry.setDirectory(true);
+                    listModel.addElement(entry);
                 }
                 
                 if (pathList.isEmpty()) {
@@ -280,9 +259,9 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                             @Override
                             public int compare(final Object o1, final Object o2) {
                                 try {
-                                    long l1 = Files.getLastModifiedTime((Path) o1).toMillis();
-                                    long l2 = Files.getLastModifiedTime((Path) o2).toMillis();
-                                    return (l2 > l1) ? 1 : ((l2 < l1) ? -1 : 0);
+                                    FileTime l1 = Files.getLastModifiedTime((Path) o1);
+                                    FileTime l2 = Files.getLastModifiedTime((Path) o2);
+                                    return l2.compareTo(l1);
                                 } catch (IOException ex) {
                                 }
                                 return 0;
@@ -294,9 +273,9 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                             @Override
                             public int compare(final Object o1, final Object o2) {
                                 try {
-                                    long l1 = Files.getLastModifiedTime((Path) o1).toMillis();
-                                    long l2 = Files.getLastModifiedTime((Path) o2).toMillis();
-                                    return (l1 > l2) ? 1 : ((l1 < l2) ? -1 : 0);
+                                    FileTime l1 = Files.getLastModifiedTime((Path) o1);
+                                    FileTime l2 = Files.getLastModifiedTime((Path) o2);
+                                    return l1.compareTo(l2);
                                 } catch (IOException ex) {
                                 }
                                 return 0;
@@ -311,8 +290,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 
                             @Override
                             public int compare(final Object o1, final Object o2) {
-                                String n1 = ((Path) o1).toString();
-                                String n2 = ((Path) o2).toString();
+                                String n1 = ((Path) o1).getFileName().toString();
+                                String n2 = ((Path) o2).getFileName().toString();
                                 return n2.compareTo(n1);
                             }
                         });
@@ -321,25 +300,33 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 
                             @Override
                             public int compare(final Object o1, final Object o2) {
-                                String n1 = ((Path) o1).toString();
-                                String n2 = ((Path) o2).toString();
+                                String n1 = ((Path) o1).getFileName().toString();
+                                String n2 = ((Path) o2).getFileName().toString();
                                 return n1.compareTo(n2);
                             }
                         });
                     }
                 }
+                
+                for (Path path : pathList) {
 
-                for (Path filePath : pathList) {
-
-                    URI uri = filePath.toUri();
+                    URI uri = path.toUri();
                     URL url = uri.toURL();
-                    String path = filePath.toString();
-                    String fileName = filePath.getFileName().toString();
-                    long last = Files.getLastModifiedTime(filePath).toMillis();
+                    String pathStr = path.toString();
+                    String fileName = path.getFileName().toString();
 
-                    debug(uri, url, path, fileName);
-
-                    if (Files.size(filePath) == 0) {
+                    debug(uri, url, pathStr, fileName);
+                    
+                    if (Files.isDirectory(path)) {
+                        ImageEntry entry = createImageEntry(path);
+                        entry.setImageIcon(ClientContext.getImageIconAlias(FOLDER_ICON));
+                        entry.setIconText(entry.getFileName());
+                        entry.setDirectory(true);
+                        listModel.addElement(entry);
+                        continue;
+                    }
+                    
+                    if (Files.size(path) == 0) {
                         continue;
                     }
 
@@ -347,66 +334,44 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                         continue;
                     }
 
-                    String suffix = getSuffix(path);
+                    String suffix = getSuffix(pathStr);
                     if (suffix == null) {
                         continue;
                     }
 
                     // Thumbnail
-                    ImageEntry entry = new ImageEntry();
-                    entry.setUrl(url.toString());
-                    entry.setPath(path);
-                    entry.setFileName(fileName);
-                    entry.setLastModified(last);
-                    //imageList.add(entry);
-                    setImageIcon(entry);
+                    ImageEntry entry = createImageEntry(path);
+                    entry.setImageIcon(FileIconMaker.createIcon(path, imageSize));
+                    SimpleDateFormat sdf = new SimpleDateFormat(SDF_FORMAT);
+                    String lblName = displayIsFilename() 
+                            ? entry.getFileName() 
+                            : sdf.format(entry.getLastModified());
+                    entry.setIconText(lblName);
                     
-                    String lblName = displayIsFilename() ? entry.getFileName() : SDF.format(entry.getLastModified());
-                    ImageLabel lbl = new ImageLabel(entry);
-                    lbl.setText(lblName);
-                    lbl.fixSize(MAX_IMAGE_SIZE + CELL_WIDTH_MARGIN, MAX_IMAGE_SIZE + CELL_WIDTH_MARGIN);
-                    imagePanel.add(lbl);
-                    imagePanel.revalidate();
+                    listModel.addElement(entry);
                 }
-                //return imageList;
                 return null;
             }
         };
 
         worker.execute();
     }
+    
+    private ImageEntry createImageEntry(Path path) throws IOException {
 
-    private void setImageIcon(ImageEntry entry) {
+        URI uri = path.toUri();
+        URL url = uri.toURL();
+        String pathStr = path.toString();
+        String fileName = path.getFileName().toString();
+        long last = Files.getLastModifiedTime(path).toMillis();
 
-        ImageIcon icon = entry.getImageIcon();
-        String ext = getSuffix(entry.getFileName());
-
-        if (icon == null && isImage(ext)) {
-            try {
-                BufferedImage image = ImageIO.read(new File(entry.getPath()));
-                if (image != null) {
-                    image = ImageHelper.getFirstScaledInstance(image, imageSize);
-                    icon = new ImageIcon(image);
-                    entry.setImageIcon(icon);
-                }
-            } catch (FileNotFoundException ex) {
-                ex.printStackTrace(System.err);
-            } catch (IOException ex) {
-                ex.printStackTrace(System.err);
-            } catch (Throwable e) {
-                e.printStackTrace(System.err);
-            }
-
-        } else if (icon == null) {
-            int index = isDocument(ext);
-            String iconStr = (index >= 0) 
-                    ? AbstractBrowser.ACCEPT_DOC_ICONS[index] 
-                    : null;
-            icon = (iconStr != null) 
-                    ? ClientContext.getImageIconAlias(iconStr) 
-                    : ClientContext.getImageIconAlias(AbstractBrowser.DEFAULT_DOC_ICON);
-            entry.setImageIcon(icon);
-        }
+        ImageEntry entry = new ImageEntry();
+        entry.setUrl(url.toString());
+        entry.setPath(pathStr);
+        entry.setFileName(fileName);
+        entry.setLastModified(last);
+        
+        return entry;
     }
     
     protected abstract String getImgLocation();
@@ -433,15 +398,15 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     @Override
     public void start() {
         initComponents();
-        scan();
+        scan(getImgLocation());
     }
 
     @Override
     public void stop() {
         // memory leak?
-        if (imagePanel != null) {
-            imagePanel.removeAll();
-        }
+        //if (imagePanel != null) {
+        //    imagePanel.removeAll();
+        //}
     }
 
     protected boolean valueIsNullOrEmpty(String test) {
@@ -450,5 +415,59 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 
     protected boolean valueIsNotNullNorEmpty(String test) {
         return !valueIsNullOrEmpty(test);
+    }
+    
+    protected class ImageListMouseAdapter extends MouseAdapter {
+        
+        @Override
+        public void mouseClicked(MouseEvent e) {
+
+            if (e.getClickCount() == 2) {
+                JList imageList = (JList) e.getComponent();
+                ImageEntry entry = (ImageEntry) imageList.getSelectedValue();
+                if (entry != null && (!entry.isDirectory())) {
+                    openImage(entry);
+                } else if (entry != null && entry.isDirectory()) {
+                    scan(entry.getPath());
+                }
+            }
+        }
+
+        @Override
+        public void mousePressed(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        @Override
+        public void mouseReleased(MouseEvent e) {
+            maybeShowPopup(e);
+        }
+
+        private void maybeShowPopup(MouseEvent e) {
+
+            if (e.isPopupTrigger() && e.getClickCount() == 1) {
+                JList imageList = (JList) e.getComponent();
+                ImageEntry entry = (ImageEntry) imageList.getSelectedValue();
+                if (entry == null) {
+                    return;
+                }
+                
+                JPopupMenu contextMenu = new JPopupMenu();
+                JMenuItem micp = new JMenuItem("コピー");
+                Container c = imageList.getTopLevelAncestor();
+                if (c instanceof JFrame) {
+                    JFrame frame = (JFrame) c;
+                    Object objMediator = WindowSupport.getMediator(frame);
+                    if (objMediator != null && objMediator instanceof ChartMediator) {
+                        ChartMediator mediator = (ChartMediator) objMediator;
+                        Action copy = mediator.getAction(GUIConst.ACTION_COPY);
+                        copy.setEnabled(true);
+                        micp.setAction(copy);
+                        contextMenu.add(micp);
+                    }
+                }
+                contextMenu.show(imageList, e.getX(), e.getY());
+            }
+        }
     }
 }

@@ -2,9 +2,11 @@ package open.dolphin.client;
 
 import java.awt.BorderLayout;
 import java.awt.Image;
+import java.awt.Insets;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.List;
+import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
@@ -24,11 +26,9 @@ public class ImagePalette extends JPanel {
 
     private int imageWidth;
     private int imageHeight;
-    private ImagePanel imagePanel;
-   
+    private DefaultListModel<ImageEntry> jlistModel;
     private List<URL> urlList;
-    
-    private static final int MARGIN = 5;
+
 
     public ImagePalette(String[] columnNames, int columnCount, int imageWidth, int imageHeight) {
         this.imageWidth = imageWidth;
@@ -41,17 +41,20 @@ public class ImagePalette extends JPanel {
     }
 
     private void initComponent() {
-
-        // Image panel を生成する
-        imagePanel = new ImagePanel();
-        // TransferHandlerを設定する
-        imagePanel.setTransferHandler(ImageEntryTransferHandler.getInstance());
-
-        this.setLayout(new BorderLayout());
-        JScrollPane scroll = new JScrollPane(imagePanel);
+        
+        // ListModelとListを設定
+        jlistModel = new DefaultListModel();
+        ImageEntryJList<ImageEntry> imageList= new ImageEntryJList(jlistModel);
+        imageList.setMaxIconTextWidth(DEFAULT_IMAGE_WIDTH);
+        
+        JScrollPane scroll = new JScrollPane(imageList);
         scroll.getVerticalScrollBar().setUnitIncrement(imageHeight / 2);
-        this.add(scroll, BorderLayout.CENTER);
+        setLayout(new BorderLayout());
+        add(scroll, BorderLayout.CENTER);
+        add(scroll);
 
+        // transferHandler
+        imageList.setTransferHandler(ImageEntryTransferHandler.getInstance());
     }
 
     public void setUrlList(List<URL> list) {
@@ -73,9 +76,7 @@ public class ImagePalette extends JPanel {
                 ImageEntry entry = new ImageEntry();
                 entry.setUrl(url.toString());
                 setImageIcon(entry);
-                ImageLabel lbl = new ImageLabel(entry);
-                lbl.fixSize(imageWidth + MARGIN, imageHeight + MARGIN);
-                imagePanel.add(lbl);
+                jlistModel.addElement(entry);
             } catch (MalformedURLException e) {
             }
         }
@@ -86,6 +87,7 @@ public class ImagePalette extends JPanel {
         ImageIcon ic = new ImageIcon(url);
         ImageIcon icon = adjustImageSize(ic, imageWidth, imageHeight);
         entry.setImageIcon(icon);
+        entry.setIconText(null);
     }
     
     private ImageIcon adjustImageSize(ImageIcon icon, int width, int height) {
