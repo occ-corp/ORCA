@@ -12,8 +12,18 @@ import open.dolphin.stampbox.StampTreeNode;
 public class LocalStampTreeNodeTransferable extends DolphinTransferable {
 
     /** Data Flavor of this class */
-    public static DataFlavor localStampTreeNodeFlavor 
-            = new DataFlavor(StampTreeNode.class, "LocalStampTreeNode");
+    public static DataFlavor localStampTreeNodeFlavor;
+
+    static {
+        try {
+//masuda^   StampTreeNodeを移動させたので、余計な手間ｗ
+            //localStampTreeNodeFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=open.dolphin.client.StampTreeNode");
+            localStampTreeNodeFlavor = new DataFlavor(DataFlavor.javaJVMLocalObjectMimeType + ";class=" + StampTreeNode.class.getName());
+//masuda$
+        } catch (Exception e) {
+            e.printStackTrace(System.err);
+        }
+    }
 
     public static final DataFlavor[] flavors = {LocalStampTreeNodeTransferable.localStampTreeNodeFlavor};
 

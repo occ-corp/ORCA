@@ -8,7 +8,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.JTree;
-import javax.swing.TransferHandler;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -25,16 +24,13 @@ import open.dolphin.stampbox.StampTreeNode;
  * @author modified by masuda, Masuda Naika
  */
 public class StampTreeTransferHandler extends DolphinTransferHandler {
-    
+
     // StampTreeNode Flavor
     private DataFlavor stampTreeNodeFlavor = LocalStampTreeNodeTransferable.localStampTreeNodeFlavor;
-
     // KartePaneからDropされるオーダのFlavor
     private DataFlavor orderFlavor = OrderListTransferable.orderListFlavor;
-
     // KartePaneからDropされるテキストFlavor
     //private DataFlavor stringFlavor = DataFlavor.stringFlavor;
-    
     // 病名エディタからDropされるRegisteredDiagnosis Flavor
     private DataFlavor infoModelFlavor = InfoModelTransferable.infoModelFlavor;
 
@@ -43,7 +39,7 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
      */
     @Override
     protected Transferable createTransferable(JComponent src) {
-        
+
         startTransfer(src);
         StampTree sourceTree = (StampTree) src;
         StampTreeNode dragNode = (StampTreeNode) sourceTree.getLastSelectedPathComponent();
@@ -60,12 +56,12 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
      */
     @Override
     public boolean importData(TransferSupport support) {
-        
+
         if (!canImport(support)) {
             importDataFailed();
             return false;
         }
-        
+
         JTree.DropLocation dl = (JTree.DropLocation) support.getDropLocation();
         TreePath path = dl.getPath();
         int childIndex = dl.getChildIndex();
@@ -73,9 +69,9 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
         StampTree target = (StampTree) support.getComponent();
         String targetEntity = target.getEntity();
         Transferable tr = support.getTransferable();
-        
+
         target.paintDropPointMark(null);
-        
+
         boolean imported = false;
         try {
             if (support.isDataFlavorSupported(orderFlavor)) {
@@ -86,8 +82,8 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                 if (droppedStampEntity.equals(targetEntity)) {
                     imported = target.addStamp(parentNode, droppedStamp, childIndex);
 
-                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_LABO_TEST) &&
-                           (targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER) || targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
+                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_LABO_TEST)
+                        && (targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER) || targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
                     //-----------------------------------------
                     // drop が検体検査で受けが生体もしくは細菌の場合
                     // entity を受側に変更して受け入れる
@@ -95,8 +91,8 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                     droppedStamp.getModuleInfoBean().setEntity(targetEntity);
                     imported = target.addStamp(parentNode, droppedStamp, childIndex);
 
-                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER) &&
-                               (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
+                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER)
+                        && (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
                     //-----------------------------------------
                     // drop が生体検査で受けが検体もしくは細菌の場合
                     // entity を受側に変更して受け入れる
@@ -104,8 +100,8 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                     droppedStamp.getModuleInfoBean().setEntity(targetEntity);
                     imported = target.addStamp(parentNode, droppedStamp, childIndex);
 
-                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER) &&
-                           (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER))) {
+                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER)
+                        && (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER))) {
                     //-----------------------------------------
                     // drop が細菌検査で受けが検体もしくは生体の場合
                     // entity を受側に変更して受け入れる
@@ -151,12 +147,12 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                 //-----------------------------------------------
                 // StampTree内のDnD, Dropされるノードを取得する
                 //-----------------------------------------------
-                StampTreeNode dropNode = (StampTreeNode)tr.getTransferData(stampTreeNodeFlavor);
+                StampTreeNode dropNode = (StampTreeNode) tr.getTransferData(stampTreeNodeFlavor);
                 //------------------------------------------------------------------------
                 // root までの親のパスのなかに自分がいるかどうかを判定する
                 // Drop先が DragNode の子である時は DnD できない i.e 親が自分の子になることはできない
                 //------------------------------------------------------------------------
-                DefaultTreeModel model = (DefaultTreeModel)target.getModel();
+                DefaultTreeModel model = (DefaultTreeModel) target.getModel();
                 TreeNode[] parents = model.getPathToRoot(parentNode);
                 boolean exist = false;
                 for (TreeNode parent : parents) {
@@ -166,7 +162,7 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                         break;
                     }
                 }
-                
+
                 if (exist) {
                     imported = false;
                 } else {
@@ -181,9 +177,7 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                         int cnt = parentNode.getChildCount();
                         for (int i = 0; i < cnt; i++) {
                             if (parentNode.getChildAt(i) == dropNode) {
-                                childIndex = childIndex > i 
-                                        ? childIndex - 1 
-                                        : childIndex;
+                                childIndex = childIndex > i ? childIndex - 1 : childIndex;
                                 //System.err.println("2:"+ childIndex);
                                 break;
                             }
@@ -193,7 +187,6 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                     // stampTreeNodeFlavorは参照のため最初に削除してから挿入する
                     model.removeNodeFromParent(dropNode);
                     model.insertNodeInto(dropNode, parentNode, childIndex);
-                    imported = true;
                 }
 
             } else {
@@ -221,7 +214,7 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
      */
     @Override
     public boolean canImport(TransferSupport support) {
-        
+
         if (!support.isDrop()) {
             return false;
         }
@@ -238,14 +231,21 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                 || support.isDataFlavorSupported(stringFlavor)
                 || support.isDataFlavorSupported(infoModelFlavor)
                 || support.isDataFlavorSupported(stampTreeNodeFlavor)) {
-            
+
             // ドロップ先をわかりやすく表示する
             Point p = support.getDropLocation().getDropPoint();
             stampTree.paintDropPointMark(p);
-            
+
             return true;
         }
 //masuda$
         return false;
+    }
+
+    @Override
+    protected void exportDone(JComponent c, Transferable data, int action) {
+        StampTree stampTree = (StampTree) c;
+        stampTree.paintDropPointMark(null);
+        endTransfer();
     }
 }

@@ -1836,7 +1836,7 @@ public class StampTree extends JTree implements TreeModelListener {
         }
         scrollRowToVisible(row);
     }
-
+    
     public StampBoxPlugin getStampBox() {
         return stampBox;
     }
