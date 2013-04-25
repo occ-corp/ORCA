@@ -74,6 +74,11 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     protected void setRootPath(String strPath) {
         FileSystem fs = FileSystems.getDefault();
         rootPath = fs.getPath(strPath);
+        currentDir = strPath;
+    }
+    private String currentDir;
+    public String getCurrentDir() {
+        return currentDir;
     }
 //masuda$
     
@@ -340,21 +345,25 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                     }
 
                     // Thumbnail
-                    ImageEntry entry = createImageEntry(path);
-                    entry.setImageIcon(FileIconMaker.createIcon(path, imageSize));
-                    SimpleDateFormat sdf = new SimpleDateFormat(SDF_FORMAT);
-                    String lblName = displayIsFilename() 
-                            ? entry.getFileName() 
-                            : sdf.format(entry.getLastModified());
-                    entry.setIconText(lblName);
-                    
-                    listModel.addElement(entry);
+                    addThumbnailImageEntry(path);
                 }
                 return null;
             }
         };
 
         worker.execute();
+    }
+    
+    public void addThumbnailImageEntry(Path path) throws IOException {
+        
+        ImageEntry entry = createImageEntry(path);
+        entry.setImageIcon(FileIconMaker.createIcon(path, imageSize));
+        SimpleDateFormat sdf = new SimpleDateFormat(SDF_FORMAT);
+        String lblName = displayIsFilename()
+                ? entry.getFileName()
+                : sdf.format(entry.getLastModified());
+        entry.setIconText(lblName);
+        listModel.addElement(entry);
     }
     
     private ImageEntry createImageEntry(Path path) throws IOException {
@@ -428,7 +437,8 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                 if (entry != null && (!entry.isDirectory())) {
                     openImage(entry);
                 } else if (entry != null && entry.isDirectory()) {
-                    scan(entry.getPath());
+                    currentDir = entry.getPath();
+                    scan(currentDir);
                 }
             }
         }

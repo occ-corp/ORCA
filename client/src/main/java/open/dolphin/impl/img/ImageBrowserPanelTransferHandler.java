@@ -163,13 +163,13 @@ public class ImageBrowserPanelTransferHandler extends DolphinTransferHandler {
                 // java.nio.file.Filesを使ってみる
                 for (File src : imageFiles) {
                     Path srcPath = src.toPath();
-                    Path destPath = new File(dirStr, src.getName()).toPath();
+                    Path destPath = new File(browser.getCurrentDir(), src.getName()).toPath();
                     if (browser.dropIsMove()) {
                         Files.move(srcPath, destPath, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
                     } else {
                         Files.copy(srcPath, destPath, StandardCopyOption.COPY_ATTRIBUTES, StandardCopyOption.REPLACE_EXISTING);
                     }
-                    
+                    browser.addThumbnailImageEntry(destPath);
                 }
                 return null;
             }
@@ -178,7 +178,6 @@ public class ImageBrowserPanelTransferHandler extends DolphinTransferHandler {
             protected void done() {
                 try {
                     get();
-                    browser.scan(browser.getImgLocation());
                 } catch (InterruptedException ex) {
                     ClientContext.getBootLogger().warn(ex);
                 } catch (ExecutionException ex) {
