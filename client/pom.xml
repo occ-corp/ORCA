@@ -168,7 +168,7 @@
             <version>1.4.0-preview</version>
         </dependency>
 -->
-<!-- 以下は自分でローカルリポジトリに追加する -->
+<!-- 莉･荳九�ｯ閾ｪ蛻�縺ｧ繝ｭ繝ｼ繧ｫ繝ｫ繝ｪ繝昴ず繝医Μ縺ｫ霑ｽ蜉縺吶ｋ -->
         <dependency>
             <groupId>com.lowagie</groupId>
             <artifactId>iTextAsian</artifactId>
