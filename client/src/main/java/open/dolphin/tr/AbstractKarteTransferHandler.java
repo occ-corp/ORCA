@@ -22,11 +22,6 @@ import open.dolphin.client.KarteStyledDocument;
 public abstract class AbstractKarteTransferHandler extends DolphinTransferHandler implements IKarteTransferHandler{
 
     @Override
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
-    }
-
-    @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
         
         // export先がOpenDolphin以外なら削除しない

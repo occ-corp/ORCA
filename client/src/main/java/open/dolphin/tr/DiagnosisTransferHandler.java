@@ -51,11 +51,6 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
     }
 
     @Override
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
-    }
-
-    @Override
     public boolean importData(TransferSupport support) {
 
         if (!canImport(support)) {

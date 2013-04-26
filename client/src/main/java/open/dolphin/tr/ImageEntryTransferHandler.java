@@ -51,9 +51,4 @@ public class ImageEntryTransferHandler extends DolphinTransferHandler {
         importDataFailed();
         return false;
     }
-
-    @Override
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
-    }
 }

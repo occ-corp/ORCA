@@ -47,12 +47,8 @@ public class ImageBrowserPanelTransferHandler extends DolphinTransferHandler {
             Transferable tr = new FileListTransferable(files);
             return tr;
         }
+        endTransfer();
         return null;
-    }
-
-    @Override
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
     }
     
     @Override

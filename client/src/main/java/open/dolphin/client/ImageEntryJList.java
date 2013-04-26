@@ -3,26 +3,19 @@ package open.dolphin.client;
 import java.awt.Component;
 import java.awt.FontMetrics;
 import java.awt.Insets;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureEvent;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
-import java.awt.event.InputEvent;
 import javax.swing.DefaultListCellRenderer;
 import javax.swing.DefaultListModel;
 import javax.swing.DropMode;
-import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.ListSelectionModel;
-import javax.swing.TransferHandler;
 import javax.swing.border.EmptyBorder;
 
 /**
  * ImageEntryのJList
  * @author masuda, Masuda Naika
  */
-public class ImageEntryJList<E> extends JList implements DragGestureListener {
+public class ImageEntryJList<E> extends JList { //implements DragGestureListener {
     
     private int maxIconTextWidth;
     private Insets margin = new Insets(5, 5, 5, 5);
@@ -35,19 +28,21 @@ public class ImageEntryJList<E> extends JList implements DragGestureListener {
         
         // レンダラ設定
         setCellRenderer(new ImageEntryJListCellRenderer());
-        
         setDropMode(DropMode.INSERT);
+        setDragEnabled(true);
+/*
         // quaquaではDrag時にクリックしなおさないといけないので…
-        //imageList.setDragEnabled(true);
         DragSource dragSource = DragSource.getDefaultDragSource();
         dragSource.createDefaultDragGestureRecognizer(
                 ImageEntryJList.this, DnDConstants.ACTION_COPY_OR_MOVE, ImageEntryJList.this);
+*/
     }
     
     public void setMaxIconTextWidth(int width) {
         maxIconTextWidth = width;
     }
-
+    
+/*
     @Override
     public void dragGestureRecognized(DragGestureEvent dge) {
         int action = dge.getDragAction();
@@ -58,6 +53,7 @@ public class ImageEntryJList<E> extends JList implements DragGestureListener {
             handler.exportAsDrag(comp, event, action);
         }
     }
+*/
     
     private class ImageEntryJListCellRenderer extends DefaultListCellRenderer {
         

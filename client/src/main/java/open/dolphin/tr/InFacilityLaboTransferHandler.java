@@ -6,7 +6,6 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JTable;
-import javax.swing.TransferHandler;
 import open.dolphin.infomodel.InFacilityLaboItem;
 import open.dolphin.table.ListTableModel;
 

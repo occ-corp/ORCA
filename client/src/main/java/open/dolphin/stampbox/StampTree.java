@@ -64,34 +64,15 @@ public class StampTree extends JTree implements TreeModelListener {
 
         logger = ClientContext.getBootLogger();
 
-        this.putClientProperty("JTree.lineStyle", "Angled"); // 水平及び垂直線を使用する
-        this.setEditable(false); // ノード名を編集不可にする
-        this.getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); // Single Selection// にする
-
-        this.setRootVisible(false);
-        this.setDragEnabled(true);
-
+        putClientProperty("JTree.lineStyle", "Angled"); // 水平及び垂直線を使用する
+        setEditable(false); // ノード名を編集不可にする
+        getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); // Single Selection// にする
+        setRootVisible(false);
+        setDragEnabled(true);
 //masuda^
+        setDropMode(DropMode.ON_OR_INSERT);
         TreeCellRenderer renderer = new StampTreeRenderer();
         setCellRenderer(renderer);
-        /*
-         * // デフォルトのセルレンダラーを置き換える final TreeCellRenderer oldRenderer =
-         * this.getCellRenderer(); TreeCellRenderer r = new TreeCellRenderer() {
-         *
-         * @Override public Component getTreeCellRendererComponent(JTree tree,
-         * Object value, boolean selected, boolean expanded, boolean leaf, int
-         * row, boolean hasFocus) {
-         *
-         * Component c = oldRenderer.getTreeCellRendererComponent(tree, value,
-         * selected, expanded, leaf, row, hasFocus); if (leaf && c instanceof
-         * JLabel) { JLabel l = (JLabel) c; Object o = ((StampTreeNode)
-         * value).getUserObject(); if (o instanceof ModuleInfoBean) {
-         *
-         * // 固有のアイコンを設定する if (isAsp()) { l.setIcon(ASP_ICON); } else {
-         * l.setIcon(LOCAL_ICON); } // ToolTips を設定する
-         * l.setToolTipText(((ModuleInfoBean) o).getStampMemo()); } } return c;
-         * } }; this.setCellRenderer(r);
-         */
 //masuda$
 
         // Listens TreeModelEvent
@@ -1583,37 +1564,16 @@ public class StampTree extends JTree implements TreeModelListener {
     }
     
     
-//masuda^   pns先生のStampTreeDropTargetListenerからコードを拝借
+//masuda^
+    // Quaquaでなくてもストライプに
+    // http://nadeausoftware.com/articles/2008/01/java_tip_how_add_zebra_background_stripes_jtree
     
     private static final Color DEFAULT_ODD_COLOR = ClientContext.getColor("color.odd");
     //private static final Color DEFAULT_EVEN_COLOR = ClientContext.getColor("color.even");
     private static final Color DEFAULT_EVEN_COLOR = ClientContext.getZebraColor();
     private static final Color[] ROW_COLORS = {DEFAULT_EVEN_COLOR, DEFAULT_ODD_COLOR};
-    private static final Color UNLOCKED_COLOR = Color.black;
-    private static final Color LOCKED_COLOR = Color.lightGray;
 
-    private static enum DropPosition {
 
-        TOP, BOTTOM, CENTER
-    }
-
-    private static enum DrawMode {
-
-        SQUARE, UNDER_LINE, UPPER_LINE
-    }
-
-    public enum InsertPosition {
-
-        AFTER, BEFORE, INTO_FOLDER
-    };
-
-    private Color lineColor = Color.blue;
-    private Object targetNode;
-    private boolean isTargetNode;
-    private DrawMode drawMode;
-
-    // Quaquaでなくてもストライプに
-    // http://nadeausoftware.com/articles/2008/01/java_tip_how_add_zebra_background_stripes_jtree
     @Override
     public void paintComponent(java.awt.Graphics g) {
 
@@ -1680,9 +1640,6 @@ public class StampTree extends JTree implements TreeModelListener {
                 }
             }
 
-            
-            isTargetNode = (targetNode != null && targetNode == value);
-
             // http://nadeausoftware.com/articles/2008/01/java_tip_how_add_zebra_background_stripes_jtree
             if (!(c instanceof DefaultTreeCellRenderer)) {
                 c.setBackground(ROW_COLORS[row & 1]);
@@ -1691,153 +1648,10 @@ public class StampTree extends JTree implements TreeModelListener {
             }
             return c;
         }
-
-        /**
-         * TransferHandler の repaint() を受けて，Drop 場所をマークする
-         *
-         * @param g
-         */
-
-        @Override
-        public void paintComponent(Graphics g) {
-
-            super.paintComponent(g);
-            if (!isTargetNode) {
-                return;
-            }
-
-            g.setColor(lineColor);
-            switch (drawMode) {
-                case UNDER_LINE:
-                    g.fillRect(0, getSize().height - 2, getSize().width, getSize().height);
-                    break;
-                case UPPER_LINE:
-                    g.fillRect(0, 0, getSize().width, 2);
-                    break;
-                case SQUARE:
-                    g.fillRect(0, 0, getSize().width, 2);
-                    g.fillRect(0, getSize().height - 2, getSize().width, getSize().height);
-                    g.fillRect(0, 0, 2, getSize().height);
-                    g.fillRect(getSize().width - 2, 0, getSize().width, getSize().height);
-                    break;
-            }
-        }
-
-    }
-
-    public void paintDropPointMark(Point p) {
-
-        if (p == null) {
-            targetNode = null;
-            repaint();
-            return;
-        }
-
-        TreePath target = getClosestPathForLocation(p.x, p.y);
-
-        if (target == null) {
-            return;
-        }
-        
-        // レンダラで drop 先を表示するのに使う色をセット
-        if (stampBox.isLocked()) {
-            lineColor = LOCKED_COLOR;
-        } else {
-            lineColor = UNLOCKED_COLOR;
-        }
-        
-        // drop しようとしている部分が見えるまでスクロール
-        Rectangle r = getPathBounds(target);
-        scrollTargetToVisible(target);
-        targetNode = target.getLastPathComponent();
-        StampTreeNode node = (StampTreeNode) target.getLastPathComponent();
-
-        if (node.isLeaf()) {
-            if (topOrBottom(p, r) == DropPosition.TOP) {
-                targetWithUpperLine(target);
-            } else {
-                drawMode = DrawMode.UNDER_LINE;
-            }
-        } else {
-            switch (topOrBottomOrCenter(p, r)) {
-                case TOP:
-                    targetWithUpperLine(target);
-                    break;
-                case BOTTOM:
-                    targetWithUnderLine();
-                    break;
-                default: //CENTER
-                    targetWithSquare();
-            }
-        }
-        repaint();
-    }
-
-    private void targetWithUpperLine(TreePath target) {
-
-        // 一番上か，上と親が違う場合は UpperLine で処理。それ以外は UnderLine に変換
-        int row = getRowForPath(target);
-        boolean parentIsDifferent;
-        if (row == 0) {
-            parentIsDifferent = true;
-        } else {
-            StampTreeNode thisNode = (StampTreeNode) target.getLastPathComponent();
-            StampTreeNode aboveNode = (StampTreeNode) getPathForRow(row - 1).getLastPathComponent();
-            parentIsDifferent = (thisNode.getParent() != aboveNode.getParent());
-        }
-        if (parentIsDifferent) {
-            drawMode = DrawMode.UPPER_LINE;
-        } else {
-            // UnderLine で処理
-            target = getPathForRow(row - 1);
-            targetNode = target.getLastPathComponent();
-            targetWithUnderLine();
-        }
-    }
-    
-    private void targetWithUnderLine() {
-        drawMode = DrawMode.UNDER_LINE;
-    }
-
-    private void targetWithSquare() {
-        drawMode = DrawMode.SQUARE;
-    }
-    
-    private DropPosition topOrBottom(Point p, Rectangle r) {
-        int offsetToTop = p.y - r.y;
-        if (offsetToTop < r.height / 2) {
-            return DropPosition.TOP;
-        } else {
-            return DropPosition.BOTTOM;
-        }
-    }
-
-    private DropPosition topOrBottomOrCenter(Point p, Rectangle r) {
-        int offsetToTop = p.y - r.y;
-        int offsetToBottom = r.y + r.height - p.y;
-        if (offsetToTop < r.height / 3) {
-            return DropPosition.TOP;
-        } else if (offsetToBottom < r.height / 3) {
-            return DropPosition.BOTTOM;
-        } else {
-            return DropPosition.CENTER;
-        }
-    }
-
-    private void scrollTargetToVisible(TreePath target) {
-
-
-        int row = getRowForPath(target);
-        if (row >= 1) {
-            scrollRowToVisible(row - 1);
-        }
-        if (row < getRowCount()) {
-            scrollRowToVisible(row + 1);
-        }
-        scrollRowToVisible(row);
     }
     
     public StampBoxPlugin getStampBox() {
         return stampBox;
     }
+//masuda$
 }

@@ -1,6 +1,5 @@
 package open.dolphin.tr;
 
-import java.awt.Point;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -46,11 +45,6 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
         return new LocalStampTreeNodeTransferable(dragNode);
     }
 
-    @Override
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
-    }
-
     /**
      * DropされたFlavorをStampTreeにインポートする。
      */
@@ -69,8 +63,6 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
         StampTree target = (StampTree) support.getComponent();
         String targetEntity = target.getEntity();
         Transferable tr = support.getTransferable();
-
-        target.paintDropPointMark(null);
 
         boolean imported = false;
         try {
@@ -219,8 +211,6 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
             return false;
         }
 //masuda^
-        // 背景色をつけないためにshowDropLocationをfalseにする
-        support.setShowDropLocation(false);
         // スタンプ箱がロックされている場合はfalse
         StampTree stampTree = (StampTree) support.getComponent();
         if (stampTree.getStampBox().isLocked()) {
@@ -231,21 +221,9 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                 || support.isDataFlavorSupported(stringFlavor)
                 || support.isDataFlavorSupported(infoModelFlavor)
                 || support.isDataFlavorSupported(stampTreeNodeFlavor)) {
-
-            // ドロップ先をわかりやすく表示する
-            Point p = support.getDropLocation().getDropPoint();
-            stampTree.paintDropPointMark(p);
-
             return true;
         }
 //masuda$
         return false;
-    }
-
-    @Override
-    protected void exportDone(JComponent c, Transferable data, int action) {
-        StampTree stampTree = (StampTree) c;
-        stampTree.paintDropPointMark(null);
-        endTransfer();
     }
 }

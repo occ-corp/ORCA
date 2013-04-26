@@ -6,7 +6,6 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.JTable;
-import javax.swing.TransferHandler;
 import open.dolphin.order.MasterItem;
 import open.dolphin.table.ListTableModel;
 

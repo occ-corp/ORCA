@@ -69,14 +69,14 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 //masuda^
     protected int imageSize = MAX_IMAGE_SIZE;
     protected DefaultListModel<ImageEntry> listModel;
-    protected Path rootPath;
+    private Path rootPath;
+    private String currentDir;
 
     protected void setRootPath(String strPath) {
         FileSystem fs = FileSystems.getDefault();
         rootPath = fs.getPath(strPath);
-        currentDir = strPath;
     }
-    private String currentDir;
+
     public String getCurrentDir() {
         return currentDir;
     }
@@ -218,6 +218,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
      */
     protected void scan(String imgLoc) {
         
+        currentDir = imgLoc;
         listModel.clear();
 
         if (valueIsNullOrEmpty(imgLoc)) {
@@ -437,8 +438,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                 if (entry != null && (!entry.isDirectory())) {
                     openImage(entry);
                 } else if (entry != null && entry.isDirectory()) {
-                    currentDir = entry.getPath();
-                    scan(currentDir);
+                    scan(entry.getPath());
                 }
             }
         }

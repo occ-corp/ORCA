@@ -3,7 +3,6 @@ package open.dolphin.tr;
 import java.awt.EventQueue;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
 import java.util.ArrayList;
@@ -71,11 +70,6 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
         Transferable tr = new OrderListTransferable(list);
         return tr;
-    }
-
-    @Override
-    public int getSourceActions(JComponent c) {
-        return COPY_OR_MOVE;
     }
 
     private void replaceStamp(final StampHolder target, final ModuleInfoBean stampInfo) {
