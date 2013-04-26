@@ -74,7 +74,9 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
              }
              */
 //masuda$
-            action = support.getDropAction();
+            if (support.isDrop()) {
+                action = support.getDropAction();
+            }
             int index = 0;
 
             // Dropされたノードを取得する

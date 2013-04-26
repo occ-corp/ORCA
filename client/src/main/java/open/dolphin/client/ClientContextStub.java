@@ -774,7 +774,10 @@ public final class ClientContextStub {
             UIManager.put("Tree.selectionBackground", c);
             UIManager.put("List.selectionBackground", c);
         }
-
+        
+        UIManager.put("Table.dropLineColor", Color.BLUE);
+        UIManager.put("Tree.dropLineColor", Color.BLUE);
+        UIManager.put("List.dropLineColor", Color.BLUE);
         UIManager.put("ComboBox.maximumRowCount", 20);
         UIManager.put("TextComponent.autoSelect", Boolean.FALSE);
         UIManager.put("OptionPane.cancelButtonText", "キャンセル");
