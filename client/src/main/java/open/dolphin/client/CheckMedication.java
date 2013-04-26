@@ -233,10 +233,20 @@ public class CheckMedication {
         }
         if (list != null && !list.isEmpty()){
             for (DrugInteractionModel model : list){
-                sb.append("＜併用禁忌＞ ");
-                sb.append(drugCodeNameMap.get(model.getSrycd1()));
+                sb.append("＜併用禁忌＞\n");
+                String drugName1 = drugCodeNameMap.get(model.getSrycd1());
+                sb.append(drugName1);
+                String brandName1 = model.getBrandname1();
+                if (brandName1 != null) {
+                    sb.append("（＝").append(brandName1).append("）");
+                }
                 sb.append(" と ");
-                sb.append(drugCodeNameMap.get(model.getSrycd2()));
+                String drugName2 = drugCodeNameMap.get(model.getSrycd2());
+                sb.append(drugName2);
+                String brandName2 = model.getBrandname2();
+                if (brandName2 != null) {
+                    sb.append("（＝").append(brandName2).append("）");
+                }
                 sb.append("\n");
                 sb.append(model.getSskijo());
                 sb.append(" ");

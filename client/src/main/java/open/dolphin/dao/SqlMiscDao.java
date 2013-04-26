@@ -138,13 +138,46 @@ public final class SqlMiscDao extends SqlDaoBean {
     }
 
     
-    public List<DrugInteractionModel> checkInteraction(Collection<String> drug1, Collection<String> drug2) {
+    public List<DrugInteractionModel> checkInteraction(Collection<String> src1, Collection<String> src2) {
         // 引数はdrugcdの配列ｘ２
 
-        if (drug1 == null || drug1.isEmpty() || drug2 == null || drug2.isEmpty()) {
+        if (src1 == null || src1.isEmpty() || src2 == null || src2.isEmpty()) {
             return Collections.emptyList();
         }
-
+        
+        // コードが後発品ならばその先発品のコードを追加する
+        Collection<String> allDrug = new ArrayList<>();
+        allDrug.addAll(src1);
+        allDrug.addAll(src2);
+        
+        // Key:genericSrycd, Value: 0-genericName, 1-brandSrycd, 2-brandName
+        Map<String, String[]> brandnameMap = getBrandnameDrugMap(allDrug);
+        // Key:brandSrycd, Value: 0-brandName, 1-genericSrycd, 2-genericName
+        Map<String, String[]> genericnameMap = new HashMap<>();
+        for (Map.Entry<String, String[]> entry : brandnameMap.entrySet()) {
+            String genericSrycd = entry.getKey();
+            String genericName = entry.getValue()[0];
+            String brandSrycd = entry.getValue()[1];
+            String brandName = entry.getValue()[2];
+            genericnameMap.put(brandSrycd, new String[]{brandName, genericSrycd, genericName});
+        }
+        
+        Collection<String> drug1 = new ArrayList<>(src1);
+        for (String srycd : src1) {
+            String[] mapValue = brandnameMap.get(srycd);
+            if (mapValue != null) {
+                drug1.add(mapValue[1]);
+            }
+        }
+        
+        Collection<String> drug2 = new ArrayList<>(src2);
+        for (String srycd : src2) {
+            String[] mapValue = brandnameMap.get(srycd);
+            if (mapValue != null) {
+                drug2.add(mapValue[1]);
+            }
+        }
+        
         StringBuilder sb = new StringBuilder();
         List<DrugInteractionModel> ret = new ArrayList<DrugInteractionModel>();
 
@@ -160,7 +193,88 @@ public final class SqlMiscDao extends SqlDaoBean {
 
         List<List<String>> valuesList = executeStatement(sql);
         for (List<String> values : valuesList) {
-            ret.add(new DrugInteractionModel(values.get(0), values.get(1), values.get(2), values.get(3)));
+            String srycd1 = values.get(0);
+            String srycd2 = values.get(1);
+            String sskijo = values.get(2);
+            String syojoucd = values.get(3);
+            String[] mapValue1 = brandnameMap.get(srycd1);
+            String brandName1 = null;
+            if (mapValue1 == null) {
+                // srycd1は先発薬
+                // ゾロの対応先発薬の場合
+                // Key:brandSrycd, Value: 0-brandName, 1-genericSrycd, 2-genericName
+                if (genericnameMap.get(srycd1) != null) {
+                    String genericSrycd = genericnameMap.get(srycd1)[1];
+                    brandName1 = genericnameMap.get(srycd1)[0];
+                    srycd1 = genericSrycd;
+                }
+            }
+            String[] mapValue2 = brandnameMap.get(srycd2);
+            String brandName2 = null;
+            if (mapValue2 == null) {
+                if (genericnameMap.get(srycd2) != null) {
+                    String genericSrycd = genericnameMap.get(srycd2)[1];
+                    brandName2 = genericnameMap.get(srycd2)[0];
+                    srycd2 = genericSrycd;
+                }
+            }
+            ret.add(new DrugInteractionModel(srycd1, srycd2, sskijo, syojoucd, brandName1, brandName2));
+        }
+
+        return ret;
+    }
+    
+    private Map<String, String[]> getBrandnameDrugMap(Collection codes) {
+
+        Map<String, String[]> ret = new HashMap<>();
+        
+        // 後発薬の薬価基準コードを取得する。先頭９ケタ
+        StringBuilder sb = new StringBuilder();
+        sb.append("select srycd,name,yakkakjncd from tbl_tensu where srycd in (");
+        sb.append(getCodes(codes));
+        sb.append(") and kouhatukbn='1' and yukoedymd='99999999'");
+        String sql = sb.toString();
+        
+        Map<String, String[]> yakkakjncdMap = new HashMap<>();
+        List<List<String>> valuesList = executeStatement(sql);
+        for (List<String> values : valuesList) {
+            String genericSrycd = values.get(0);
+            String genericName = values.get(1);
+            String yakkakjncd = values.get(2).substring(0, 9);
+            yakkakjncdMap.put(yakkakjncd, new String[]{genericSrycd, genericName, null, null});
+        }
+        
+        if (yakkakjncdMap.isEmpty()) {
+            return ret;
+        }
+        
+        // 先発薬を調べる
+        sb = new StringBuilder();
+        sb.append("select srycd,name,yakkakjncd from tbl_tensu where substring(yakkakjncd,0,10) in (");
+        sb.append(getCodes(yakkakjncdMap.keySet()));
+        sb.append(") and kouhatukbn<>'1' and yukoedymd='99999999'");
+        sql = sb.toString();
+        valuesList = executeStatement(sql);
+        for (List<String> values : valuesList) {
+            String brandSrycd = values.get(0);
+            String brandName = values.get(1);
+            String yakkakjncd = values.get(2).substring(0, 9);
+            String[] mapValue = yakkakjncdMap.get(yakkakjncd);
+            if (mapValue != null) {
+                mapValue[2] = brandSrycd;
+                mapValue[3] = brandName;
+            }
+        }
+        
+        // 後発薬のsrycdをキーにしたマップを作成する
+        for (String[] mapValue : yakkakjncdMap.values()) {
+            String genericSrycd = mapValue[0];
+            String brandSrycd = mapValue[2];
+            if (brandSrycd != null) {
+                // Key:genericSrycd, Value: 0-genericName, 1-brandSrycd, 2-brandName
+                String[] value = new String[]{mapValue[1], brandSrycd, mapValue[3]};
+                ret.put(genericSrycd, value);
+            }
         }
 
         return ret;

@@ -211,12 +211,24 @@ public class CheckInteractionPanel {
         // 結果の処理
         if (list != null && !list.isEmpty()) {
             for (DrugInteractionModel model : list){
-                sb.append(kensakuItems.get(model.getSrycd1()));
+                // 1st drug
+                String drugName1 = kensakuItems.get(model.getSrycd1());
+                sb.append(drugName1);
+                String brandName1 = model.getBrandname1();
+                if (brandName1 != null) {
+                    sb.append("（＝").append(brandName1).append("）");
+                }
                 sb.append(" と ");
-                String[] data = rirekiItems.get(model.getSrycd2());
-                sb.append(data[0]);
+                // 2nd drug
+                String[] mapValue = rirekiItems.get(model.getSrycd2());
+                String drugName2 = mapValue[0];
+                sb.append(drugName2);
+                String brandName2 = model.getBrandname2();
+                if (brandName2 != null) {
+                    sb.append("（＝").append(brandName2).append("）");
+                }
                 sb.append(" (");
-                sb.append(data[1]);
+                sb.append(mapValue[1]);
                 sb.append(")\n");
                 sb.append(model.getSskijo());
                 sb.append(" ");
