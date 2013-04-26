@@ -763,7 +763,6 @@ public final class RpEditor extends AbstractStampEditor {
         JTable setTable = view.getSetTable();
         setTable.setModel(tableModel);
 //masuda^
-        setTable.addMouseMotionListener(new SetTableMouseMotionListener());
         // 中止項目登録のためsetTableにPopupListener2を設定する
         PopupListener2 popupListener2 = new PopupListener2(setTable);
 //masuda$

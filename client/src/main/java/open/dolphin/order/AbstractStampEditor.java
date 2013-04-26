@@ -1,8 +1,6 @@
 package open.dolphin.order;
 
-import java.awt.Color;
 import java.awt.Component;
-import java.awt.Graphics;
 import java.awt.Window;
 import java.awt.event.*;
 import java.beans.PropertyChangeListener;
@@ -920,7 +918,7 @@ public abstract class AbstractStampEditor extends StampEditorConst {
         }
         
         // れんだら
-        OrderSetTableCellRenderer  renderer = new OrderSetTableCellRenderer();
+        StripeTableCellRenderer renderer = new StripeTableCellRenderer();
         renderer.setTable(setTable);
         renderer.setDefaultRenderer();
         setTable.setDropMode(DropMode.INSERT_ROWS);
@@ -1353,30 +1351,6 @@ public abstract class AbstractStampEditor extends StampEditorConst {
         });
     }
     
-    // setTableのMouseMotionListener
-    protected static class SetTableMouseMotionListener implements MouseMotionListener {
-
-        @Override
-        public void mouseDragged(MouseEvent e) {
-            int ctrlMask = InputEvent.CTRL_DOWN_MASK;
-            int action = ((e.getModifiersEx() & ctrlMask) == ctrlMask)
-                    ? TransferHandler.COPY
-                    : TransferHandler.MOVE;
-
-            JTable setTable = (JTable) e.getSource();
-            // 非選択状態からいきなりドラッグを開始すると cellEditor が残ってしまう問題の workaround
-            if (setTable.isEditing()) {
-                setTable.getCellEditor().stopCellEditing();
-            }
-            TransferHandler handler = setTable.getTransferHandler();
-            handler.exportAsDrag(setTable, e, action);
-        }
-
-        @Override
-        public void mouseMoved(MouseEvent e) {
-        }
-    }
-    
     // 検索結果で採用薬を色分けするレンダラ
     protected static class SearchResultTableRenderer extends StripeTableCellRenderer {
 
@@ -1392,55 +1366,6 @@ public abstract class AbstractStampEditor extends StampEditorConst {
                 setForeground(java.awt.Color.BLUE);
             }
             return this;
-        }
-    }
-    
-    /**
-     * MasterPanelTableCellRenderer
-     * 
-     * @author pns
-     * @author modified by masuda, Masuda Naika
-     */
-    protected static class OrderSetTableCellRenderer extends StripeTableCellRenderer {
-
-        private boolean isTargetRow;
-        private boolean isUnderline;
-        private final Color LINE_COLOR = new Color(0x0A, 0x53, 0xB6);
-
-        @Override
-        public Component getTableCellRendererComponent(JTable table, Object value,
-                boolean isSelected, boolean hasFocus, int row, int column) {
-
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            JTable.DropLocation loc = table.getDropLocation();
-            int targetRow = (loc == null) ? -1 : table.getDropLocation().getRow();
-
-            if (row == 0 && targetRow == 0) {
-                isTargetRow = true;
-                isUnderline = false;
-            } else if (row == targetRow - 1) {
-                isTargetRow = true;
-                isUnderline = true;
-            } else {
-                isTargetRow = false;
-            }
-
-            return this;
-        }
-
-        @Override
-        public void paintComponent(Graphics g) {
-            super.paintComponent(g);
-
-            if (isTargetRow) {
-                g.setColor(LINE_COLOR);
-                if (isUnderline) {
-                    g.fillRect(0, getSize().height - 2, getSize().width, getSize().height);
-                } else {
-                    g.fillRect(0, 0, getSize().width, 2);
-                }
-            }
         }
     }
 //masuda$

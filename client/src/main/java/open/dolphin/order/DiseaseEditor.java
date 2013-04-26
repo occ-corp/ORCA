@@ -515,10 +515,9 @@ public final class DiseaseEditor extends AbstractStampEditor {
 
         table.setDragEnabled(true);
         table.setDropMode(DropMode.INSERT);
- //masuda^ 
+//masuda^ 
         // TransferHandler
         table.setTransferHandler(new RegisteredDiagnosisTransferHandler());
-        table.addMouseMotionListener(new SetTableMouseMotionListener());
 //masuda$
         table.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         table.setRowSelectionAllowed(true);
