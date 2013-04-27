@@ -219,8 +219,8 @@ public class CheckMedication {
         // パフォーマンス良くなるはず。
 
         int len = drugCodeNameMap.size();
-        // 薬なかったらリターン
-        if (len == 0){
+        // 薬がないか１剤だけならリターン
+        if (len < 2){
             return null;
         }
         StringBuilder sb = new StringBuilder();
