@@ -6,6 +6,7 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import javax.swing.JComponent;
 import javax.swing.JFrame;
+import javax.swing.JTextPane;
 import javax.swing.TransferHandler;
 import open.dolphin.helper.WindowSupport;
 import open.dolphin.tr.DolphinTransferHandler;
@@ -74,9 +75,12 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
         }
         
         // DolphinTransferHandlerが設定されていない場合はChartMediator処理は不要
-        TransferHandler t = newComp.getTransferHandler();
-        if (t == null || !(t instanceof DolphinTransferHandler)) {
-            return;
+        // KarteViewerのJTextPaneは例外
+        if (!(newComp instanceof JTextPane)) {
+            TransferHandler t = newComp.getTransferHandler();
+            if (t == null || !(t instanceof DolphinTransferHandler)) {
+                return;
+            }
         }
 
         // get Mediator from focused JFrame
