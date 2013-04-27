@@ -150,31 +150,22 @@ public final class SqlMiscDao extends SqlDaoBean {
         allDrug.addAll(src1);
         allDrug.addAll(src2);
         
-        // Key:genericSrycd, Value: 0-genericName, 1-brandSrycd, 2-brandName
-        Map<String, String[]> brandnameMap = getBrandnameDrugMap(allDrug);
-        // Key:brandSrycd, Value: 0-brandName, 1-genericSrycd, 2-genericName
-        Map<String, String[]> genericnameMap = new HashMap<>();
-        for (Map.Entry<String, String[]> entry : brandnameMap.entrySet()) {
-            String genericSrycd = entry.getKey();
-            String genericName = entry.getValue()[0];
-            String brandSrycd = entry.getValue()[1];
-            String brandName = entry.getValue()[2];
-            genericnameMap.put(brandSrycd, new String[]{brandName, genericSrycd, genericName});
-        }
-        
+        // ゾロと先発の対応リストを作成する one-to-many
+        List<ZoroBrandPair> zoroBrandList = getZoroBrandPair(allDrug);
+
         Collection<String> drug1 = new ArrayList<>(src1);
         for (String srycd : src1) {
-            String[] mapValue = brandnameMap.get(srycd);
-            if (mapValue != null) {
-                drug1.add(mapValue[1]);
+            List<ZoroBrandPair> pairs = getBrands(zoroBrandList, srycd);
+            for (ZoroBrandPair pair : pairs) {
+                drug1.add(pair.brandSrycd);
             }
         }
         
         Collection<String> drug2 = new ArrayList<>(src2);
         for (String srycd : src2) {
-            String[] mapValue = brandnameMap.get(srycd);
-            if (mapValue != null) {
-                drug2.add(mapValue[1]);
+            List<ZoroBrandPair> pairs = getBrands(zoroBrandList, srycd);
+            for (ZoroBrandPair pair : pairs) {
+                drug2.add(pair.brandSrycd);
             }
         }
         
@@ -197,60 +188,111 @@ public final class SqlMiscDao extends SqlDaoBean {
             String srycd2 = values.get(1);
             String sskijo = values.get(2);
             String syojoucd = values.get(3);
-            String[] mapValue1 = brandnameMap.get(srycd1);
             String brandName1 = null;
-            if (mapValue1 == null) {
-                // srycd1は先発薬
-                // ゾロの対応先発薬の場合
-                // Key:brandSrycd, Value: 0-brandName, 1-genericSrycd, 2-genericName
-                if (genericnameMap.get(srycd1) != null) {
-                    String genericSrycd = genericnameMap.get(srycd1)[1];
-                    brandName1 = genericnameMap.get(srycd1)[0];
-                    srycd1 = genericSrycd;
-                }
-            }
-            String[] mapValue2 = brandnameMap.get(srycd2);
             String brandName2 = null;
-            if (mapValue2 == null) {
-                if (genericnameMap.get(srycd2) != null) {
-                    String genericSrycd = genericnameMap.get(srycd2)[1];
-                    brandName2 = genericnameMap.get(srycd2)[0];
-                    srycd2 = genericSrycd;
+            
+            ZoroBrandPair zoro = getZoro(zoroBrandList, srycd1);
+            // ゾロのエイリアスとしての先発薬の場合
+            if (zoro != null) {
+                List<ZoroBrandPair> brands = getBrands(zoroBrandList, zoro.zoroSrycd);
+                if (!brands.isEmpty()) {
+                    srycd1 = zoro.zoroSrycd;
+                    boolean first = true;
+                    sb = new StringBuilder();
+                    for (ZoroBrandPair pair : brands) {
+                        if (!first) {
+                            sb.append(",");
+                        } else {
+                            first = false;
+                        }
+                        sb.append(pair.brandName);
+                    }
+                    brandName1 = sb.toString();
                 }
             }
+
+            zoro = getZoro(zoroBrandList, srycd2);
+            if (zoro != null) {
+                List<ZoroBrandPair> brands = getBrands(zoroBrandList, zoro.zoroSrycd);
+                if (!brands.isEmpty()) {
+                    srycd2 = zoro.zoroSrycd;
+                    boolean first = true;
+                    sb = new StringBuilder();
+                    for (ZoroBrandPair pair : brands) {
+                        if (!first) {
+                            sb.append(",");
+                        } else {
+                            first = false;
+                        }
+                        sb.append(pair.brandName);
+                    }
+                    brandName2 = sb.toString();
+                }
+            }
+            
             ret.add(new DrugInteractionModel(srycd1, srycd2, sskijo, syojoucd, brandName1, brandName2));
         }
 
         return ret;
     }
     
-    private Map<String, String[]> getBrandnameDrugMap(Collection codes) {
+    private class ZoroBrandPair {
 
-        Map<String, String[]> ret = new HashMap<>();
+        String zoroSrycd;
+        String zoroName;
+        String brandSrycd;
+        String brandName;
+    }
+
+    private ZoroBrandPair getZoro(List<ZoroBrandPair> list, String brandSrycd) {
+        for (ZoroBrandPair pair : list) {
+            if (brandSrycd.equals(pair.brandSrycd)) {
+                return pair;
+            }
+        }
+        return null;
+    }
+
+    private List<ZoroBrandPair> getBrands(List<ZoroBrandPair> list, String zoroSrycd) {
+        List<ZoroBrandPair> ret = new ArrayList<>();
+        for (ZoroBrandPair pair : list) {
+            if (zoroSrycd.equals(pair.zoroSrycd)) {
+                ret.add(pair);
+            }
+        }
+        return ret;
+    }
+    
+    private List<ZoroBrandPair> getZoroBrandPair(Collection codes) {
+        
+        List<ZoroBrandPair> ret = new ArrayList<>();
         
         // 後発薬の薬価基準コードを取得する。先頭９ケタ
         StringBuilder sb = new StringBuilder();
-        sb.append("select srycd,name,yakkakjncd from tbl_tensu where srycd in (");
+        sb.append("select distinct srycd,name,yakkakjncd from tbl_tensu where srycd in (");
         sb.append(getCodes(codes));
         sb.append(") and kouhatukbn='1' and yukoedymd='99999999'");
         String sql = sb.toString();
         
-        Map<String, String[]> yakkakjncdMap = new HashMap<>();
+        Map<String, ZoroBrandPair> yakkakjncdMap = new HashMap<>();
         List<List<String>> valuesList = executeStatement(sql);
         for (List<String> values : valuesList) {
-            String genericSrycd = values.get(0);
-            String genericName = values.get(1);
+            ZoroBrandPair pair = new ZoroBrandPair();
+            pair.zoroSrycd = values.get(0);
+            pair.zoroName = values.get(1);
+            // javaのsubstringはyakkakjncd.substring(0,9)である
             String yakkakjncd = values.get(2).substring(0, 9);
-            yakkakjncdMap.put(yakkakjncd, new String[]{genericSrycd, genericName, null, null});
+            yakkakjncdMap.put(yakkakjncd, pair);
         }
         
         if (yakkakjncdMap.isEmpty()) {
-            return ret;
+            return Collections.emptyList();
         }
         
         // 先発薬を調べる
         sb = new StringBuilder();
-        sb.append("select srycd,name,yakkakjncd from tbl_tensu where substring(yakkakjncd,0,10) in (");
+        // sqlのsubstringはsubstring(yakkakjncd,0,10)である
+        sb.append("select distinct srycd,name,yakkakjncd from tbl_tensu where substring(yakkakjncd,0,10) in (");
         sb.append(getCodes(yakkakjncdMap.keySet()));
         sb.append(") and kouhatukbn<>'1' and yukoedymd='99999999'");
         sql = sb.toString();
@@ -259,23 +301,18 @@ public final class SqlMiscDao extends SqlDaoBean {
             String brandSrycd = values.get(0);
             String brandName = values.get(1);
             String yakkakjncd = values.get(2).substring(0, 9);
-            String[] mapValue = yakkakjncdMap.get(yakkakjncd);
-            if (mapValue != null) {
-                mapValue[2] = brandSrycd;
-                mapValue[3] = brandName;
+            ZoroBrandPair mapPair = yakkakjncdMap.get(yakkakjncd);
+            if (mapPair != null) {
+                ZoroBrandPair pair = new ZoroBrandPair();
+                pair.brandSrycd = brandSrycd;
+                pair.brandName = brandName;
+                pair.zoroSrycd = mapPair.zoroSrycd;
+                pair.zoroName = mapPair.zoroName;
+                ret.add(pair);
             }
         }
         
-        // 後発薬のsrycdをキーにしたマップを作成する
-        for (String[] mapValue : yakkakjncdMap.values()) {
-            String genericSrycd = mapValue[0];
-            String brandSrycd = mapValue[2];
-            if (brandSrycd != null) {
-                // Key:genericSrycd, Value: 0-genericName, 1-brandSrycd, 2-brandName
-                String[] value = new String[]{mapValue[1], brandSrycd, mapValue[3]};
-                ret.put(genericSrycd, value);
-            }
-        }
+        yakkakjncdMap.clear();
 
         return ret;
     }
