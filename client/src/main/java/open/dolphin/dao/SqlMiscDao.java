@@ -170,7 +170,7 @@ public final class SqlMiscDao extends SqlDaoBean {
         }
         
         StringBuilder sb = new StringBuilder();
-        List<DrugInteractionModel> ret = new ArrayList<DrugInteractionModel>();
+        Map<String, DrugInteractionModel> map = new HashMap<>();
 
         // SQL文を作成
         sb.append("select drugcd, drugcd2, TI.syojyoucd, syojyou ");
@@ -229,10 +229,13 @@ public final class SqlMiscDao extends SqlDaoBean {
                     brandName2 = sb.toString();
                 }
             }
-            
-            ret.add(new DrugInteractionModel(srycd1, srycd2, sskijo, syojoucd, brandName1, brandName2));
+            map.put(srycd1, new DrugInteractionModel(
+                    srycd1, srycd2, sskijo, syojoucd, brandName1, brandName2));
         }
-
+        
+        List<DrugInteractionModel> ret = new ArrayList<>(map.values());
+        map.clear();
+        
         return ret;
     }
     
