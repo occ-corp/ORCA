@@ -107,9 +107,9 @@ public class SqlDaoBean extends DaoBean {
     
     private List<String> getColumnValues(ResultSet rs) throws SQLException {
 
-        List<String> values = new ArrayList<String>();
         ResultSetMetaData meta = rs.getMetaData();
         int columnCount = meta.getColumnCount();
+        List<String> values = new ArrayList<String>(columnCount);
 
         for (int i = 1; i <= columnCount; ++i) {
             int type = meta.getColumnType(i);
@@ -380,6 +380,11 @@ public class SqlDaoBean extends DaoBean {
         p.setUsername(getUser());
         p.setPassword(getPasswd());
         p.setDefaultReadOnly(true);
+        p.setMaxActive(5);
+        p.setInitialSize(1);
+        p.setMaxWait(5000);
+        p.setRemoveAbandonedTimeout(30);
+        p.setRemoveAbandoned(true);
         dataSource = new DataSource();
         dataSource.setPoolProperties(p);
     }

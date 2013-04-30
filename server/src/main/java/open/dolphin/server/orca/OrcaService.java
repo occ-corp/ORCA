@@ -216,6 +216,11 @@ public class OrcaService {
         p.setUsername(user);
         p.setPassword(pass);
         p.setDefaultReadOnly(true);
+        p.setMaxActive(5);
+        p.setInitialSize(1);
+        p.setMaxWait(5000);
+        p.setRemoveAbandonedTimeout(30);
+        p.setRemoveAbandoned(true);
         DataSource ds = new org.apache.tomcat.jdbc.pool.DataSource();
         ((org.apache.tomcat.jdbc.pool.DataSource) ds).setPoolProperties(p);
 
