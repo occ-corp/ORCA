@@ -27,6 +27,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
+import open.dolphin.dao.SqlDaoBean;
 import open.dolphin.delegater.PatientDelegater;
 import open.dolphin.delegater.StampDelegater;
 import open.dolphin.delegater.UserDelegater;
@@ -1121,7 +1122,7 @@ public class Dolphin implements MainWindow, IChartEventListener {
 
         // FocusProperetyChangeListenerを破棄する
         FocusPropertyChangeListener.getInstance().dispose();
-//masuda$
+
         
         // ログアウト処理
         try {
@@ -1134,6 +1135,10 @@ public class Dolphin implements MainWindow, IChartEventListener {
             }
         } catch (Exception ex) {
         }
+        
+        // DAO DataSourceを閉じる
+        SqlDaoBean.closeDao();
+//masuda$        
     }
 
     private void saveStampTree() {

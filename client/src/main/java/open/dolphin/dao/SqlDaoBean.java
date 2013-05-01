@@ -163,10 +163,11 @@ public class SqlDaoBean extends DaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
-            closeConnection(con);
+            try {
+                con.close();
+            } catch (Exception ex) {
+            }
         }
 
         return valuesList;
@@ -245,10 +246,11 @@ public class SqlDaoBean extends DaoBean {
         } catch (Exception e) {
             e.printStackTrace(System.err);
             processError(e);
-            closeConnection(con);
-
         } finally {
-            closeConnection(con);
+            try {
+                con.close();
+            } catch (Exception ex) {
+            }
         }
 
         return valuesList;
@@ -361,7 +363,17 @@ public class SqlDaoBean extends DaoBean {
         return ptid;
     }
 
-    public Connection getConnection() throws Exception {
+    private Connection getConnection() throws Exception {
+        Connection con;
+        if (false) {
+            con = DriverManager.getConnection(getURL(), getUser(), getPasswd());
+        } else {
+            con = getConnectionFromPool();
+        }
+        return con;
+    }
+    
+    private Connection getConnectionFromPool() throws Exception {
         
         if (dataSource == null) {
             setupDataSource();
@@ -395,6 +407,10 @@ public class SqlDaoBean extends DaoBean {
 
     public final void setDriver(String driver) {
         this.driver = driver;
+        try {
+            Class.forName(driver);
+        } catch (ClassNotFoundException ex) {
+        }
     }
 
     public final String getDatabase() {
@@ -442,30 +458,6 @@ public class SqlDaoBean extends DaoBean {
         buf.append("',");
         return buf.toString();
     }
-    
-    public void closeStatement(Statement st) {
-        try {
-            st.close();
-        } catch (SQLException e) {
-        } catch (NullPointerException e) {
-        }
-    }
-
-    public void closePreparedStatement(PreparedStatement ps) {
-        try {
-            ps.close();
-        } catch (SQLException e) {
-        } catch (NullPointerException e) {
-        }
-    }
-
-    public void closeConnection(Connection con) {
-        try {
-            con.close();
-        } catch (SQLException e) {
-        } catch (NullPointerException e) {
-        }
-    }
 
     protected void debug(String msg) {
         logger.debug(msg);
@@ -474,6 +466,12 @@ public class SqlDaoBean extends DaoBean {
     protected void printTrace(String msg) {
         if (trace) {
             logger.debug(msg);
+        }
+    }
+    
+    public static void closeDao() {
+        if (dataSource != null) {
+            dataSource.close(true);
         }
     }
     
