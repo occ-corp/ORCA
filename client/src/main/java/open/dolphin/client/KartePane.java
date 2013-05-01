@@ -43,7 +43,7 @@ import open.dolphin.tr.*;
 import open.dolphin.util.BeanUtils;
 import open.dolphin.util.DicomImageEntry;
 import open.dolphin.util.ImageTool;
-import open.dolphin.util.PopupMenuUtil;
+import open.dolphin.util.NonHidePopupMenu;
 import org.apache.log4j.Logger;
 
 /**
@@ -444,7 +444,7 @@ public class KartePane implements DocumentListener, MouseListener,
     protected JPopupMenu createMenus() {
 
         //final JPopupMenu contextMenu = new JPopupMenu();
-        final JPopupMenu contextMenu = PopupMenuUtil.createPopupMenu();
+        final JPopupMenu contextMenu = new NonHidePopupMenu();
         
         // cut, copy, paste メニューを追加する
         contextMenu.add(mediator.getAction(GUIConst.ACTION_CUT));

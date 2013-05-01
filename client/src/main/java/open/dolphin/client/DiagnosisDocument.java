@@ -34,7 +34,7 @@ import open.dolphin.tr.DiagnosisTransferHandler;
 import open.dolphin.util.AgeCalculator;
 import open.dolphin.util.BeanUtils;
 import open.dolphin.util.MMLDate;
-import open.dolphin.util.PopupMenuUtil;
+import open.dolphin.util.NonHidePopupMenu;
 import org.apache.log4j.Logger;
 
 /**
@@ -254,7 +254,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
                     // ASP StampBox が選択されていて傷病名Treeがない場合がある
                     if (hasTree(IInfoModel.ENTITY_DIAGNOSIS)) {
                         //JPopupMenu popup = new JPopupMenu();
-                        JPopupMenu popup = PopupMenuUtil.createPopupMenu();
+                        JPopupMenu popup = new NonHidePopupMenu();
                         getContext().getChartMediator().addDiseaseMenu(popup);
                         popup.show(e.getComponent(), e.getX(), e.getY());
                     } else {
