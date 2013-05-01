@@ -18,8 +18,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Properties;
 import javax.swing.Action;
 import javax.swing.DefaultListModel;
@@ -80,6 +82,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
     public String getCurrentDir() {
         return currentDir;
     }
+    private Map<String, ImageEntry> iconCache;
 //masuda$
     
     public AbstractBrowser() {
@@ -90,6 +93,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
             ClientContext.getBootLogger().warn("Desktop is not supported");
         }
         listModel = new DefaultListModel<ImageEntry>();
+        iconCache = new HashMap<>();
     }
 
     /**
@@ -375,11 +379,16 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         String fileName = path.getFileName().toString();
         long last = Files.getLastModifiedTime(path).toMillis();
 
-        ImageEntry entry = new ImageEntry();
-        entry.setUrl(url.toString());
-        entry.setPath(pathStr);
-        entry.setFileName(fileName);
-        entry.setLastModified(last);
+        String key = pathStr + ":" + String.valueOf(last);
+        ImageEntry entry = iconCache.get(key);
+        if (entry == null) {
+            entry = new ImageEntry();
+            entry.setUrl(url.toString());
+            entry.setPath(pathStr);
+            entry.setFileName(fileName);
+            entry.setLastModified(last);
+            iconCache.put(key, entry);
+        }
         
         return entry;
     }
@@ -417,6 +426,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         //if (imagePanel != null) {
         //    imagePanel.removeAll();
         //}
+        iconCache.clear();
     }
 
     protected boolean valueIsNullOrEmpty(String test) {
