@@ -86,10 +86,6 @@ public class TextComponentTransferHandler extends AbstractKarteTransferHandler {
     @Override
     public boolean canImport(TransferSupport support) {
         
-        if (!support.isDrop()) {
-            return false;
-        }
-        
         // 選択範囲内にDnDならtrue
         if (isDndOntoSelectedText(support)){
             return false;
