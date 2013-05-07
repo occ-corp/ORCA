@@ -729,7 +729,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
      */
     private final class KarteTask extends DBTask<Integer, Void> {
         
-        private static final int fetchSize = 200;
+        private static final int defaultFetchSize = 200;
         private Map<Long, DocInfoModel> docInfoMap;
         private CompletionService service;
         private MultiTaskExecutor exec;
@@ -757,6 +757,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             int idListSize = docInfoMap.size();
             int taskCount=  0;
             List<Long> allIds = new ArrayList<Long>(docInfoMap.keySet());
+            // 20文書までは一回で、20～200文書までは２分割で、200以上は200文書ごと取得
+            int fetchSize = (20 < idListSize && idListSize < defaultFetchSize)
+                    ? idListSize / 2
+                    : defaultFetchSize;
             
             // 分割してサーバーから取得する
             while (fromIndex < idListSize) {
@@ -778,6 +782,7 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 } catch (Exception ex) {
                 }
                 fromIndex += fetchSize;
+                fetchSize = defaultFetchSize;
             }
             
             // 出来上がったものからkarteViewerMapに登録していく
