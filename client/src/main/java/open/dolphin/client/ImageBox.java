@@ -7,10 +7,14 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.File;
-import java.io.FileFilter;
-import java.io.FilenameFilter;
+import java.io.IOException;
 import java.net.URL;
+import java.nio.file.DirectoryIteratorException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.*;
 import javax.swing.*;
 import open.dolphin.helper.ComponentMemory;
@@ -24,6 +28,9 @@ import open.dolphin.helper.WindowSupport;
  * @author modified by masuda, Masuda Naika
  */
 public class ImageBox extends AbstractMainTool {
+    
+    private static final String[] FOLDER_NAMES = {
+        "1-全身・躯幹", "2-頭頚部", "3-上肢", "4-下肢"};
 
     private static final int DEFAULT_IMAGE_WIDTH 	= 80; //120
     private static final int DEFAULT_IMAGE_HEIGHT 	= 80;
@@ -46,98 +53,98 @@ public class ImageBox extends AbstractMainTool {
     private MenuSupport mediator;
 //pns$
     private static final FolderImagePair[] DEFAULT_IMAGES = {
-        new FolderImagePair("1-全身・躯幹", "01-001.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-002.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-003.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-004.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-005.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-006.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-007.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-008.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-009.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-010.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-011.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-012.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-013.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-014.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-015.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-016.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-017.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-018.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-019.JPG"),
-        new FolderImagePair("1-全身・躯幹", "01-020.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-001.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-002.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-003.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-004.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-005.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-006.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-007.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-008.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-009.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-010.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-011.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-012.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-013.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-014.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-015.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-016.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-017.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-018.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-019.JPG"),
+        new FolderImagePair(FOLDER_NAMES[0], "01-020.JPG"),
         
-        new FolderImagePair("2-頭頚部", "02-001.JPG"),
-        new FolderImagePair("2-頭頚部", "02-002.JPG"),
-        new FolderImagePair("2-頭頚部", "02-003.JPG"),
-        new FolderImagePair("2-頭頚部", "02-004.JPG"),
-        new FolderImagePair("2-頭頚部", "02-005.JPG"),
-        new FolderImagePair("2-頭頚部", "02-006.JPG"),
-        new FolderImagePair("2-頭頚部", "02-007.JPG"),
-        new FolderImagePair("2-頭頚部", "02-008.JPG"),
-        new FolderImagePair("2-頭頚部", "02-009.JPG"),
-        new FolderImagePair("2-頭頚部", "02-010.JPG"),
-        new FolderImagePair("2-頭頚部", "02-011.JPG"),
-        new FolderImagePair("2-頭頚部", "02-012.JPG"),
-        new FolderImagePair("2-頭頚部", "02-013.JPG"),
-        new FolderImagePair("2-頭頚部", "02-014.JPG"),
-        new FolderImagePair("2-頭頚部", "02-015.JPG"),
-        new FolderImagePair("2-頭頚部", "02-016.JPG"),
-        new FolderImagePair("2-頭頚部", "02-017.JPG"),
-        new FolderImagePair("2-頭頚部", "02-018.JPG"),
-        new FolderImagePair("2-頭頚部", "02-019.JPG"),
-        new FolderImagePair("2-頭頚部", "02-020.JPG"),
-        new FolderImagePair("2-頭頚部", "02-021.JPG"),
-        new FolderImagePair("2-頭頚部", "02-022.JPG"),
-        new FolderImagePair("2-頭頚部", "02-023.JPG"),
-        new FolderImagePair("2-頭頚部", "02-024.JPG"),
-        new FolderImagePair("2-頭頚部", "02-025.JPG"),
-        new FolderImagePair("2-頭頚部", "02-026.JPG"),
-        new FolderImagePair("2-頭頚部", "02-027.JPG"),
-        new FolderImagePair("2-頭頚部", "02-028.JPG"),
-        new FolderImagePair("2-頭頚部", "02-029.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-001.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-002.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-003.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-004.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-005.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-006.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-007.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-008.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-009.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-010.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-011.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-012.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-013.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-014.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-015.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-016.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-017.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-018.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-019.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-020.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-021.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-022.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-023.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-024.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-025.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-026.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-027.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-028.JPG"),
+        new FolderImagePair(FOLDER_NAMES[1], "02-029.JPG"),
         
-        new FolderImagePair("3-上肢", "03-001.JPG"),
-        new FolderImagePair("3-上肢", "03-002.JPG"),
-        new FolderImagePair("3-上肢", "03-003.JPG"),
-        new FolderImagePair("3-上肢", "03-004.JPG"),
-        new FolderImagePair("3-上肢", "03-005.JPG"),
-        new FolderImagePair("3-上肢", "03-006.JPG"),
-        new FolderImagePair("3-上肢", "03-007.JPG"),
-        new FolderImagePair("3-上肢", "03-008.JPG"),
-        new FolderImagePair("3-上肢", "03-009.JPG"),
-        new FolderImagePair("3-上肢", "03-010.JPG"),
-        new FolderImagePair("3-上肢", "03-011.JPG"),
-        new FolderImagePair("3-上肢", "03-012.JPG"),
-        new FolderImagePair("3-上肢", "03-013.JPG"),
-        new FolderImagePair("3-上肢", "03-014.JPG"),
-        new FolderImagePair("3-上肢", "03-015.JPG"),
-        new FolderImagePair("3-上肢", "03-016.JPG"),
-        new FolderImagePair("3-上肢", "03-017.JPG"),
-        new FolderImagePair("3-上肢", "03-018.JPG"),
-        new FolderImagePair("3-上肢", "03-019.JPG"),
-        new FolderImagePair("3-上肢", "03-020.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-001.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-002.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-003.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-004.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-005.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-006.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-007.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-008.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-009.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-010.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-011.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-012.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-013.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-014.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-015.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-016.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-017.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-018.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-019.JPG"),
+        new FolderImagePair(FOLDER_NAMES[2], "03-020.JPG"),
         
-        new FolderImagePair("4-下肢", "04-001.JPG"),
-        new FolderImagePair("4-下肢", "04-002.JPG"),
-        new FolderImagePair("4-下肢", "04-003.JPG"),
-        new FolderImagePair("4-下肢", "04-004.JPG"),
-        new FolderImagePair("4-下肢", "04-005.JPG"),
-        new FolderImagePair("4-下肢", "04-006.JPG"),
-        new FolderImagePair("4-下肢", "04-007.JPG"),
-        new FolderImagePair("4-下肢", "04-008.JPG"),
-        new FolderImagePair("4-下肢", "04-009.JPG"),
-        new FolderImagePair("4-下肢", "04-010.JPG"),
-        new FolderImagePair("4-下肢", "04-011.JPG"),
-        new FolderImagePair("4-下肢", "04-012.JPG"),
-        new FolderImagePair("4-下肢", "04-013.JPG"),
-        new FolderImagePair("4-下肢", "04-014.JPG"),
-        new FolderImagePair("4-下肢", "04-015.JPG"),
-        new FolderImagePair("4-下肢", "04-016.JPG"),
-        new FolderImagePair("4-下肢", "04-017.JPG"),
-        new FolderImagePair("4-下肢", "04-018.JPG"),
-        new FolderImagePair("4-下肢", "04-019.JPG"),
-        new FolderImagePair("4-下肢", "04-020.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-001.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-002.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-003.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-004.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-005.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-006.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-007.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-008.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-009.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-010.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-011.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-012.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-013.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-014.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-015.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-016.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-017.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-018.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-019.JPG"),
+        new FolderImagePair(FOLDER_NAMES[3], "04-020.JPG"),
     };
     
     private static final String RES_BASE = "/open/dolphin/resources/schema/";
@@ -274,7 +281,7 @@ public class ImageBox extends AbstractMainTool {
         tabbedPane.removeAll();
         
         // タブ（フォルダ名）と画像URLリストのマップ
-        Map<String, List<URL>> map = new LinkedHashMap<String, List<URL>>();
+        Map<String, List<URL>> map = new LinkedHashMap<>();
         
         // デフォルトイメージ
         for (FolderImagePair pair : DEFAULT_IMAGES) {
@@ -282,8 +289,9 @@ public class ImageBox extends AbstractMainTool {
             String fileName = pair.getFileName();
             List<URL> urlList = map.get(folderName);
             if (urlList == null) {
-                urlList = new ArrayList<URL>();
+                urlList = new ArrayList<>();
             }
+            
             try {
                 URL url = getClass().getResource(RES_BASE + fileName);
                 if (url != null) {
@@ -293,31 +301,34 @@ public class ImageBox extends AbstractMainTool {
             }
             map.put(folderName, urlList);
         }
-        
+
         // ユーザーイメージ
-        File baseDir = new File(imageLocation);
-        if (baseDir.exists() && baseDir.isDirectory()) {
-            
-            File[] directories = listDirectories(baseDir);
-            for (File imageDirectory : directories) {
-                File[] imageFiles = listImageFiles(imageDirectory, suffix);
-                String folderName = imageDirectory.getName();
+        FileSystem fs = FileSystems.getDefault();
+        Path imagePath = fs.getPath(imageLocation);
+        DirectoryFilter dirFilter = new DirectoryFilter();
+        ImageFileFilter imageFilter = new ImageFileFilter(suffix);
+
+        try (DirectoryStream<Path> directories = Files.newDirectoryStream(imagePath, dirFilter)) {
+            for (Path dirPath : directories) {
+                String folderName = dirPath.getFileName().toString();
                 List<URL> urlList = map.get(folderName);
                 if (urlList == null) {
-                    urlList = new ArrayList<URL>();
+                    urlList = new ArrayList<>();
                 }
-                for (File imageFile : imageFiles) {
-                    try {
-                        URL url = imageFile.toURI().toURL();
+                try (DirectoryStream<Path> ds = Files.newDirectoryStream(dirPath, imageFilter)) {
+                    for (Path filePath : ds) {
+                        URL url = filePath.toUri().toURL();
                         if (url != null) {
                             urlList.add(url);
                         }
-                    } catch (Exception e) {
                     }
+                } catch (IOException | DirectoryIteratorException ex) {
                 }
                 map.put(folderName, urlList);
             }
+        } catch (IOException | DirectoryIteratorException ex) {
         }
+     
         for (Map.Entry entry : map.entrySet()) {
             String folderName = (String) entry.getKey();
             List<URL> urlList = (List<URL>) entry.getValue();
@@ -327,26 +338,15 @@ public class ImageBox extends AbstractMainTool {
         }
     }
 
-    private File[] listDirectories(File dir) {
-        DirectoryFilter filter = new DirectoryFilter();
-        File[] directories = dir.listFiles(filter);
-        return directories;
-    }
-    
-    private File[] listImageFiles(File dir, String[] suffix) {
-        ImageFileFilter filter = new ImageFileFilter(suffix);
-        return dir.listFiles(filter);
-    }
-
-    private class DirectoryFilter implements FileFilter {
+    private class DirectoryFilter implements DirectoryStream.Filter<Path> {
 
         @Override
-        public boolean accept(File path) {
-            return path.isDirectory();
+        public boolean accept(Path entry) throws IOException {
+            return Files.isDirectory(entry);
         }
     }
     
-    private class ImageFileFilter implements FilenameFilter {
+    private class ImageFileFilter implements DirectoryStream.Filter<Path> {
 
         private String[] suffix;
 
@@ -355,16 +355,14 @@ public class ImageBox extends AbstractMainTool {
         }
 
         @Override
-        public boolean accept(File dir, String name) {
-
-            boolean accept = false;
-            for (int i = 0; i < suffix.length; i++) {
-                if (name.toLowerCase().endsWith(suffix[i])) {
-                    accept = true;
-                    break;
+        public boolean accept(Path entry) throws IOException {
+            String path = entry.toString().toLowerCase();
+            for (String str : suffix) {
+                if (path.endsWith(str)) {
+                    return true;
                 }
             }
-            return accept;
+            return false;
         }
     }
     

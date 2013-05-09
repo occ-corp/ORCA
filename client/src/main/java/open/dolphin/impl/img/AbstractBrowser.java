@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URL;
+import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
@@ -23,6 +24,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
+import java.util.concurrent.ExecutionException;
+import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -236,24 +239,27 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
             return;
         }
 
-        SwingWorker worker = new SwingWorker<Void, Void>() {
+        SwingWorker worker = new SwingWorker<Void, ImageEntry>() {
 
             @Override
             protected Void doInBackground() throws Exception {
                 
-                List<Path> pathList = new ArrayList<Path>();
-                DirectoryStream<Path> ds = Files.newDirectoryStream(imagePath);
-                for (Path path : ds) {
-                    pathList.add(path);
+                List<Path> pathList = new ArrayList<>();
+
+                try (DirectoryStream<Path> ds = Files.newDirectoryStream(imagePath)) {
+                    for (Path path : ds) {
+                        pathList.add(path);
+                    }
+                } catch (IOException | DirectoryIteratorException ex) {
                 }
-                
+
                 // 親フォルダに戻るアイコンを追加する
                 if (imagePath.compareTo(rootPath) > 0) {
                     ImageEntry entry = createImageEntry(imagePath.getParent());
                     entry.setImageIcon(ClientContext.getImageIconAlias(ICON_PARENT_FOLDER));
                     entry.setIconText("一つ上へ");
                     entry.setDirectory(true);
-                    listModel.addElement(entry);
+                    publish(entry);
                 }
                 
                 if (pathList.isEmpty()) {
@@ -332,7 +338,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                         entry.setImageIcon(ClientContext.getImageIconAlias(FOLDER_ICON));
                         entry.setIconText(entry.getFileName());
                         entry.setDirectory(true);
-                        listModel.addElement(entry);
+                        publish(entry);
                         continue;
                     }
                     
@@ -350,17 +356,25 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                     }
 
                     // Thumbnail
-                    addThumbnailImageEntry(path);
+                    ImageEntry entry = createThumbnailImageEntry(path);
+                    publish(entry);
                 }
+                
                 return null;
+            }
+
+            @Override
+            protected void process(List<ImageEntry> chunks) {
+                for (ImageEntry entry : chunks) {
+                    listModel.addElement(entry);
+                }
             }
         };
 
         worker.execute();
     }
     
-    public void addThumbnailImageEntry(Path path) throws IOException {
-        
+    private ImageEntry createThumbnailImageEntry(Path path) throws IOException {
         ImageEntry entry = createImageEntry(path);
         entry.setImageIcon(FileIconMaker.createIcon(path, imageSize));
         SimpleDateFormat sdf = new SimpleDateFormat(SDF_FORMAT);
@@ -368,6 +382,11 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
                 ? entry.getFileName()
                 : sdf.format(entry.getLastModified());
         entry.setIconText(lblName);
+        return entry;
+    }
+    
+    public void addThumbnailImageEntry(Path path) throws IOException {
+        ImageEntry entry = createThumbnailImageEntry(path);
         listModel.addElement(entry);
     }
     
