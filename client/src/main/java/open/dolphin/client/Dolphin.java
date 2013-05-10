@@ -1093,8 +1093,13 @@ public class Dolphin implements MainWindow, IChartEventListener {
 
         return dirty;
     }
+    
+    // MenuFactoryからよばれる
+    public void processExit() {
+        processExit(false);
+    }
 
-    public void processExit(boolean force) {
+    private void processExit(boolean force) {
         if (!force) {
             if (isDirty()) {
                 alertDirty();
