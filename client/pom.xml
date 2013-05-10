@@ -39,7 +39,7 @@
         <dependency>
             <groupId>org.hibernate</groupId>
             <artifactId>hibernate-core</artifactId>
-            <version>4.1.11.Final</version>
+            <version>4.1.12.Final</version>
             <type>jar</type>
         </dependency>
         <dependency>
@@ -95,7 +95,7 @@
         <dependency>
             <groupId>commons-codec</groupId>
             <artifactId>commons-codec</artifactId>
-            <version>1.7</version>
+            <version>1.8</version>
         </dependency>
         <dependency>
             <groupId>jfree</groupId>
@@ -148,7 +148,7 @@
         <dependency>
            <groupId>com.jtattoo</groupId>
            <artifactId>JTattoo</artifactId>
-           <version>1.6.7</version>
+           <version>1.6.8</version>
          </dependency>
 <!-- 
         <dependency>
