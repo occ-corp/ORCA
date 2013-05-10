@@ -393,6 +393,8 @@ public class SqlDaoBean extends DaoBean {
         p.setPassword(getPasswd());
         p.setDefaultReadOnly(true);
         p.setMaxActive(5);
+        p.setMaxIdle(5);
+        p.setMinIdle(1);
         p.setInitialSize(1);
         p.setMaxWait(5000);
         p.setRemoveAbandonedTimeout(30);

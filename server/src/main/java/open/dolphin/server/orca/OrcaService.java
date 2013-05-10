@@ -61,6 +61,7 @@ public class OrcaService {
         for (DataSource ds : dataSourceMap.values()) {
             ds.close(true);
         }
+        dataSourceMap.clear();
         logger.info("Server ORCA service stopped.");
     }
 
@@ -220,6 +221,8 @@ public class OrcaService {
         p.setPassword(pass);
         p.setDefaultReadOnly(true);
         p.setMaxActive(5);
+        p.setMaxIdle(5);
+        p.setMinIdle(1);
         p.setInitialSize(1);
         p.setMaxWait(5000);
         p.setRemoveAbandonedTimeout(30);
