@@ -306,6 +306,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
      */
     @Override
     public void showDocuments(final DocInfoModel[] selectedHistories, final JScrollPane scroller) {
+        
+        if (karteViewerMap == null) {
+            return;
+        }
 
         this.scroller = scroller;
 

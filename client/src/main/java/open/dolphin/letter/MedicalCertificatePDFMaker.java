@@ -30,11 +30,11 @@ public class MedicalCertificatePDFMaker extends AbstractPDFMaker {
     protected boolean makePDF(String filePath) {
         
         boolean result = false;
-        marginLeft = 20;
-        marginRight = 20;
-        marginTop = 20;
-        marginBottom = 30;
-        titleFontSize = 10;
+        marginLeft = 35;
+        marginRight = 35;
+        marginTop = 40;
+        marginBottom = 40;
+        titleFontSize = 18;
 
         // 用紙サイズを設定
         Document document = new Document(PageSize.A4, marginLeft, marginRight, marginTop, marginBottom);
@@ -134,7 +134,7 @@ public class MedicalCertificatePDFMaker extends AbstractPDFMaker {
 //            }
 //            String space = sb.toString();
             StringBuilder sb = new StringBuilder();
-            sb.append(zipCode);
+            sb.append("〒").append(zipCode);
             cell = createNoBorderCell(sb.toString());
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             pTable.addCell(cell);
@@ -157,7 +157,7 @@ public class MedicalCertificatePDFMaker extends AbstractPDFMaker {
 
             // 医師
             sb = new StringBuilder();
-            sb.append("医 師　").append(model.getConsultantDoctor()).append(" 印");
+            sb.append("医 師　").append(model.getConsultantDoctor()).append("   印");
             cell = createNoBorderCell(sb.toString());
             cell.setHorizontalAlignment(Element.ALIGN_RIGHT);
             pTable.addCell(cell);

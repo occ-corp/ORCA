@@ -29,11 +29,11 @@ public class Reply1PDFMaker extends AbstractPDFMaker {
     protected boolean makePDF(String filePath) {
         
         boolean result = false;
-        marginLeft = 20;
-        marginRight = 20;
-        marginTop = 20;
-        marginBottom = 30;
-        titleFontSize = 10;
+        marginLeft = 35;
+        marginRight = 35;
+        marginTop = 40;
+        marginBottom = 40;
+        titleFontSize = 18;
 
         // 用紙サイズを設定
         Document document = new Document(PageSize.A4, marginLeft, marginRight, marginTop, marginBottom);
