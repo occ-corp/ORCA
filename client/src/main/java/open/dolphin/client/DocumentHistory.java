@@ -941,6 +941,9 @@ public class DocumentHistory {
      * @param extractionContent 文書タイプ
      */
     public void setExtractionContent(String extractionComposite) {
+        if (extractionComposite.split(CAMMA).length == 1) {
+            extractionComposite = extractionComposite + CAMMA + ALL;
+        }
         String old = this.extractionComposite;
         this.extractionComposite = extractionComposite;
         // 束縛プロパティの通知を行う

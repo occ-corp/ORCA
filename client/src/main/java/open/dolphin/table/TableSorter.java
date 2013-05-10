@@ -323,7 +323,8 @@ public class TableSorter extends AbstractTableModel {
     @Override
 	public Object getValueAt(int row, int column) {
 //masuda^
-        if (row > tableModel.getRowCount() - 1 || column > tableModel.getColumnCount()) {
+        if (row < 0 || row >= tableModel.getRowCount() 
+                || column < 0 || column >= tableModel.getColumnCount()) {
             return null;
         }
 //masuda$

@@ -65,6 +65,8 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     // Common MouseListener
     private MouseListener mouseListener;
     
+    private KarteTask karteTask;
+    
 
 //pns^ 表示されているカルテの中身を検索する modified by masuda
     private FindAndView findAndView = new FindAndView();
@@ -195,6 +197,11 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             viewer.stop();
         }
 */
+        try {
+            karteTask.cancel(true);
+        } catch (Exception ex) {
+        }
+        
         karteViewerMap.clear();
         karteViewerMap = null;
 
@@ -342,8 +349,11 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             showKarteViewers();
         } else {
             // 追加されたものがある場合はデータベースから取得する
-            KarteTask task = new KarteTask(getContext(), map);
-            task.execute();
+            if (karteTask != null && !karteTask.isDone()) {
+                karteTask.cancel(true);
+            }
+            karteTask = new KarteTask(getContext(), map);
+            karteTask.execute();
         }
     }
     
