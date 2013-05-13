@@ -196,7 +196,7 @@ public class ChartEventListener {
                 try {
                     future = ChartEventDelegater.getInstance().subscribe();
                     ClientResponse response = future.get();
-                    onEventExec.execute(new RemoteOnEventTask(response.getEntityInputStream()));
+                    onEventExec.execute(new RemoteOnEventTask(response));
                 } catch (Exception e) {
                 }
             }
@@ -235,15 +235,20 @@ public class ChartEventListener {
     // 状態変化通知メッセージをデシリアライズし各リスナに処理を分配する
     private class RemoteOnEventTask implements Runnable {
         
-        private InputStream is;
+        private ClientResponse response;
         
-        private RemoteOnEventTask(InputStream is) {
-            this.is = is;
+        private RemoteOnEventTask(ClientResponse response) {
+            this.response = response;
         }
 
         @Override
         public void run() {
             
+            if (response == null || response.getStatus() / 100 != 2) {
+                return;
+            }
+            
+            InputStream is = response.getEntityInputStream();
             ChartEventModel evt = (ChartEventModel) 
                     JsonConverter.getInstance().fromJson(is, ChartEventModel.class);
             
