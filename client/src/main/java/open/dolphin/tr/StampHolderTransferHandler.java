@@ -1,10 +1,14 @@
 package open.dolphin.tr;
 
+import java.awt.Dimension;
 import java.awt.EventQueue;
+import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
+import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -28,6 +32,8 @@ import open.dolphin.util.BeanUtils;
  * @author modified by masuda, Masuda Naika
  */
 public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
+    
+    private static final double IconScale = 0.6;
 
     //private static final int SHORTCUTKEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
     private static final String MED_TEIKI = "定期";
@@ -67,11 +73,39 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         }
         ModuleModel[] stamps = stampList.toArray(new ModuleModel[0]);
         OrderList list = new OrderList(stamps);
-
+        
+        // ドラッグ中のイメージを設定する
+        Image image = createIconImage();
+        setDragImage(image);
+        
         Transferable tr = new OrderListTransferable(list);
         return tr;
     }
+    
+    private Image createIconImage() {
+        
+        Dimension d = new Dimension();
+        for (StampHolder sh : selectedStampHolder) {
+            d.height += sh.getBounds().height;
+            d.width = Math.max(d.width, sh.getBounds().width);
+        }
+        BufferedImage image =new BufferedImage(d.width, d.height, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D g2d = image.createGraphics();
 
+        int y = 0;
+        for (StampHolder sh : selectedStampHolder) {
+            BufferedImage bf = getImageFromComponent(sh);
+            g2d.drawImage(bf, null, 0, y);
+            y += bf.getHeight();
+        }
+        g2d.dispose();
+        
+        int width = (int) (d.width * IconScale);
+        int height =(int) (d.height * IconScale);
+        
+        return image.getScaledInstance(width, height, Image.SCALE_FAST);
+    }
+    
     private void replaceStamp(final StampHolder target, final ModuleInfoBean stampInfo) {
 
         SwingWorker worker = new SwingWorker<Void, Void>() {

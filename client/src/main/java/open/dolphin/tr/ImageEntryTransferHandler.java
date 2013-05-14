@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
 import javax.swing.JList;
@@ -36,6 +37,10 @@ public class ImageEntryTransferHandler extends DolphinTransferHandler {
             endTransfer();
             return null;
         }
+        
+        // ドラッグ中のイメージを設定する
+        Image image = entry.getImageIcon().getImage();
+        setDragImage(image);
         
         Transferable tr = new ImageEntryTransferable(entry);
         return tr;

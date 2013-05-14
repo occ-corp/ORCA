@@ -1,7 +1,9 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
+import java.awt.image.BufferedImage;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
 import open.dolphin.client.GUIConst;
@@ -17,6 +19,8 @@ import open.dolphin.infomodel.SchemaModel;
  * @author modified by masuda, Masuda Naika
  */
 public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
+    
+    private static final double IconScale = 0.6;
 
     private static final SchemaHolderTransferHandler instance;
 
@@ -40,10 +44,24 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
         SchemaModel schema = source.getSchema();
         SchemaList list = new SchemaList();
         list.setSchemaList(new SchemaModel[]{schema});
+        
+        // ドラッグ中のイメージを設定する
+        Image image = createIconImage(src);
+        setDragImage(image);
+        
         Transferable tr = new SchemaListTransferable(list);
         return tr;
     }
+    
+    private Image createIconImage(JComponent src) {
 
+        BufferedImage image = getImageFromComponent(src);
+        int width = (int) (image.getWidth() * IconScale);
+        int height =(int) (image.getHeight() * IconScale);
+        
+        return image.getScaledInstance(width, height, Image.SCALE_FAST);
+    }
+    
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
 
