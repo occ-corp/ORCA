@@ -56,7 +56,8 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
     // docInfo.getDocId() (=String)ではなくgetDocPk() (=long)であることに注意
     private Map<Long, KarteViewer> karteViewerMap;
     // 今選択されているDocInfoModelの配列
-    private List<DocInfoModel> docInfoList;
+    private DocInfoModel[] docInfoList;
+    //private List<DocInfoModel> docInfoList;
     // ScrollerPaneに入っている、KarteViewerを含んだPanal
     private KarteScrollerPanel scrollerPanel;
     
@@ -319,20 +320,18 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
         }
 
         this.scroller = scroller;
+        docInfoList = selectedHistories;
 
         if (selectedHistories == null || selectedHistories.length == 0) {
             initScrollerPanel();
-            docInfoList = Collections.emptyList();
             return;
         }
         
-        docInfoList = Arrays.asList(selectedHistories);
-        
         // ここでソートしておく
         if (ascending) {
-            Collections.sort(docInfoList);
+            Arrays.sort(docInfoList);
         } else {
-            Collections.sort(docInfoList, Collections.reverseOrder());
+            Arrays.sort(docInfoList, Collections.reverseOrder());
         }
 
         // 選択リストにあって 現在の karteViewerMap にないものはデータベースから取得する
@@ -380,8 +379,9 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 initScrollerPanel();
 
                 // 選択されているDocInfoに対応するKarteViewerをviewerListに追加する
-                for (int i = 0; i < docInfoList.size(); ++i) {
-                    DocInfoModel docInfo = docInfoList.get(i);
+                int size = docInfoList.length;
+                for (int i = 0; i < size; ++i) {
+                    DocInfoModel docInfo = docInfoList[i];
                     KarteViewer viewer = karteViewerMap.get(docInfo.getDocPk());
                     if (viewer != null) {
                         JPanel panel = viewer.getUI();
@@ -399,8 +399,8 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
                 // 文書履歴タブに変更
                 getContext().showDocument(0);
                 // 一つ目を選択し、フォーカスを設定する。フォーカスがないとキー移動できない
-                int index = (ascending) ? docInfoList.size() - 1 : 0;
-                KarteViewer kv = karteViewerMap.get(docInfoList.get(index).getDocPk());
+                int index = (ascending) ? docInfoList.length - 1 : 0;
+                KarteViewer kv = karteViewerMap.get(docInfoList[index].getDocPk());
                 if (kv != null) {
                     setSelectedKarte(kv);
                     kv.getUI().requestFocusInWindow();
@@ -771,10 +771,10 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             int idListSize = docInfoMap.size();
             int taskCount=  0;
             List<Long> allIds = new ArrayList<Long>(docInfoMap.keySet());
-            // 20文書までは一回で、20～200文書までは２分割で、200以上は200文書ごと取得
-            int fetchSize = (20 < idListSize && idListSize < defaultFetchSize)
-                    ? idListSize / 2
-                    : defaultFetchSize;
+            // 20文書までは一回で、20～400文書までは２分割で、400以上は200文書ごと取得
+            int fetchSize = (idListSize <= 20 || idListSize / 200 > 2)
+                    ? defaultFetchSize
+                    : idListSize / 2;
             
             // 分割してサーバーから取得する
             while (fromIndex < idListSize) {
