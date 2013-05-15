@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
@@ -37,8 +38,23 @@ public class InFacilityLaboTransferHandler extends DolphinTransferHandler {
             list.add(tableModel.getObject(row));
         }
         if (list.isEmpty()) {
+            endTransfer();
             return null;
         }
+        // ドラッグ中のイメージを設定する
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (InFacilityLaboItem item : list) {
+            if (!first) {
+                sb.append("\n");
+            } else {
+                first = false;
+            }
+            sb.append(item.getItemName());
+        }
+        Image image = createStringImage(sb.toString(), sourceTable.getFont());
+        setDragImage(image);
+        
         return new InFacilityLaboItemTransferable(list.toArray(new InFacilityLaboItem[0])); 
     }
     

@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.Toolkit;
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
@@ -46,7 +47,15 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
 //masuda^   table sorter対応
         ListTableSorter sorter = (ListTableSorter) sourceTable.getModel();
         dragItem = (RegisteredDiagnosisModel) sorter.getObject(sourceTable.getSelectedRow());
-        return dragItem != null ? new InfoModelTransferable(dragItem) : null;
+        if (dragItem != null) {
+            // ドラッグ中のイメージを設定する
+            Image image = createStringImage(dragItem.getDiagnosisName(), sourceTable.getFont());
+            setDragImage(image);
+            return new InfoModelTransferable(dragItem);
+        }
+        
+        endTransfer();
+        return null;
 //masuda$
     }
 

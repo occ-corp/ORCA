@@ -1,7 +1,7 @@
 package open.dolphin.tr;
 
 import java.awt.Component;
-import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Rectangle;
@@ -11,6 +11,7 @@ import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import javax.swing.JComponent;
+import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import static javax.swing.TransferHandler.COPY_OR_MOVE;
@@ -116,6 +117,19 @@ public abstract class DolphinTransferHandler extends TransferHandler {
         
         Image image = createComponentImage(c);
 
+        return image;
+    }
+    
+    protected Image createStringImage(String str, Font font) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("<html>");
+        sb.append(str.replace("\n", "<br>"));
+        sb.append("</html>");
+        JLabel lbl = new JLabel();
+        lbl.setFont(font);
+        lbl.setText(sb.toString());
+        lbl.setSize(lbl.getPreferredSize());
+        Image image = createComponentImage(lbl);
         return image;
     }
 }

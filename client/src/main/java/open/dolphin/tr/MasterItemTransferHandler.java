@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
@@ -30,11 +31,14 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
         int fromIndex = sourceTable.getSelectedRow();
         MasterItem mi = tableModel.getObject(fromIndex);
         if (mi != null) {
+            // ドラッグ中のイメージを設定する
+            Image image = createStringImage(mi.getName(), sourceTable.getFont());
+            setDragImage(image);
             return new MasterItemTransferable(mi);
-        } else {
-            endTransfer();
-            return null;
         }
+        
+        endTransfer();
+        return null;
     }
     
     @Override

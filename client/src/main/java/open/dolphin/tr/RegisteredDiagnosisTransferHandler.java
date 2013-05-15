@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
@@ -31,6 +32,9 @@ public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
         fromIndex = sourceTable.getSelectedRow();
         RegisteredDiagnosisModel rd = tableModel.getObject(fromIndex);
         if (rd != null) {
+            // ドラッグ中のイメージを設定する
+            Image image = createStringImage(rd.getDiagnosisName(), sourceTable.getFont());
+            setDragImage(image);
             return new RegisteredDiagnosisTransferable(rd);
         }
         
