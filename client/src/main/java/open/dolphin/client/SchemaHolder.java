@@ -46,6 +46,7 @@ public final class SchemaHolder extends AbstractComponentHolder implements Compo
         setDoubleBuffered(false);
         setOpaque(true);
         setBackground(BACKGROUND);
+        setBorder(nonSelectedBorder);
         
         this.schema = schema;
         setImageIcon(schema.getIcon());
