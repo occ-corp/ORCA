@@ -285,15 +285,31 @@ public class StampBoxPlugin extends AbstractMainTool {
         //
         publishBtn = new JButton(ClientContext.getImageIconAlias("icon_stamp_publish"));
         publishBtn.setToolTipText("スタンプの公開を管理をします");
-        publishBtn.addActionListener(new ReflectActionListener(this, "publishStamp"));
-        
+//masuda^   reflectionはキライ
+        //publishBtn.addActionListener(new ReflectActionListener(this, "publishStamp"));
+        publishBtn.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                publishStamp();
+            }
+        });
+//masuda$
         //
         // インポートボタンを生成する
         //
         importBtn = new JButton(ClientContext.getImageIconAlias("icon_stamp_import"));
         importBtn.setToolTipText("スタンプのインポートを管理をします");
-        importBtn.addActionListener(new ReflectActionListener(this, "importStamp"));
-        
+//masuda^   reflectionはキライ
+        //importBtn.addActionListener(new ReflectActionListener(this, "importStamp"));
+        importBtn.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                importStamp();
+            }
+        });
+//masuda$
 //pns^  ロックボタンを生成する
         lockBtn = new JToggleButton();
         lockBtn.setIcon(ClientContext.getImageIconAlias("icon_stamp_lock_on"));
@@ -766,7 +782,7 @@ public class StampBoxPlugin extends AbstractMainTool {
     /**
      * スタンプパブリッシャーを起動する。
      */
-    public void publishStamp() {
+    private void publishStamp() {
         StampPublisher publisher = new StampPublisher(this);
         publisher.start();
     }
@@ -774,7 +790,7 @@ public class StampBoxPlugin extends AbstractMainTool {
     /**
      * スタンプインポーターを起動する。
      */
-    public void importStamp() {
+    private void importStamp() {
         StampImporter importer = new StampImporter(this);
         importer.start();
     }

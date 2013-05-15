@@ -1,5 +1,6 @@
 package open.dolphin.tr;
 
+import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import javax.swing.JComponent;
@@ -16,9 +17,15 @@ public class AspStampTreeTransferHandler extends DolphinTransferHandler {
 
     @Override
     protected Transferable createTransferable(JComponent c) {
+        
         startTransfer(c);
         StampTree sourceTree = (StampTree) c;
         StampTreeNode dragNode = (StampTreeNode) sourceTree.getLastSelectedPathComponent();
+        
+        // ドラッグ中のイメージを設定する
+        Image image = createNodeImage(sourceTree);
+        setDragImage(image);
+        
         return new LocalStampTreeNodeTransferable(dragNode);
     }
 

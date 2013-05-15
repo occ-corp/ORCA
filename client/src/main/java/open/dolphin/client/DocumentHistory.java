@@ -6,7 +6,6 @@ import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
-import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import java.util.ArrayList;
@@ -509,7 +508,7 @@ public class DocumentHistory {
     /**
      * 抽出期間を変更し再検索する。
      */
-    public void periodChanged(int state) {
+    private void periodChanged(int state) {
 //masuda^         
         if (!blockExtractionPeriodEvent && state == ItemEvent.SELECTED) {
             int index = extractionCombo.getSelectedIndex();
@@ -522,7 +521,7 @@ public class DocumentHistory {
     /**
      * 文書種別を変更し再検索する。
      */
-    public void contentChanged(int state) {
+    private void contentChanged(int state) {
         
         if (state == ItemEvent.SELECTED) {
             int index = contentCombo.getSelectedIndex();
@@ -812,10 +811,22 @@ public class DocumentHistory {
         });
 
         // 文書種別変更
-        contentCombo.addItemListener(EventHandler.create(ItemListener.class, this, "contentChanged", "stateChange"));
+        contentCombo.addItemListener(new ItemListener(){
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                contentChanged(e.getStateChange());
+            }
+        });
 
         // 抽出期間コンボボックスの選択を処理する
-        extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "periodChanged", "stateChange"));
+        extractionCombo.addItemListener(new ItemListener(){
+
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                periodChanged(e.getStateChange());
+            }
+        });
 
         // Preference から文書種別を設定する
         extractionComposite = KARTE + CAMMA + ALL;

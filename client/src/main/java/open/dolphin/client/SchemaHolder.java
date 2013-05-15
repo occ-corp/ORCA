@@ -24,9 +24,7 @@ public final class SchemaHolder extends AbstractComponentHolder implements Compo
     private static final Border nonSelectedBorder = BorderFactory.createLineBorder(NON_SELECTED_BORDER);
     private static final Border selectedBorder = BorderFactory.createLineBorder(SELECTED_BORDER);
 
-    private static final int FIXED_SIZE = 192;
-    private int fixedWidth = FIXED_SIZE;
-    private int fixedHeight = FIXED_SIZE;
+    private static final int ICON_SIZE = 192;
     
     private boolean selected;
     
@@ -45,10 +43,6 @@ public final class SchemaHolder extends AbstractComponentHolder implements Compo
         function.setDeleteAction(SchemaHolder.this);
 
         this.kartePane = kartePane;
-        setSize(fixedWidth, fixedHeight);
-        setMaximumSize(new Dimension(fixedWidth, fixedHeight));
-        setMinimumSize(new Dimension(fixedWidth, fixedHeight));
-        setPreferredSize(new Dimension(fixedWidth, fixedHeight));
         setDoubleBuffered(false);
         setOpaque(true);
         setBackground(BACKGROUND);
@@ -57,8 +51,8 @@ public final class SchemaHolder extends AbstractComponentHolder implements Compo
         setImageIcon(schema.getIcon());
     }
     
-    public void setImageIcon(ImageIcon icon) {
-        Dimension d = new Dimension(fixedWidth, fixedHeight);
+    private void setImageIcon(ImageIcon icon) {
+        Dimension d = new Dimension(ICON_SIZE, ICON_SIZE);
         ImageIcon adjusted = function.getAdjustedImage(icon, d);
         setIcon(adjusted);
     }

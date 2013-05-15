@@ -128,7 +128,7 @@ public class NLaboTestImporter extends AbstractMainComponent {
         controlMenu();
     }
     
-    public void openKarte() {
+    private void openKarte() {
         
         boolean showReceiptMessage = Project.getBoolean("showReceiptMessage", true);
         if (showReceiptMessage) {
@@ -517,7 +517,14 @@ public class NLaboTestImporter extends AbstractMainComponent {
 
                     if (row == selected && obj != null) {
                         String pop1 = ClientContext.getString("watingList.popup.openKarte");
-                        contextMenu.add(new JMenuItem(new ReflectAction(pop1, NLaboTestImporter.this, "openKarte")));
+                        JMenuItem mi = new JMenuItem(new AbstractAction(pop1){
+
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                openKarte();
+                            }
+                        });
+                        contextMenu.add(mi);
                     }
                     contextMenu.show(e.getComponent(), e.getX(), e.getY());
                 }

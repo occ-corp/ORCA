@@ -1,11 +1,13 @@
 package open.dolphin.stampbox;
 
 import java.awt.Toolkit;
+import java.awt.event.ActionEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import javax.swing.AbstractAction;
+import javax.swing.JMenuItem;
 import javax.swing.JPopupMenu;
 import javax.swing.tree.TreePath;
-import open.dolphin.client.PopupMenuFactory;
 import open.dolphin.infomodel.ModuleInfoBean;
 
 /**
@@ -33,7 +35,7 @@ public class StampTreePopupAdapter extends MouseAdapter {
         if (evt.isPopupTrigger()) {
 
             // イベントソースの StampTree を取得する
-            StampTree tree = (StampTree) evt.getSource();
+            final StampTree tree = (StampTree) evt.getSource();
 //masuda^   ロック中はポップアップしない
             if (tree.getStampBox().isLocked()) {
                 return;
@@ -63,7 +65,39 @@ public class StampTreePopupAdapter extends MouseAdapter {
             }
             
             // Popupする
-            JPopupMenu popup = PopupMenuFactory.create("stampTree.pop", tree);
+//masuda^   reflectionはキライ
+            JPopupMenu popup = new JPopupMenu();
+            popup.add(new JMenuItem(new AbstractAction("コピー"){
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tree.copy();
+                }
+            }));
+            popup.addSeparator();
+            popup.add(new JMenuItem(new AbstractAction("新規フォルダ"){
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tree.createNewFolder();
+                }
+            }));
+            popup.add(new JMenuItem(new AbstractAction("名称変更"){
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tree.renameNode();
+                }
+            }));
+            popup.addSeparator();
+            popup.add(new JMenuItem(new AbstractAction("削 除"){
+
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    tree.deleteNode();
+                }
+            }));
+//masuda$
             popup.show(evt.getComponent(),x, y);
         }
     }

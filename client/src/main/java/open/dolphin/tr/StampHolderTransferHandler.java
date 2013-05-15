@@ -94,7 +94,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
         int y = 0;
         for (StampHolder sh : selectedStampHolder) {
-            BufferedImage bf = getImageFromComponent(sh);
+            BufferedImage bf = createComponentImage(sh);
             g2d.drawImage(bf, null, 0, y);
             y += bf.getHeight();
         }

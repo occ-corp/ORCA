@@ -2,7 +2,6 @@ package open.dolphin.client;
 
 import java.awt.*;
 import java.awt.event.*;
-import java.beans.EventHandler;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.text.ParseException;
@@ -357,7 +356,12 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         diagTable.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
         diagTable.setRowSelectionAllowed(true);
         ListSelectionModel m = diagTable.getSelectionModel();
-        m.addListSelectionListener(EventHandler.create(ListSelectionListener.class, this, "rowSelectionChanged", ""));
+        m.addListSelectionListener(new ListSelectionListener() {
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                rowSelectionChanged(e);
+            }
+        });
 
 //masuda    ソーター組み込み
         sorter = new ListTableSorter(tableModel);
@@ -653,7 +657,12 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
         int currentDiagnosisPeriod = Project.getInt(Project.DIAGNOSIS_PERIOD, 0);
         int selectIndex = NameValuePair.getIndex(String.valueOf(currentDiagnosisPeriod), extractionObjects);
         extractionCombo.setSelectedIndex(selectIndex);
-        extractionCombo.addItemListener(EventHandler.create(ItemListener.class, this, "extPeriodChanged", ""));
+        extractionCombo.addItemListener(new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                extPeriodChanged(e);
+            }
+        });
 
         JPanel comboPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         comboPanel.add(extractionCombo);
@@ -693,7 +702,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
     /**
      * 行選択が起った時のボタン制御を行う。
      */
-    public void rowSelectionChanged(ListSelectionEvent e) {
+    private void rowSelectionChanged(ListSelectionEvent e) {
 
         if (e.getValueIsAdjusting() == false) {
             // 削除ボタンをコントロールする
@@ -731,7 +740,7 @@ public final class DiagnosisDocument extends AbstractChartDocument implements Pr
      * 抽出期間を変更した場合に再検索を行う。
      * ORCA 病名ボタンが disable であれば検索後に enable にする。
      */
-    public void extPeriodChanged(ItemEvent e) {
+    private void extPeriodChanged(ItemEvent e) {
         if (e.getStateChange() == ItemEvent.SELECTED) {
             getDiagnosisHistory();
         }

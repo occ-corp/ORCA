@@ -4,11 +4,12 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Frame;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.EventHandler;
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.ListSelectionListener;
 import open.dolphin.infomodel.PVTHealthInsuranceModel;
 import open.dolphin.project.Project;
@@ -227,8 +228,13 @@ public final class NewKarteDialog {
         insuranceList = new JList();
         insuranceList.setFixedCellWidth(200);
         insuranceList.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        insuranceList.addListSelectionListener(EventHandler.create(ListSelectionListener.class, this, "insuranceSelectionChanged", "valueIsAdjusting"));
-        
+        insuranceList.addListSelectionListener(new ListSelectionListener(){
+
+            @Override
+            public void valueChanged(ListSelectionEvent e) {
+                insuranceSelectionChanged(e.getValueIsAdjusting());
+            }
+        });
         JPanel ip = new JPanel(new BorderLayout(9, 0));
         ip.setBorder(BorderFactory.createTitledBorder(SELECT_INS));
         ip.add(insuranceList, BorderLayout.CENTER);
@@ -238,7 +244,13 @@ public final class NewKarteDialog {
         emptyNew = new JRadioButton(EMPTY_NEW);
         applyRp = new JRadioButton(APPLY_RP);
         allCopy = new JRadioButton(ALL_COPY);
-        ActionListener memory = EventHandler.create(ActionListener.class, this, "memoryMode");
+        ActionListener memory = new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                memoryMode();
+            }
+        };
         emptyNew.addActionListener(memory);
         applyRp.addActionListener(memory);
         allCopy.addActionListener(memory);
@@ -254,8 +266,16 @@ public final class NewKarteDialog {
         // タブパネルへ追加/別ウィンドウ
         openAnother = new JRadioButton(OPEN_ANOTHER);
         addToTab = new JRadioButton(ADD_TO_TAB);
-        openAnother.addActionListener(EventHandler.create(ActionListener.class, this, "memoryFrame"));
-        addToTab.addActionListener(EventHandler.create(ActionListener.class, this, "memoryFrame"));
+        ActionListener al = new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                memoryFrame();
+            }
+        };
+        openAnother.addActionListener(al);
+        addToTab.addActionListener(al);
+
         JPanel openPanel = new JPanel();
         openPanel.setLayout(new BoxLayout(openPanel, BoxLayout.X_AXIS));
         openPanel.add(openAnother);
@@ -266,13 +286,25 @@ public final class NewKarteDialog {
         // ok
         String buttonText =  (String) UIManager.get("OptionPane.okButtonText");
         okButton = new JButton(buttonText);
-        okButton.addActionListener(EventHandler.create(ActionListener.class, this, "doOk"));
+        okButton.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doOk();
+            }
+        });
         okButton.setEnabled(false);
         
         // Cancel Button
         buttonText =  (String)UIManager.get("OptionPane.cancelButtonText");
         cancelButton = new JButton(buttonText);
-        cancelButton.addActionListener(EventHandler.create(ActionListener.class, this, "doCancel"));
+        cancelButton.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doCancel();
+            }
+        });
                 
         // 全体を配置
         JPanel panel = new JPanel();
@@ -299,7 +331,7 @@ public final class NewKarteDialog {
     /**
      * 保険選択の変更を処理する。
      */
-    public void insuranceSelectionChanged(boolean adjusting) {
+    private void insuranceSelectionChanged(boolean adjusting) {
         if (adjusting == false) {
             Object o = insuranceList.getSelectedValue();
             boolean ok = (o != null);
@@ -310,7 +342,7 @@ public final class NewKarteDialog {
     /**
      * カルテの作成方法をプレファレンスに記録する。
      */
-    public void memoryMode() {
+    private void memoryMode() {
         
         if (emptyNew.isSelected()) {
             Project.setInt(LAST_CREATE_MODE, 0);
@@ -324,7 +356,7 @@ public final class NewKarteDialog {
     /**
      * カルテフレーム(ウインドウ)の作成方法をプレファレンスに記録する。
      */
-    public void memoryFrame() {
+    private void memoryFrame() {
         boolean openFrame = openAnother.isSelected();
         Project.setBoolean(FRAME_MEMORY,openFrame);
         Project.setBoolean(Project.KARTE_PLACE_MODE, openFrame);
@@ -333,7 +365,7 @@ public final class NewKarteDialog {
     /**
      * パラーメータを取得しダイアログの値に設定する。
      */
-    public void doOk() {
+    private void doOk() {
         params.setDepartmentName(departmentLabel.getText());
         params.setPVTHealthInsurance((PVTHealthInsuranceModel) insuranceList.getSelectedValue());
         params.setCreateMode(getCreateMode());
@@ -346,7 +378,7 @@ public final class NewKarteDialog {
     /**
      * キャンセルする。ダイアログを閉じる。
      */
-    public void doCancel() {
+    private void doCancel() {
         value = null;
         dialog.setVisible(false);
         dialog.dispose();

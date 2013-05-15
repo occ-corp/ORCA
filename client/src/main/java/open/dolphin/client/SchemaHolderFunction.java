@@ -126,21 +126,21 @@ public class SchemaHolderFunction {
     }
     
     public ImageIcon getAdjustedImage(ImageIcon icon, Dimension dim) {
-        
+
         getLogger().debug("SchemaHolder adjustImageSize");
-        
-        if ( (icon.getIconHeight() > dim.height) ||
-                (icon.getIconWidth() > dim.width) ) {
+
+        if ((icon.getIconHeight() > dim.height)
+                || (icon.getIconWidth() > dim.width)) {
             Image img = icon.getImage();
-            float hRatio = (float)icon.getIconHeight() / dim.height;
-            float wRatio = (float)icon.getIconWidth() / dim.width;
+            float hRatio = (float) icon.getIconHeight() / dim.height;
+            float wRatio = (float) icon.getIconWidth() / dim.width;
             int h, w;
             if (hRatio > wRatio) {
                 h = dim.height;
-                w = (int)(icon.getIconWidth() / hRatio);
+                w = (int) (icon.getIconWidth() / hRatio);
             } else {
                 w = dim.width;
-                h = (int)(icon.getIconHeight() / wRatio);
+                h = (int) (icon.getIconHeight() / wRatio);
             }
             img = img.getScaledInstance(w, h, Image.SCALE_SMOOTH);
             return new ImageIcon(img);

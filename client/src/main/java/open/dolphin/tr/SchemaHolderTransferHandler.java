@@ -55,7 +55,7 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
     
     private Image createIconImage(JComponent src) {
 
-        BufferedImage image = getImageFromComponent(src);
+        BufferedImage image = createComponentImage(src);
         int width = (int) (image.getWidth() * IconScale);
         int height =(int) (image.getHeight() * IconScale);
         

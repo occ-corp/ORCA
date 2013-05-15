@@ -1,5 +1,6 @@
 package open.dolphin.impl.img;
 
+import java.awt.Image;
 import java.awt.Window;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
@@ -45,6 +46,9 @@ public class ImageBrowserPanelTransferHandler extends DolphinTransferHandler {
             File f = new File(entry.getPath());
             File[] files = new File[]{f};
             Transferable tr = new FileListTransferable(files);
+            // ドラッグ中のイメージを設定する
+            Image image = entry.getImageIcon().getImage();
+            setDragImage(image);
             return tr;
         }
         endTransfer();

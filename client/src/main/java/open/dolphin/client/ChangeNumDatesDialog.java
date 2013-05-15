@@ -1,9 +1,8 @@
 package open.dolphin.client;
 
-import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.beans.EventHandler;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
 import javax.swing.*;
@@ -16,7 +15,7 @@ import javax.swing.event.DocumentListener;
  */
 public final class ChangeNumDatesDialog {
 
-    private JButton chagneBtn;
+    private JButton changeBtn;
     private JButton cancelBtn;
     private ChangeNumDatesView view;
     private JDialog dialog;
@@ -31,14 +30,24 @@ public final class ChangeNumDatesDialog {
         view.getNumDatesFld().setDocument(numReg);
 
         // OK button
-        chagneBtn = new JButton("変更");
-        chagneBtn.addActionListener(EventHandler.create(ActionListener.class, ChangeNumDatesDialog.this, "doOk"));
-        chagneBtn.setEnabled(false);
+        changeBtn = new JButton(new AbstractAction("変更"){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doOk();
+            }
+        });
+        changeBtn.setEnabled(false);
 
         // Cancel Button
         String buttonText =  (String)UIManager.get("OptionPane.cancelButtonText");
-        cancelBtn = new JButton(buttonText);
-        cancelBtn.addActionListener(EventHandler.create(ActionListener.class, ChangeNumDatesDialog.this, "doCancel"));
+        cancelBtn = new JButton(new AbstractAction(buttonText){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                doCancel();
+            }
+        });
 
         // Listener
         view.getNumDatesFld().getDocument().addDocumentListener(new DocumentListener() {
@@ -58,7 +67,7 @@ public final class ChangeNumDatesDialog {
             }
         });
 
-        Object[] options = new Object[]{chagneBtn, cancelBtn};
+        Object[] options = new Object[]{changeBtn, cancelBtn};
 
         JOptionPane jop = new JOptionPane(
                 view,
@@ -66,14 +75,16 @@ public final class ChangeNumDatesDialog {
                 JOptionPane.DEFAULT_OPTION,
                 null,
                 options,
-                chagneBtn);
+                changeBtn);
 
         dialog = jop.createDialog(parent, ClientContext.getFrameTitle("処方日数変更"));
         dialog.addWindowListener(new WindowAdapter() {
+            
             @Override
             public void windowOpened(WindowEvent e) {
                 view.getNumDatesFld().requestFocusInWindow();
             }
+
             @Override
             public void windowClosing(WindowEvent e) {
                 doCancel();
@@ -88,7 +99,7 @@ public final class ChangeNumDatesDialog {
         dialog.setVisible(true);
     }
 
-    public void doOk() {
+    private void doOk() {
         try {
             int number = Integer.parseInt(view.getNumDatesFld().getText().trim());
             boundSupport.firePropertyChange("newNumDates", -1, number);
@@ -98,7 +109,7 @@ public final class ChangeNumDatesDialog {
         }
     }
 
-    public void doCancel() {
+    private void doCancel() {
         boundSupport.firePropertyChange("newNumDates", -1, 0);
         close();
     }
@@ -112,6 +123,6 @@ public final class ChangeNumDatesDialog {
         String test = view.getNumDatesFld().getText().trim();
         boolean ok = true;
         ok = ok && (!test.equals(""));
-        chagneBtn.setEnabled(ok);
+        changeBtn.setEnabled(ok);
     }
 }

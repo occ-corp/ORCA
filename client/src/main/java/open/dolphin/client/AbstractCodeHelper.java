@@ -1,6 +1,8 @@
 package open.dolphin.client;
 
 import java.awt.Rectangle;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.util.Enumeration;
@@ -165,13 +167,25 @@ public abstract class AbstractCodeHelper {
         }
     }
     
-    protected void addActionListner(JMenuItem item, StampTreeNode node) {
-        
+    protected void addActionListner(final JMenuItem item, final StampTreeNode node) {
+//masuda    reflectionはキライ
+/*
         ReflectActionListener ral = new ReflectActionListener(this, LISTENER_METHOD, 
                             new Class[]{JComponent.class, TransferHandler.class, LocalStampTreeNodeTransferable.class},
                             new Object[]{textPane, textPane.getTransferHandler(), new LocalStampTreeNodeTransferable(node)});
+*/
+        ActionListener al = new ActionListener() {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                TransferHandler handler = textPane.getTransferHandler();
+                LocalStampTreeNodeTransferable tr = new LocalStampTreeNodeTransferable(node);
+                importStamp(textPane, handler, tr);
+            }
+            
+        };
         
-        item.addActionListener(ral);
+        item.addActionListener(al);
     }
 
     protected void showPopup() {
@@ -190,7 +204,8 @@ public abstract class AbstractCodeHelper {
         }
     }
     
-    public void importStamp(JComponent comp, TransferHandler handler, LocalStampTreeNodeTransferable tr) {
+    private void importStamp(JComponent comp, TransferHandler handler, LocalStampTreeNodeTransferable tr) {
+        
         textPane.setSelectionStart(start);
         textPane.setSelectionEnd(end);
         textPane.replaceSelection("");

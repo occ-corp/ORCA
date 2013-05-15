@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
-import java.beans.EventHandler;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -550,7 +549,7 @@ public class WatingListImpl extends AbstractMainComponent {
     /**
      * レンダラをトグルで切り替える。
      */
-    public void switchRenderere() {
+    private void switchRendererer() {
         sexRenderer = !sexRenderer;
         Project.setBoolean("sexRenderer", sexRenderer);
         if (pvtTable != null) {
@@ -631,7 +630,7 @@ public class WatingListImpl extends AbstractMainComponent {
         getContext().enabledAction(GUIConst.ACTION_OPEN_KARTE, enabled);
     }
 
-    public void openKarte() {
+    private void openKarte() {
 
         PatientVisitModel pvt = getSelectedPvt();
         if (pvt == null) {
@@ -691,30 +690,56 @@ public class WatingListImpl extends AbstractMainComponent {
                 PatientVisitModel obj = getSelectedPvt();
                 
                 if (row == selectedRow && obj != null && !obj.getStateBit(PatientVisitModel.BIT_CANCEL)) {
-                    String pop1 = "カルテを開く";
-                    contextMenu.add(new JMenuItem(
-                            new ReflectAction(pop1, WatingListImpl.this, "openKarte")));
+                    JMenuItem mi1 = new JMenuItem(new AbstractAction("カルテを開く"){
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            openKarte();
+                        }
+                    });
+                    contextMenu.add(mi1);
                     contextMenu.addSeparator();
                     contextMenu.add(new JMenuItem(copyAction));
                     // pvt削除は誰も開いていない場合のみ
                     if (obj.getPatientModel().getOwnerUUID() == null) {
-                        contextMenu.add(new JMenuItem(
-                                new ReflectAction("受付削除", WatingListImpl.this, "removePvt")));
+                        JMenuItem mi2 = new JMenuItem(new AbstractAction("受付削除"){
+
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                removePvt();
+                            }
+                        });
+                        contextMenu.add(mi2);
                     }
                     contextMenu.addSeparator();
                 }
                 
                 // pvt cancelのundo
                 if (row == selectedRow && obj != null && obj.getStateBit(PatientVisitModel.BIT_CANCEL)) {
-                    contextMenu.add(new JMenuItem(
-                            new ReflectAction("キャンセル取消", WatingListImpl.this, "undoCancelPvt")));
+                    JMenuItem mi3 = new JMenuItem(new AbstractAction("キャンセル取消"){
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            undoCancelPvt();
+                        }
+                    });
+                    contextMenu.add(mi3);
                     contextMenu.addSeparator();
                 }
-                
-                JRadioButtonMenuItem oddEven = new JRadioButtonMenuItem(
-                        new ReflectAction(pop3, WatingListImpl.this, "switchRenderere"));
-                JRadioButtonMenuItem sex = new JRadioButtonMenuItem(
-                        new ReflectAction(pop4, WatingListImpl.this, "switchRenderere"));
+                JRadioButtonMenuItem oddEven = new JRadioButtonMenuItem(new AbstractAction(pop3){
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                       switchRendererer();
+                    }
+                });
+                JRadioButtonMenuItem sex =  new JRadioButtonMenuItem(new AbstractAction(pop4){
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                       switchRendererer();
+                    }
+                });
                 ButtonGroup bg = new ButtonGroup();
                 bg.add(oddEven);
                 bg.add(sex);
@@ -725,12 +750,16 @@ public class WatingListImpl extends AbstractMainComponent {
                 } else {
                     oddEven.setSelected(true);
                 }
+                
+                JCheckBoxMenuItem item = new JCheckBoxMenuItem(new AbstractAction(pop5){
 
-                JCheckBoxMenuItem item = new JCheckBoxMenuItem(pop5);
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        switchAgeDisplay();
+                    }
+                });
                 contextMenu.add(item);
                 item.setSelected(ageDisplay);
-                item.addActionListener(
-                        EventHandler.create(ActionListener.class, WatingListImpl.this, "switchAgeDisplay"));
 
                 // 担当分のみ表示: getOrcaId() != nullでメニュー
                 if (orcaId != null) {
@@ -826,7 +855,7 @@ public class WatingListImpl extends AbstractMainComponent {
     /**
      * 選択した患者の受付キャンセルをundoする。masuda
      */
-    public void undoCancelPvt() {
+    private void undoCancelPvt() {
 
         final PatientVisitModel pvtModel = getSelectedPvt();
 
@@ -845,7 +874,7 @@ public class WatingListImpl extends AbstractMainComponent {
     /**
      * 選択した患者の受付を削除する。masuda
      */
-    public void removePvt() {
+    private void removePvt() {
 
         final PatientVisitModel pvtModel = getSelectedPvt();
 

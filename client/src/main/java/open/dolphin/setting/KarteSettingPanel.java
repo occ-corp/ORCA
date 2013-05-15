@@ -7,7 +7,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
-import java.beans.EventHandler;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.List;
@@ -399,8 +398,13 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         bg.add(vSc);
         bg.add(hSc);
 
-        restoreDefaultBtn.addActionListener(EventHandler.create(ActionListener.class, this, "restoreDefault"));
+        restoreDefaultBtn.addActionListener(new ActionListener(){
 
+              @Override
+              public void actionPerformed(ActionEvent e) {
+                  restoreDefault();
+              }
+          });
         // スタンプ動作
         JPanel stampPanel = new JPanel();
         stampPanel.setLayout(new BoxLayout(stampPanel, BoxLayout.Y_AXIS));
@@ -642,12 +646,6 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         }
     }
 
-    public void inspectorChanged(int state) {
-        if (state == ItemEvent.SELECTED) {
-            checkState();
-        }
-    }
-
     /**
      * ModelToView
      */
@@ -660,10 +658,18 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         forthCompo.setSelectedItem(model.getForthInspector());
 
         // 重複をチェックするためのリスナ
-        topCompo.addItemListener(EventHandler.create(ItemListener.class, this, "inspectorChanged", "stateChange"));
-        secondCompo.addItemListener(EventHandler.create(ItemListener.class, this, "inspectorChanged", "stateChange"));
-        thirdCompo.addItemListener(EventHandler.create(ItemListener.class, this, "inspectorChanged", "stateChange"));
-        forthCompo.addItemListener(EventHandler.create(ItemListener.class, this, "inspectorChanged", "stateChange"));
+        ItemListener il = new ItemListener() {
+            @Override
+            public void itemStateChanged(ItemEvent e) {
+                if (e.getStateChange() == ItemEvent.SELECTED) {
+                    checkState();
+                }
+            }
+        };
+        topCompo.addItemListener(il);
+        secondCompo.addItemListener(il);
+        thirdCompo.addItemListener(il);
+        forthCompo.addItemListener(il);
 
         // インスペクタ画面のロケータ
         boolean curLocator = model.isLocateByPlatform();
@@ -1616,7 +1622,7 @@ public class KarteSettingPanel extends AbstractSettingPanel {
         }
     }
 
-    public void restoreDefault() {
+    private void restoreDefault() {
 
         pltform.setSelected(Project.getDefaultBoolean(Project.LOCATION_BY_PLATFORM));
         prefLoc.setSelected(!Project.getDefaultBoolean(Project.LOCATION_BY_PLATFORM));

@@ -4,7 +4,6 @@ import java.awt.Component;
 import java.awt.Toolkit;
 import java.awt.datatransfer.StringSelection;
 import java.awt.event.*;
-import java.beans.EventHandler;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -144,7 +143,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
     /**
      * 年齢表示をオンオフする。
      */
-    public void switchAgeDisplay() {
+    private void switchAgeDisplay() {
         
         if (view.getTable() == null) {
             return;
@@ -238,21 +237,47 @@ public class PatientSearchImpl extends AbstractMainComponent {
                 int selected = view.getTable().getSelectedRow();
 
                 if (row == selected && obj != null) {
-                    contextMenu.add(new JMenuItem(new ReflectAction("カルテを開く", PatientSearchImpl.this, "openKarte")));
+                    JMenuItem mi1 = new JMenuItem(new AbstractAction("カルテを開く"){
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            openKarte();
+                        }
+                    });
+                    contextMenu.add(mi1);
                     contextMenu.addSeparator();
                     contextMenu.add(new JMenuItem(copyAction));
-                    contextMenu.add(new JMenuItem(new ReflectAction("受付登録", PatientSearchImpl.this, "addAsPvt")));
+                    JMenuItem mi2 = new JMenuItem(new AbstractAction("受付登録"){
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            addAsPvt();
+                        }
+                    });
+                    contextMenu.add(mi2);
                     contextMenu.addSeparator();
                 }
 
-                JCheckBoxMenuItem item = new JCheckBoxMenuItem("年齢表示");
+                JCheckBoxMenuItem item = new JCheckBoxMenuItem(new AbstractAction("年齢表示"){
+
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        switchAgeDisplay();
+                    }
+                });
                 contextMenu.add(item);
                 item.setSelected(ageDisplay);
-                item.addActionListener(EventHandler.create(ActionListener.class, PatientSearchImpl.this, "switchAgeDisplay"));
                 
 //pns^  検索結果をファイル保存
                 if (view.getTable().getRowCount() > 0) {
-                    contextMenu.add(new JMenuItem(new ReflectAction("検索結果ファイル保存", PatientSearchImpl.this, "exportSearchResult")));
+                    JMenuItem mi3 = new JMenuItem(new AbstractAction("検索結果ファイル保存"){
+
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            exportSearchResult();
+                        }
+                    });
+                    contextMenu.add(mi3);
                 }
 //pns$
                 contextMenu.show(e.getComponent(), e.getX(), e.getY());
@@ -543,7 +568,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
      * カルテを開く。
      * @param value 対象患者
      */
-    public void openKarte() {
+    private void openKarte() {
 
         if (canOpen(getSelectedPatient())) {
 
@@ -573,7 +598,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
     /**
      * リストで選択された患者を受付に登録する。
      */
-    public void addAsPvt() {
+    private void addAsPvt() {
 
         // 来院情報を生成する
         SimpleWorker worker = new SimpleWorker<Void, Void>() {
@@ -788,7 +813,7 @@ public class PatientSearchImpl extends AbstractMainComponent {
     /**
      * 検索結果をファイルに書き出す
      */
-    public void exportSearchResult() {
+    private void exportSearchResult() {
         JFileChooser fileChooser = new JFileChooser();
         if (fileChooser.showSaveDialog(view) == JFileChooser.APPROVE_OPTION) {
             File file = fileChooser.getSelectedFile();

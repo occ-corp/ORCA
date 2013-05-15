@@ -157,8 +157,17 @@ public final class SimpleCalendarPanel extends JPanel implements DragGestureList
         this.setMaximumSize(dim);
         
         // Embed popup menu
-        appointMenu = PopupMenuFactory.create("appoint.popupMenu", SimpleCalendarPanel.this);
-        
+//masuda^   reflectionはキライ
+        //appointMenu = PopupMenuFactory.create("appoint.popupMenu", SimpleCalendarPanel.this);
+        appointMenu = new JPopupMenu();
+        appointMenu.add(new JMenuItem(new AbstractAction("取り消し"){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                appointCancel();
+            }
+        }));
+//masuda$
         // Table を DragTarget, 自身をリスナに設定する
         dragSource = new DragSource();
         dragSource.createDefaultDragGestureRecognizer(table, DnDConstants.ACTION_COPY_OR_MOVE, SimpleCalendarPanel.this);
@@ -752,7 +761,7 @@ public final class SimpleCalendarPanel extends JPanel implements DragGestureList
         processAppoint(popedRow, popedCol, "その他", null);
     }
 
-    public void appointCancel() {
+    private void appointCancel() {
         processCancel(popedRow, popedCol);
     }
     

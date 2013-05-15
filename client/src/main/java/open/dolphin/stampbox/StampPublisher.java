@@ -15,7 +15,6 @@ import javax.swing.event.DocumentListener;
 import open.dolphin.client.BlockGlass;
 import open.dolphin.client.ClientContext;
 import open.dolphin.client.GUIFactory;
-import open.dolphin.client.ReflectActionListener;
 import open.dolphin.delegater.StampDelegater;
 import open.dolphin.helper.GridBagBuilder;
 import open.dolphin.helper.SimpleWorker;
@@ -117,7 +116,7 @@ public class StampPublisher {
         SwingUtilities.invokeLater(awt);
     }
     
-    public void stop() {
+    private void stop() {
         dialog.setVisible(false);
         dialog.dispose();
         stampBox.getBlockGlass().unblock();
@@ -389,16 +388,46 @@ public class StampPublisher {
         publc.addActionListener(pl);
         
         // CheckBox listener
-        ReflectActionListener cbListener = new ReflectActionListener(this, "checkButton");
+//masuda^   reflectionはキライ
+        //ReflectActionListener cbListener = new ReflectActionListener(this, "checkButton");
+        ActionListener cbListener = new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkButton();
+            }
+        };
         for (JCheckBox cb : entities) {
             cb.addActionListener(cbListener);
         }
         
         // publish & cancel
-        publish.addActionListener(new ReflectActionListener(this, "publish"));
-        cancelPublish.addActionListener(new ReflectActionListener(this, "cancelPublish"));
-        cancel.addActionListener(new ReflectActionListener(this, "stop"));
+        //publish.addActionListener(new ReflectActionListener(this, "publish"));
+        //cancelPublish.addActionListener(new ReflectActionListener(this, "cancelPublish"));
+        //cancel.addActionListener(new ReflectActionListener(this, "stop"));
+        publish.addActionListener(new ActionListener(){
 
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                publish();
+            }
+        });
+        cancelPublish.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelPublish();
+            }
+        });
+        
+        cancel.addActionListener(new ActionListener(){
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                stop();
+            }
+        });
+//masuda$
         if (ClientContext.isDolphinPro()) {
             local.doClick();
         }
@@ -423,7 +452,7 @@ public class StampPublisher {
     /**
      * スタンプを公開する。
      */
-    public void publish() {
+    private void publish() {
         
         // 公開するStampTreeを取得する
         ArrayList<StampTree> publishList = new ArrayList<StampTree>(IInfoModel.STAMP_ENTITIES.length);
@@ -625,7 +654,7 @@ public class StampPublisher {
     /**
      * 公開しているTreeを取り消す。
      */
-    public void cancelPublish() {
+    private void cancelPublish() {
         
         // 確認を行う
         JLabel msg1 = new JLabel("公開を取り消すとサブスクライブしているユーザがあなたの");
@@ -748,7 +777,7 @@ public class StampPublisher {
         worker.execute();
     }
     
-    public void checkButton() {
+    private void checkButton() {
         
         switch (publishType) {
             case TT_NONE:

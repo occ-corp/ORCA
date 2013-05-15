@@ -1,14 +1,10 @@
 package open.dolphin.tr;
 
-import java.awt.Component;
-import java.awt.Graphics2D;
 import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.text.BadLocationException;
@@ -141,15 +137,5 @@ public abstract class AbstractKarteTransferHandler extends DolphinTransferHandle
     protected final int getModifiersEx() {
         int modifiersEx = FocusPropertyChangeListener.getInstance().getModifiersEx();
         return modifiersEx;
-    }
-    
-    // ComponentからBufferedImageを作成する
-    protected BufferedImage getImageFromComponent(Component cmp) {
-        Rectangle r = cmp.getBounds();
-        BufferedImage image = new BufferedImage(r.width, r.height, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D g2d = image.createGraphics();
-        cmp.paint(g2d);
-        g2d.dispose();
-        return image;
     }
 }
