@@ -10,17 +10,15 @@ import open.dolphin.table.ListTableModel;
 
 
 /**
- * RegisteredDiagnosisTransferHandler
+ * RegisteredDiagnosisTransferHandler　病名エディタ
  *
  * @author Minagawa,Kazushi
  * @author modified by masuda, Masuda Naika, from 1.4
  */
 public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
-
-    private DataFlavor registeredDiagnosisFlavor = RegisteredDiagnosisTransferable.registeredDiagnosisFlavor;
-
+    
+    private static final DataFlavor FLAVOR = RegisteredDiagnosisTransferable.registeredDiagnosisFlavor;
     private int fromIndex;
-    private int toIndex;
 
     @Override
     protected Transferable createTransferable(JComponent src) {
@@ -45,60 +43,41 @@ public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
     @Override
     public boolean importData(TransferSupport support) {
         
-        if (!canImport(support)) {
+        JTable dropTable = (JTable) support.getComponent();
+        if (!canImport(support) || dropTable != srcComponent) {
             importDataFailed();
             return false;
         }
-
+        
         try {
-            JTable dropTable = (JTable) support.getComponent();
-
             ListTableModel<RegisteredDiagnosisModel> tableModel = (ListTableModel<RegisteredDiagnosisModel>) dropTable.getModel();
             JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
-            toIndex = dropLocation.getRow();
-            if (dropTable == srcComponent) {
-                tableModel.moveRow(fromIndex, (toIndex > fromIndex) ? --toIndex : toIndex);
-            } else {
-                RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) 
-                        support.getTransferable().getTransferData(registeredDiagnosisFlavor);
-                tableModel.addObject(toIndex, rd);
-            }
+            int toIndex = dropLocation.getRow();
+            tableModel.moveRow(fromIndex, (toIndex > fromIndex) ? --toIndex : toIndex);
+            dropTable.getSelectionModel().setSelectionInterval(toIndex, toIndex);
             importDataSuccess(dropTable);
             return true;
-
+            
         } catch (Exception ioe) {
+            importDataFailed();
+            return false;
         }
-        
-        importDataFailed();
-        return false;
     }
 
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
-
-        // export先がOpenDolphin以外なら削除しない
-        if (isExportToOther()) {
-            endTransfer();
-            return;
-        }
-        
-        JTable sourceTable = (JTable) c;
-        sourceTable.getSelectionModel().setSelectionInterval(toIndex, toIndex);
-        
         fromIndex = -1;
-        toIndex = -1;
         endTransfer();
     }
-
+    
+    @Override
+    public int getSourceActions(JComponent c) {
+        return MOVE;
+    }
+    
     @Override
     public boolean canImport(TransferSupport support) {
-
-        if (!support.isDrop()) {
-            return false;
-        }
-        if (support.isDataFlavorSupported(registeredDiagnosisFlavor)) {
-            return true;
-        }
-        return false;
+        return support.isDrop() 
+                && support.isDataFlavorSupported(FLAVOR);
     }
 }

@@ -14,7 +14,6 @@ import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
-import static javax.swing.TransferHandler.COPY_OR_MOVE;
 import javax.swing.text.Position;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;

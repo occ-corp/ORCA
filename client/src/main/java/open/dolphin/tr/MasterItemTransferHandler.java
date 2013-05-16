@@ -3,8 +3,6 @@ package open.dolphin.tr;
 import java.awt.Image;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.io.IOException;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import open.dolphin.order.MasterItem;
@@ -19,7 +17,8 @@ import open.dolphin.table.ListTableModel;
  */
 public final class MasterItemTransferHandler extends DolphinTransferHandler {
     
-    private DataFlavor masterItemFlavor = MasterItemTransferable.masterItemFlavor;
+    private static final DataFlavor FLAVOR = MasterItemTransferable.masterItemFlavor;
+    private int fromIndex;
     
     @Override
     protected Transferable createTransferable(JComponent src) {
@@ -28,7 +27,7 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
         
         JTable sourceTable = (JTable) src;
         ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) sourceTable.getModel();
-        int fromIndex = sourceTable.getSelectedRow();
+        fromIndex = sourceTable.getSelectedRow();
         MasterItem mi = tableModel.getObject(fromIndex);
         if (mi != null) {
             // ドラッグ中のイメージを設定する
@@ -42,71 +41,43 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
     }
     
     @Override
-    public int getSourceActions(JComponent c) {
-        return MOVE;
-    }
-    
-    @Override
     public boolean importData(TransferSupport support) {
         
-        if (!canImport(support)) {
+        JTable dropTable = (JTable) support.getComponent();
+        if (!canImport(support) || dropTable != srcComponent) {
             importDataFailed();
             return false;
         }
 
         try {
-            JTable.DropLocation dl = (JTable.DropLocation)support.getDropLocation();
-            int toIndex = dl.getRow();
-            if (dl.isInsertRow() && toIndex>-1) {
-                Transferable t = support.getTransferable();
-                MasterItem dropItem = (MasterItem) t.getTransferData(masterItemFlavor);
-                JTable dropTable = (JTable) support.getComponent();
-                
-                ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) dropTable.getModel();
+            ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) dropTable.getModel();
+            JTable.DropLocation dropLocation = (JTable.DropLocation) support.getDropLocation();
+            int toIndex = dropLocation.getRow();
+            tableModel.moveRow(fromIndex, (toIndex > fromIndex) ? --toIndex : toIndex);
+            dropTable.getSelectionModel().setSelectionInterval(toIndex, toIndex);
+            importDataSuccess(dropTable);
+            return true;
 
-                if (toIndex<tableModel.getObjectCount()) {
-                    tableModel.addObject(toIndex, dropItem);
-                } else {
-                    tableModel.addObject(dropItem);
-                }
-                
-                importDataSuccess(support.getComponent());
-                return true;
-            }
         } catch (Exception ioe) {
-            ioe.printStackTrace(System.err);
+            importDataFailed();
+            return false;
         }
-        
-        importDataFailed();
-        return false;
     }
     
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
-        
-        // export先がOpenDolphin以外なら削除しない
-        if (isExportToOther()) {
-            endTransfer();
-            return;
-        }
-
-        boolean shouldRemove = (c == srcComponent);
-        
-        if (action == MOVE && shouldRemove) {
-            JTable src = (JTable) c;
-            ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) src.getModel();
-            try {
-                MasterItem mi = (MasterItem) data.getTransferData(masterItemFlavor);
-                tableModel.delete(mi);
-            } catch (UnsupportedFlavorException ex) {
-            } catch (IOException ex) {
-            }
-        }
+        fromIndex = -1;
         endTransfer();
     }
-
+    
+    @Override
+    public int getSourceActions(JComponent c) {
+        return MOVE;
+    }
+    
     @Override
     public boolean canImport(TransferSupport support) {
-        return (support.isDrop() && support.isDataFlavorSupported(masterItemFlavor));
+        return support.isDrop() 
+                && support.isDataFlavorSupported(FLAVOR);
     }
 }

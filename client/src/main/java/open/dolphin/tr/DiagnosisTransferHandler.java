@@ -2,9 +2,11 @@ package open.dolphin.tr;
 
 import java.awt.Image;
 import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JTable;
 import open.dolphin.client.DiagnosisDocument;
@@ -21,10 +23,9 @@ import open.dolphin.table.ListTableSorter;
  *
  */
 public class DiagnosisTransferHandler extends DolphinTransferHandler {
-
-    private RegisteredDiagnosisModel dragItem;
-    private DiagnosisDocument parent;
     
+    private static final DataFlavor FLAVOR = LocalStampTreeNodeTransferable.localStampTreeNodeFlavor;
+    private DiagnosisDocument parent;
     private int action;
 
     public DiagnosisTransferHandler(DiagnosisDocument parent) {
@@ -46,7 +47,7 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
 
 //masuda^   table sorter対応
         ListTableSorter sorter = (ListTableSorter) sourceTable.getModel();
-        dragItem = (RegisteredDiagnosisModel) sorter.getObject(sourceTable.getSelectedRow());
+        RegisteredDiagnosisModel dragItem = (RegisteredDiagnosisModel) sorter.getObject(sourceTable.getSelectedRow());
         if (dragItem != null) {
             // ドラッグ中のイメージを設定する
             Image image = createStringImage(dragItem.getDiagnosisName(), sourceTable.getFont());
@@ -74,9 +75,9 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
              JTable dropTable = (JTable) c;
              int index = dropTable.getSelectedRow();
              if (index < 0) {
-             index = 0;
+                index = 0;
              }
-             */
+*/
 //masuda$
             if (support.isDrop()) {
                 action = support.getDropAction();
@@ -85,10 +86,10 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
 
             // Dropされたノードを取得する
             Transferable t = support.getTransferable();
-            StampTreeNode droppedNode = (StampTreeNode) t.getTransferData(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor);
+            StampTreeNode droppedNode = (StampTreeNode) t.getTransferData(FLAVOR);
 
             // Import するイストを生成する
-            ArrayList<ModuleInfoBean> importList = new ArrayList<ModuleInfoBean>(3);
+            List<ModuleInfoBean> importList = new ArrayList<>();
 
             // 葉の場合
             if (droppedNode.isLeaf()) {
@@ -122,7 +123,7 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
                 }
             }
             // まとめてデータベースからフェッチしインポートする
-            if (importList.size() > 0) {
+            if (!importList.isEmpty()) {
                 parent.importStampList(importList, index);
                 importDataSuccess(support.getComponent());
                 return true;
@@ -142,6 +143,6 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
 
     @Override
     public boolean canImport(TransferSupport support) {
-        return support.isDataFlavorSupported(LocalStampTreeNodeTransferable.localStampTreeNodeFlavor);
+        return support.isDataFlavorSupported(FLAVOR);
     }
 }
