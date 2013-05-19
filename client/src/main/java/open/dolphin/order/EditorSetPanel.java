@@ -107,7 +107,11 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
     public void setEditorValue(IInfoModel[] value) {
         isImport = false;
         editorValue = value;
-        boundSupport.firePropertyChange(EditorSetPanel.EDITOR_VALUE_PROP, null, editorValue);
+//masuda^   スタンプ新規・置換制御のためoldValueも返す
+        //boundSupport.firePropertyChange(EditorSetPanel.EDITOR_VALUE_PROP, null, editorValue);
+        IInfoModel[] oldValue = curEditor.getOldValue();
+        boundSupport.firePropertyChange(EditorSetPanel.EDITOR_VALUE_PROP, oldValue, editorValue);
+//masuda$
     }
     
     public StampTreeNode getSelectedNode() {
@@ -344,7 +348,7 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
                                 IInfoModel model = (IInfoModel) BeanUtils.xmlDecode(stampModel.getStampBytes());
                                 if (model != null) {
                                     // 病名の場合
-                                    if ("diagnosis".equals(stampModel.getEntity())) {
+                                    if (model instanceof RegisteredDiagnosisModel) {
                                         RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) model;
                                         curEditor.setValue(new RegisteredDiagnosisModel[]{rd});
                                     //　それ以外
@@ -386,8 +390,13 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
                 // 束縛プロパティによりリスナのStampBoxへこの値が通知される。
 //masuda^   複数スタンプ
                 IInfoModel[] values = curEditor.getValue();
-//masuda$
+                if (values == null || values.length == 0) {
+                    return;
+                }
+                // 新規の場合はoldValueをクリアする
+                curEditor.setOldValue(null);
                 setEditorValue(values);
+//masuda$
                 curEditor.setValue(null);
             }
         });
@@ -403,31 +412,10 @@ public class EditorSetPanel extends JPanel implements PropertyChangeListener, Tr
                 // 束縛プロパティによりリスナへこの値が通知される。
 //masuda^   複数スタンプ
                 IInfoModel[] values = curEditor.getValue();
-
                 if (values == null || values.length == 0) {
                     return;
                 }
-                
-                // 病名以外
-                if (!(values[0] instanceof RegisteredDiagnosisModel)) {
-                    // 編集元のstampIdを取得する
-                    IInfoModel[] oldValues = curEditor.getOldValue();
-                    String stampId = null;
-                    if (oldValues != null && oldValues.length > 0) {
-                        ModuleModel stamp = (ModuleModel) oldValues[0];
-                        stampId = stamp.getModuleInfoBean().getStampId();
-                    }
-                    // １個目はstampIdを引き継ぐ。その他は新規としてstampId = null
-                    for (int i = 0; i < values.length; ++i) {
-                        ModuleModel stamp = (ModuleModel) values[i];
-                        if (i == 0) {
-                            stamp.getModuleInfoBean().setStampId(stampId);
-                        } else {
-                            stamp.getModuleInfoBean().setStampId(null);
-                        }
-                    }
-                }
-                
+                // 置換の場合はstampIdを継承するためoldValueはクリアしない
                 setEditorValue(values);
 //masuda$
                 curEditor.setValue(null);

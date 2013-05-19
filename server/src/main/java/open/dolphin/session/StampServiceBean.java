@@ -536,4 +536,14 @@ public class StampServiceBean {
         }
         return cnt;
     }
+    
+//masuda^   すべてのスタンプを取得する
+    public List<StampModel> getAllStamps(Long userId) {
+        if (userId == null) {
+            return null;
+        }
+        return em.createQuery("select s from StampModel s where s.userId = :userId")
+                .setParameter("userId", userId)
+                .getResultList();
+    }
 }

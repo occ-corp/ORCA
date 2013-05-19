@@ -20,6 +20,7 @@ public final class ChangeNumDatesDialog {
     private ChangeNumDatesView view;
     private JDialog dialog;
     private PropertyChangeSupport boundSupport;
+    private PropertyChangeListener listener;
 
     public ChangeNumDatesDialog(JFrame parent, PropertyChangeListener pcl) {
 
@@ -91,8 +92,9 @@ public final class ChangeNumDatesDialog {
             }
         });
 
+        listener = pcl;
         boundSupport = new PropertyChangeSupport(this);
-        boundSupport.addPropertyChangeListener(pcl);
+        boundSupport.addPropertyChangeListener(listener);
     }
 
     public void show() {
@@ -115,6 +117,7 @@ public final class ChangeNumDatesDialog {
     }
 
     private void close() {
+        boundSupport.removePropertyChangeListener(listener);
         dialog.setVisible(false);
         dialog.dispose();
     }

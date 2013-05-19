@@ -126,6 +126,26 @@ public abstract class AbstractStampBox extends JTabbedPane implements IStampBox 
         return ret;
     }
     
+//masuda^
+    /**
+     * スタンプボックスに含まれるORCA以外の全treeを返す。
+     * @return StampTreeのリスト
+     */
+    public List<StampTree> getAllTreesExceptOrca() {
+        List<StampTree> ret = new ArrayList<StampTree>();
+        int cnt = this.getTabCount();
+        for (int i = 0; i < cnt; i++) {
+            StampTreePanel tp = (StampTreePanel) this.getComponentAt(i);
+            if (IInfoModel.ENTITY_ORCA.equals(tp.getTree().getEntity())) {
+                continue;
+            }
+            StampTree tree = tp.getTree();
+            ret.add(tree);
+        }
+        return ret;
+    }
+//masuda$
+    
     /**
      * スタンプボックスに含まれる病名以外のStampTreeを返す。
      * @return StampTreeのリスト

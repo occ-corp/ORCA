@@ -63,7 +63,7 @@ public final class FalcoSender implements IKarteSender {
     public void removeListeners() {
         if (boundSupport != null) {
             for (PropertyChangeListener listener : boundSupport.getPropertyChangeListeners()) {
-                boundSupport.removePropertyChangeListener(listener);
+                boundSupport.removePropertyChangeListener(KarteSenderResult.PROP_KARTE_SENDER_RESULT, listener);
             }
         }
     }

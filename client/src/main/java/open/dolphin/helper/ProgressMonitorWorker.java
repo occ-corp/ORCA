@@ -22,7 +22,7 @@ public abstract class ProgressMonitorWorker<T, Void> extends SwingWorker<T, Void
     private Timer taskTimer;
     private ProgressMonitor monitor;
     private int delayCount;
-    private static final int DEFAULT_ESTIMATION = 120*1000;  // 120 秒
+    private static final int DEFAULT_ESTIMATION = 60*1000;  // 60 秒
     private static final int DEFAULT_DELAY = 300;       // 300 mmsec
     private boolean timeout;
     private PropertyChangeListener pcl;

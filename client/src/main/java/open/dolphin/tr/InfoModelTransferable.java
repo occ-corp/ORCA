@@ -27,7 +27,8 @@ import open.dolphin.infomodel.IInfoModel;
 /**
  * Transferable class of the IInfoModel.
  *
- * @author  Kazushi Minagawa, Digital Globe, Inc.
+ * @author Kazushi Minagawa, Digital Globe, Inc.
+ * @author masuda, Masuda Naika
  */ 
 public final class InfoModelTransferable extends DolphinTransferable {
 
@@ -35,12 +36,13 @@ public final class InfoModelTransferable extends DolphinTransferable {
     public static DataFlavor infoModelFlavor = new DataFlavor(IInfoModel.class, "Info Model");
 
     public static final DataFlavor[] flavors = {InfoModelTransferable.infoModelFlavor};
-      
-    private IInfoModel model;
+    
+    // 複数対応 masuda
+    private IInfoModel[] infoModels;
 
     /** Creates new InfoModelTransferable */
-    public InfoModelTransferable(IInfoModel model) {
-        this.model = model;
+    public InfoModelTransferable(IInfoModel[] infoModels) {
+        this.infoModels = infoModels;
     }
 
     @Override
@@ -58,7 +60,7 @@ public final class InfoModelTransferable extends DolphinTransferable {
 	    throws UnsupportedFlavorException, IOException {
 
         if (flavor.equals(infoModelFlavor)) {
-            return model;
+            return infoModels;
         } else {
             throw new UnsupportedFlavorException(flavor);
         }

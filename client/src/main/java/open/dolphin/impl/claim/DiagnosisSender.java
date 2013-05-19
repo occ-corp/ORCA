@@ -59,7 +59,7 @@ public class DiagnosisSender implements IDiagnosisSender {
     public void removeListeners() {
         if (boundSupport != null) {
             for (PropertyChangeListener listener : boundSupport.getPropertyChangeListeners()) {
-                boundSupport.removePropertyChangeListener(listener);
+                boundSupport.removePropertyChangeListener(KarteSenderResult.PROP_DIAG_SENDER_RESULT, listener);
             }
         }
     }

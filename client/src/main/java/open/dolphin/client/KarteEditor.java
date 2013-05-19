@@ -133,7 +133,7 @@ public class KarteEditor extends AbstractChartDocument implements IInfoModel, NC
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         if (boundSupport != null) {
-            boundSupport.removePropertyChangeListener(listener);
+            boundSupport.removePropertyChangeListener(SAVE_DONE, listener);
         }
     }
 //masuda$

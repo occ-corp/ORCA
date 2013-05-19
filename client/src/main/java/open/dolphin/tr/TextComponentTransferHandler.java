@@ -137,11 +137,20 @@ public class TextComponentTransferHandler extends AbstractKarteTransferHandler {
     // DiagnosisDocumentからの病名を挿入する
     private boolean doDiagnosisDrop(Transferable tr, JTextComponent tc) {
         try {
-            RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) tr.getTransferData(InfoModelTransferable.infoModelFlavor);
+            // 複数対応
+            RegisteredDiagnosisModel[] rds = (RegisteredDiagnosisModel[]) tr.getTransferData(InfoModelTransferable.infoModelFlavor);
             StringBuilder sb = new StringBuilder();
-            sb.append("＃");
-            sb.append(rd.getDiagnosis());
-            sb.append("(").append(rd.getStartDate()).append(")");
+            boolean first = true;
+            for (RegisteredDiagnosisModel rd : rds) {
+                if (!first) {
+                    sb.append("\n");
+                } else {
+                    first = false;
+                }
+                sb.append("＃");
+                sb.append(rd.getDiagnosis());
+                sb.append("(").append(rd.getStartDate()).append(")");
+            }
             tc.replaceSelection(sb.toString());
             return true;
         } catch (Exception e) {

@@ -518,6 +518,27 @@ public class StampDelegater extends BusinessDelegater {
         return ids.size();
     }
     
+//masuda^   すべてのStampModelを取得する
+    public List<StampModel> getAllStamps(long userId) throws Exception {
+        
+        String path = RES_STAMP + "allStamps/" + String.valueOf(userId);
+        
+        ClientResponse response = getClientRequest(path, null)
+                .accept(MEDIATYPE_JSON_UTF8)
+                .get(ClientResponse.class);
+
+        int status = response.getStatus();
+        isHTTP200(status);
+        InputStream is = response.getEntityInputStream();
+
+        TypeReference typeRef = new TypeReference<List<StampModel>>(){};
+        List<StampModel> smList = (List<StampModel>) 
+                getConverter().fromGzippedJson(is, typeRef);
+        
+        return smList;
+    }
+    
+    
     @Override
     protected void debug(int status, String entity) {
         if (debug || DEBUG) {

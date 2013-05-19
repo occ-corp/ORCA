@@ -11,7 +11,6 @@ import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
 import open.dolphin.client.GUIConst;
 import open.dolphin.client.KartePane;
@@ -33,23 +32,16 @@ import open.dolphin.util.BeanUtils;
  */
 public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
     
-    private static final double IconScale = 0.6;
-
-    //private static final int SHORTCUTKEY_MASK = Toolkit.getDefaultToolkit().getMenuShortcutKeyMask();
+    private static final double IconScale = 0.7;
+    
     private static final String MED_TEIKI = "定期";
     private static final String MED_RINJI = "臨時";
 
     private static final StampHolderTransferHandler instance;
 
-    // 選択している複数のStampHolderを記憶しておく
-    private static final CopyOnWriteArrayList<StampHolder> selectedStampHolder;
-
-
     static {
         instance = new StampHolderTransferHandler();
-        selectedStampHolder = new CopyOnWriteArrayList<StampHolder>();
     }
-
 
     private StampHolderTransferHandler() {
     }
@@ -64,7 +56,7 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         startTransfer(src);
         
         // 複数stampを含んだtransferableを返す
-        List<ModuleModel> stampList = new ArrayList<ModuleModel>();
+        List<ModuleModel> stampList = new ArrayList<>();
 
         // OrderListのstampsを作る
         for (StampHolder sh : selectedStampHolder) {
@@ -285,7 +277,10 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
     @Override
     public void enter(JComponent jc, ActionMap map) {
-
+        
+        // SchemaHolderの選択は解除する
+        exitClearSelectedSchemaHolder();
+        
         StampHolder sh = (StampHolder) jc;
 
         boolean canCut = (sh.getKartePane().getTextPane().isEditable());
@@ -301,13 +296,6 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         if (!isAvoidExit()) {
             exitClearSelectedStampHolder();
         }
-    }
-
-    public boolean isAvoidExit() {
-
-        int modifiersEx = getModifiersEx();
-        return  (modifiersEx & SHORTCUTKEY_DOWN_MASK) != 0 &&
-                (modifiersEx & InputEvent.ALT_DOWN_MASK) == 0;
     }
 
     private void processStampSelection(StampHolder stampHolder) {
@@ -336,15 +324,6 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         }
         //何も押されてなかったら単一選択のはず
         stampHolderSingleSelection(stampHolder);
-    }
-
-    // selectedStampHolderにあるStampHolderをexitしクリアする
-    private void exitClearSelectedStampHolder() {
-
-        for (StampHolder sh : selectedStampHolder) {
-            sh.setSelected(false);
-        }
-        selectedStampHolder.clear();
     }
 
     public void stampHolderSingleSelection(StampHolder stampHolder) {

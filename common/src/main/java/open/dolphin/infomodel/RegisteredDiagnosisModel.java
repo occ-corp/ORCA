@@ -81,6 +81,17 @@ public class RegisteredDiagnosisModel extends KarteEntryBean {
     public boolean isActive() {
         return active;
     }
+    
+    // スタンプ箱のエディタで使用
+    @JsonIgnore
+    @Transient
+    private String stampId;
+    public void setStampId(String stampId) {
+        this.stampId = stampId;
+    }
+    public String getStampId() {
+        return stampId;
+    }
 //masuda$
     
     /**

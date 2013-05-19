@@ -1,15 +1,21 @@
 package open.dolphin.client;
 
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.EventQueue;
+import java.awt.Image;
+import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
 import java.util.Iterator;
+import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.ImageIcon;
 import javax.swing.JPopupMenu;
 import javax.swing.KeyStroke;
 import open.dolphin.infomodel.SchemaModel;
 import open.dolphin.plugin.PluginLoader;
+import open.dolphin.tr.SchemaHolderTransferHandler;
 import org.apache.log4j.Logger;
 
 /**
@@ -65,9 +71,9 @@ public class SchemaHolderFunction {
     
     // 選択中のスタンプホルダを削除する deleteAction
     private void deleteSchema() {
-        
-        if (selectedSchema != null) {
-            selectedSchema.getKartePane().removeSchema(selectedSchema);
+        List<SchemaHolder> shList = getSelectedSchemaHolder();
+        for (SchemaHolder sh : shList) {
+            sh.getKartePane().removeSchema(sh);
         }
     }
     
@@ -147,5 +153,9 @@ public class SchemaHolderFunction {
         } else {
             return icon;
         }
+    }
+    
+    private List<SchemaHolder> getSelectedSchemaHolder() {
+        return SchemaHolderTransferHandler.getInstance().getSelectedSchemaHolder();
     }
 }

@@ -260,6 +260,19 @@ public class KarteStyledDocument extends DefaultStyledDocument {
         }
         return list;
     }
+    
+    public List<SchemaHolder> getSchemaHolders() {
+        
+        List<SchemaHolder> list = new ArrayList<SchemaHolder>();
+        int length = getLength();
+        for (int i = 0; i < length; ++i) {
+            SchemaHolder sh = (SchemaHolder) StyleConstants.getComponent(getCharacterElement(i).getAttributes());
+            if (sh != null) {
+                list.add(sh);
+            }
+        }
+        return list;
+    }
 /*
     // StampHolder直後の改行がない場合は補う
     public void fixCrAfterStamp() {

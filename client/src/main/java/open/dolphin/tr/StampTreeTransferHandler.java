@@ -6,6 +6,8 @@ import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
@@ -74,50 +76,50 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
         try {
             if (support.isDataFlavorSupported(orderFlavor)) {
                 OrderList list = (OrderList) tr.getTransferData(orderFlavor);
-                ModuleModel droppedStamp = list.getOrderList()[0];
-                String droppedStampEntity = droppedStamp.getModuleInfoBean().getEntity();
+                List<ModuleModel> mmList = new ArrayList<>();
+                for (ModuleModel mm : list.getOrderList()) {
+                    String stampEntity = mm.getModuleInfoBean().getEntity();
 
-                if (droppedStampEntity.equals(targetEntity)) {
-                    imported = target.addStamp(parentNode, droppedStamp, childIndex);
+                    if (stampEntity.equals(targetEntity)) {
+                        mmList.add(mm);
+                    } else if (stampEntity.equals(IInfoModel.ENTITY_LABO_TEST)
+                            && (targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER) || 
+                            targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
+                        //-----------------------------------------
+                        // drop が検体検査で受けが生体もしくは細菌の場合
+                        // entity を受側に変更して受け入れる
+                        //-----------------------------------------
+                        mm.getModuleInfoBean().setEntity(targetEntity);
+                        mmList.add(mm);
+                    } else if (stampEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER)
+                            && (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || 
+                            targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
+                        //-----------------------------------------
+                        // drop が生体検査で受けが検体もしくは細菌の場合
+                        // entity を受側に変更して受け入れる
+                        //-----------------------------------------
+                        mm.getModuleInfoBean().setEntity(targetEntity);
+                        mmList.add(mm);
+                    } else if (stampEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER)
+                            && (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || 
+                            targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER))) {
+                        //-----------------------------------------
+                        // drop が細菌検査で受けが検体もしくは生体の場合
+                        // entity を受側に変更して受け入れる
+                        //-----------------------------------------
+                        mm.getModuleInfoBean().setEntity(targetEntity);
+                        mmList.add(mm);
+                    } else if (targetEntity.equals(IInfoModel.ENTITY_PATH)) {
+                        //---------------------
+                        // パス Tree の場合
+                        //---------------------
+                        mmList.add(mm);
 
-                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_LABO_TEST)
-                        && (targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER) || targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
-                    //-----------------------------------------
-                    // drop が検体検査で受けが生体もしくは細菌の場合
-                    // entity を受側に変更して受け入れる
-                    //-----------------------------------------
-                    droppedStamp.getModuleInfoBean().setEntity(targetEntity);
-                    imported = target.addStamp(parentNode, droppedStamp, childIndex);
-
-                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER)
-                        && (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || targetEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER))) {
-                    //-----------------------------------------
-                    // drop が生体検査で受けが検体もしくは細菌の場合
-                    // entity を受側に変更して受け入れる
-                    //-----------------------------------------
-                    droppedStamp.getModuleInfoBean().setEntity(targetEntity);
-                    imported = target.addStamp(parentNode, droppedStamp, childIndex);
-
-                } else if (droppedStampEntity.equals(IInfoModel.ENTITY_BACTERIA_ORDER)
-                        && (targetEntity.equals(IInfoModel.ENTITY_LABO_TEST) || targetEntity.equals(IInfoModel.ENTITY_PHYSIOLOGY_ORDER))) {
-                    //-----------------------------------------
-                    // drop が細菌検査で受けが検体もしくは生体の場合
-                    // entity を受側に変更して受け入れる
-                    //-----------------------------------------
-                    droppedStamp.getModuleInfoBean().setEntity(targetEntity);
-                    imported = target.addStamp(parentNode, droppedStamp, childIndex);
-
-                } else if (targetEntity.equals(IInfoModel.ENTITY_PATH)) {
-                    //---------------------
-                    // パス Tree の場合
-                    //---------------------
-                    imported = target.addStamp(parentNode, droppedStamp, childIndex);
-
-                } else {
-                    // Rootの最後に追加する
-                    //return target.addStamp(droppedStamp, null);
-                    // これがいいかどうか.....
-                    imported = false;
+                    }
+                }
+                if (!mmList.isEmpty()) {
+                    ModuleModel[] adds = mmList.toArray(new ModuleModel[mmList.size()]);
+                    imported = target.addStamp(parentNode, adds, childIndex);
                 }
 
             } else if (support.isDataFlavorSupported(stringFlavor)) {
@@ -134,13 +136,13 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
                 //----------------------------------------------
                 // DiagnosisEditorからDropされた病名をインポートする
                 //----------------------------------------------
-                RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) tr.getTransferData(InfoModelTransferable.infoModelFlavor);
                 if (targetEntity.equals(IInfoModel.ENTITY_DIAGNOSIS)) {
-                    imported = target.addDiagnosis(parentNode, rd, childIndex);
+                    RegisteredDiagnosisModel[] rds = (RegisteredDiagnosisModel[]) 
+                            tr.getTransferData(InfoModelTransferable.infoModelFlavor);
+                    imported = target.addDiagnosis(parentNode, rds, childIndex);
                 } else {
                     imported = false;
                 }
-
             } else if (support.isDataFlavorSupported(stampTreeNodeFlavor)) {
                 //-----------------------------------------------
                 // StampTree内のDnD, Dropされるノードを取得する

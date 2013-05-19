@@ -1,11 +1,13 @@
-
 package open.dolphin.stampbox;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
 import open.dolphin.client.ClientContext;
 import open.dolphin.delegater.StampDelegater;
 import open.dolphin.infomodel.ModuleInfoBean;
@@ -30,10 +32,25 @@ public class ExtendedStampTreeXmlBuilder {
     private StringWriter stringWriter;
     private StampTreeNode rootNode;
     private Logger logger;
+    
+    private Map<String, StampModel> allStampMap;
 
     // Creates new ExtendedStampTreeXmlBuilder
     public ExtendedStampTreeXmlBuilder() {
+        
         logger = ClientContext.getBootLogger();
+        
+        // 先にユーザーのスタンプをデータベースからまとめて取得しHashMapに登録しておく
+        allStampMap = new HashMap<>();
+        long userId = Project.getUserModel().getId();
+        try {
+            List<StampModel> allStamps = StampDelegater.getInstance().getAllStamps(userId);
+            for (StampModel stamp : allStamps) {
+                allStampMap.put(stamp.getId(), stamp);
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
     }
 
     /**
@@ -185,11 +202,10 @@ public class ExtendedStampTreeXmlBuilder {
     }
 
     // StampIdから対応するStampModelを取得してstampBytesのHex文字列を作成する
-    private String getHexStampBytes(String stampId) throws Exception{
+    private String getHexStampBytes(String stampId) {
 
-        StampDelegater del = StampDelegater.getInstance();
         // スタンプの実体を取得
-        StampModel model = del.getStamp(stampId);
+        StampModel model = allStampMap.get(stampId);
         // データベースにない場合はnullを返す
         if (model == null){
             return null;

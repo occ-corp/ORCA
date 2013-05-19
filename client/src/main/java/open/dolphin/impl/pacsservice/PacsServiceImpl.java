@@ -52,7 +52,7 @@ public class PacsServiceImpl implements PacsService {
         if (boundSupport == null) {
             boundSupport = new PropertyChangeSupport(this);
         }
-        boundSupport.removePropertyChangeListener(listener);
+        boundSupport.removePropertyChangeListener(PACS_IMAGE_ARRIVED, listener);
     }
 
     @Override

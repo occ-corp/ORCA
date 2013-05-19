@@ -5,7 +5,10 @@ import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.datatransfer.UnsupportedFlavorException;
+import java.awt.event.InputEvent;
 import java.io.IOException;
+import java.util.List;
+import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.JComponent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
@@ -13,6 +16,8 @@ import javax.swing.text.JTextComponent;
 import open.dolphin.client.FocusPropertyChangeListener;
 import open.dolphin.client.KartePane;
 import open.dolphin.client.KarteStyledDocument;
+import open.dolphin.client.SchemaHolder;
+import open.dolphin.client.StampHolder;
 
 /**
  * AbstractKarteTransferHandler
@@ -20,6 +25,15 @@ import open.dolphin.client.KarteStyledDocument;
  * @author masuda, Masuda Naika
  */
 public abstract class AbstractKarteTransferHandler extends DolphinTransferHandler implements IKarteTransferHandler{
+    
+    // 選択している複数のStampHolder/SchemaHolderを記憶しておく
+    protected static final List<StampHolder> selectedStampHolder;
+    protected static final List<SchemaHolder> selectedSchemaHolder;
+    
+    static {
+        selectedStampHolder = new CopyOnWriteArrayList<>();
+        selectedSchemaHolder = new CopyOnWriteArrayList<>();
+    }
 
     @Override
     protected void exportDone(JComponent c, Transferable data, int action) {
@@ -132,10 +146,35 @@ public abstract class AbstractKarteTransferHandler extends DolphinTransferHandle
         }
         return false;
     }
-
+    
     // modifiersExを返す
     protected final int getModifiersEx() {
         int modifiersEx = FocusPropertyChangeListener.getInstance().getModifiersEx();
         return modifiersEx;
+    }
+    
+    protected boolean isAvoidExit() {
+        int modifiersEx = getModifiersEx();
+        return (modifiersEx & SHORTCUTKEY_DOWN_MASK) != 0
+                && (modifiersEx & InputEvent.ALT_DOWN_MASK) == 0;
+    }
+    
+    
+    // selectedStampHolderにあるStampHolderをexitしクリアする
+    protected void exitClearSelectedStampHolder() {
+
+        for (StampHolder sh : selectedStampHolder) {
+            sh.setSelected(false);
+        }
+        selectedStampHolder.clear();
+    }
+    
+    // selectedSchemaHolderにあるSchemaHolderをexitしクリアする
+    protected void exitClearSelectedSchemaHolder() {
+
+        for (SchemaHolder sh : selectedSchemaHolder) {
+            sh.setSelected(false);
+        }
+        selectedSchemaHolder.clear();
     }
 }

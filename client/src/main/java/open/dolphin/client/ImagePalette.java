@@ -63,6 +63,7 @@ public class ImagePalette extends JPanel {
     }
 
     public void dispose() {
+        jlistModel.clear();
     }
 
     public void refresh() {

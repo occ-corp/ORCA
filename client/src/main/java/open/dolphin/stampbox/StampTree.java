@@ -2,13 +2,10 @@ package open.dolphin.stampbox;
 
 import java.awt.*;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.beans.XMLEncoder;
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
 import java.util.List;
 import javax.swing.*;
@@ -17,7 +14,7 @@ import javax.swing.event.TreeModelListener;
 import javax.swing.tree.*;
 import open.dolphin.client.ClientContext;
 import open.dolphin.delegater.StampDelegater;
-import open.dolphin.helper.SimpleWorker;
+import open.dolphin.helper.ProgressMonitorWorker;
 import open.dolphin.infomodel.*;
 import open.dolphin.project.Project;
 import open.dolphin.util.GUIDGenerator;
@@ -27,7 +24,7 @@ import org.apache.log4j.Logger;
  * StampTree
  *
  * @author Kazushi Minagawa, Digital Globe, Inc. 
- * @author modified by masuda, Masuda Naika
+ * @author modified by masuda, Masuda Naika, refactored on 2013/05/17
  */
 public class StampTree extends JTree implements TreeModelListener {
 
@@ -36,7 +33,7 @@ public class StampTree extends JTree implements TreeModelListener {
     private static final ImageIcon ASP_ICON = ClientContext.getImageIconAlias("icon_world_small");
     private static final ImageIcon LOCAL_ICON = ClientContext.getImageIconAlias("icon_stamp_drag_leaf");
     private static final String NEW_FOLDER_NAME = "新規フォルダ";
-    private static final String STAMP_SAVE_TASK_NAME = "スタンプ保存";
+
     // ASP Tree かどうかのフラグ 
     private boolean asp;
     // 個人用Treeかどうかのフラグ 
@@ -45,13 +42,6 @@ public class StampTree extends JTree implements TreeModelListener {
     private StampBoxPlugin stampBox;
     // Logger, Application
     private Logger logger;
-    // timerTask 関連
-    private SimpleWorker worker;
-    private javax.swing.Timer taskTimer;
-    private ProgressMonitor monitor;
-    private int delayCount;
-    private int maxEstimation = 120 * 1000;   // 120 秒
-    private int delay = 300;               // 300 mmsec
 
     /**
      * StampTreeオブジェクトを生成する。
@@ -69,12 +59,11 @@ public class StampTree extends JTree implements TreeModelListener {
         getSelectionModel().setSelectionMode(TreeSelectionModel.SINGLE_TREE_SELECTION); // Single Selection// にする
         setRootVisible(false);
         setDragEnabled(true);
-//masuda^
+        
         setDropMode(DropMode.ON_OR_INSERT);
         TreeCellRenderer renderer = new StampTreeRenderer();
         setCellRenderer(renderer);
-//masuda$
-
+        
         // Listens TreeModelEvent
         model.addTreeModelListener(StampTree.this);
 
@@ -88,7 +77,7 @@ public class StampTree extends JTree implements TreeModelListener {
      * @return Tree情報
      */
     public TreeInfo getTreeInfo() {
-        StampTreeNode node = (StampTreeNode) this.getModel().getRoot();
+        StampTreeNode node = (StampTreeNode) getModel().getRoot();
         TreeInfo info = (TreeInfo) node.getUserObject();
         return info;
     }
@@ -191,60 +180,90 @@ public class StampTree extends JTree implements TreeModelListener {
      */
     public void enter() {
     }
+    
+    /**
+     * 1. KartePaneから drop されたスタンプをツリーに加える。
+     */
+    public boolean addStamp(final StampTreeNode parent, final ModuleModel[] stamps, final int childIndex) {
 
-    public boolean addStamp(final StampTreeNode parent, ModuleModel droppedStamp, final int childIndex) {
-
-        boolean ret = false;
-        if (parent == null || droppedStamp == null) {
-            return ret;
+        if (parent == null || stamps == null || stamps.length == 0) {
+            return false;
         }
-
-        //---------------------------------------
-        // Drop された Stamp の ModuleInfoを得る
-        //---------------------------------------
-        ModuleInfoBean droppedInfo = droppedStamp.getModuleInfoBean();
-
-        //----------------------------------------------
-        // データベースへ droppedStamp のデータモデルを保存する
-        //----------------------------------------------
-        // Entityを生成する
-        final StampModel stampModel = new StampModel();
-        final String stampId = GUIDGenerator.generate(stampModel);      // stampId
-        stampModel.setId(stampId);
-        stampModel.setUserId(Project.getUserModel().getId());           // userId
-        stampModel.setEntity(droppedInfo.getEntity());                  // entity
-        stampModel.setStampBytes(getXMLBytes(droppedStamp.getModel())); // XML
-
-        //----------------------------------------------
-        // Tree に加える新しい StampInfo を生成する
-        //----------------------------------------------
-        final ModuleInfoBean info = new ModuleInfoBean();
-        info.setStampName(droppedInfo.getStampName());      // オリジナル名
-        info.setEntity(droppedInfo.getEntity());            // Entity
-        info.setStampRole(droppedInfo.getStampRole());      // Role
-        info.setStampMemo(constractToolTip(droppedStamp));  // Tooltip
-        info.setStampId(stampId);                           // StampID
-
-        worker = new SimpleWorker<String, Void>() {
+        
+        final String message = "スタンプ保存";
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (ModuleModel mm : stamps) {
+            if (!first) {
+                sb.append("、");
+            } else {
+                first = false;
+            }
+            sb.append(mm.getModuleInfoBean().getStampName());
+        }
+        sb.append("を保存しています...");
+        final String note = sb.toString();
+        
+        Component c = SwingUtilities.getWindowAncestor(this);
+        ProgressMonitorWorker worker = new ProgressMonitorWorker<List<ModuleInfoBean>, Void>(c, message, note) {
 
             @Override
-            protected String doInBackground() throws Exception {
+            protected List<ModuleInfoBean> doInBackground() throws Exception {
+                
                 logger.debug("addStamp doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
+                
+                List<StampModel> stampList = new ArrayList<>();
+                List<ModuleInfoBean> infoList = new ArrayList<>();
+                
+                for (ModuleModel stamp : stamps) {
+                    //---------------------------------------
+                    // Drop された Stamp の ModuleInfoを得る
+                    //---------------------------------------
+                    ModuleInfoBean droppedInfo = stamp.getModuleInfoBean();
+
+                    //----------------------------------------------
+                    // データベースへ droppedStamp のデータモデルを保存する
+                    //----------------------------------------------
+                    // Entityを生成する
+                    StampModel stampModel = new StampModel();
+                    String stampId = GUIDGenerator.generate(stampModel);        // stampId
+                    stampModel.setId(stampId);
+                    stampModel.setUserId(Project.getUserModel().getId());       // userId
+                    stampModel.setEntity(droppedInfo.getEntity());              // entity
+                    stampModel.setStampBytes(getXMLBytes(stamp.getModel()));    // XML
+
+                    //----------------------------------------------
+                    // Tree に加える新しい StampInfo を生成する
+                    //----------------------------------------------
+                    ModuleInfoBean info = new ModuleInfoBean();
+                    info.setStampName(droppedInfo.getStampName());  // オリジナル名
+                    info.setEntity(droppedInfo.getEntity());        // Entity
+                    info.setStampRole(droppedInfo.getStampRole());  // Role
+                    info.setStampMemo(constractToolTip(stamp));     // Tooltip
+                    info.setStampId(stampId);                       // StampID
+                    
+                    stampList.add(stampModel);
+                    infoList.add(info);
+                }
+
                 StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.putStamp(stampModel);
-                return ret;
+                sdl.putStamp(stampList);
+                
+                return infoList;
             }
 
             @Override
-            protected void succeeded(String result) {
+            protected void succeeded(List<ModuleInfoBean> list) {
                 logger.debug("addStamp succeeded");
-                StampTreeNode node = new StampTreeNode(info);
-                DefaultTreeModel model = (DefaultTreeModel) StampTree.this.getModel();
-                int index = childIndex != -1 ? childIndex : parent.getChildCount();
-                model.insertNodeInto(node, parent, index);
+                for (int i = list.size() - 1; i >= 0; --i) {
+                    ModuleInfoBean info = list.get(i);
+                    StampTreeNode node = new StampTreeNode(info);
+                    DefaultTreeModel model = (DefaultTreeModel) getModel();
+                    int childCount = parent.getChildCount();
+                    int index = (childIndex >= 0 && childIndex < childCount)
+                            ? childIndex : childCount;
+                    model.insertNodeInto(node, parent, index);
+                }
             }
 
             @Override
@@ -258,414 +277,141 @@ public class StampTree extends JTree implements TreeModelListener {
                 logger.warn(cause.getCause());
                 logger.warn(cause.getMessage());
             }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
         };
-
-        String message = "スタンプ保存";
-        String note = info.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
-                }
-            }
-        });
 
         worker.execute();
         return true;
     }
 
     /**
-     * 1. KartePaneから drop されたスタンプをツリーに加える。 2. スタンプ道具箱エディタで編集されたスタンプを加える。
+     * 2. スタンプ道具箱エディタで編集されたスタンプを加える。
      */
-    public boolean addStamp(ModuleModel droppedStamp, final StampTreeNode selected) {
+    public boolean addOrReplaceStamp(ModuleModel[] newStamps) {
 
-        boolean ret = false;
-        if (droppedStamp == null) {
-            return ret;
+        if (newStamps == null || newStamps.length == 0) {
+            return false;
         }
 
-        //---------------------------------------
-        // Drop された Stamp の ModuleInfoを得る
-        //---------------------------------------
-        ModuleInfoBean droppedInfo = droppedStamp.getModuleInfoBean();
-
-        //----------------------------------------------
-        // データベースへ droppedStamp のデータモデルを保存する
-        //----------------------------------------------
-        // Entityを生成する
-        final StampModel stampModel = new StampModel();
-        final String stampId = GUIDGenerator.generate(stampModel);      // stampId
-        stampModel.setId(stampId);
-        stampModel.setUserId(Project.getUserModel().getId());           // userId
-        stampModel.setEntity(droppedInfo.getEntity());                  // entity
-        stampModel.setStampBytes(getXMLBytes(droppedStamp.getModel())); // XML
-
-        //----------------------------------------------
-        // Tree に加える新しい StampInfo を生成する
-        //----------------------------------------------
-        final ModuleInfoBean info = new ModuleInfoBean();
-        info.setStampName(droppedInfo.getStampName());      // オリジナル名
-        info.setEntity(droppedInfo.getEntity());            // Entity
-        info.setStampRole(droppedInfo.getStampRole());      // Role
-        info.setStampMemo(constractToolTip(droppedStamp));  // Tooltip
-        info.setStampId(stampId);                           // StampID
-
-        worker = new SimpleWorker<String, Void>() {
-
-            @Override
-            protected String doInBackground() throws Exception {
-                logger.debug("addStamp doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
-                StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.putStamp(stampModel);
-                return ret;
-            }
-
-            @Override
-            protected void succeeded(String result) {
-                logger.debug("addStamp succeeded");
-                addInfoToTree(info, selected);
-            }
-
-            @Override
-            protected void cancelled() {
-                logger.debug("addStamp cancelled");
-            }
-
-            @Override
-            protected void failed(java.lang.Throwable cause) {
-                logger.debug("addStamp failed");
-                logger.warn(cause.getCause());
-                logger.warn(cause.getMessage());
-            }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
-        };
-
-        String message = "スタンプ保存";
-        String note = info.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
+        StampTreeNode target = getSelectedNode();
+        ModuleModel firstStamp = newStamps[0];
+        String stampId = firstStamp.getModuleInfoBean().getStampId();
+        if (stampId != null) {
+            StampTreeNode srcNode = getSourceNode(stampId);
+            if (srcNode != null) {
+                // 一つ目は置換する
+                replaceStamp(srcNode, firstStamp);
+                // 編集元が一つで、新たに複数スタンプになった場合、引き続き残りを追加する
+                if (newStamps.length > 1) {
+                    target = srcNode;
+                    newStamps = Arrays.copyOfRange(newStamps, 1, newStamps.length);
                 } else {
-                    monitor.setProgress(delayCount);
+                    return true;
                 }
             }
-        });
+        }
+        
+        if (target == null) {
+            // 選択されていない場合はroot nodeをtargetにする
+            target = (StampTreeNode) getModel().getRoot();
+        }
 
-        worker.execute();
-        return true;
-    }
-
-    /**
-     * StampTree に新しいノードを加える。
-     *
-     * @param info 追加するノードの情報
-     * @param selected カーソルの下にあるノード(Drop 位置のノード）
-     */
-    public void addInfoToTree(ModuleInfoBean info, StampTreeNode selected) {
-
-        //----------------------------------------------
-        // StampInfo から新しい StampTreeNode を生成する
-        //----------------------------------------------
-        StampTreeNode node = new StampTreeNode(info);
-
-        //----------------------------------------------
-        // Drop 位置のノードによって追加する位置を決める
-        //----------------------------------------------
-        if (selected != null && selected.isLeaf()) {
-            //----------------------------------------------
-            // Drop位置のノードが葉の場合、その前に挿入する
-            //----------------------------------------------
-            StampTreeNode newParent = (StampTreeNode) selected.getParent();
-            int index = newParent.getIndex(selected);
-            DefaultTreeModel model = (DefaultTreeModel) this.getModel();
-            model.insertNodeInto(node, newParent, index);
-            //----------------------------------------------
-            // 追加したノードを選択する
-            //----------------------------------------------
-            TreeNode[] path = model.getPathToRoot(node);
-            ((JTree) this).setSelectionPath(new TreePath(path));
-
-        } else if (selected != null && (!selected.isLeaf())) {
-            //----------------------------------------------
-            // Drop位置のノードが子を持つ時、最後の子として挿入する
-            //----------------------------------------------
-            DefaultTreeModel model = (DefaultTreeModel) this.getModel();
-            model.insertNodeInto(node, selected, selected.getChildCount());
-            //----------------------------------------------
-            // 追加したノードを選択する
-            //----------------------------------------------
-            TreeNode[] path = model.getPathToRoot(node);
-            ((JTree) this).setSelectionPath(new TreePath(path));
-
+        if (target.isLeaf()) {
+            // Leafの場合はその下に追加
+            StampTreeNode parent = (StampTreeNode) target.getParent();
+            int childIndex = parent.getIndex(target) + 1;
+            return addStamp(parent, newStamps, childIndex);
         } else {
-            //---------------------------------------------------------
-            // Drop 位置のノードが null でコールされるケースがある
-            // 1. このtreeのスタンプではない場合、該当するTreeのルートに加える
-            // 2. パス Tree など、まだノードを持たない初期状態の時
-            //---------------------------------------------------------
+            // Nodeの場合は最後に追加
+            int childIndex = target.getChildCount();
+            return addStamp(target, newStamps, childIndex);
+        }
+    }
+    
+    /**
+     * Diagnosis Table から Drag & Drop されたRegisteredDiagnosisをスタンプ化する。
+     */
+    public boolean addDiagnosis(final StampTreeNode parent, final RegisteredDiagnosisModel[] rds, final int childIndex) {
 
-            // Stamp ボックスから entity に対応する tree を得る
-            StampTree another = stampBox.getStampTree(info.getEntity());
-            boolean myTree = (another == this);
-            final String treeName = another.getTreeName();
-            DefaultTreeModel model = (DefaultTreeModel) another.getModel();
-            StampTreeNode root = (StampTreeNode) model.getRoot();
-            root.add(node);
-            model.reload(root);
+        if (parent == null || rds == null || rds.length == 0) {
+            return false;
+        }
+        
+        final String message = "スタンプ保存";
+        StringBuilder sb = new StringBuilder();
+        boolean first = true;
+        for (RegisteredDiagnosisModel rd : rds) {
+            if (!first) {
+                sb.append("、");
+            } else {
+                first = false;
+            }
+            sb.append(rd.getDiagnosis());
+        }
+        sb.append("を保存しています...");
+        final String note = sb.toString();
+        Component c = SwingUtilities.getWindowAncestor(this);
+        
+        ProgressMonitorWorker worker = new ProgressMonitorWorker<List<ModuleInfoBean>, Void>(c, message, note) {
 
-            //---------------------------------------------------------
-            // 追加したノードを選択する
-            //---------------------------------------------------------
-            TreeNode[] path = model.getPathToRoot(node);
-            ((JTree) this).setSelectionPath(new TreePath(path));
+            @Override
+            protected List<ModuleInfoBean> doInBackground() throws Exception {
+                logger.debug("addDiagnosis doInBackground");
+                
+                List<StampModel> stampList = new ArrayList<>();
+                List<ModuleInfoBean> infoList = new ArrayList<>();
+                for (RegisteredDiagnosisModel model : rds) {
+                    
+                    // データベースへ永続化するデータモデルを生成する
+                    RegisteredDiagnosisModel rd = new RegisteredDiagnosisModel();
+                    rd.setDiagnosis(model.getDiagnosis());
+                    rd.setDiagnosisCode(model.getDiagnosisCode());
+                    rd.setDiagnosisCodeSystem(model.getDiagnosisCodeSystem());
 
-            // メッセージを表示する
-            if (!myTree) {
-                SwingUtilities.invokeLater(new Runnable() {
+                    StampModel stamp = new StampModel();
+                    String stampId = GUIDGenerator.generate(stamp);
+                    stamp.setId(stampId);
+                    stamp.setUserId(Project.getUserModel().getId());
+                    stamp.setEntity(IInfoModel.ENTITY_DIAGNOSIS);
+                    stamp.setStampBytes(getXMLBytes(rd));
+                    stampList.add(stamp);
 
-                    @Override
-                    public void run() {
-                        StringBuilder buf = new StringBuilder();
-                        buf.append("スタンプは個人用の ");
-                        buf.append(treeName);
-                        buf.append(" に保存しました。");
-                        JOptionPane.showMessageDialog(
-                                StampTree.this,
-                                buf.toString(),
-                                ClientContext.getFrameTitle(STAMP_SAVE_TASK_NAME),
-                                JOptionPane.INFORMATION_MESSAGE);
+                    // Tree に加える 新しい StampInfo を生成する
+                    ModuleInfoBean info = new ModuleInfoBean();
+                    info.setStampId(stampId);                       // Stamp ID
+                    info.setStampName(model.getDiagnosis());          // 傷病名
+                    info.setEntity(IInfoModel.ENTITY_DIAGNOSIS);    // カテゴリ
+                    info.setStampRole(IInfoModel.ENTITY_DIAGNOSIS); // Role
+
+                    StringBuilder sb = new StringBuilder();
+                    sb.append(model.getDiagnosis());
+                    String cd = model.getDiagnosisCode();
+                    if (cd != null) {
+                        sb.append("(");
+                        sb.append(cd);
+                        sb.append(")"); // Tooltip
                     }
-                });
-            }
-        }
-    }
-
-    /**
-     * Stampを置き換える。
-     *
-     * @param stampToReplcae 置き換えるスタンプ
-     */
-    public void replaceStamp(ModuleModel stampToReplcae) {
-
-        if (stampToReplcae == null) {
-            return;
-        }
-
-        // 置き換える Stamp の ModuleInfoを得る
-        ModuleInfoBean stampInfo = stampToReplcae.getModuleInfoBean();
-//masuda^   memoを更新
-        stampInfo.setStampMemo(constractToolTip(stampToReplcae));
-//masuda$
-
-        //-------------------------------------------------
-        // データベースへ stampToReplcae のデータモデルを保存する
-        // Entityを生成する
-        //-------------------------------------------------
-        final StampModel stampModel = new StampModel();
-        final String stampId = stampInfo.getStampId();                      // stampId
-        stampModel.setId(stampId);
-        stampModel.setUserId(Project.getUserModel().getId());               // userId
-        stampModel.setEntity(stampInfo.getEntity());                        // entity
-        stampModel.setStampBytes(getXMLBytes(stampToReplcae.getModel()));   // XML
-
-        worker = new SimpleWorker<String, Void>() {
-
-            @Override
-            protected String doInBackground() throws Exception {
-                logger.debug("replaceStamp doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
-                StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.replaceStamp(stampModel);
-                return ret;
-            }
-
-            @Override
-            protected void succeeded(String result) {
-                logger.debug("replaceStamp succeeded");
-            }
-
-            @Override
-            protected void cancelled() {
-                logger.debug("replaceStamp cancelled");
-            }
-
-            @Override
-            protected void failed(java.lang.Throwable cause) {
-                logger.debug("replaceStamp failed");
-                logger.warn(cause.getCause());
-                logger.warn(cause.getMessage());
-            }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
-        };
-
-        String message = "スタンプ保存";
-        String note = stampInfo.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
+                    info.setStampMemo(sb.toString());
+                    infoList.add(info);
                 }
-            }
-        });
-
-        worker.execute();
-    }
-
-    /**
-     * Diagnosis Table から Drag & Drop されたRegisteredDiagnosisをスタンプ化する。
-     */
-    public boolean addDiagnosis(RegisteredDiagnosisModel rd, final StampTreeNode selected) {
-
-        if (rd == null) {
-            return false;
-        }
-
-        // クリア
-        rd.setId(0L);
-        rd.setKarteBean(null);
-        rd.setUserModel(null);
-        rd.setDiagnosisCategoryModel(null);
-        rd.setDiagnosisOutcomeModel(null);
-        rd.setFirstEncounterDate(null);
-        rd.setStartDate(null);
-        rd.setEndDate(null);
-        rd.setRelatedHealthInsurance(null);
-        rd.setFirstConfirmDate(null);
-        rd.setConfirmDate(null);
-        rd.setStatus(null);
-        rd.setPatientLiteModel(null);
-        rd.setUserLiteModel(null);
-
-        RegisteredDiagnosisModel add = new RegisteredDiagnosisModel();
-        add.setDiagnosis(rd.getDiagnosis());
-        add.setDiagnosisCode(rd.getDiagnosisCode());
-        add.setDiagnosisCodeSystem(rd.getDiagnosisCodeSystem());
-
-        ModuleModel stamp = new ModuleModel();
-        stamp.setModel(add);
-
-        // データベースへ Stamp のデータモデルを永続化する
-        final StampModel addStamp = new StampModel();
-        final String stampId = GUIDGenerator.generate(addStamp);
-        addStamp.setId(stampId);
-        addStamp.setUserId(Project.getUserModel().getId());
-        addStamp.setEntity(IInfoModel.ENTITY_DIAGNOSIS);
-        addStamp.setStampBytes(getXMLBytes(stamp.getModel()));
-
-        // Tree に加える 新しい StampInfo を生成する
-        final ModuleInfoBean info = new ModuleInfoBean();
-        info.setStampId(stampId);                       // Stamp ID
-        info.setStampName(add.getDiagnosis());          // 傷病名
-        info.setEntity(IInfoModel.ENTITY_DIAGNOSIS);    // カテゴリ
-        info.setStampRole(IInfoModel.ENTITY_DIAGNOSIS); // Role
-
-        StringBuilder buf = new StringBuilder();
-        buf.append(add.getDiagnosis());
-        String cd = add.getDiagnosisCode();
-        if (cd != null) {
-            buf.append("(");
-            buf.append(cd);
-            buf.append(")"); // Tooltip
-        }
-        info.setStampMemo(buf.toString());
-
-        worker = new SimpleWorker<String, Void>() {
-
-            @Override
-            protected String doInBackground() throws Exception {
-                logger.debug("addDiagnosis doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
+                
                 StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.putStamp(addStamp);
-                return ret;
+                sdl.putStamp(stampList);
+                
+                return infoList;
             }
 
             @Override
-            protected void succeeded(String result) {
+            protected void succeeded(List<ModuleInfoBean> list) {
                 logger.debug("addDiagnosis succeeded");
-                addInfoToTree(info, selected);
+                for (int i = list.size() - 1; i >= 0; --i) {
+                    ModuleInfoBean info = list.get(i);
+                    StampTreeNode node = new StampTreeNode(info);
+                    DefaultTreeModel model = (DefaultTreeModel) getModel();
+                    int childCount = parent.getChildCount();
+                    int index = (childIndex >= 0 && childIndex < childCount)
+                            ? childIndex : childCount;
+                    model.insertNodeInto(node, parent, index);
+                }
             }
 
             @Override
@@ -679,385 +425,116 @@ public class StampTree extends JTree implements TreeModelListener {
                 logger.warn(cause.getCause());
                 logger.warn(cause.getMessage());
             }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
         };
 
-        String message = "スタンプ保存";
-        String note = info.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
-                }
-            }
-        });
-
         worker.execute();
-
-        return true;
-    }
-
-    /**
-     * Diagnosis Table から Drag & Drop されたRegisteredDiagnosisをスタンプ化する。
-     */
-    public boolean addDiagnosis(final StampTreeNode parent, RegisteredDiagnosisModel rd, final int childIndex) {
-
-        if ((parent == null) || (rd == null)) {
-            return false;
-        }
-
-        // クリア
-        rd.setId(0L);
-        rd.setKarteBean(null);
-        rd.setUserModel(null);
-        rd.setDiagnosisCategoryModel(null);
-        rd.setDiagnosisOutcomeModel(null);
-        rd.setFirstEncounterDate(null);
-        rd.setStartDate(null);
-        rd.setEndDate(null);
-        rd.setRelatedHealthInsurance(null);
-        rd.setFirstConfirmDate(null);
-        rd.setConfirmDate(null);
-        rd.setStatus(null);
-        rd.setPatientLiteModel(null);
-        rd.setUserLiteModel(null);
-
-        RegisteredDiagnosisModel add = new RegisteredDiagnosisModel();
-        add.setDiagnosis(rd.getDiagnosis());
-        add.setDiagnosisCode(rd.getDiagnosisCode());
-        add.setDiagnosisCodeSystem(rd.getDiagnosisCodeSystem());
-
-        ModuleModel stamp = new ModuleModel();
-        stamp.setModel(add);
-
-        // データベースへ Stamp のデータモデルを永続化する
-        final StampModel addStamp = new StampModel();
-        final String stampId = GUIDGenerator.generate(addStamp);
-        addStamp.setId(stampId);
-        addStamp.setUserId(Project.getUserModel().getId());
-        addStamp.setEntity(IInfoModel.ENTITY_DIAGNOSIS);
-        addStamp.setStampBytes(getXMLBytes(stamp.getModel()));
-
-        // Tree に加える 新しい StampInfo を生成する
-        final ModuleInfoBean info = new ModuleInfoBean();
-        info.setStampId(stampId);                       // Stamp ID
-        info.setStampName(add.getDiagnosis());          // 傷病名
-        info.setEntity(IInfoModel.ENTITY_DIAGNOSIS);    // カテゴリ
-        info.setStampRole(IInfoModel.ENTITY_DIAGNOSIS); // Role
-
-        StringBuilder buf = new StringBuilder();
-        buf.append(add.getDiagnosis());
-        String cd = add.getDiagnosisCode();
-        if (cd != null) {
-            buf.append("(");
-            buf.append(cd);
-            buf.append(")"); // Tooltip
-        }
-        info.setStampMemo(buf.toString());
-
-        worker = new SimpleWorker<String, Void>() {
-
-            @Override
-            protected String doInBackground() throws Exception {
-                logger.debug("addDiagnosis doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
-                StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.putStamp(addStamp);
-                return ret;
-            }
-
-            @Override
-            protected void succeeded(String result) {
-                logger.debug("addDiagnosis succeeded");
-                StampTreeNode node = new StampTreeNode(info);
-                DefaultTreeModel model = (DefaultTreeModel) StampTree.this.getModel();
-                int index = childIndex != -1 ? childIndex : parent.getChildCount();
-                model.insertNodeInto(node, parent, index);
-            }
-
-            @Override
-            protected void cancelled() {
-                logger.debug("addDiagnosis cancelled");
-            }
-
-            @Override
-            protected void failed(java.lang.Throwable cause) {
-                logger.warn("addDiagnosis failed");
-                logger.warn(cause.getCause());
-                logger.warn(cause.getMessage());
-            }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
-        };
-
-        String message = "スタンプ保存";
-        String note = info.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
-                }
-            }
-        });
-
-        worker.execute();
-
         return true;
     }
 
     /**
      * エディタで生成した病名リストを登録する。
      */
-    public void addDiagnosis(List<RegisteredDiagnosisModel> list) {
-
-        //System.err.println("StampTree: addDiagnosis");
-
-        if (list == null || list.isEmpty()) {
-            return;
+    public boolean addOrReplaceDiagnosis(RegisteredDiagnosisModel[] newRds) {
+        
+        if (newRds == null || newRds.length == 0) {
+            return false;
         }
-
-        final ArrayList<StampModel> stampList = new ArrayList<StampModel>();
-        final ArrayList<ModuleInfoBean> infoList = new ArrayList<ModuleInfoBean>();
-
-        for (RegisteredDiagnosisModel rd : list) {
-            // クリア
-            rd.setId(0L);
-            rd.setKarteBean(null);
-            rd.setUserModel(null);
-            rd.setDiagnosisCategoryModel(null);
-            rd.setDiagnosisOutcomeModel(null);
-            rd.setFirstEncounterDate(null);
-            rd.setStartDate(null);
-            rd.setEndDate(null);
-            rd.setRelatedHealthInsurance(null);
-            rd.setFirstConfirmDate(null);
-            rd.setConfirmDate(null);
-            rd.setStatus(null);
-            rd.setPatientLiteModel(null);
-            rd.setUserLiteModel(null);
-
-            RegisteredDiagnosisModel add = new RegisteredDiagnosisModel();
-            add.setDiagnosis(rd.getDiagnosis());
-            add.setDiagnosisCode(rd.getDiagnosisCode());
-            add.setDiagnosisCodeSystem(rd.getDiagnosisCodeSystem());
-//            System.err.println(add.getDiagnosis());
-//            System.err.println(add.getDiagnosisCode());
-//            System.err.println(add.getDiagnosisCodeSystem());
-
-            ModuleModel stamp = new ModuleModel();
-            stamp.setModel(add);
-
-            // データベースへ Stamp のデータモデルを永続化する
-            StampModel addStamp = new StampModel();
-            String stampId = GUIDGenerator.generate(addStamp);
-            addStamp.setId(stampId);
-            addStamp.setUserId(Project.getUserModel().getId());
-            addStamp.setEntity(IInfoModel.ENTITY_DIAGNOSIS);
-            addStamp.setStampBytes(getXMLBytes(stamp.getModel()));
-//            System.err.println(addStamp.getId());
-//            System.err.println(addStamp.getUserId());
-//            System.err.println(addStamp.getEntity());
-            stampList.add(addStamp);
-
-            // Tree に加える 新しい StampInfo を生成する
-            ModuleInfoBean info = new ModuleInfoBean();
-            info.setStampId(stampId);                       // Stamp ID
-            info.setStampName(add.getDiagnosis());          // 傷病名
-            info.setEntity(IInfoModel.ENTITY_DIAGNOSIS);    // カテゴリ
-            info.setStampRole(IInfoModel.ENTITY_DIAGNOSIS); // Role
-
-            StringBuilder buf = new StringBuilder();
-            buf.append(add.getDiagnosis());
-            String cd = add.getDiagnosisCode();
-            if (cd != null) {
-                buf.append("(");
-                buf.append(cd);
-                buf.append(")"); // Tooltip
-            }
-            info.setStampMemo(buf.toString());
-            infoList.add(info);
-        }
-
-        worker = new SimpleWorker<List<String>, Void>() {
-
-            @Override
-            protected List<String> doInBackground() throws Exception {
-                logger.debug("addDiagnosis doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
-                StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                sdl.putStamp(stampList);
-                return null;
-            }
-
-            @Override
-            protected void succeeded(List<String> result) {
-                logger.debug("addDiagnosis succeeded");
-                for (ModuleInfoBean info : infoList) {
-//masuda^   スタンプ挿入位置を選択中の位置にする
-                    StampTreeNode target = getSelectedNode();
-                    addInfoToTree(info, target);
-//masuda$
-                }
-            }
-
-            @Override
-            protected void cancelled() {
-                logger.debug("addDiagnosis cancelled");
-            }
-
-            @Override
-            protected void failed(java.lang.Throwable cause) {
-                logger.warn("addDiagnosis failed");
-                logger.warn(cause.getCause());
-                logger.warn(cause.getMessage());
-            }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
-        };
-
-        String message = "スタンプ保存";
-        String note = "病名スタンプを保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
+        
+        StampTreeNode target = getSelectedNode();
+        RegisteredDiagnosisModel firstRd = newRds[0];
+        
+        // 置換の場合
+        String stampId = firstRd.getStampId();
+        if (stampId != null) {
+            StampTreeNode srcNode = getSourceNode(stampId);
+            if (srcNode != null) {
+                // 一つ目は置換する
+                replaceRd(srcNode, firstRd);
+                // 編集元が一つで、新たに複数スタンプになった場合。 実際はないはず
+                if (newRds.length > 1) {
+                    target = srcNode;
+                    newRds = Arrays.copyOfRange(newRds, 1, newRds.length);
                 } else {
-                    monitor.setProgress(delayCount);
+                    return true;
                 }
             }
-        });
+        }
 
-        worker.execute();
+        if (target == null) {
+            // 選択されていない場合はroot nodeをtargetにする
+            target = (StampTreeNode) getModel().getRoot();
+        }
+        
+        if (target.isLeaf()) {
+            // Leafの場合はその下に追加
+            StampTreeNode parent = (StampTreeNode) target.getParent();
+            int childIndex = parent.getIndex(target) + 1;
+            return addDiagnosis(parent, newRds, childIndex);
+        } else {
+            // Nodeの場合は最後に追加
+            int childIndex = target.getChildCount();
+            return addDiagnosis(target, newRds, childIndex);
+        }
     }
-
+    
     /**
      * テキストスタンプを追加する。
      */
-    public boolean addTextStamp(final StampTreeNode parent, String text, final int childIndex) {
+    public boolean addTextStamp(final StampTreeNode parent, final String text, final int childIndex) {
 
-        if ((parent == null) || (text == null) || (text.length() == 0) || text.equals("")) {
+        if (parent == null || text == null || text.isEmpty()) {
             return false;
         }
-
-        TextStampModel stamp = new TextStampModel();
-        stamp.setText(text);
-
-        // データベースへ Stamp のデータモデルを永続化する
-        final StampModel addStamp = new StampModel();
-        final String stampId = GUIDGenerator.generate(addStamp);
-        addStamp.setId(stampId);
-        addStamp.setUserId(Project.getUserModel().getId());
-        addStamp.setEntity(IInfoModel.ENTITY_TEXT);
-        addStamp.setStampBytes(getXMLBytes((IInfoModel) stamp));
-
-        // Tree へ加える 新しい StampInfo を生成する
-        final ModuleInfoBean info = new ModuleInfoBean();
-        int len = text.length() > 16 ? 16 : text.length();
-        String name = text.substring(0, len);
-        len = name.indexOf("\n");
-        if (len > 0) {
-            name = name.substring(0, len);
+        
+        int len = Math.min(16, text.length());
+        int pos = text.indexOf("\n");
+        if (pos != -1) {
+            len = Math.min(len, pos);
         }
-        info.setStampName(name);                    //
-        info.setEntity(IInfoModel.ENTITY_TEXT);     // カテゴリ
-        info.setStampRole(IInfoModel.ENTITY_TEXT);  // Role
-        info.setStampMemo(text);                    // Tooltip
-        info.setStampId(stampId);                   // Stamp ID
+        final String message = "スタンプ保存";
+        final String stampName = text.substring(0, len);
+        final String note = stampName + "を保存しています...";
+        Component c = SwingUtilities.getWindowAncestor(this);
 
-        worker = new SimpleWorker<String, Void>() {
+        ProgressMonitorWorker worker = new ProgressMonitorWorker<ModuleInfoBean, Void>(c, message, note) {
 
             @Override
-            protected String doInBackground() throws Exception {
+            protected ModuleInfoBean doInBackground() throws Exception {
                 logger.debug("addTextStamp doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
+                
+                TextStampModel stamp = new TextStampModel();
+                stamp.setText(text);
+
+                // データベースへ Stamp のデータモデルを永続化する
+                StampModel addStamp = new StampModel();
+                String stampId = GUIDGenerator.generate(addStamp);
+                addStamp.setId(stampId);
+                addStamp.setUserId(Project.getUserModel().getId());
+                addStamp.setEntity(IInfoModel.ENTITY_TEXT);
+                addStamp.setStampBytes(getXMLBytes((IInfoModel) stamp));
+
+                // Tree へ加える 新しい StampInfo を生成する
+                ModuleInfoBean info = new ModuleInfoBean();
+                info.setStampName(stampName);               //
+                info.setEntity(IInfoModel.ENTITY_TEXT);     // カテゴリ
+                info.setStampRole(IInfoModel.ENTITY_TEXT);  // Role
+                info.setStampMemo(text);                    // Tooltip
+                info.setStampId(stampId);                   // Stamp ID
+
                 StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.putStamp(addStamp);
-                return ret;
+                sdl.putStamp(addStamp);
+                
+                return info;
             }
 
             @Override
-            protected void succeeded(String result) {
+            protected void succeeded(ModuleInfoBean info) {
                 logger.debug("addTextStamp succeeded");
                 StampTreeNode node = new StampTreeNode(info);
-                DefaultTreeModel model = (DefaultTreeModel) StampTree.this.getModel();
-                int index = childIndex != -1 ? childIndex : parent.getChildCount();
+                DefaultTreeModel model = (DefaultTreeModel) getModel();
+                int childCount = parent.getChildCount();
+                int index = (childIndex >= 0 && childIndex < childCount)
+                        ? childIndex : childCount;
                 model.insertNodeInto(node, parent, index);
             }
 
@@ -1072,160 +549,184 @@ public class StampTree extends JTree implements TreeModelListener {
                 logger.warn(cause.getCause());
                 logger.warn(cause.getMessage());
             }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
         };
-
-        String message = "スタンプ保存";
-        String note = info.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
-                }
-            }
-        });
-
+        
         worker.execute();
-
         return true;
     }
 
     /**
      * テキストスタンプを追加する。
      */
-    public boolean addTextStamp(String text, final StampTreeNode selected) {
-
-        if ((text == null) || (text.length() == 0) || text.equals("")) {
+    public boolean addOrReplaceTextStamp(ModuleModel[] newStamps) {
+        
+        if (newStamps == null || newStamps.length == 0) {
             return false;
         }
-
-        TextStampModel stamp = new TextStampModel();
-        stamp.setText(text);
-
-        //
-        // データベースへ Stamp のデータモデルを永続化する
-        //
-        final StampModel addStamp = new StampModel();
-        final String stampId = GUIDGenerator.generate(addStamp);
-        addStamp.setId(stampId);
-        addStamp.setUserId(Project.getUserModel().getId());
-        addStamp.setEntity(IInfoModel.ENTITY_TEXT);
-        addStamp.setStampBytes(getXMLBytes((IInfoModel) stamp));
-
-        //
-        // Tree へ加える 新しい StampInfo を生成する
-        //
-        final ModuleInfoBean info = new ModuleInfoBean();
-        int len = text.length() > 16 ? 16 : text.length();
-        String name = text.substring(0, len);
-        len = name.indexOf("\n");
-        if (len > 0) {
-            name = name.substring(0, len);
+        
+        StampTreeNode target = getSelectedNode();
+        ModuleModel firstMm = newStamps[0];
+        
+        TextStampModel firstStamp = (TextStampModel) firstMm.getModel();
+        String text = firstStamp.getText();
+        if (text == null || text.isEmpty()) {
+            return false;
         }
-        info.setStampName(name);                    //
-        info.setEntity(IInfoModel.ENTITY_TEXT);     // カテゴリ
-        info.setStampRole(IInfoModel.ENTITY_TEXT);  // Role
-        info.setStampMemo(text);                    // Tooltip
-        info.setStampId(stampId);                   // Stamp ID
-
-        worker = new SimpleWorker<String, Void>() {
-
-            @Override
-            protected String doInBackground() throws Exception {
-                logger.debug("addTextStamp doInBackground");
-//masuda^
-                //StampDelegater sdl = new StampDelegater();
-                StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-                String ret = sdl.putStamp(addStamp);
-                return ret;
+        
+        // 置換の場合
+        String stampId = firstMm.getModuleInfoBean().getStampId();
+        if (stampId != null) {
+            StampTreeNode srcNode = getSourceNode(stampId);
+            if (srcNode != null) {
+                // 一つ目は置換する
+                replaceStamp(srcNode, firstMm);
+                return true;
             }
+            // TextStampは複数スタンプなし
+        }
 
-            @Override
-            protected void succeeded(String result) {
-                logger.debug("addTextStamp succeeded");
-                addInfoToTree(info, selected);
+        if (target == null) {
+            // 選択されていない場合はroot nodeをtargetにする
+            target = (StampTreeNode) getModel().getRoot();
+        }
+        
+        if (target.isLeaf()) {
+            // Leafの場合はその下に追加
+            StampTreeNode parent = (StampTreeNode) target.getParent();
+            int childIndex = parent.getIndex(target) + 1;
+            return addTextStamp(parent, text, childIndex);
+        } else {
+            // Nodeの場合は最後に追加
+            int childIndex = target.getChildCount();
+            return addTextStamp(target, text, childIndex);
+        }
+    }
+    
+    // 編集元のスタンプのStampTreeNodeを取得する。再帰は苦手ｗｗｗ
+    private StampTreeNode getSourceNode(String stampId) {
+        StampTreeNode root = (StampTreeNode) getModel().getRoot();
+        return searchNode(root, stampId);
+    }
+    
+    private StampTreeNode searchNode(StampTreeNode node, String stampId) {
+
+        if (stampId == null) {
+            return null;
+        }
+
+        if (node.getUserObject() instanceof ModuleInfoBean) {
+            ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
+            if (stampId.equals(info.getStampId())) {
+                return node;
             }
+        }
 
-            @Override
-            protected void cancelled() {
-                logger.debug("addTextStamp cancelled");
-            }
-
-            @Override
-            protected void failed(java.lang.Throwable cause) {
-                logger.warn("addTextStamp failed");
-                logger.warn(cause.getCause());
-                logger.warn(cause.getMessage());
-            }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
-        };
-
-        String message = "スタンプ保存";
-        String note = info.getStampName() + "を保存しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
+        int childCount = node.getChildCount();
+        if (childCount != 0) {
+            // childrenがある場合はそれも調べる。
+            for (int i = 0; i < childCount; ++i) {
+                StampTreeNode childNode = (StampTreeNode) node.getChildAt(i);
+                StampTreeNode ret = searchNode(childNode, stampId);
+                if (ret != null) {
+                    return ret;
                 }
             }
-        });
-
-        worker.execute();
-
-        return true;
+        }
+        return null;
     }
+    
+    /**
+     * Stampを置き換える。
+     *
+     * @param stamp 置き換えるスタンプ
+     */
+    private void replaceStamp(StampTreeNode node, ModuleModel stamp) {
 
+        if (node == null || !node.isLeaf() || stamp == null) {
+            return;
+        }
+        
+        // 置き換える Stamp の ModuleInfoを得る
+        ModuleInfoBean info = stamp.getModuleInfoBean();
+        // memoを更新
+        info.setStampMemo(constractToolTip(stamp));
+        // nodeを更新
+        node.setUserObject(info);
+        ((DefaultTreeModel) getModel()).nodeChanged(node);
+
+        //-------------------------------------------------
+        // データベースへ stampToReplcae のデータモデルを保存する
+        // Entityを生成する
+        //-------------------------------------------------
+        final StampModel stampModel = new StampModel();
+        stampModel.setId(info.getStampId());                        // stampId
+        stampModel.setUserId(Project.getUserModel().getId());       // userId
+        stampModel.setEntity(info.getEntity());                     // entity
+        stampModel.setStampBytes(getXMLBytes(stamp.getModel()));    // XML
+        
+        SwingWorker worker = new SwingWorker(){
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                StampDelegater sdl = StampDelegater.getInstance();
+                sdl.replaceStamp(stampModel);
+                return null;
+            }
+        };
+        worker.execute();
+    }
+    
+    private void replaceRd(StampTreeNode node, RegisteredDiagnosisModel rd) {
+        
+        if (node == null || !node.isLeaf() || rd == null) {
+            return;
+        }
+        
+        // StampInfoを置換する
+        ModuleInfoBean info = new ModuleInfoBean();
+        info.setStampId(rd.getStampId());               // Stamp ID
+        info.setStampName(rd.getDiagnosis());           // 傷病名
+        info.setEntity(IInfoModel.ENTITY_DIAGNOSIS);    // カテゴリ
+        info.setStampRole(IInfoModel.ENTITY_DIAGNOSIS); // Role
+
+        StringBuilder sb = new StringBuilder();
+        sb.append(rd.getDiagnosis());
+        String cd = rd.getDiagnosisCode();
+        if (cd != null) {
+            sb.append("(");
+            sb.append(cd);
+            sb.append(")"); // Tooltip
+        }
+        info.setStampMemo(sb.toString());
+        
+        // nodeを更新
+        node.setUserObject(info);
+        ((DefaultTreeModel) getModel()).nodeChanged(node);
+
+        // データベースへ永続化するデータモデルを生成する
+        RegisteredDiagnosisModel model = new RegisteredDiagnosisModel();
+        model.setDiagnosis(rd.getDiagnosis());
+        model.setDiagnosisCode(rd.getDiagnosisCode());
+        model.setDiagnosisCodeSystem(rd.getDiagnosisCodeSystem());
+
+        final StampModel stampModel = new StampModel();
+        stampModel.setId(rd.getStampId());                      // stampId
+        stampModel.setUserId(Project.getUserModel().getId());   // userId
+        stampModel.setEntity(IInfoModel.ENTITY_DIAGNOSIS);      // entity
+        stampModel.setStampBytes(getXMLBytes(model));           // XML
+        
+        SwingWorker worker = new SwingWorker(){
+
+            @Override
+            protected Object doInBackground() throws Exception {
+                StampDelegater sdl = StampDelegater.getInstance();
+                sdl.replaceStamp(stampModel);
+                return null;
+            }
+        };
+        worker.execute();
+    }
+    
     /**
      * スタンプの情報を表示するための文字列を生成する。
      *
@@ -1233,51 +734,16 @@ public class StampTree extends JTree implements TreeModelListener {
      * @return スタンプの情報文字列
      */
     protected String constractToolTip(ModuleModel stamp) {
-
-        String ret = null;
-
-        try {
-            StringBuilder buf = new StringBuilder();
-            BufferedReader reader = new BufferedReader(new StringReader(stamp.getModel().toString()));
-
-            String line;
-            while ((line = reader.readLine()) != null) {
-
-                buf.append(line);
-
-                if (buf.length() < TOOLTIP_LENGTH) {
-                    buf.append(",");
-                } else {
-                    break;
-                }
-            }
-            reader.close();
-            if (buf.length() > TOOLTIP_LENGTH) {
-                buf.setLength(TOOLTIP_LENGTH);
-            }
-            buf.append("...");
-            ret = buf.toString();
-
-        } catch (IOException e) {
-            e.toString();
+        
+        String ret = stamp.getModel().toString();
+        if (ret.length() > TOOLTIP_LENGTH) {
+            ret = ret.substring(0, TOOLTIP_LENGTH - 3).replace("\n", ",");
+            ret += "...";
+        } else {
+            ret = ret.replace("\n", ",");
         }
 
         return ret;
-    }
-
-    /**
-     * スタンプタスク共通の warning ダイアログを表示する。
-     *
-     * @param title ダイアログウインドウに表示するタイトル
-     * @param message　エラーメッセージ
-     */
-    private void warning(String message) {
-        String title = ClientContext.getString("stamptree.title");
-        JOptionPane.showMessageDialog(
-                StampTree.this,
-                message,
-                ClientContext.getFrameTitle(title),
-                JOptionPane.WARNING_MESSAGE);
     }
 
     /**
@@ -1314,25 +780,19 @@ public class StampTree extends JTree implements TreeModelListener {
             return;
         }
 
-        //
         // 削除するノードを取得する
         // 右クリックで選択されている
-        //
         final StampTreeNode theNode = getSelectedNode();
         if (theNode == null) {
             return;
         }
 
-        //
         // このノードをルートにするサブツリーを前順走査する列挙を生成して返します。
         // 列挙の nextElement() メソッドによって返される最初のノードは、この削除するノードです。
-        //
         Enumeration e = theNode.preorderEnumeration();
 
-        //
         // このリストのなかに削除するノードとその子を含める
-        //
-        final ArrayList<String> deleteList = new ArrayList<String>();
+        final List<String> deleteList = new ArrayList<String>();
 
         // エディタから発行があるかどうかのフラグ
         boolean hasEditor = false;
@@ -1347,17 +807,14 @@ public class StampTree extends JTree implements TreeModelListener {
 
                 ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
                 String stampId = info.getStampId();
-                //
+                
                 // エディタから発行がある場合は中止する
-                //
                 if (info.getStampName().equals("エディタから発行...") && (!info.isSerialized())) {
                     hasEditor = true;
                     break;
                 }
-
-                //
+                
                 // IDが付いているもののみを加える
-                //
                 if (stampId != null) {
                     deleteList.add(stampId);
                     logger.debug("added " + info.getStampName());
@@ -1365,10 +822,8 @@ public class StampTree extends JTree implements TreeModelListener {
             }
         }
 
-        //
         // エディタから発行が有った場合はダイアログを表示し
         // リターンする
-        //
         if (hasEditor) {
             String msg0 = "エディタから発行は消去できません。フォルダに含まれている";
             String msg1 = "場合は Drag & Drop で移動後、再度実行してください。";
@@ -1381,27 +836,23 @@ public class StampTree extends JTree implements TreeModelListener {
             return;
         }
 
-        //
         // 削除するフォルダが空の場合は削除してリターンする
         // リストのサイズがゼロかつ theNode が葉でない時
-        // 
         if (deleteList.isEmpty() && (!theNode.isLeaf())) {
             DefaultTreeModel model = (DefaultTreeModel) (StampTree.this).getModel();
             model.removeNodeFromParent(theNode);
             return;
         }
 
-        // データベースのスタンプを削除するデリゲータを生成する
-//masuda^   シングルトン化
-        //final StampDelegater sdl = new StampDelegater();
-        final StampDelegater sdl = StampDelegater.getInstance();
-//masuda$
-
-        worker = new SimpleWorker<Void, Void>() {
+        final String message = "スタンプ削除";
+        final String note = "スタンプを削除しています...";
+        Component c = SwingUtilities.getWindowAncestor(this);
+        ProgressMonitorWorker worker = new ProgressMonitorWorker<Void, Void>(c, message, note) {
 
             @Override
             protected Void doInBackground() throws Exception {
                 logger.debug("deleteNode doInBackground");
+                StampDelegater sdl = StampDelegater.getInstance();
                 sdl.removeStamps(deleteList);
                 return null;
             }
@@ -1409,7 +860,6 @@ public class StampTree extends JTree implements TreeModelListener {
             @Override
             protected void succeeded(Void result) {
                 logger.debug("deleteNode succeeded");
-
                 //---------------------------------------
                 // 成功している場合は Tree からノードを削除する
                 //---------------------------------------
@@ -1433,43 +883,7 @@ public class StampTree extends JTree implements TreeModelListener {
                 logger.warn(cause.getCause());
                 logger.warn(cause.getMessage());
             }
-
-            @Override
-            protected void startProgress() {
-                delayCount = 0;
-                taskTimer.start();
-            }
-
-            @Override
-            protected void stopProgress() {
-                taskTimer.stop();
-                monitor.close();
-                taskTimer = null;
-                monitor = null;
-            }
         };
-
-        String message = "スタンプ削除";
-        String note = "スタンプを削除しています...";
-        Component c = SwingUtilities.getWindowAncestor(this);
-        maxEstimation = 60 * 1000;
-        delay = 300;
-        monitor = new ProgressMonitor(c, message, note, 0, maxEstimation / delay);
-
-        taskTimer = new Timer(delay, new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                delayCount++;
-
-                if (monitor.isCanceled() && (!worker.isCancelled())) {
-                    worker.cancel(true);
-
-                } else {
-                    monitor.setProgress(delayCount);
-                }
-            }
-        });
 
         worker.execute();
     }
@@ -1486,30 +900,21 @@ public class StampTree extends JTree implements TreeModelListener {
         // フォルダノードを生成する
         StampTreeNode folder = new StampTreeNode(NEW_FOLDER_NAME);
 
-        //
         // 生成位置となる選択されたノードを得る
-        //
         StampTreeNode selected = getSelectedNode();
 
         if (selected != null && selected.isLeaf()) {
-            //
             // 選択位置のノードが葉の場合、その前に挿入する
-            //
             StampTreeNode newParent = (StampTreeNode) selected.getParent();
             int index = newParent.getIndex(selected);
             DefaultTreeModel model = (DefaultTreeModel) this.getModel();
             model.insertNodeInto(folder, newParent, index);
 
         } else if (selected != null && (!selected.isLeaf())) {
-            //
             // 選択位置のノードが子を持つ時、最後の子として挿入する
-            //
             DefaultTreeModel model = (DefaultTreeModel) this.getModel();
             model.insertNodeInto(folder, selected, selected.getChildCount());
         }
-
-        //TreePath parentPath = new TreePath(parent.getPath());
-        //this.expandPath(parentPath);
     }
 
     /**
@@ -1518,9 +923,7 @@ public class StampTree extends JTree implements TreeModelListener {
     public void copy() {
         Action a = this.getActionMap().get(TransferHandler.getCopyAction().getValue(Action.NAME));
         if (a != null) {
-            a.actionPerformed(new ActionEvent(this,
-                    ActionEvent.ACTION_PERFORMED,
-                    null));
+            a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
     }
 
@@ -1530,9 +933,7 @@ public class StampTree extends JTree implements TreeModelListener {
     public void paste() {
         Action a = this.getActionMap().get(TransferHandler.getPasteAction().getValue(Action.NAME));
         if (a != null) {
-            a.actionPerformed(new ActionEvent(this,
-                    ActionEvent.ACTION_PERFORMED,
-                    null));
+            a.actionPerformed(new ActionEvent(this, ActionEvent.ACTION_PERFORMED, null));
         }
     }
 
@@ -1555,16 +956,13 @@ public class StampTree extends JTree implements TreeModelListener {
 
     private byte[] getXMLBytes(Object bean) {
         ByteArrayOutputStream bo = new ByteArrayOutputStream();
-        // ムダ？ masuda
-        //XMLEncoder e = new XMLEncoder(new BufferedOutputStream(bo));
         XMLEncoder e = new XMLEncoder(bo);
         e.writeObject(bean);
         e.close();
         return bo.toByteArray();
     }
     
-    
-//masuda^
+
     // Quaquaでなくてもストライプに
     // http://nadeausoftware.com/articles/2008/01/java_tip_how_add_zebra_background_stripes_jtree
     
@@ -1653,5 +1051,4 @@ public class StampTree extends JTree implements TreeModelListener {
     public StampBoxPlugin getStampBox() {
         return stampBox;
     }
-//masuda$
 }

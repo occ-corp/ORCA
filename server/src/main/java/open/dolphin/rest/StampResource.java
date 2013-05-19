@@ -106,6 +106,17 @@ public class StampResource extends AbstractResource {
 
         debug(String.valueOf(cnt));
     }
+    
+//masuda^
+    @GET
+    @Path("allStamps/{param}")
+    public Response getAllStamps(@PathParam("param") Long userId) {
+        
+        List<StampModel> stamps = stampServiceBean.getAllStamps(userId);
+        StreamingOutput so = getGzipOutStream(stamps);
+        
+        return Response.ok(so).build();
+    }
 
     @Override
     protected void debug(String msg) {

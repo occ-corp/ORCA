@@ -24,8 +24,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Properties;
-import java.util.concurrent.ExecutionException;
-import java.util.logging.Logger;
 import javax.swing.Action;
 import javax.swing.DefaultListModel;
 import javax.swing.ImageIcon;
@@ -418,16 +416,12 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
 
     protected void openImage(ImageEntry entry) {
 
-        if (desktop==null) {
+        if (desktop == null) {
             return;
         }
 
-        // pathに空白があるとダメのworkaround
-        String uri = "file:///" 
-                + entry.getPath().replace(File.separator, "/").replace(" ", "%20");
         try {
-            File f = new File(new URI(uri));
-            desktop.open(f);
+            desktop.browse(new URI(entry.getPath()));
         } catch (Exception ex) {
             ClientContext.getBootLogger().warn(ex);
         }
@@ -445,6 +439,7 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         //if (imagePanel != null) {
         //    imagePanel.removeAll();
         //}
+        listModel.clear();
         iconCache.clear();
     }
 

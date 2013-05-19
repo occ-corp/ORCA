@@ -187,7 +187,7 @@ public class ScreenTenKey {
 
     public void removePropertyChangeListener(PropertyChangeListener listener) {
         if (boundSupport != null) {
-            boundSupport.removePropertyChangeListener(listener);
+            boundSupport.removePropertyChangeListener(SCREEN_TENKEY_OUTPUT, listener);
         }
     }
 

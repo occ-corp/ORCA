@@ -128,6 +128,8 @@ public class PacsDicomDocImpl extends AbstractChartDocument implements PropertyC
         if (pacsService != null) {
             pacsService.removePropertyChangeListener(this);
         }
+        
+        listModel.clear();
 
         shutdownExecutor();
     }
