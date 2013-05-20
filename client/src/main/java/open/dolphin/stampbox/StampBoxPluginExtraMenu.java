@@ -99,12 +99,15 @@ public class StampBoxPluginExtraMenu extends MouseAdapter {
                         try {
                             String xml = get();
                             Charset cs = Charset.forName("UTF-8");
-                            Files.write(path, xml.getBytes(cs));
+                            try (BufferedWriter writer = Files.newBufferedWriter(path, cs)) {
+                                writer.write(xml);
+                                writer.close();
+                            } catch (IOException ex) {
+                                processException(ex);
+                            }
                         } catch (InterruptedException ex) {
                             processException(ex);
                         } catch (ExecutionException ex) {
-                            processException(ex);
-                        } catch (IOException ex) {
                             processException(ex);
                         }
 
