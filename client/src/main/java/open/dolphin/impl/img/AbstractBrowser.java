@@ -14,6 +14,7 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -421,7 +422,9 @@ public abstract class AbstractBrowser extends AbstractChartDocument {
         }
 
         try {
-            desktop.browse(new URI(entry.getPath()));
+            // from 2.4.1
+            Path path = Paths.get(entry.getPath());
+            desktop.browse(path.toUri());
         } catch (Exception ex) {
             ClientContext.getBootLogger().warn(ex);
         }
