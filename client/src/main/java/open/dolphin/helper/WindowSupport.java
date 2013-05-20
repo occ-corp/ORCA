@@ -6,8 +6,8 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentSkipListMap;
+import java.util.SortedSet;
+import java.util.concurrent.ConcurrentSkipListSet;
 import java.util.concurrent.CopyOnWriteArrayList;
 import javax.swing.*;
 import javax.swing.event.MenuEvent;
@@ -29,17 +29,17 @@ public class WindowSupport implements MenuListener {
     private static final ImageIcon icon = 
             ClientContext.getClientContextStub().getImageIcon("dolphinIcon.png");
     
-    // JFrameとWindowSupportのマップ　フォーカス処理にも使用
-    private static final Map<JFrame, WindowSupport> allWindows;
+    // WindowSupportのリスト　フォーカス処理にも使用
+    private static final SortedSet<WindowSupport> allWindows;
     // allChartsはChartImplから移動
     private static final List<ChartImpl> allCharts;
     // allEditorFramesはEditorFrameから移動
     private static final List<EditorFrame> allEditorFrames;
     
     static {
-        allWindows = new ConcurrentSkipListMap<JFrame, WindowSupport>(new WindowComparator());
-        allEditorFrames = new CopyOnWriteArrayList<EditorFrame>();
-        allCharts = new CopyOnWriteArrayList<ChartImpl>();
+        allWindows = new ConcurrentSkipListSet<>(new WindowComparator());
+        allEditorFrames = new CopyOnWriteArrayList<>();
+        allCharts = new CopyOnWriteArrayList<>();
     }
     
     // Window support が提供するスタッフ
@@ -115,7 +115,7 @@ public class WindowSupport implements MenuListener {
             
             @Override
             public void windowOpened(WindowEvent e) {
-                allWindows.put(frame, windowSupport);
+                allWindows.add(windowSupport);
                 if (chartImpl != null) {
                     allCharts.add(chartImpl);
                 }
@@ -123,7 +123,7 @@ public class WindowSupport implements MenuListener {
             
             @Override
             public void windowClosed(WindowEvent e) {
-                allWindows.remove(frame);
+                allWindows.remove(windowSupport);
                 if (chartImpl != null) {
                     allCharts.remove(chartImpl);
                 }
@@ -137,9 +137,10 @@ public class WindowSupport implements MenuListener {
     }
     
     public static Object getMediator(JFrame frame) {
-        WindowSupport ws = allWindows.get(frame);
-        if (ws != null) {
-            return ws.getMediator();
+        for (WindowSupport ws : allWindows) {
+            if (ws.getFrame() == frame) {
+                return ws.getMediator();
+            }
         }
         return null;
     }
@@ -188,7 +189,7 @@ public class WindowSupport implements MenuListener {
         wm.removeAll();
         
         // リストから新規に生成する
-        for (WindowSupport ws : allWindows.values()) {
+        for (WindowSupport ws : allWindows) {
             Action action = ws.getWindowAction();
             wm.add(action);
         }
@@ -207,8 +208,8 @@ public class WindowSupport implements MenuListener {
 
         @Override
         public int compare(Object o1, Object o2) {
-            String title1 = ((JFrame) o1).getTitle();
-            String title2 = ((JFrame) o2).getTitle();
+            String title1 = ((WindowSupport) o1).getFrame().getTitle();
+            String title2 = ((WindowSupport) o2).getFrame().getTitle();
             return (title1 == null) ? -1 : title1.compareTo(title2);
         }
     }

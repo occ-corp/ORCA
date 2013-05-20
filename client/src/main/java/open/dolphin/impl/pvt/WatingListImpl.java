@@ -534,6 +534,10 @@ public class WatingListImpl extends AbstractMainComponent {
         }
         // ChartStateListenerから除去する
         cel.removeListener(this);
+        
+        if (executor != null) {
+            executor.shutdownNow();
+        }
     }
 
 
@@ -1133,7 +1137,7 @@ public class WatingListImpl extends AbstractMainComponent {
         String waitingTime = "00:00";
         Date now = new Date();
 
-        final StringBuilder sb = new StringBuilder();
+        StringBuilder sb = new StringBuilder();
         sb.append(timeFormatter.format(now));
         sb.append(" | ");
         sb.append("来院数");
@@ -1145,7 +1149,16 @@ public class WatingListImpl extends AbstractMainComponent {
             waitingTime = DurationFormatUtils.formatPeriod(waitingPvtDate.getTime(), now.getTime(), "HH:mm");
         }
         sb.append(waitingTime);
-        view.getPvtInfoLbl().setText(sb.toString());
+        final String info = sb.toString();
+        
+        SwingUtilities.invokeLater(new Runnable(){
+
+            @Override
+            public void run() {
+                view.getPvtInfoLbl().setText(info);
+            }
+        });
+        
     }
 
 //pns^
