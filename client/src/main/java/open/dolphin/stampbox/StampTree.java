@@ -602,36 +602,26 @@ public class StampTree extends JTree implements TreeModelListener {
         }
     }
     
-    // 編集元のスタンプのStampTreeNodeを取得する。再帰は苦手ｗｗｗ
+    // 編集元のスタンプのStampTreeNodeを取得する
     private StampTreeNode getSourceNode(String stampId) {
-        StampTreeNode root = (StampTreeNode) getModel().getRoot();
-        return searchNode(root, stampId);
-    }
-    
-    private StampTreeNode searchNode(StampTreeNode node, String stampId) {
-
-        if (stampId == null) {
+        
+        if (stampId == null || stampId.isEmpty()) {
             return null;
         }
-
-        if (node.getUserObject() instanceof ModuleInfoBean) {
-            ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
-            if (stampId.equals(info.getStampId())) {
-                return node;
-            }
-        }
-
-        int childCount = node.getChildCount();
-        if (childCount != 0) {
-            // childrenがある場合はそれも調べる。
-            for (int i = 0; i < childCount; ++i) {
-                StampTreeNode childNode = (StampTreeNode) node.getChildAt(i);
-                StampTreeNode ret = searchNode(childNode, stampId);
-                if (ret != null) {
-                    return ret;
+        
+        StampTreeNode rootNode = (StampTreeNode) getModel().getRoot();
+        Enumeration e = rootNode.preorderEnumeration();
+        
+        while (e.hasMoreElements()) {
+            StampTreeNode node = (StampTreeNode) e.nextElement();
+            if (node.isLeaf() && node.getUserObject() instanceof ModuleInfoBean) {
+                ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
+                if (stampId.equals(info.getStampId())) {
+                    return node;
                 }
             }
         }
+        
         return null;
     }
     
