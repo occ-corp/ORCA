@@ -10,12 +10,12 @@ import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 import javax.swing.*;
-import javax.swing.tree.DefaultTreeModel;
 import open.dolphin.client.BlockGlass;
 import open.dolphin.delegater.StampDelegater;
 import open.dolphin.infomodel.IInfoModel;
@@ -271,18 +271,37 @@ public class StampBoxPluginExtraMenu extends MouseAdapter {
                 // ユーザーのすべてのスタンプをデータベースから取得しHashMapに登録する
                 long userId = Project.getUserModel().getId();
                 List<StampModel> allStamps = StampDelegater.getInstance().getAllStamps(userId);
-                Map<String, StampModel> allStampMap = new HashMap<>();
+                Map<String, StampModel> map = new HashMap<>();
                 for (StampModel stamp : allStamps) {
-                    allStampMap.put(stamp.getId(), stamp);
+                    map.put(stamp.getId(), stamp);
                 }
 
                 // ORCA以外のスタンプツリーを取得する
                 int cnt = 0;
-                List<StampTree> treeList = stampBox.getAllTreesExceptOrca();
+                List<StampTree> treeList = getAllTreesExceptOrca();
                 for (StampTree tree : treeList) {
                     // 各ツリーのゾンビを抹消する
-                    TreeZombieBuster buster = new TreeZombieBuster(tree, allStampMap);
-                    cnt += buster.removeZombie();
+                    System.out.println(tree.getEntity() + "ツリーを処理中です。\n");
+
+                    StampTreeNode rootNode = (StampTreeNode) tree.getModel().getRoot();
+                    Enumeration e = rootNode.preorderEnumeration();
+
+                    while (e.hasMoreElements()) {
+                        StampTreeNode node = (StampTreeNode) e.nextElement();
+                        if (node.isLeaf() && node.getUserObject() instanceof ModuleInfoBean) {
+                            ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
+                            // エディタから発行のStampIdはnull
+                            String stampId = info.getStampId();
+                            if (stampId != null && !map.containsKey(info.getStampId())) {
+                                node.removeFromParent();
+                                StringBuilder buf = new StringBuilder();
+                                buf.append("ゾンビ：").append(info.getStampName()).append(" ");
+                                buf.append(info.getStampId()).append("\n");
+                                System.out.println(buf.toString());
+                                cnt++;
+                            }
+                        }
+                    }
 
                 }
                 sb.append(cnt).append("件のゾンビを退治しました！\n");
@@ -293,11 +312,11 @@ public class StampBoxPluginExtraMenu extends MouseAdapter {
                 List<ModuleInfoBean> allInfos = getAllStampInfos();
                 for (ModuleInfoBean info : allInfos) {
                     // HashMapから削除していく
-                    allStampMap.remove(info.getStampId());
+                    map.remove(info.getStampId());
                 }
                 // 残ったものがデータベース側のゾンビである
                 List<String> removeList = new ArrayList<>();
-                removeList.addAll(allStampMap.keySet());
+                removeList.addAll(map.keySet());
 
                 // データベースから削除する
                 //cnt = removeList.size();
@@ -326,57 +345,34 @@ public class StampBoxPluginExtraMenu extends MouseAdapter {
         worker.execute();
     }
 
-    private class TreeZombieBuster{
-        
-        private StampTree tree;
-        private Map<String, StampModel> map;
-        private int removeCount;
-        
-        private TreeZombieBuster(StampTree tree, Map<String, StampModel> map) {
-            this.tree = tree;
-            this.map = map;
-        }
-        
-        private int removeZombie() {
-            System.out.println(tree.getEntity() + "ツリーを処理中です。\n");
-            DefaultTreeModel treeModel = (DefaultTreeModel) tree.getModel();
-            StampTreeNode root = (StampTreeNode) treeModel.getRoot();
-            removeTreeZombie(root);
-            return removeCount;
-        }
-        
-        private void removeTreeZombie(StampTreeNode node) {
-            if (node.isLeaf() && node.getUserObject() instanceof ModuleInfoBean) {
-                ModuleInfoBean info = (ModuleInfoBean) node.getUserObject();
-                // エディタから発行のStampIdはnull
-                String stampId = info.getStampId();
-                if (stampId != null && !map.containsKey(info.getStampId())) {
-                    node.removeFromParent();
-                    StringBuilder sb = new StringBuilder();
-                    sb.append("ゾンビ：").append(info.getStampName()).append(" ");
-                    sb.append(info.getStampId()).append("\n");
-                    System.out.println(sb.toString());
-                    removeCount++;
-                }
-            }
-            int cnt = node.getChildCount();
-            for (int i = 0; i < cnt; ++i) {
-                StampTreeNode child = (StampTreeNode) node.getChildAt(i);
-                removeTreeZombie(child);
-            }
-        }
-    }
-    
     // ORCA以外のユーザースタンプのModuleInfoBeanを取得する
     private List<ModuleInfoBean> getAllStampInfos() {
-        List<StampTree> treeList = stampBox.getAllTreesExceptOrca();
+        List<StampTree> treeList = getAllTreesExceptOrca();
         List<ModuleInfoBean> infoList = new ArrayList<>();
         for (StampTree tree : treeList) {
             infoList.addAll(stampBox.getAllStamps(tree.getEntity()));
         }
         return infoList;
     }
-
+    
+    /**
+     * スタンプボックスに含まれるORCA以外の全treeを返す。
+     * @return StampTreeのリスト
+     */
+    private List<StampTree> getAllTreesExceptOrca() {
+        List<StampTree> ret = new ArrayList<>();
+        int cnt = stampBox.getTabCount();
+        for (int i = 0; i < cnt; i++) {
+            StampTreePanel tp = (StampTreePanel) stampBox.getComponentAt(i);
+            if (IInfoModel.ENTITY_ORCA.equals(tp.getTree().getEntity())) {
+                continue;
+            }
+            StampTree tree = tp.getTree();
+            ret.add(tree);
+        }
+        return ret;
+    }
+    
     private void processException(Exception ex) {
         System.err.println("StampBoxPluginExtraMenu.java: " + ex);
     }
