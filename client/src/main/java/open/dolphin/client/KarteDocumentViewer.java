@@ -770,13 +770,16 @@ public class KarteDocumentViewer extends AbstractChartDocument implements Docume
             int fromIndex = 0;
             int idListSize = docInfoMap.size();
             int taskCount=  0;
-            List<Long> allIds = new ArrayList<Long>(docInfoMap.keySet());
+
+            // 最初のfetchSizeを決める
             // 20文書までは一回で、20～400文書までは２分割で、400以上は200文書ごと取得
-            int fetchSize = (idListSize <= 20 || idListSize / 200 > 2)
-                    ? defaultFetchSize
+            int fetchSize = (idListSize <= 20 || idListSize / defaultFetchSize >= 2)
+                    ? idListSize % defaultFetchSize
                     : idListSize / 2;
             
             // 分割してサーバーから取得する
+            List<Long> allIds = new ArrayList<Long>(docInfoMap.keySet());
+            
             while (fromIndex < idListSize) {
                 int toIndex = Math.min(fromIndex + fetchSize, idListSize);
                 List<Long> ids = allIds.subList(fromIndex, toIndex);
