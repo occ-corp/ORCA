@@ -294,10 +294,8 @@ public class StampBoxPluginExtraMenu extends MouseAdapter {
                             String stampId = info.getStampId();
                             if (stampId != null && !map.containsKey(info.getStampId())) {
                                 node.removeFromParent();
-                                StringBuilder buf = new StringBuilder();
-                                buf.append("ゾンビ：").append(info.getStampName()).append(" ");
-                                buf.append(info.getStampId()).append("\n");
-                                System.out.println(buf.toString());
+                                //String msg = String.format("ゾンビ：%s %s", info.getStampName(), info.getStampId());
+                                //System.out.println(msg);
                                 cnt++;
                             }
                         }
