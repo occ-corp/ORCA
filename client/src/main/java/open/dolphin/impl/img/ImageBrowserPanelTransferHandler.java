@@ -38,21 +38,24 @@ public class ImageBrowserPanelTransferHandler extends DolphinTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
 
-        startTransfer(src);
         JList imageList = (JList) src;
-        
         ImageEntry entry = (ImageEntry) imageList.getSelectedValue();
-        if (entry != null && !entry.isDirectory()) {
-            File f = new File(entry.getPath());
-            File[] files = new File[]{f};
-            Transferable tr = new FileListTransferable(files);
-            // ドラッグ中のイメージを設定する
-            Image image = entry.getImageIcon().getImage();
-            setDragImage(image);
-            return tr;
+
+        if (entry == null || entry.isDirectory()) {
+            return null;
         }
-        endTransfer();
-        return null;
+        
+        startTransfer(src);
+        
+        // ドラッグ中のイメージを設定する
+        Image image = entry.getImageIcon().getImage();
+        setDragImage(image);
+        
+        File f = new File(entry.getPath());
+        File[] files = new File[]{f};
+        Transferable tr = new FileListTransferable(files);
+
+        return tr;
     }
     
     @Override

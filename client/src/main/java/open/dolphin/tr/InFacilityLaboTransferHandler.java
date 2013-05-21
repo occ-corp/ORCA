@@ -28,17 +28,17 @@ public class InFacilityLaboTransferHandler extends DolphinTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
         
-        startTransfer(src);
         JTable sourceTable = (JTable) src;
-
-        ListTableModel<InFacilityLaboItem> tableModel = (ListTableModel<InFacilityLaboItem>) sourceTable.getModel();
         int[] selectedRows = sourceTable.getSelectedRows();
         int size = selectedRows.length;
+        
         if (size == 0) {
-            endTransfer();
             return null;
         }
         
+        startTransfer(src);
+        
+        ListTableModel<InFacilityLaboItem> tableModel = (ListTableModel<InFacilityLaboItem>) sourceTable.getModel();
         InFacilityLaboItem[] items = new InFacilityLaboItem[size];
         List<String> strList = new ArrayList<>();
         for (int i = 0; i < size; ++i) {

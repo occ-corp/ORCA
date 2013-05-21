@@ -18,9 +18,14 @@ public class AspStampTreeTransferHandler extends DolphinTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent c) {
         
-        startTransfer(c);
         StampTree sourceTree = (StampTree) c;
         StampTreeNode dragNode = (StampTreeNode) sourceTree.getLastSelectedPathComponent();
+        
+        if (dragNode == null) {
+            return null;
+        }
+        
+        startTransfer(c);
         
         // ドラッグ中のイメージを設定する
         Image image = createDragImage(sourceTree, dragNode);

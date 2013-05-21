@@ -48,11 +48,15 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
     @Override
     protected Transferable createTransferable(JComponent src) {
-
-        startTransfer(src);
         
         // 複数stampを含んだtransferableを返す
         int size = selectedStampHolder.size();
+        if (size == 0) {
+            return null;
+        }        
+
+        startTransfer(src);
+        
         StampHolder[] stampList = selectedStampHolder.toArray(new StampHolder[size]);
         ModuleModel[] stamps = new ModuleModel[size];
         

@@ -9,6 +9,7 @@ import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
+import java.awt.geom.AffineTransform;
 import java.awt.image.BufferedImage;
 import java.util.List;
 import javax.swing.JComponent;
@@ -96,6 +97,7 @@ public abstract class DolphinTransferHandler extends TransferHandler {
         endTransfer();
     }
     
+    
     // 文字列のDragImageを作成する
     protected Image createDragImage(String str, Font font) {
         try {
@@ -168,30 +170,25 @@ public abstract class DolphinTransferHandler extends TransferHandler {
         return null;
     }
     
-    
     private BufferedImage createComponentImage(Component[] components) throws Exception {
         
         // 各ComponentのBufferedImageを準備する
-        int size = components.length;
         int width = 0;
         int height = 0;
-        BufferedImage[] images = new BufferedImage[size];
-        for (int i = 0; i < size; ++i) {
-            Component c = components[i];
-            BufferedImage bf = createComponentImage(c);
-            images[i] = bf;
-            width = Math.max(width, bf.getWidth());
-            height += bf.getHeight();
+        for (Component c : components) {
+            Dimension d = c.getSize();
+            width = Math.max(width, d.width);
+            height += d.height;
         }
         
         // Componentsを縦に並べて描画する
         BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g2d = image.createGraphics();
-        int y = 0;
-        for (int i = 0; i < size; ++i) {
-            BufferedImage bf = images[i];
-            g2d.drawImage(bf, null, 0, y);
-            y += bf.getHeight();
+        AffineTransform at = new AffineTransform();
+        for (Component c : components) {
+            g2d.setTransform(at);
+            c.paint(g2d);
+            at.translate(0, c.getHeight());
         }
         g2d.dispose();
         
@@ -206,10 +203,7 @@ public abstract class DolphinTransferHandler extends TransferHandler {
             d = c.getPreferredSize();
             c.setSize(d);
         }
-        if (d.width == 0 || d.height == 0) {
-            throw new Exception();
-        }
-
+        
         BufferedImage image = new BufferedImage(d.width, d.height, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g2d = image.createGraphics();
         c.paint(g2d);

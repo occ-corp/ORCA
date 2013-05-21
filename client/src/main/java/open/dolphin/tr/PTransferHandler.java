@@ -41,16 +41,15 @@ public class PTransferHandler extends AbstractKarteTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
         
-        startTransfer(src);
-
         JTextComponent source = (JTextComponent) src;
 
         // テキストの選択範囲を記憶
         boolean b = setSelectedTextArea(source);
         if (!b) {
-            endTransfer();
             return null;
         }
+        
+        startTransfer(src);
 
         String data = source.getSelectedText();
         return new StringSelection(data);

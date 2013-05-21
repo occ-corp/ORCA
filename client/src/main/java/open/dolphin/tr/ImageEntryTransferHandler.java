@@ -29,14 +29,14 @@ public class ImageEntryTransferHandler extends DolphinTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
         
-        startTransfer(src);
-        
         JList imageList = (JList) src;
         ImageEntry entry = (ImageEntry) imageList.getSelectedValue();
+        
         if (entry == null) {
-            endTransfer();
             return null;
         }
+        
+        startTransfer(src);
         
         // ドラッグ中のイメージを設定する
         Image image = entry.getImageIcon().getImage();

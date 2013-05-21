@@ -39,32 +39,32 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
     
     @Override
     protected Transferable createTransferable(JComponent src) {
-
-        startTransfer(src);
-        action = 0;
         
+        action = 0;
         JTable sourceTable = (JTable) src;
-
-//masuda^   table sorter対応
-        ListTableSorter sorter = (ListTableSorter) sourceTable.getModel();
-        int cnt = sourceTable.getSelectedRowCount();
-        if (cnt > 0) {
-            RegisteredDiagnosisModel[] rds = new RegisteredDiagnosisModel[cnt];
-            List<String> strList = new ArrayList<>();
-            for (int i = 0; i < cnt; ++i) {
-                RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) sorter.getObject(sourceTable.getSelectedRows()[i]);
-                rds[i] = rd;
-                strList.add(rd.getDiagnosisName());
-            }
-            // ドラッグ中のイメージを設定する
-            Image image = createDragImage(strList, sourceTable.getFont());
-            setDragImage(image);
-            return new InfoModelTransferable(rds);
+        
+        int[] selectedRows = sourceTable.getSelectedRows();
+        int size = selectedRows.length;
+        if (size == 0) {
+            return null;
         }
         
-        endTransfer();
-        return null;
-//masuda$
+        startTransfer(src);
+        
+        ListTableSorter sorter = (ListTableSorter) sourceTable.getModel();
+        RegisteredDiagnosisModel[] rds = new RegisteredDiagnosisModel[size];
+        List<String> strList = new ArrayList<>();
+        for (int i = 0; i < size; ++i) {
+            RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) sorter.getObject(selectedRows[i]);
+            rds[i] = rd;
+            strList.add(rd.getDiagnosisName());
+        }
+        
+        // ドラッグ中のイメージを設定する
+        Image image = createDragImage(strList, sourceTable.getFont());
+        setDragImage(image);
+
+        return new InfoModelTransferable(rds);
     }
 
     @Override

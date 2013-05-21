@@ -38,10 +38,15 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
 
     @Override
     protected Transferable createTransferable(JComponent src) {
-
+        
+        // 複数schemaを含んだtransferableを返す
+        int size = selectedSchemaHolder.size();
+        if (size == 0) {
+            return null;
+        }
+        
         startTransfer(src);
         
-        int size = selectedSchemaHolder.size();
         SchemaHolder[] shList = selectedSchemaHolder.toArray(new SchemaHolder[size]);
         SchemaModel[] schemas = new SchemaModel[size];
         

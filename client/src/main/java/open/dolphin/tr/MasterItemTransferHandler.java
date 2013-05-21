@@ -23,21 +23,21 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
         
-        startTransfer(src);
-        
         JTable sourceTable = (JTable) src;
-        ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) sourceTable.getModel();
         fromIndex = sourceTable.getSelectedRow();
-        MasterItem mi = tableModel.getObject(fromIndex);
-        if (mi != null) {
-            // ドラッグ中のイメージを設定する
-            Image image = createDragImage(mi.getName(), sourceTable.getFont());
-            setDragImage(image);
-            return new MasterItemTransferable(mi);
+        if (fromIndex < 0) {
+            return null;
         }
         
-        endTransfer();
-        return null;
+        startTransfer(src);
+        
+        ListTableModel<MasterItem> tableModel = (ListTableModel<MasterItem>) sourceTable.getModel();
+        MasterItem mi = tableModel.getObject(fromIndex);
+ 
+        // ドラッグ中のイメージを設定する
+        Image image = createDragImage(mi.getName(), sourceTable.getFont());
+        setDragImage(image);
+        return new MasterItemTransferable(mi);
     }
     
     @Override
@@ -45,6 +45,7 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
         
         JTable dropTable = (JTable) support.getComponent();
         if (!canImport(support) || dropTable != srcComponent) {
+            fromIndex = -1;
             importDataFailed();
             return false;
         }
@@ -59,6 +60,7 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
             return true;
 
         } catch (Exception ioe) {
+            fromIndex = -1;
             importDataFailed();
             return false;
         }

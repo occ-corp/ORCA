@@ -23,21 +23,22 @@ public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
         
-        startTransfer(src);
-        
         JTable sourceTable = (JTable) src;
-        ListTableModel<RegisteredDiagnosisModel> tableModel = (ListTableModel<RegisteredDiagnosisModel>) sourceTable.getModel();
         fromIndex = sourceTable.getSelectedRow();
-        RegisteredDiagnosisModel rd = tableModel.getObject(fromIndex);
-        if (rd != null) {
-            // ドラッグ中のイメージを設定する
-            Image image = createDragImage(rd.getDiagnosisName(), sourceTable.getFont());
-            setDragImage(image);
-            return new RegisteredDiagnosisTransferable(rd);
+        if (fromIndex < 0) {
+            return null;
         }
         
-        endTransfer();
-        return null;
+        startTransfer(src);
+        
+        ListTableModel<RegisteredDiagnosisModel> tableModel = (ListTableModel<RegisteredDiagnosisModel>) sourceTable.getModel();
+        RegisteredDiagnosisModel rd = tableModel.getObject(fromIndex);
+        
+        // ドラッグ中のイメージを設定する
+        Image image = createDragImage(rd.getDiagnosisName(), sourceTable.getFont());
+        setDragImage(image);
+        
+        return new RegisteredDiagnosisTransferable(rd);
     }
 
     @Override
@@ -45,6 +46,7 @@ public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
         
         JTable dropTable = (JTable) support.getComponent();
         if (!canImport(support) || dropTable != srcComponent) {
+            fromIndex = -1;
             importDataFailed();
             return false;
         }
@@ -59,6 +61,7 @@ public class RegisteredDiagnosisTransferHandler extends DolphinTransferHandler {
             return true;
             
         } catch (Exception ioe) {
+            fromIndex = -1;
             importDataFailed();
             return false;
         }
