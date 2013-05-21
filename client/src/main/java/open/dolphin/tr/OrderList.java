@@ -10,7 +10,7 @@ import open.dolphin.infomodel.ModuleModel;
  */
 public final class OrderList implements Serializable {
 
-    private static final long serialVersionUID = -6049175115811888229L;
+    //private static final long serialVersionUID = -6049175115811888229L;
 
     private ModuleModel[] orderList;
 
@@ -19,7 +19,7 @@ public final class OrderList implements Serializable {
     }
 
     public OrderList(ModuleModel[] stamp) {
-    	setOrderStamp(stamp);
+    	orderList = stamp;
     }
 
     public ModuleModel[] getOrderList() {

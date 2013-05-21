@@ -1,20 +1,22 @@
 package open.dolphin.tr;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Image;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
 import java.awt.image.BufferedImage;
+import java.util.List;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.JTree;
 import javax.swing.TransferHandler;
 import javax.swing.text.Position;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.TreeCellRenderer;
 import javax.swing.tree.TreeNode;
 import javax.swing.tree.TreePath;
@@ -94,51 +96,138 @@ public abstract class DolphinTransferHandler extends TransferHandler {
         endTransfer();
     }
     
+    // 文字列のDragImageを作成する
+    protected Image createDragImage(String str, Font font) {
+        try {
+            JLabel lbl = new JLabel();
+            lbl.setBorder(null);
+            lbl.setFont(font);
+            lbl.setText(str);
+            return createComponentImage(lbl);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return null;
+    }
+    
+    protected Image createDragImage(List<String> strList, Font font) {
+        try {
+            int size = strList.size();
+            JLabel[] labels = new JLabel[size];
+            for (int i = 0; i < size; ++i) {
+                JLabel lbl = new JLabel();
+                lbl.setBorder(null);
+                lbl.setFont(font);
+                lbl.setText(strList.get(i));
+                labels[i] = lbl;
+            }
+            return createComponentImage(labels);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return null;
+    }
+    
+    // StampTreeのDragImageを作成する
+    protected Image createDragImage(JTree tree, TreeNode node) {
+        
+        try {
+            TreeCellRenderer renderer = tree.getCellRenderer();
+            TreePath path = tree.getSelectionPath();
+
+            boolean selected = false;
+            boolean expanded = tree.isExpanded(path);
+            boolean isLeaf = node.isLeaf();
+            int row = tree.getRowForPath(path);
+
+            Component c = renderer.getTreeCellRendererComponent(tree,
+                    node, selected, expanded, isLeaf, row, isLeaf);
+
+            // ストライプがついているので消す
+            if (c instanceof DefaultTreeCellRenderer) {
+                ((DefaultTreeCellRenderer) c).setBackgroundNonSelectionColor(null);
+            } else {
+                c.setBackground(null);
+            }
+
+            return createComponentImage(c);
+        } catch (Exception ex) {
+            ex.printStackTrace(System.err);
+        }
+        return null;
+    }
+    
+    // コンポーネントのDragImageを作成する
+    protected Image createDragImage(Component[] components, double scale) {
+
+        try {
+            BufferedImage image = createComponentImage(components);
+            return createResizedImage(image, scale);
+        } catch (Exception ex) {
+        }
+        return null;
+    }
+    
+    
+    private BufferedImage createComponentImage(Component[] components) throws Exception {
+        
+        // 各ComponentのBufferedImageを準備する
+        int size = components.length;
+        int width = 0;
+        int height = 0;
+        BufferedImage[] images = new BufferedImage[size];
+        for (int i = 0; i < size; ++i) {
+            Component c = components[i];
+            BufferedImage bf = createComponentImage(c);
+            images[i] = bf;
+            width = Math.max(width, bf.getWidth());
+            height += bf.getHeight();
+        }
+        
+        // Componentsを縦に並べて描画する
+        BufferedImage image = new BufferedImage(width, height, BufferedImage.TYPE_4BYTE_ABGR);
+        Graphics2D g2d = image.createGraphics();
+        int y = 0;
+        for (int i = 0; i < size; ++i) {
+            BufferedImage bf = images[i];
+            g2d.drawImage(bf, null, 0, y);
+            y += bf.getHeight();
+        }
+        g2d.dispose();
+        
+        return image;
+    }
+    
     // ComponentからBufferedImageを作成する
-    protected BufferedImage createComponentImage(Component c) {
-        Rectangle r = c.getBounds();
-        BufferedImage image = new BufferedImage(r.width, r.height, BufferedImage.TYPE_4BYTE_ABGR);
+    private BufferedImage createComponentImage(Component c) throws Exception {
+        
+        Dimension d = c.getSize();
+        if (d.width == 0 || d.height == 0) {
+            d = c.getPreferredSize();
+            c.setSize(d);
+        }
+        if (d.width == 0 || d.height == 0) {
+            throw new Exception();
+        }
+
+        BufferedImage image = new BufferedImage(d.width, d.height, BufferedImage.TYPE_4BYTE_ABGR);
         Graphics2D g2d = image.createGraphics();
         c.paint(g2d);
         g2d.dispose();
-        return image;
-    }
-    
-    // 選択中のTreeNodeのBufferedImageを作成する。pns先生のコードを拝借
-    protected Image createNodeImage(JTree tree) {
-
-        TreePath path = tree.getSelectionPath();
-        if (path == null) {
-            return null;
-        }
-
-        TreeCellRenderer renderer = tree.getCellRenderer();
-        TreeNode node = (TreeNode) tree.getLastSelectedPathComponent();
-        boolean selected = false;
-        boolean expanded = tree.isExpanded(path);
-        boolean isLeaf = node.isLeaf();
-        int row = tree.getRowForPath(path);
-        boolean hasFocus = true;
-
-        Component c = renderer.getTreeCellRendererComponent(
-                tree, node, selected, expanded, isLeaf, row, hasFocus);
-        c.setSize(c.getPreferredSize());    // これ大事
         
-        Image image = createComponentImage(c);
-
         return image;
     }
     
-    protected Image createStringImage(String str, Font font) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>");
-        sb.append(str.replace("\n", "<br>"));
-        sb.append("</html>");
-        JLabel lbl = new JLabel();
-        lbl.setFont(font);
-        lbl.setText(sb.toString());
-        lbl.setSize(lbl.getPreferredSize());
-        Image image = createComponentImage(lbl);
-        return image;
+    // BufferedImageをリサイズする
+    private Image createResizedImage(BufferedImage image, double scale) {
+        
+        if (scale == 1) {
+            return image;
+        }
+        
+        int width = (int) (image.getWidth() * scale);
+        int height =(int) (image.getHeight() * scale);
+        
+        return image.getScaledInstance(width, height, Image.SCALE_FAST);
     }
 }

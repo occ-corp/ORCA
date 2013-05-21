@@ -1029,10 +1029,10 @@ public class StampTree extends JTree implements TreeModelListener {
             }
 
             // http://nadeausoftware.com/articles/2008/01/java_tip_how_add_zebra_background_stripes_jtree
-            if (!(c instanceof DefaultTreeCellRenderer)) {
-                c.setBackground(ROW_COLORS[row & 1]);
-            } else {
+            if (c instanceof DefaultTreeCellRenderer) {
                 ((DefaultTreeCellRenderer) c).setBackgroundNonSelectionColor(ROW_COLORS[row & 1]);
+            } else {
+                c.setBackground(ROW_COLORS[row & 1]);
             }
             return c;
         }

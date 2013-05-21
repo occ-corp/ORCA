@@ -23,7 +23,7 @@ public class AspStampTreeTransferHandler extends DolphinTransferHandler {
         StampTreeNode dragNode = (StampTreeNode) sourceTree.getLastSelectedPathComponent();
         
         // ドラッグ中のイメージを設定する
-        Image image = createNodeImage(sourceTree);
+        Image image = createDragImage(sourceTree, dragNode);
         setDragImage(image);
         
         return new LocalStampTreeNodeTransferable(dragNode);

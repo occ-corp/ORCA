@@ -1,13 +1,9 @@
 package open.dolphin.tr;
 
-import java.awt.Dimension;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.ActionMap;
 import javax.swing.JComponent;
@@ -25,7 +21,7 @@ import open.dolphin.infomodel.SchemaModel;
  */
 public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
     
-    private static final double IconScale = 0.6;
+    private static final double DRAG_IMAGE_SCALE = 0.6;
     
     private static final SchemaHolderTransferHandler instance;
     
@@ -44,47 +40,22 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
     protected Transferable createTransferable(JComponent src) {
 
         startTransfer(src);
-        List<SchemaModel> schemaList = new ArrayList<>();
         
-        List<SchemaHolder> shList = selectedSchemaHolder;
-        for (SchemaHolder sh : shList) {
-            SchemaModel schema = sh.getSchema();
-            schemaList.add(schema);
+        int size = selectedSchemaHolder.size();
+        SchemaHolder[] shList = selectedSchemaHolder.toArray(new SchemaHolder[size]);
+        SchemaModel[] schemas = new SchemaModel[size];
+        
+        for (int i = 0; i < size; ++i) {
+            schemas[i] = shList[i].getSchema();
         }
-        SchemaModel[] schemas = schemaList.toArray(new SchemaModel[0]);
-        SchemaList list = new SchemaList();
-        list.setSchemaList(schemas);
+        SchemaList list = new SchemaList(schemas);
         
         // ドラッグ中のイメージを設定する
-        Image image = createIconImage(shList);
+        Image image = createDragImage(shList, DRAG_IMAGE_SCALE);
         setDragImage(image);
         
         Transferable tr = new SchemaListTransferable(list);
         return tr;
-    }
-    
-    private Image createIconImage(List<SchemaHolder> shList) {
-        
-        Dimension d = new Dimension();
-        for (SchemaHolder sh : shList) {
-            d.height += sh.getBounds().height;
-            d.width = Math.max(d.width, sh.getBounds().width);
-        }
-        BufferedImage image =new BufferedImage(d.width, d.height, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D g2d = image.createGraphics();
-
-        int y = 0;
-        for (SchemaHolder lbl : shList) {
-            BufferedImage bf = createComponentImage(lbl);
-            g2d.drawImage(bf, null, 0, y);
-            y += bf.getHeight();
-        }
-        g2d.dispose();
-        
-        int width = (int) (d.width * IconScale);
-        int height =(int) (d.height * IconScale);
-        
-        return image.getScaledInstance(width, height, Image.SCALE_FAST);
     }
     
     @Override

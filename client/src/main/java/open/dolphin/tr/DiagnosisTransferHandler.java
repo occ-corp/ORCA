@@ -50,16 +50,14 @@ public class DiagnosisTransferHandler extends DolphinTransferHandler {
         int cnt = sourceTable.getSelectedRowCount();
         if (cnt > 0) {
             RegisteredDiagnosisModel[] rds = new RegisteredDiagnosisModel[cnt];
-            StringBuilder sb = new StringBuilder();
+            List<String> strList = new ArrayList<>();
             for (int i = 0; i < cnt; ++i) {
-                rds[i] = (RegisteredDiagnosisModel) sorter.getObject(sourceTable.getSelectedRows()[i]);
-                if (i != 0) {
-                    sb.append("\n");
-                }
-                sb.append(rds[i].getDiagnosisName());
+                RegisteredDiagnosisModel rd = (RegisteredDiagnosisModel) sorter.getObject(sourceTable.getSelectedRows()[i]);
+                rds[i] = rd;
+                strList.add(rd.getDiagnosisName());
             }
             // ドラッグ中のイメージを設定する
-            Image image = createStringImage(sb.toString(), sourceTable.getFont());
+            Image image = createDragImage(strList, sourceTable.getFont());
             setDragImage(image);
             return new InfoModelTransferable(rds);
         }

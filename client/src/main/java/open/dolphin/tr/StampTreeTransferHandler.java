@@ -8,6 +8,7 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import javax.swing.Icon;
 import javax.swing.JComponent;
 import javax.swing.JTree;
 import javax.swing.tree.DefaultTreeModel;
@@ -47,7 +48,7 @@ public class StampTreeTransferHandler extends DolphinTransferHandler {
         StampTreeNode dragNode = (StampTreeNode) sourceTree.getLastSelectedPathComponent();
         
         // ドラッグ中のイメージを設定する
-        Image image = createNodeImage(sourceTree);
+        Image image = createDragImage(sourceTree, dragNode);
         setDragImage(image);
         
         return new LocalStampTreeNodeTransferable(dragNode);

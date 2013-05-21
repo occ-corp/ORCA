@@ -31,7 +31,7 @@ public final class MasterItemTransferHandler extends DolphinTransferHandler {
         MasterItem mi = tableModel.getObject(fromIndex);
         if (mi != null) {
             // ドラッグ中のイメージを設定する
-            Image image = createStringImage(mi.getName(), sourceTable.getFont());
+            Image image = createDragImage(mi.getName(), sourceTable.getFont());
             setDragImage(image);
             return new MasterItemTransferable(mi);
         }

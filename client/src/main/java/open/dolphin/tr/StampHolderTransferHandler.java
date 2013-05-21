@@ -1,15 +1,11 @@
 package open.dolphin.tr;
 
-import java.awt.Dimension;
 import java.awt.EventQueue;
-import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.Window;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.Transferable;
 import java.awt.event.InputEvent;
-import java.awt.image.BufferedImage;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 import open.dolphin.client.GUIConst;
@@ -32,7 +28,7 @@ import open.dolphin.util.BeanUtils;
  */
 public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
     
-    private static final double IconScale = 0.7;
+    private static final double DRAG_IMAGE_SCALE = 0.7;
     
     private static final String MED_TEIKI = "定期";
     private static final String MED_RINJI = "臨時";
@@ -56,47 +52,25 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
         startTransfer(src);
         
         // 複数stampを含んだtransferableを返す
-        List<ModuleModel> stampList = new ArrayList<>();
-
+        int size = selectedStampHolder.size();
+        StampHolder[] stampList = selectedStampHolder.toArray(new StampHolder[size]);
+        ModuleModel[] stamps = new ModuleModel[size];
+        
         // OrderListのstampsを作る
-        for (StampHolder sh : selectedStampHolder) {
-            ModuleModel stamp = sh.getStamp();
-            stampList.add(stamp);
+        for (int i = 0; i < size; ++i) {
+            stamps[i] = stampList[i].getStamp();
         }
-        ModuleModel[] stamps = stampList.toArray(new ModuleModel[0]);
         OrderList list = new OrderList(stamps);
         
         // ドラッグ中のイメージを設定する
-        Image image = createIconImage();
+        Image image = createDragImage(stampList, DRAG_IMAGE_SCALE);
         setDragImage(image);
         
         Transferable tr = new OrderListTransferable(list);
         return tr;
     }
     
-    private Image createIconImage() {
-        
-        Dimension d = new Dimension();
-        for (StampHolder sh : selectedStampHolder) {
-            d.height += sh.getBounds().height;
-            d.width = Math.max(d.width, sh.getBounds().width);
-        }
-        BufferedImage image =new BufferedImage(d.width, d.height, BufferedImage.TYPE_4BYTE_ABGR);
-        Graphics2D g2d = image.createGraphics();
 
-        int y = 0;
-        for (StampHolder sh : selectedStampHolder) {
-            BufferedImage bf = createComponentImage(sh);
-            g2d.drawImage(bf, null, 0, y);
-            y += bf.getHeight();
-        }
-        g2d.dispose();
-        
-        int width = (int) (d.width * IconScale);
-        int height =(int) (d.height * IconScale);
-        
-        return image.getScaledInstance(width, height, Image.SCALE_FAST);
-    }
     
     private void replaceStamp(final StampHolder target, final ModuleInfoBean stampInfo) {
 

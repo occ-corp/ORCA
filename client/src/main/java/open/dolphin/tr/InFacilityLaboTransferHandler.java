@@ -33,29 +33,25 @@ public class InFacilityLaboTransferHandler extends DolphinTransferHandler {
 
         ListTableModel<InFacilityLaboItem> tableModel = (ListTableModel<InFacilityLaboItem>) sourceTable.getModel();
         int[] selectedRows = sourceTable.getSelectedRows();
-        List<InFacilityLaboItem> list = new ArrayList<InFacilityLaboItem>();
-        for (int row : selectedRows) {
-            list.add(tableModel.getObject(row));
-        }
-        if (list.isEmpty()) {
+        int size = selectedRows.length;
+        if (size == 0) {
             endTransfer();
             return null;
         }
-        // ドラッグ中のイメージを設定する
-        StringBuilder sb = new StringBuilder();
-        boolean first = true;
-        for (InFacilityLaboItem item : list) {
-            if (!first) {
-                sb.append("\n");
-            } else {
-                first = false;
-            }
-            sb.append(item.getItemName());
+        
+        InFacilityLaboItem[] items = new InFacilityLaboItem[size];
+        List<String> strList = new ArrayList<>();
+        for (int i = 0; i < size; ++i) {
+            InFacilityLaboItem item = tableModel.getObject(selectedRows[i]);
+            items[i] = item;
+            strList.add(item.getItemName());
         }
-        Image image = createStringImage(sb.toString(), sourceTable.getFont());
+
+        // ドラッグ中のイメージを設定する
+        Image image = createDragImage(strList, sourceTable.getFont());
         setDragImage(image);
         
-        return new InFacilityLaboItemTransferable(list.toArray(new InFacilityLaboItem[0])); 
+        return new InFacilityLaboItemTransferable(items); 
     }
     
     @Override

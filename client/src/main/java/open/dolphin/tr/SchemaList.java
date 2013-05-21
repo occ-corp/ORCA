@@ -16,6 +16,10 @@ public class SchemaList implements Serializable {
     public SchemaList() {
     }
     
+    public SchemaList(SchemaModel[] schemaList) {
+        this.schemaList = schemaList;
+    }
+    
     public SchemaModel[] getSchemaList() {
         return schemaList;
     }
