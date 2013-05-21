@@ -36,12 +36,22 @@ public abstract class DolphinTransferHandler extends TransferHandler {
     protected static Component destComponent;
     protected static Position startPos;
     protected static Position endPos;
+    protected static int modifiersEx;
 
     private static void clearVariables() {
         srcComponent =null;
         destComponent = null;
         startPos = null;
         endPos = null;
+        modifiersEx = 0;
+    }
+    
+    public static void setModifiersEx(int modifier) {
+        modifiersEx = modifier;
+    }
+    
+    public static int getModifiersEx() {
+        return modifiersEx;
     }
     
     public static void startTransfer(Component source) {

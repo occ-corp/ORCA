@@ -10,6 +10,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import javax.swing.*;
+import open.dolphin.tr.DolphinTransferHandler;
 
 /**
  * ComponentHolder
@@ -38,9 +39,9 @@ public abstract class AbstractComponentHolder extends JLabel implements MouseLis
     @Override
     public void mouseClicked(MouseEvent e) {
         
-        // modifiersExを記録しておく
+        // TransferHandlerにmodifiersExを記録しておく
         int modifiersEx = e.getModifiersEx();
-        FocusPropertyChangeListener.getInstance().setModifiersEx(modifiersEx);
+        DolphinTransferHandler.setModifiersEx(modifiersEx);
 
         // StampEditor から戻った後に動作しないため
         boolean focus = requestFocusInWindow();

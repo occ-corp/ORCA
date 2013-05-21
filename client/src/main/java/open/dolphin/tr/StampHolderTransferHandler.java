@@ -300,8 +300,6 @@ public class StampHolderTransferHandler extends AbstractKarteTransferHandler {
 
     private void processStampSelection(StampHolder stampHolder) {
 
-        int modifiersEx = getModifiersEx();
-        
         // CTRL+SHIFTなら薬剤すべて選択
         if ((modifiersEx & InputEvent.SHIFT_DOWN_MASK) != 0 && (modifiersEx & SHORTCUTKEY_DOWN_MASK) != 0){
             setStampHolderMedicineSelect(stampHolder);

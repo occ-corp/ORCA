@@ -179,8 +179,6 @@ public class SchemaHolderTransferHandler extends AbstractKarteTransferHandler {
     
     private void processSchemaSelection(SchemaHolder schemaHolder) {
         
-        int modifiersEx = getModifiersEx();
-        
         // Shift/ALT押されてたらスタンプすべて選択
         if ((modifiersEx & InputEvent.ALT_DOWN_MASK) != 0
                 || (modifiersEx & InputEvent.SHIFT_DOWN_MASK) != 0) {

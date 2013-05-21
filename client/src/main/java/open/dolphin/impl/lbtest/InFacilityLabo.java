@@ -166,7 +166,7 @@ public class InFacilityLabo {
             column.setPreferredWidth(SET_COL_WIDTH[i]);
         }
         setTable.setDragEnabled(true);
-        setTable.setDropMode(DropMode.INSERT);
+        setTable.setDropMode(DropMode.INSERT_ROWS);
         setTable.setColumnSelectionAllowed(false);
         setTable.setCellSelectionEnabled(true);
         InFacilityLaboTransferHandler sHandler = new InFacilityLaboTransferHandler();

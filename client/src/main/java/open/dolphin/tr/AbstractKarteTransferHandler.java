@@ -13,7 +13,6 @@ import javax.swing.JComponent;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import open.dolphin.client.FocusPropertyChangeListener;
 import open.dolphin.client.KartePane;
 import open.dolphin.client.KarteStyledDocument;
 import open.dolphin.client.SchemaHolder;
@@ -147,18 +146,10 @@ public abstract class AbstractKarteTransferHandler extends DolphinTransferHandle
         return false;
     }
     
-    // modifiersExを返す
-    protected final int getModifiersEx() {
-        int modifiersEx = FocusPropertyChangeListener.getInstance().getModifiersEx();
-        return modifiersEx;
-    }
-    
     protected boolean isAvoidExit() {
-        int modifiersEx = getModifiersEx();
         return (modifiersEx & SHORTCUTKEY_DOWN_MASK) != 0
                 && (modifiersEx & InputEvent.ALT_DOWN_MASK) == 0;
     }
-    
     
     // selectedStampHolderにあるStampHolderをexitしクリアする
     protected void exitClearSelectedStampHolder() {

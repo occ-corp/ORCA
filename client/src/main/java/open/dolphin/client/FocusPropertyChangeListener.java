@@ -25,8 +25,6 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
     private static final String PROPERTY_PERMANENT_FOCUS_OWNER = "permanentFocusOwner";
     //private static final String PROPERTY_FOCUS_OWNER = "focusOwner";
 
-    // ComponentをクリックしたときのmodifiersEx
-    private int modifiersEx;
     // old focused component
     private  JComponent oldComp;
 
@@ -39,14 +37,6 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
 
     public static FocusPropertyChangeListener getInstance() {
         return instance;
-    }
-
-    public int getModifiersEx() {
-        return modifiersEx;
-    }
-
-    public void setModifiersEx(int modifiersEx) {
-        this.modifiersEx = modifiersEx;
     }
 
     public void register() {
@@ -112,6 +102,5 @@ public class FocusPropertyChangeListener implements PropertyChangeListener {
         }
 
         oldComp = newComp;
-        modifiersEx = 0;
     }
 }
