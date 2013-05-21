@@ -177,6 +177,10 @@ public abstract class DolphinTransferHandler extends TransferHandler {
         int height = 0;
         for (Component c : components) {
             Dimension d = c.getSize();
+            if (d.width == 0 || d.height == 0) {
+                d = c.getPreferredSize();
+                c.setSize(d);
+            }
             width = Math.max(width, d.width);
             height += d.height;
         }
