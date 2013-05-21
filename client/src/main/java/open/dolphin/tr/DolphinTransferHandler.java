@@ -172,7 +172,7 @@ public abstract class DolphinTransferHandler extends TransferHandler {
     
     private BufferedImage createComponentImage(Component[] components) throws Exception {
         
-        // 各ComponentのBufferedImageを準備する
+        // BufferedImageのサイズを計算する
         int width = 0;
         int height = 0;
         for (Component c : components) {
