@@ -34,7 +34,6 @@ public class TextComponentTransferHandler extends AbstractKarteTransferHandler {
     @Override
     protected Transferable createTransferable(JComponent src) {
 
-        startTransfer(src);
         JTextComponent source = (JTextComponent) src;
 
         // テキストの選択範囲を記憶
@@ -42,6 +41,8 @@ public class TextComponentTransferHandler extends AbstractKarteTransferHandler {
         if (!b) {
             return null;
         }
+        
+        startTransfer(src);
 
         String data = source.getSelectedText();
         return new StringSelection(data);
