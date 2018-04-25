@@ -96,8 +96,17 @@ public class Launcher {
 
     private void installLookAndFeels() {
         try {
+            
             UIManager.installLookAndFeel("Nimrod", "com.nilo.plaf.nimrod.NimRODLookAndFeel");
             UIManager.installLookAndFeel("InfoNode", "net.infonode.gui.laf.InfoNodeLookAndFeel");
+            
+            
+            //改修点２（OceanColors)　ORCAver4.8→5.0改修
+            UIManager.installLookAndFeel("OceanGreen",  "jp.co.occ.plaf.OceanGreen");
+            UIManager.installLookAndFeel("OceanPink",   "jp.co.occ.plaf.OceanPink");
+            UIManager.installLookAndFeel("OceanOrange", "jp.co.occ.plaf.OceanOrange");
+            UIManager.installLookAndFeel("OceanBlue",   "jp.co.occ.plaf.OceanBlue");
+            UIManager.installLookAndFeel("OceanYellow", "jp.co.occ.plaf.OceanYellow");
         } catch (Exception e) {
             logger.catching(Level.WARN, e);
         }
@@ -198,7 +207,8 @@ public class Launcher {
         JTabbedPane tabbed = new JTabbedPane();
         tabbed.setTabLayoutPolicy(JTabbedPane.SCROLL_TAB_LAYOUT);
         tabbed.addTab(Messages.getString("ConfigurationPanel.basic_tab_label"), configPanel.getBasicPanel());
-        tabbed.addTab(Messages.getString("ConfigurationPanel.ssl_tab_label"), configPanel.getSSLPanel());
+        //改修点３（SSL対応） ORCAver4.8→5.0改修
+        //tabbed.addTab(Messages.getString("ConfigurationPanel.ssl_tab_label"), configPanel.getSSLPanel());
         tabbed.addTab(Messages.getString("ConfigurationPanel.printer_config_tab_label"), configPanel.getPrinterConfigPanel());
         tabbed.addTab(Messages.getString("ConfigurationPanel.others_tab_label"), configPanel.getOthersPanel());
         tabbed.addTab(Messages.getString("ConfigurationPanel.info_tab_label"), configPanel.getInfoPanel());
@@ -259,7 +269,9 @@ public class Launcher {
         final ConfigViewer viewer = createConfigurationViewer();
         container.add(mainPanel, BorderLayout.CENTER);
 
-        URL iconURL = getClass().getResource("/images/orca.png");
+        //改修点１(画像の変更)　ORCAver4.8→5.0改修
+        //URL iconURL = getClass().getResource("/images/orca.png");
+        URL iconURL = getClass().getResource("/images/rik_orca_header.png");
         f.setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
 
         JLabel iconLabel = new JLabel("", createIcon(), JLabel.CENTER);
@@ -346,7 +358,8 @@ public class Launcher {
     }
 
     protected Icon createIcon() {
-        URL iconURL = getClass().getResource("/images/jma_receipt.png");
+        //改修点１(画像の変更)　ORCAver4.8→5.0改修
+        URL iconURL = getClass().getResource("/images/rik_orca.png");
         if (iconURL != null) {
             return new ImageIcon(iconURL);
         }
