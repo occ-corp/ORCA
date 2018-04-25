@@ -269,7 +269,9 @@ public class Launcher {
         final ConfigViewer viewer = createConfigurationViewer();
         container.add(mainPanel, BorderLayout.CENTER);
 
-        URL iconURL = getClass().getResource("/images/orca.png");
+        //改修点１(画像の変更)　ORCAver4.8→5.0改修
+        //URL iconURL = getClass().getResource("/images/orca.png");
+        URL iconURL = getClass().getResource("/images/rik_orca_header.png");
         f.setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
 
         JLabel iconLabel = new JLabel("", createIcon(), JLabel.CENTER);
@@ -356,7 +358,8 @@ public class Launcher {
     }
 
     protected Icon createIcon() {
-        URL iconURL = getClass().getResource("/images/standard60.png");
+        //改修点１(画像の変更)　ORCAver4.8→5.0改修
+        URL iconURL = getClass().getResource("/images/rik_orca.png");
         if (iconURL != null) {
             return new ImageIcon(iconURL);
         }
