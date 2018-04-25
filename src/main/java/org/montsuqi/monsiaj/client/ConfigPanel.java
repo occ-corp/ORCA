@@ -40,7 +40,10 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.Iterator;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
@@ -63,6 +66,11 @@ import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.plaf.metal.MetalLookAndFeel;
 import javax.swing.plaf.metal.MetalTheme;
 import javax.swing.text.JTextComponent;
+import jp.co.occ.plaf.OceanBlue;
+import jp.co.occ.plaf.OceanGreen;
+import jp.co.occ.plaf.OceanOrange;
+import jp.co.occ.plaf.OceanPink;
+import jp.co.occ.plaf.OceanYellow;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -214,6 +222,31 @@ public class ConfigPanel extends JPanel {
         if (doChangeLookAndFeel) {
             try {
                 MetalLookAndFeel.setCurrentTheme(systemMetalTheme);
+                
+                //改修点２(OceanColors)　ORCAver4.8→5.0改修
+                if (className.startsWith("jp.co.occ.plaf")) {
+                    String themeName = Class.forName(className).getSimpleName();
+                    switch (themeName) {
+                        case "OceanGreen":
+                            MetalLookAndFeel.setCurrentTheme(new OceanGreen());
+                            break;
+                        case "OceanOrange":
+                            MetalLookAndFeel.setCurrentTheme(new OceanOrange());
+                            break;
+                        case "OceanBlue":
+                            MetalLookAndFeel.setCurrentTheme(new OceanBlue());
+                            break;
+                        case "OceanYellow":
+                            MetalLookAndFeel.setCurrentTheme(new OceanYellow());
+                            break;
+                        default:
+                            MetalLookAndFeel.setCurrentTheme(new OceanPink());
+                            break;
+                    }
+                    UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
+                } 
+                
+                /*
                 if (className.startsWith("com.nilo.plaf.nimrod")) {
                     System.setProperty("nimrodlf.themeFile", lafThemeEntry.getText());
                     UIManager.setLookAndFeel(new NimRODLookAndFeel());
@@ -223,6 +256,8 @@ public class ConfigPanel extends JPanel {
                 if (SystemEnvironment.isMacOSX() && (!className.startsWith("apple.laf.AquaLookAndFeel"))) {
                     updateFont(new Font("Osaka", Font.PLAIN, 12));
                 }
+                */
+
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
                 logger.warn(e);
             }
@@ -572,6 +607,18 @@ public class ConfigPanel extends JPanel {
                         Messages.getString("ConfigurationPanel.style_filter_pattern")));
 
         lafs = UIManager.getInstalledLookAndFeels();
+        
+        //改修点２(OceanColors)　ORCAver4.8→5.0改修
+        ArrayList<LookAndFeelInfo> list = new ArrayList(Arrays.asList(lafs));
+        Iterator<LookAndFeelInfo> it = list.iterator();
+        while (it.hasNext()) {
+            LookAndFeelInfo info = it.next();
+            if (!info.getName().startsWith("Ocean")) {
+                it.remove();
+            }
+        }
+        lafs = (LookAndFeelInfo[])list.toArray(new LookAndFeelInfo[0]);
+        
         String[] lafNames = new String[lafs.length];
         for (int i = 0; i < lafNames.length; i++) {
             lafNames[i] = lafs[i].getName();
