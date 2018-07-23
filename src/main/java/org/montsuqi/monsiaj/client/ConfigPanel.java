@@ -220,7 +220,7 @@ public class ConfigPanel extends JPanel {
 
     protected void changeLookAndFeel(String className) {
         if (doChangeLookAndFeel) {
-            try {
+            try {                
                 MetalLookAndFeel.setCurrentTheme(systemMetalTheme);
                 
                 //改修点２(OceanColors)　ORCAver4.8→5.0改修
@@ -244,7 +244,7 @@ public class ConfigPanel extends JPanel {
                             break;
                     }
                     UIManager.setLookAndFeel("javax.swing.plaf.metal.MetalLookAndFeel");
-                } 
+                }
                 
                 /*
                 if (className.startsWith("com.nilo.plaf.nimrod")) {
@@ -257,7 +257,7 @@ public class ConfigPanel extends JPanel {
                     updateFont(new Font("Osaka", Font.PLAIN, 12));
                 }
                 */
-
+                
             } catch (ClassNotFoundException | IllegalAccessException | InstantiationException | UnsupportedLookAndFeelException e) {
                 logger.warn(e);
             }
@@ -617,7 +617,7 @@ public class ConfigPanel extends JPanel {
                 it.remove();
             }
         }
-        lafs = (LookAndFeelInfo[])list.toArray(new LookAndFeelInfo[0]);
+        lafs = (LookAndFeelInfo[])list.toArray(new LookAndFeelInfo[0]);        
         
         String[] lafNames = new String[lafs.length];
         for (int i = 0; i < lafNames.length; i++) {

@@ -90,7 +90,7 @@ public class TopWindow extends Window implements ComponentListener {
         super();
 
         //改修点１(画像の変更)　ORCAver4.8→5.0改修
-        //URL iconURL = getClass().getResource("/images/orca.png");
+        //URL iconURL = getClass().getResource("/images/orcamo.png");
         URL iconURL = getClass().getResource("/images/rik_orca_header.png");
         setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
 
