@@ -51,6 +51,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.WindowConstants;
+import javax.swing.border.EmptyBorder;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -96,12 +97,11 @@ public class Launcher {
 
     private void installLookAndFeels() {
         try {
-            
+            //改修点２（OceanColors) ORCAver4.8→5.0改修
+            /*
             UIManager.installLookAndFeel("Nimrod", "com.nilo.plaf.nimrod.NimRODLookAndFeel");
             UIManager.installLookAndFeel("InfoNode", "net.infonode.gui.laf.InfoNodeLookAndFeel");
-            
-            
-            //改修点２（OceanColors)　ORCAver4.8→5.0改修
+            */
             UIManager.installLookAndFeel("OceanGreen",  "jp.co.occ.plaf.OceanGreen");
             UIManager.installLookAndFeel("OceanPink",   "jp.co.occ.plaf.OceanPink");
             UIManager.installLookAndFeel("OceanOrange", "jp.co.occ.plaf.OceanOrange");
@@ -270,11 +270,12 @@ public class Launcher {
         container.add(mainPanel, BorderLayout.CENTER);
 
         //改修点１(画像の変更)　ORCAver4.8→5.0改修
-        //URL iconURL = getClass().getResource("/images/orca.png");
+        //URL iconURL = getClass().getResource("/images/orcamo.png");
         URL iconURL = getClass().getResource("/images/rik_orca_header.png");
         f.setIconImage(Toolkit.getDefaultToolkit().createImage(iconURL));
 
         JLabel iconLabel = new JLabel("", createIcon(), JLabel.CENTER);
+        iconLabel.setBorder(new EmptyBorder(5,5,5,5));
         container.add(iconLabel, BorderLayout.WEST);
 
         JPanel bar = new JPanel();
@@ -359,6 +360,7 @@ public class Launcher {
 
     protected Icon createIcon() {
         //改修点１(画像の変更)　ORCAver4.8→5.0改修
+        //URL iconURL = getClass().getResource("/images/orcamo-logo.png");
         URL iconURL = getClass().getResource("/images/rik_orca.png");
         if (iconURL != null) {
             return new ImageIcon(iconURL);
