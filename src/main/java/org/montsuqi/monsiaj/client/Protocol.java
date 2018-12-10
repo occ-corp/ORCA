@@ -35,7 +35,7 @@ import java.net.PasswordAuthentication;
 import java.net.URL;
 import java.net.Proxy;
 import java.security.GeneralSecurityException;
-import java.util.logging.Level;
+import java.util.ArrayList;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLSocketFactory;
 import javax.swing.JOptionPane;
@@ -74,7 +74,7 @@ public class Protocol {
     private int appExecTime;
 
     private SSLSocketFactory sslSocketFactory;
-    static final String PANDA_CLIENT_VERSION = "2.0.0";
+    static final String PANDA_CLIENT_VERSION = "2.0.1";
 
     private int sslType;
 
@@ -91,6 +91,8 @@ public class Protocol {
     private String caCert;
     private String certFile;
     private String certFilePassphrase;
+
+    private String openid_connect_rp_cookie = "";
 
     public Protocol(String authURI, final String user, final String pass) throws IOException, GeneralSecurityException {
         this.rpcId = 1;
@@ -187,14 +189,18 @@ public class Protocol {
 
     private HttpURLConnection getHttpURLConnection(String strURL) throws IOException {
         URL url = new URL(strURL);
+        return getHttpURLConnection(url);
+    }
+
+    private HttpURLConnection getHttpURLConnection(URL url) throws IOException {
         HttpURLConnection con = (HttpURLConnection) url.openConnection(Proxy.NO_PROXY);
 
-        if (strURL.startsWith("https")) {
+        if (url.getProtocol().equals("https")) {
             if (sslSocketFactory != null) {
                 ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
             }
         }
-        if (strURL.equals(authURI)) {
+        if (url.toString().equals(authURI)) {
             Authenticator.setDefault(new Authenticator() {
                 @Override
                 protected PasswordAuthentication getPasswordAuthentication() {
@@ -307,6 +313,11 @@ public class Protocol {
         con.setRequestProperty("Content-Type", "application/json");
         con.setRequestProperty("User-Agent", USER_AGENT);
 
+        if (!this.openid_connect_rp_cookie.isEmpty()) {
+            con.setRequestProperty("Cookie", this.openid_connect_rp_cookie);
+            this.openid_connect_rp_cookie = "";
+        }
+
         try (OutputStreamWriter osw = new OutputStreamWriter(con.getOutputStream(), "UTF-8")) {
             osw.write(reqStr);
             osw.flush();
@@ -347,23 +358,27 @@ public class Protocol {
                 break;
         }
 
-        ByteArrayOutputStream bytes = getHTTPBody(con);
+        Object result;
+        try (ByteArrayOutputStream bytes = getHTTPBody(con)) {
+            long et = System.currentTimeMillis();
+            if (System.getProperty("monsia.do_profile") != null) {
+                logger.info(method + ":" + (et - st) + "ms request_bytes:" + reqStr.length() + " response_bytes:" + bytes.size());
+            }
+            String resStr = bytes.toString("UTF-8");
+            if (System.getProperty("monsia.debug.jsonrpc") != null) {
+                logger.info("---- JSONRPC response");
+                logger.info(resStr);
+                logger.info("----");
+            }
+            result = checkJSONRPCResponse(resStr);
+        }
         con.disconnect();
-
-        long et = System.currentTimeMillis();
-        if (System.getProperty("monsia.do_profile") != null) {
-            logger.info(method + ":" + (et - st) + "ms request_bytes:" + reqStr.length() + " response_bytes:" + bytes.size());
-        }
-
-        String resStr = bytes.toString("UTF-8");
-
-        if (System.getProperty("monsia.debug.jsonrpc") != null) {
-            logger.info("---- JSONRPC response");
-            logger.info(resStr);
-            logger.info("----");
-        }
-        Object result = checkJSONRPCResponse(resStr);
         return result;
+    }
+
+    public void startOpenIDConnect(String sso_user, String sso_password, String sso_sp_uri) throws IOException, JSONException {
+        OpenIdConnect sso = new OpenIdConnect(sso_user, sso_password, sso_sp_uri);
+        this.openid_connect_rp_cookie = sso.connect();
     }
 
     public void getServerInfo() throws IOException, JSONException {
@@ -499,31 +514,18 @@ public class Protocol {
         }
 
         URL url = new URL(this.restURIRoot + "sessions/" + this.sessionId + "/blob/" + oid);
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-        String protocol = url.getProtocol();
-        switch (protocol) {
-            case "https":
-                if (sslSocketFactory != null) {
-                    ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
-                }
-                break;
-            case "http":
-                break;
-            default:
-                throw new IOException("bad protocol");
-        }
-
+        HttpURLConnection con = getHttpURLConnection(url);
         con.setInstanceFollowRedirects(false);
         con.setRequestMethod("GET");
         con.setRequestProperty("User-Agent", USER_AGENT);
 
-        BufferedInputStream bis = new BufferedInputStream(con.getInputStream());
-        int length;
-        while ((length = bis.read()) != -1) {
-            out.write(length);
+        try (BufferedInputStream bis = new BufferedInputStream(con.getInputStream())) {
+            int length;
+            while ((length = bis.read()) != -1) {
+                out.write(length);
+            }
+            out.close();
         }
-        out.close();
         con.disconnect();
 
         return con.getResponseCode();
@@ -531,21 +533,7 @@ public class Protocol {
 
     public synchronized String postBLOB(byte[] in) throws IOException {
         URL url = new URL(this.restURIRoot + "sessions/" + this.sessionId + "/blob/");
-        HttpURLConnection con = (HttpURLConnection) url.openConnection();
-
-        String protocol = url.getProtocol();
-        switch (protocol) {
-            case "https":
-                if (sslSocketFactory != null) {
-                    ((HttpsURLConnection) con).setSSLSocketFactory(sslSocketFactory);
-                }
-                break;
-            case "http":
-                break;
-            default:
-                throw new IOException("bad protocol");
-        }
-
+        HttpURLConnection con = getHttpURLConnection(url);
         con.setInstanceFollowRedirects(false);
         con.setRequestMethod("POST");
         con.setDoOutput(true);
