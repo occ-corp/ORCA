@@ -212,6 +212,8 @@ public class Launcher {
         tabbed.addTab(Messages.getString("ConfigurationPanel.printer_config_tab_label"), configPanel.getPrinterConfigPanel());
         tabbed.addTab(Messages.getString("ConfigurationPanel.others_tab_label"), configPanel.getOthersPanel());
         tabbed.addTab(Messages.getString("ConfigurationPanel.info_tab_label"), configPanel.getInfoPanel());
+        //改修点３（シングルサインオン） 2018/12/10追記
+        //tabbed.addTab(Messages.getString("ConfigurationPanel.single_sign_on"), configPanel.getSSOPanel());
 
         gbc = new GridBagConstraints();
         gbc.gridx = 0;
